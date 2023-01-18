@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1D7F782A-6727-4216-A75A-986158A288A6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.API", "src\TaxBeacon.API\TaxBeacon.API.csproj", "{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.UserManagement", "src\TaxBeacon.UserManagement\TaxBeacon.UserManagement.csproj", "{76DACBB4-458E-4840-A5DB-FEA9D837467E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.DAL", "src\TaxBeacon.DAL\TaxBeacon.DAL.csproj", "{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6} = {1D7F782A-6727-4216-A75A-986158A288A6}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F4F2EB9-1E83-4F40-B890-0589652A15CA}
+	EndGlobalSection
+EndGlobal
