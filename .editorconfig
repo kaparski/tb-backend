@@ -221,3 +221,27 @@ dotnet_naming_style.begins_with_i.required_prefix = I
 dotnet_naming_style.begins_with_i.required_suffix =
 dotnet_naming_style.begins_with_i.word_separator =
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
+
+# SonarAnalyzers.CSharp
+
+#  Complete the task associated to this 'TODO' comment.
+dotnet_diagnostic.S1135.severity = none
+
+# StyleCop.Analyzer
+# [SA1633] TA C# code file is missing a standard file header.
+dotnet_diagnostic.SA1633.severity = none
+
+# [SA1210] The using directives within a C# code file are not sorted alphabetically by namespace.
+dotnet_diagnostic.SA1210.severity = none
+
+# [SA1101] A call to an instance member of the local class or a base class is not prefixed with 'this.', within a C# code file.
+dotnet_diagnostic.SA1101.severity = none
+
+# [SA1309] A field name in C# begins with an underscore.
+dotnet_diagnostic.SA1309.severity = none
+
+# [SA1402] File may only contain a single type
+dotnet_diagnostic.SA1402.severity = none
+
+# [SA1649] File name should match first type name
+dotnet_diagnostic.SA1649.severity = none

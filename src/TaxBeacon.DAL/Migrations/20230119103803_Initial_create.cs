@@ -20,7 +20,7 @@ namespace TaxBeacon.DAL.Migrations
                     CreatedDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
-                    DeletedDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    DeletedDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -40,7 +40,7 @@ namespace TaxBeacon.DAL.Migrations
                     CreatedDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
-                    DeletedDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    DeletedDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -52,7 +52,7 @@ namespace TaxBeacon.DAL.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                 },
                 constraints: table =>
                 {

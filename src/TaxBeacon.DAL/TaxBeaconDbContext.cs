@@ -5,14 +5,14 @@ using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.DAL;
 
-public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
+public class TaxBeaconDbContext : DbContext, ITaxBeaconDbContext
 {
     private readonly EntitySaveChangesInterceptor _saveChangesInterceptor;
 
     public TaxBeaconDbContext(
         DbContextOptions<TaxBeaconDbContext> options,
-        EntitySaveChangesInterceptor saveChangesInterceptor): base(options) =>
-        _saveChangesInterceptor = saveChangesInterceptor;
+        EntitySaveChangesInterceptor saveChangesInterceptor)
+        : base(options) => _saveChangesInterceptor = saveChangesInterceptor;
 
     public DbSet<Tenant> Tenants => Set<Tenant>();
 

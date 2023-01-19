@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.DAL.Entities;
 
-public class Tenant: BaseEntity
+public class Tenant : BaseEntity
 {
     public Guid Id { get; set; }
 

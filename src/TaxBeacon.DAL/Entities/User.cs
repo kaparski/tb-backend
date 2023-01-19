@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.DAL.Entities;
 
-public class User: BaseEntity
+public class User : BaseEntity
 {
     public Guid Id { get; set; }
 
@@ -16,7 +16,6 @@ public class User: BaseEntity
 
     public UserStatus UserStatus { get; set; }
 
-    //TODO: Add department, roles and Job title in the future
-
+    // TODO: Add department, roles and Job title in the future
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
 }
