@@ -11,6 +11,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.UserManagement", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.DAL", "src\TaxBeacon.DAL\TaxBeacon.DAL.csproj", "{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{228716C1-EB3B-45F4-AA50-A5DFCDC4623E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		.dockerignore = .dockerignore
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Common", "src\TaxBeacon.Common\TaxBeacon.Common.csproj", "{4420293B-B679-4DD3-8226-1F08066EBE13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +38,10 @@ Global
 		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4420293B-B679-4DD3-8226-1F08066EBE13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4420293B-B679-4DD3-8226-1F08066EBE13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4420293B-B679-4DD3-8226-1F08066EBE13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4420293B-B679-4DD3-8226-1F08066EBE13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -37,6 +50,7 @@ Global
 		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104} = {1D7F782A-6727-4216-A75A-986158A288A6}
 		{76DACBB4-458E-4840-A5DB-FEA9D837467E} = {1D7F782A-6727-4216-A75A-986158A288A6}
 		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{4420293B-B679-4DD3-8226-1F08066EBE13} = {1D7F782A-6727-4216-A75A-986158A288A6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F4F2EB9-1E83-4F40-B890-0589652A15CA}
