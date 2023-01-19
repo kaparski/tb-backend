@@ -2,11 +2,8 @@
 
 namespace TaxBeacon.API.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : ControllerBase
     {
-        public IActionResult Index()
-        {
-            return Ok();
-        }
+        public IActionResult Index() => Ok();
     }
 }
