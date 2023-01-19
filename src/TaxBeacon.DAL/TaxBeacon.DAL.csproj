@@ -12,4 +12,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TaxBeacon.Common\TaxBeacon.Common.csproj" />
+  </ItemGroup>
+
 </Project>

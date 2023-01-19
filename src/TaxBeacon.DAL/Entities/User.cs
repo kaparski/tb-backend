@@ -1,4 +1,6 @@
-﻿namespace TaxBeacon.DAL.Entities;
+﻿using TaxBeacon.Common.Enums;
+
+namespace TaxBeacon.DAL.Entities;
 
 public class User: BaseEntity
 {
@@ -12,7 +14,7 @@ public class User: BaseEntity
 
     public string Email { get; set; }
 
-    public int StatusId { get; set; }
+    public UserStatus UserStatus { get; set; }
 
     //TODO: Add department, roles and Job title in the future
 

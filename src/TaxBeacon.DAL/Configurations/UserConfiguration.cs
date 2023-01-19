@@ -30,5 +30,9 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
             .HasColumnType("nvarchar")
             .HasMaxLength(150)
             .IsRequired();
+
+        user
+            .Property(u => u.UserStatus)
+            .HasConversion<int>();
     }
 }
