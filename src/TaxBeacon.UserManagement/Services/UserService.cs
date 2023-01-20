@@ -26,7 +26,7 @@ public class UserService: IUserService
         if (user is null)
         {
             await CreateUserAsync(
-                new User()
+                new User
                 {
                     Username = string.Empty,
                     FirstName = string.Empty,
@@ -50,7 +50,7 @@ public class UserService: IUserService
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
 
-        user.TenantUsers.Add(new() { Tenant = tenant });
+        user.TenantUsers.Add(new TenantUser { Tenant = tenant });
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 

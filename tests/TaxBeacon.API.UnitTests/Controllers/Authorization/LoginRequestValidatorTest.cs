@@ -40,7 +40,7 @@ public class LoginRequestValidatorTest
     }
 
     [Fact]
-    public void Validation_LongEmail_ShouldHavMxLengthError()
+    public void Validation_LongEmail_ShouldHaveMaxLengthError()
     {
         //Arrange
         var email = $"{new Faker().Random.String2(200)}@email.com";
