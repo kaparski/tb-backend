@@ -20,6 +20,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Common", "src\TaxBeacon.Common\TaxBeacon.Common.csproj", "{4420293B-B679-4DD3-8226-1F08066EBE13}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{78103266-2E2B-4710-9139-0AB800F12A71}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.UserManagement.UnitTests", "tests\TaxBeacon.UserManagement.UnitTests\TaxBeacon.UserManagement.UnitTests.csproj", "{BF40CE7B-1B35-4BAF-819E-998431E1C239}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.API.UnitTests", "tests\TaxBeacon.API.UnitTests\TaxBeacon.API.UnitTests.csproj", "{FA27BB92-9E96-4117-84C8-95787C922BED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +48,14 @@ Global
 		{4420293B-B679-4DD3-8226-1F08066EBE13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4420293B-B679-4DD3-8226-1F08066EBE13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4420293B-B679-4DD3-8226-1F08066EBE13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA27BB92-9E96-4117-84C8-95787C922BED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA27BB92-9E96-4117-84C8-95787C922BED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA27BB92-9E96-4117-84C8-95787C922BED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA27BB92-9E96-4117-84C8-95787C922BED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +65,8 @@ Global
 		{76DACBB4-458E-4840-A5DB-FEA9D837467E} = {1D7F782A-6727-4216-A75A-986158A288A6}
 		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6} = {1D7F782A-6727-4216-A75A-986158A288A6}
 		{4420293B-B679-4DD3-8226-1F08066EBE13} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239} = {78103266-2E2B-4710-9139-0AB800F12A71}
+		{FA27BB92-9E96-4117-84C8-95787C922BED} = {78103266-2E2B-4710-9139-0AB800F12A71}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F4F2EB9-1E83-4F40-B890-0589652A15CA}
