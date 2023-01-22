@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
@@ -16,8 +17,9 @@ namespace TaxBeacon.UserManagement.UnitTests.Services;
 
 public class UserServiceTests
 {
-    private readonly Mock<ILogger<UserService>> _userServiceLoggerMock;
+    private readonly Mock<IDateTimeService> _dateTimeServiceMock;
     private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
+    private readonly Mock<ILogger<UserService>> _userServiceLoggerMock;
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly UserService _userService;
 
@@ -25,6 +27,7 @@ public class UserServiceTests
     {
         _userServiceLoggerMock = new();
         _entitySaveChangesInterceptorMock = new();
+        _dateTimeServiceMock = new();
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -32,7 +35,7 @@ public class UserServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
-        _userService = new UserService(_userServiceLoggerMock.Object, _dbContextMock);
+        _userService = new UserService(_userServiceLoggerMock.Object, _dbContextMock, _dateTimeServiceMock.Object);
     }
 
     [Fact]
@@ -49,6 +52,10 @@ public class UserServiceTests
         await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
 
+        _dateTimeServiceMock
+            .Setup(ds => ds.UtcNow)
+            .Returns(DateTime.UtcNow);
+
         //Act
         await _userService.LoginAsync(mailAddress);
         var actualResult = await _dbContextMock.Users.LastAsync();
@@ -56,6 +63,8 @@ public class UserServiceTests
         //Assert
         (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
         actualResult.LastLoginDateUtc.Should().BeAfter(currentDate);
+        _dateTimeServiceMock
+            .Verify(ds => ds.UtcNow, Times.Once);
     }
 
     [Fact]
@@ -69,6 +78,10 @@ public class UserServiceTests
 
         _dbContextMock.Tenants.Add(tenant);
         await _dbContextMock.SaveChangesAsync();
+
+        _dateTimeServiceMock
+            .Setup(s => s.UtcNow)
+            .Returns(currentDate);
 
         //Act
         await _userService.LoginAsync(mailAddress);
@@ -87,7 +100,9 @@ public class UserServiceTests
                 .And
                 .HaveCount(1);
             actualResult.TenantUsers.First().TenantId.Should().Be(tenant.Id);
-            actualResult.LastLoginDateUtc.Should().BeAfter(currentDate);
+            actualResult.LastLoginDateUtc.Should().Be(currentDate);
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Once);
         }
     }
 
