@@ -26,9 +26,7 @@ public class UserService: IUserService
 
     public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u =>
-                mailAddress.Address.Equals(u.Email, StringComparison.InvariantCultureIgnoreCase),
-            cancellationToken);
+        var user = await _context.Users.FirstOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
 
         if (user is null)
         {
@@ -45,7 +43,6 @@ public class UserService: IUserService
         else
         {
             user.LastLoginDateUtc = _dateTimeService.UtcNow;
-            _context.Users.Update(user);
             await _context.SaveChangesAsync(cancellationToken);
         }
     }
@@ -54,6 +51,7 @@ public class UserService: IUserService
         User user,
         CancellationToken cancellationToken = default)
     {
+        // TODO: This is a temporary solution for tenants, because we will always keep one tenant in db for now
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
 
