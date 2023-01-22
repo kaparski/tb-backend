@@ -4,6 +4,7 @@ using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
@@ -40,15 +41,16 @@ public class UserServiceTests
         //Arrange
         var tenant = TestData.TestTenant.Generate();
         var user = TestData.TestUser.Generate();
+        var mailAddress = new MailAddress(user.Email);
         var currentDate = DateTime.UtcNow;
 
-        user.TenantUsers.Add(new() { Tenant = tenant });
+        user.TenantUsers.Add(new TenantUser { Tenant = tenant });
         await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
 
         //Act
-        await _userService.LoginAsync(user.Email);
+        await _userService.LoginAsync(mailAddress);
         var actualResult = await _dbContextMock.Users.LastAsync();
 
         //Assert
@@ -62,13 +64,14 @@ public class UserServiceTests
         //Arrange
         var tenant = TestData.TestTenant.Generate();
         var user = TestData.TestUser.Generate();
+        var mailAddress = new MailAddress(user.Email);
         var currentDate = DateTime.UtcNow;
 
         _dbContextMock.Tenants.Add(tenant);
         await _dbContextMock.SaveChangesAsync();
 
         //Act
-        await _userService.LoginAsync(user.Email);
+        await _userService.LoginAsync(mailAddress);
         var actualResult = await _dbContextMock.Users.LastAsync();
 
         //Assert

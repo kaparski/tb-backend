@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -17,10 +18,10 @@ public class UserService: IUserService
         _context = context;
     }
 
-    public async Task LoginAsync(string email, CancellationToken cancellationToken = default)
+    public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u =>
-                email.Equals(u.Email, StringComparison.InvariantCultureIgnoreCase),
+                mailAddress.Address.Equals(u.Email, StringComparison.InvariantCultureIgnoreCase),
             cancellationToken);
 
         if (user is null)
@@ -31,7 +32,7 @@ public class UserService: IUserService
                     Username = string.Empty,
                     FirstName = string.Empty,
                     LastName = string.Empty,
-                    Email = email,
+                    Email = mailAddress.Address,
                     LastLoginDateUtc = DateTime.UtcNow
                 }, cancellationToken);
         }
