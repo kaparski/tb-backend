@@ -1,4 +1,5 @@
 using TaxBeacon.API;
+using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.UserManagement;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +12,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUi();
 }
 
 app.UseHttpsRedirection();
