@@ -56,7 +56,7 @@ public class UserService : IUserService
     {
         var users = _context
             .Users
-            .ProjectToType<UserList>(null)
+            .ProjectToType<UserList>()
             .GridifyQueryable(gridifyQuery);
 
         return users;
