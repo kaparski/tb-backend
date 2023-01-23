@@ -1,7 +1,5 @@
 ﻿using Gridify;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Filters;
-using System.Net.Mime;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -18,12 +16,17 @@ public class UserController : BaseController
     /// List of users
     /// </summary>
     /// <remarks>
-    ///  Example: page = 1,
-    /// pageSize = 20,
-    /// orderBy = username desc,
-    /// filter = firstName=Dastan
+    /// Sample request:
+    ///
+    ///     GET /users
+    ///     {
+    ///     "page":1,
+    ///     "pageSize":2,
+    ///     "orderBy":"username desc",
+    ///     "filter":"firstName=Dastan"
+    ///     }
     /// </remarks>
-    /// <response>Returns users</response>
+    /// <response code="200">Returns users</response>
     /// <returns>List of users</returns>
     [HttpGet(Name = "GetUsers")]
     [ProducesDefaultResponseType(typeof(ProblemDetails))]

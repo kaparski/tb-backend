@@ -16,18 +16,18 @@ public static class SwaggerServiceExtension
                     Title = "TaxBeacon API",
                     Description = "TaxBeacon API Description",
                     Version = "v1",
-                    TermsOfService = null
                 });
             x.DescribeAllParametersInCamelCase();
             var commentsFileName = Assembly.GetExecutingAssembly().GetName().Name + ".xml";
-            // x.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, commentsFileName));
+            x.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, commentsFileName));
         });
 
     internal static void UseSwaggerUi(this IApplicationBuilder app)
     {
-        app.UseSwagger();
+        app.UseSwagger(x => x.SerializeAsV2 = true);
         app.UseSwaggerUI(x =>
         {
+            x.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
             x.DefaultModelExpandDepth(3);
             x.DefaultModelRendering(ModelRendering.Example);
             x.DefaultModelsExpandDepth(-1);

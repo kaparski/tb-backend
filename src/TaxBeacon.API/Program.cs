@@ -1,11 +1,14 @@
+using Microsoft.IdentityModel.Logging;
 using TaxBeacon.API;
 using TaxBeacon.API.Extensions.SwaggerServices;
+using TaxBeacon.Common;
 using TaxBeacon.UserManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddUserManagementServices();
+builder.Services.AddCommonServices();
 
 var app = builder.Build();
 
@@ -13,10 +16,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwaggerUi();
+    IdentityModelEventSource.ShowPII = true;
 }
 
 app.UseHttpsRedirection();
+app.UseCors("DefaultCorsPolicy");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

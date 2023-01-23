@@ -1,6 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using TaxBeacon.API.Extensions;
 using TaxBeacon.API.Extensions.GridifyServices;
+using Microsoft.Identity.Web;
+using System.Reflection;
 using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
@@ -21,6 +26,9 @@ public static class ConfigureServices
         services.AddEndpointsApiExplorer();
         services.AddSwagger();
         services.AddGridify(configuration);
+        services.AddFluentValidationAutoValidation();
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
         // TODO: Decide if we should move this into TaxBeacon.UserManagement layer
         services.AddScoped<EntitySaveChangesInterceptor>();
         services.AddDbContext<TaxBeaconDbContext>(options =>
@@ -29,6 +37,16 @@ public static class ConfigureServices
                     "DefaultConnection"),
                 builder => builder.MigrationsAssembly(typeof(TaxBeaconDbContext).Assembly.FullName)));
         services.AddScoped<ITaxBeaconDbContext>(provider => provider.GetRequiredService<TaxBeaconDbContext>());
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
+
+        services.AddCors(o => o.AddPolicy("DefaultCorsPolicy", builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }));
 
         return services;
     }

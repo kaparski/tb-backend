@@ -364,3 +364,5 @@ FodyWeavers.xsd
 
 # Jetbrains Rider cache/options directory
 .idea/
+
+/src/TaxBeacon.API/appsettings.Development.json

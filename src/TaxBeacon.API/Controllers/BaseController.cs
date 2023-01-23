@@ -5,8 +5,6 @@ namespace TaxBeacon.API.Controllers;
 
 
 [ApiController]
-[Consumes(MediaTypeNames.Application.Json)]
-[Produces(MediaTypeNames.Application.Json)]
 public class BaseController
 {
 
