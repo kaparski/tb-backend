@@ -12,7 +12,7 @@ public class UserList
 
     public string LastName { get; set; }
 
-    public string Email { get; set; }
-
     public UserStatus UserStatus { get; set; }
+
+    public DateTime? LastLoginDateUtc { get; set; }
 }
