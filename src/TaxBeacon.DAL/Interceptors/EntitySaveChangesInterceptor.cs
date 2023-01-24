@@ -13,7 +13,7 @@ public static class EntityEntryExtension
             && r.TargetEntry.State is EntityState.Added or EntityState.Modified);
 }
 
-public class EntitySaveChangesInterceptor : SaveChangesInterceptor
+public class EntitySaveChangesInterceptor: SaveChangesInterceptor
 {
     public override InterceptionResult<int> SavingChanges(
         DbContextEventData eventData,
