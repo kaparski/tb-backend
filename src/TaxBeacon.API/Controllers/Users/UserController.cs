@@ -33,9 +33,9 @@ public class UserController: BaseController
     [HttpGet(Name = "GetUsers")]
     [ProducesDefaultResponseType(typeof(ProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<UserListResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<QueryablePaging<UserListResponse>>> GetList([FromQuery] GridifyQuery query)
+    public async Task<ActionResult<QueryablePaging<UserListResponse>>> GetList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
-        var users = await _userService.GetUsersAsync(query);
+        var users = await _userService.GetUsersAsync(query, cancellationToken);
         var userListResponse = new QueryablePaging<UserListResponse>(users.Count, users.Query
             .Select(
             x => new UserListResponse()
