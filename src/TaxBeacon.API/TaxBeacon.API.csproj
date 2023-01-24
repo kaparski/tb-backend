@@ -13,6 +13,10 @@
     <DocumentationFile>bin\Debug\TaxBeacon.API.xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\TaxBeacon.API.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Gridify" Version="2.8.2" />
     <PackageReference Include="FluentValidation" Version="11.4.0" />
