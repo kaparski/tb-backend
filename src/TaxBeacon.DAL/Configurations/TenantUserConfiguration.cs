@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace TaxBeacon.DAL.Configurations;
 
-public class TenantUserConfiguration : IEntityTypeConfiguration<TenantUser>
+public class TenantUserConfiguration: IEntityTypeConfiguration<TenantUser>
 {
     public void Configure(EntityTypeBuilder<TenantUser> tenantUser)
     {

@@ -5,7 +5,7 @@ using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.DAL;
 
-public class TaxBeaconDbContext : DbContext, ITaxBeaconDbContext
+public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
 {
     private readonly EntitySaveChangesInterceptor _saveChangesInterceptor;
 

@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.DAL.Entities;
 
-public class User : BaseEntity
+public class User: BaseEntity
 {
     public Guid Id { get; set; }
 
