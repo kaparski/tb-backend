@@ -1,4 +1,5 @@
 ﻿using Gridify;
+using Gridify.EntityFramework;
 using Mapster;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
@@ -52,12 +53,12 @@ public class UserService: IUserService
         }
     }
 
-    public QueryablePaging<UserList> GetUsers(GridifyQuery gridifyQuery)
+    public async Task<QueryablePaging<UserList>> GetUsersAsync(GridifyQuery gridifyQuery)
     {
-        var users = _context
+        var users = await _context
             .Users
             .ProjectToType<UserList>()
-            .GridifyQueryable(gridifyQuery);
+            .GridifyQueryableAsync(gridifyQuery, null);
 
         return users;
     }

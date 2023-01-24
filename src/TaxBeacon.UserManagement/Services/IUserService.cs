@@ -6,6 +6,6 @@ namespace TaxBeacon.UserManagement.Services;
 
 public interface IUserService
 {
-    QueryablePaging<UserList> GetUsers(GridifyQuery gridifyQuery);
+    Task<QueryablePaging<UserList>> GetUsersAsync(GridifyQuery gridifyQuery);
     Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
 }

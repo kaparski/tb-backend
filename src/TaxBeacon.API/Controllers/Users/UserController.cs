@@ -1,5 +1,7 @@
 ﻿using Gridify;
 using Microsoft.AspNetCore.Mvc;
+using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -30,10 +32,22 @@ public class UserController: BaseController
     /// <returns>List of users</returns>
     [HttpGet(Name = "GetUsers")]
     [ProducesDefaultResponseType(typeof(ProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<UserList>), StatusCodes.Status200OK)]
-    public ActionResult<QueryablePaging<UserList>> GetList([FromQuery] GridifyQuery query)
+    [ProducesResponseType(typeof(QueryablePaging<UserListResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<QueryablePaging<UserListResponse>>> GetList([FromQuery] GridifyQuery query)
     {
-        var users = _userService.GetUsers(query);
-        return users;
+        var users = await _userService.GetUsersAsync(query);
+        var userListResponse = new QueryablePaging<UserListResponse>(users.Count, users.Query
+            .Select(
+            x => new UserListResponse()
+            {
+                Id = x.Id,
+                Username = x.Username,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                UserStatus = x.UserStatus,
+                LastLoginDateUtc = x.LastLoginDateUtc,
+            }));
+
+        return userListResponse;
     }
 }

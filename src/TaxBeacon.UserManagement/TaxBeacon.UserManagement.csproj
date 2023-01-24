@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Gridify" Version="2.8.2" />
+    <PackageReference Include="Gridify.EntityFramework" Version="2.8.2" />
     <PackageReference Include="Mapster" Version="7.3.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
   </ItemGroup>

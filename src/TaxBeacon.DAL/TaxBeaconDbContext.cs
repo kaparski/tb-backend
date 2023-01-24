@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 
@@ -23,7 +24,7 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        modelBuilder.Entity<User>().HasQueryFilter(b => !b.IsDeleted ?? true);
+        modelBuilder.Entity<User>().HasQueryFilter(b => !b.IsDeleted.HasValue || !b.IsDeleted.Value);
         base.OnModelCreating(modelBuilder);
     }
 
