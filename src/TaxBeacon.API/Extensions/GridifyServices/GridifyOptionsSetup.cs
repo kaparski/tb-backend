@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.API.Extensions.GridifyServices;
 
-public class GridifyOptionsSetup : IConfigureOptions<GridifyOptions>
+public class GridifyOptionsSetup: IConfigureOptions<GridifyOptions>
 {
     public const string ConfigurationSectionName = "GridifyOptions";
     private readonly IConfiguration _configuration;

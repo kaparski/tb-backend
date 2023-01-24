@@ -13,7 +13,7 @@ using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.UserManagement.Services;
 
-public class UserService : IUserService
+public class UserService: IUserService
 {
     private readonly ILogger<UserService> _logger;
     private readonly ITaxBeaconDbContext _context;
