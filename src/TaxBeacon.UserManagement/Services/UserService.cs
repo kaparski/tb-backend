@@ -3,14 +3,12 @@ using Gridify.EntityFramework;
 using Mapster;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
-using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.UserManagement.Services;
 
