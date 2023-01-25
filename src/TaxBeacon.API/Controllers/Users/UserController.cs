@@ -1,4 +1,5 @@
 ﻿using Gridify;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
@@ -36,17 +37,7 @@ public class UserController: BaseController
     public async Task<ActionResult<QueryablePaging<UserListResponse>>> GetList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
         var users = await _userService.GetUsersAsync(query, cancellationToken);
-        var userListResponse = new QueryablePaging<UserListResponse>(users.Count, users.Query
-            .Select(
-            x => new UserListResponse()
-            {
-                Id = x.Id,
-                Username = x.Username,
-                FirstName = x.FirstName,
-                LastName = x.LastName,
-                UserStatus = x.UserStatus,
-                LastLoginDateUtc = x.LastLoginDateUtc,
-            }));
+        var userListResponse = new QueryablePaging<UserListResponse>(users.Count, users.Query.ProjectToType<UserListResponse>());
 
         return userListResponse;
     }
