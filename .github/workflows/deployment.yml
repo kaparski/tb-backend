@@ -27,7 +27,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'dev' && 'dev' || github.ref_name == 'qa' && 'qa' || 'prod' }}
-    if: github.event_name == 'push' #&& github.event.pull_request.base.ref == 'main'
+    if: github.event_name == 'push'
     steps:
       - run: echo ${{ github.ref_name }}
 
@@ -48,7 +48,7 @@ jobs:
         with:
           push: true
           tags: ${{ env.ACR_URL }}/${{ secrets.CONTAINER_APP_NAME }}:${{ github.sha }}
-          file: ./Dockerfile
+          file: ./src/TaxBeacon.API/Dockerfile
 
   deploy:
     name: Deployment job
