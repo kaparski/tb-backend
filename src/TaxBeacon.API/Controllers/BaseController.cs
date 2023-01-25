@@ -4,7 +4,7 @@ using System.Net.Mime;
 namespace TaxBeacon.API.Controllers;
 
 [ApiController]
-public class BaseController
+public class BaseController: ControllerBase
 {
 
 }
