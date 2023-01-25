@@ -51,12 +51,12 @@ public class UserService: IUserService
         }
     }
 
-    public async Task<QueryablePaging<UserList>> GetUsersAsync(GridifyQuery gridifyQuery,
+    public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken)
     {
         var users = await _context
             .Users
-            .ProjectToType<UserList>()
+            .ProjectToType<UserDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
         return users;

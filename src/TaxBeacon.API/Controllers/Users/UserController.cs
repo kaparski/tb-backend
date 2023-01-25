@@ -33,11 +33,11 @@ public class UserController: BaseController
     /// <returns>List of users</returns>
     [HttpGet(Name = "GetUsers")]
     [ProducesDefaultResponseType(typeof(ProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<UserListResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<QueryablePaging<UserListResponse>>> GetList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<QueryablePaging<UserResponse>>> GetList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
         var users = await _userService.GetUsersAsync(query, cancellationToken);
-        var userListResponse = new QueryablePaging<UserListResponse>(users.Count, users.Query.ProjectToType<UserListResponse>());
+        var userListResponse = new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>());
 
         return userListResponse;
     }

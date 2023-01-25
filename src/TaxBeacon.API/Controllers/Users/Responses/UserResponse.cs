@@ -1,8 +1,8 @@
 ﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.UserManagement.Models;
+namespace TaxBeacon.API.Controllers.Users.Responses;
 
-public class UserList
+public class UserResponse
 {
     public Guid Id { get; set; }
 
@@ -15,4 +15,10 @@ public class UserList
     public UserStatus UserStatus { get; set; }
 
     public DateTime? LastLoginDateUtc { get; set; }
+
+    public string Role { get; set; }
+
+    public string Department { get; set; }
+
+    public string JobTitle { get; set; }
 }
