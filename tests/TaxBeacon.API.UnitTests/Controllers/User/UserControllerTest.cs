@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Moq;
+using System.Net;
 using TaxBeacon.API.Controllers.Authorization;
 using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Responses;
@@ -41,7 +42,7 @@ public class UserControllerTest
         var actualResponse = await _controller.GetUserList(query, default);
 
         // Assert
-        actualResponse.Should().BeOfType<ActionResult<QueryablePaging<UserResponse>>>();
+        actualResponse.Should().BeOfType<OkObjectResult>();
         actualResponse.Should().NotBeNull();
     }
 }
