@@ -160,7 +160,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetUsers_InvalidPageNumber_UserListIsEmpty()
+    public async Task GetUsers_PageNumberOutsideOfTotalRange_UserListIsEmpty()
     {
         // Arrange
         TestData.TestUser
