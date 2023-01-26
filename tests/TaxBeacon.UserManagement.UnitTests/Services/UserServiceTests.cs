@@ -108,7 +108,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetUsers_CorrectUserListAscendingOrderingAndPagination_UsersWithAscendingUsernames()
+    public async Task GetUsers_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfUsersAndCorrectPage()
     {
         // Arrange
         TestData.TestUser
@@ -134,7 +134,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetUsers_CorrectUserListDescendingOrderingAndPagination_UsersWithAscendingUsernames()
+    public async Task GetUsers_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfUsersInDescendingOrder()
     {
         // Arrange
         TestData.TestUser
@@ -160,7 +160,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetUsers_InvalidPageNumber_UsersWithAscendingUsernames()
+    public async Task GetUsers_InvalidPageNumber_UserListIsEmpty()
     {
         // Arrange
         TestData.TestUser
