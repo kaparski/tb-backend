@@ -1,13 +1,8 @@
 ﻿using FluentAssertions;
 using Gridify;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using Moq;
-using System.Net;
-using TaxBeacon.API.Controllers.Authorization;
 using TaxBeacon.API.Controllers.Users;
-using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
