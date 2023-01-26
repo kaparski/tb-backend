@@ -29,26 +29,26 @@ jobs:
     environment: ${{ github.ref_name == 'dev' && 'dev' || github.ref_name == 'qa' && 'qa' || 'prod' }}
     if: github.event_name == 'push'
     steps:
-      - run: echo ${{ github.ref_name }}
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@main
+      - run: pwd ${{ github.workspace }}
 
-      - uses: actions/checkout@v3
-
-      - name: Set up Docker Build
-        uses: docker/setup-buildx-action@v1
-
-      - name: Log in to ACR
-        uses: docker/login-action@v1.10.0
+      - name: Edit a .NET Core database connection string in appsettings.json
+        uses: benday-inc/edit-dbconnstr-in-appsettings@v1.3
         with:
-          registry: ${{ env.ACR_URL }}
+          name: DefaultConnection
+          connectionString: ${{secrets.CONNECTION_STRING}}
+          pathToSettingsFile: '${{ github.workspace }}/src/TaxBeacon.API/appsettings.json'
+
+      - name: 'Build and push image'
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.ACR_URL }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-
-      - name: Build and push container image to registry
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          tags: ${{ env.ACR_URL }}/${{ secrets.CONTAINER_APP_NAME }}:${{ github.sha }}
-          file: ./src/TaxBeacon.API/Dockerfile
+      - run: |
+            docker build -f ${{ github.workspace }}/src/TaxBeacon.API/Dockerfile -t ${{ env.ACR_URL }}/${{ secrets.CONTAINER_APP_NAME }}:${{ github.sha }} .
+            docker push ${{ env.ACR_URL }}/${{ secrets.CONTAINER_APP_NAME }}:${{ github.sha }}
 
   deploy:
     name: Deployment job
