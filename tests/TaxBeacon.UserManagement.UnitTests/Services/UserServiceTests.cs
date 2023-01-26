@@ -155,7 +155,7 @@ public class UserServiceTests
         // Assert
         var listOfUsers = pageOfUsers.Query.ToList();
         listOfUsers.Count().Should().Be(6);
-        listOfUsers[0].Username.Should().Be("abc");
+        listOfUsers.Select(x => x.Username).Should().BeInDescendingOrder();
         pageOfUsers.Count.Should().Be(6);
     }
 
