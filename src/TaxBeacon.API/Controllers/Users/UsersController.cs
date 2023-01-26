@@ -7,11 +7,11 @@ using TaxBeacon.UserManagement.Services;
 namespace TaxBeacon.API.Controllers.Users;
 
 [Route("api/users")]
-public class UserController: BaseController
+public class UsersController: BaseController
 {
     private readonly IUserService _userService;
 
-    public UserController(IUserService userService) => _userService = userService;
+    public UsersController(IUserService userService) => _userService = userService;
 
     /// <summary>
     /// List of users

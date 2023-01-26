@@ -11,13 +11,13 @@ namespace TaxBeacon.API.UnitTests.Controllers.User;
 public class UsersControllerTest
 {
     private readonly Mock<IUserService> _userServiceMock;
-    private readonly UserController _controller;
+    private readonly UsersController _controller;
 
     public UsersControllerTest()
     {
         _userServiceMock = new();
 
-        _controller = new UserController(_userServiceMock.Object);
+        _controller = new UsersController(_userServiceMock.Object);
     }
 
     [Fact]
