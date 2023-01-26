@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -11,6 +12,7 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
@@ -106,8 +108,94 @@ public class UserServiceTests
         }
     }
 
+    [Fact]
+    public async Task GetUsers_CorrectUserListAscendingOrderingAndPagination_UsersWithAscendingUsernames()
+    {
+        // Arrange
+        TestData.TestUser
+            .RuleFor(u => u.Username, (f, u) => TestData.GetNextName());
+        var users = TestData.TestUser.Generate(5);
+        await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery
+        {
+            Page = 2,
+            PageSize = 4,
+            OrderBy = "username asc",
+        };
+
+        // Act
+        var pageOfUsers = await _userService.GetUsersAsync(query, default);
+
+        // Assert
+        var listOfUsers = pageOfUsers.Query.ToList();
+        listOfUsers.Count().Should().Be(1);
+        listOfUsers[0].Username.Should().Be("abc");
+        pageOfUsers.Count.Should().Be(5);
+    }
+
+    [Fact]
+    public async Task GetUsers_CorrectUserListDescendingOrderingAndPagination_UsersWithAscendingUsernames()
+    {
+        // Arrange
+        TestData.TestUser
+            .RuleFor(u => u.Username, (f, u) => TestData.GetNextName());
+        var users = TestData.TestUser.Generate(6);
+        await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery
+        {
+            Page = 1,
+            PageSize = 25,
+            OrderBy = "username desc",
+        };
+
+        // Act
+        var pageOfUsers = await _userService.GetUsersAsync(query, default);
+
+        // Assert
+        var listOfUsers = pageOfUsers.Query.ToList();
+        listOfUsers.Count().Should().Be(6);
+        listOfUsers[0].Username.Should().Be("abc");
+        pageOfUsers.Count.Should().Be(6);
+    }
+
+    [Fact]
+    public async Task GetUsers_InvalidPageNumber_UsersWithAscendingUsernames()
+    {
+        // Arrange
+        TestData.TestUser
+            .RuleFor(u => u.Username, (f, u) => TestData.GetNextName());
+        var users = TestData.TestUser.Generate(6);
+        await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery
+        {
+            Page = 2,
+            PageSize = 25,
+            OrderBy = "username asc",
+        };
+
+        // Act
+        var page = await _userService.GetUsersAsync(query, default);
+
+        // Assert
+        page.Count.Should().Be(6);
+        var listOfUsers = page.Query.ToList();
+        listOfUsers.Count().Should().Be(0);
+    }
+
     private static class TestData
     {
+        public static List<string> CustomUsernames = new()
+        {
+            "aaa",
+            "abb",
+            "abc"
+        };
+
+        static int _nameIndex = 0;
+
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
@@ -123,5 +211,12 @@ public class UserServiceTests
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.UserStatus, f => f.PickRandom<UserStatus>());
+
+        public static string GetNextName()
+        {
+            if (_nameIndex >= CustomUsernames.Count)
+                _nameIndex = 0;
+            return CustomUsernames[_nameIndex++];
+        }
     }
 }
