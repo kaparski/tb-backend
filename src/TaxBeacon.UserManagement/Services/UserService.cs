@@ -1,10 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Gridify;
+using Gridify.EntityFramework;
+using Mapster;
+using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.UserManagement.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
-using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -45,6 +49,17 @@ public class UserService: IUserService
             user.LastLoginDateUtc = _dateTimeService.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken)
+    {
+        var users = await _context
+            .Users
+            .ProjectToType<UserDto>()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
     }
 
     private async Task<User> CreateUserAsync(

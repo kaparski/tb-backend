@@ -1,5 +1,6 @@
 using Microsoft.IdentityModel.Logging;
 using TaxBeacon.API;
+using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.Common;
 using TaxBeacon.UserManagement;
 
@@ -14,8 +15,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUi();
     IdentityModelEventSource.ShowPII = true;
 }
 

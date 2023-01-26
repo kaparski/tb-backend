@@ -2,8 +2,11 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using TaxBeacon.API.Extensions;
+using TaxBeacon.API.Extensions.GridifyServices;
 using Microsoft.Identity.Web;
 using System.Reflection;
+using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
@@ -18,17 +21,20 @@ public static class ConfigureServices
     {
         // Add services to the container.
         services.AddControllers();
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
-
+        services.AddSwagger();
+        services.AddGridify(configuration);
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         // TODO: Decide if we should move this into TaxBeacon.UserManagement layer
         services.AddScoped<EntitySaveChangesInterceptor>();
         services.AddDbContext<TaxBeaconDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+            options.UseSqlServer(
+                configuration.GetConnectionString(
+                    "DefaultConnection"),
                 builder => builder.MigrationsAssembly(typeof(TaxBeaconDbContext).Assembly.FullName)));
         services.AddScoped<ITaxBeaconDbContext>(provider => provider.GetRequiredService<TaxBeaconDbContext>());
 

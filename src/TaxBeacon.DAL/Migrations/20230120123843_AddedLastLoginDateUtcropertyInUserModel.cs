@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TaxBeacon.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedLastLoginDateUtcropertyInUserModel : Migration
+    public partial class AddedLastLoginDateUtcropertyInUserModel: Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

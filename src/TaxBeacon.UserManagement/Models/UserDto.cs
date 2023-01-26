@@ -1,8 +1,8 @@
 ﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.DAL.Entities;
+namespace TaxBeacon.UserManagement.Models;
 
-public class User: BaseEntity
+public class UserDto
 {
     public Guid Id { get; set; }
 
@@ -12,12 +12,7 @@ public class User: BaseEntity
 
     public string LastName { get; set; }
 
-    public string Email { get; set; }
-
     public UserStatus UserStatus { get; set; }
 
     public DateTime? LastLoginDateUtc { get; set; }
-
-    // TODO: Add department, roles and Job title in the future
-    public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
 }

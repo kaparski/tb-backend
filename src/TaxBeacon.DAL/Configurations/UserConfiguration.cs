@@ -33,6 +33,8 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
 
         user
             .Property(u => u.UserStatus)
-            .HasConversion<int>();
+            .HasConversion<string>()
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
     }
 }

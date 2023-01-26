@@ -30,7 +30,7 @@ namespace TaxBeacon.API.Controllers.Authorization
         /// <response code="200">User email valid and last login date successfully saved</response>
         /// <response code="400">User email invalid</response>
         /// <response code="401">User is unauthorized</response>
-        [HttpPost("login")]
+        [HttpPost("login", Name = "Login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest loginRequest,
             CancellationToken cancellationToken)
         {
