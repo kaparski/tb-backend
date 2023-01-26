@@ -134,7 +134,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetUsers_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfUsersInDescendingOrder()
+    public async Task GetUsersAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfUsersInDescendingOrder()
     {
         // Arrange
         TestData.TestUser
@@ -160,7 +160,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetUsers_PageNumberOutsideOfTotalRange_UserListIsEmpty()
+    public async Task GetUsersAsync_PageNumberOutsideOfTotalRange_UserListIsEmpty()
     {
         // Arrange
         TestData.TestUser

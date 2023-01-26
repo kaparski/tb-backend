@@ -8,17 +8,18 @@ using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.User;
 
-public class UserControllerTest
+public class UsersControllerTest
 {
     private readonly Mock<IUserService> _userServiceMock;
     private readonly UserController _controller;
 
-    public UserControllerTest()
+    public UsersControllerTest()
     {
         _userServiceMock = new();
 
         _controller = new UserController(_userServiceMock.Object);
     }
+
     [Fact]
     public async Task GetUserList_ValidQuery_ReturnSuccessStatusCode()
     {
