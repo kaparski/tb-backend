@@ -108,7 +108,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetUsers_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfUsersAndCorrectPage()
+    public async Task GetUsersAsync_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfUsersAndCorrectPage()
     {
         // Arrange
         TestData.TestUser
