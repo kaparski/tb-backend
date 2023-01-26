@@ -19,7 +19,7 @@ if (app.Environment.IsDevelopment())
     IdentityModelEventSource.ShowPII = true;
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("DefaultCorsPolicy");
 
 app.UseAuthentication();
