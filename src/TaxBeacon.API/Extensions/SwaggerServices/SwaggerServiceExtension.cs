@@ -30,6 +30,7 @@ public static class SwaggerServiceExtension
             x.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
             x.DefaultModelExpandDepth(4);
             x.DefaultModelRendering(ModelRendering.Example);
+            x.DefaultModelsExpandDepth(-1);
             x.DisplayOperationId();
             x.DisplayRequestDuration();
             x.DocExpansion(DocExpansion.None);
