@@ -24,11 +24,11 @@ public static class SwaggerServiceExtension
 
     internal static void UseSwaggerUi(this IApplicationBuilder app)
     {
-        app.UseSwagger(x => x.SerializeAsV2 = true);
+        app.UseSwagger();
         app.UseSwaggerUI(x =>
         {
             x.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-            x.DefaultModelExpandDepth(3);
+            x.DefaultModelExpandDepth(4);
             x.DefaultModelRendering(ModelRendering.Example);
             x.DefaultModelsExpandDepth(-1);
             x.DisplayOperationId();
