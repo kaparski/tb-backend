@@ -18,7 +18,7 @@ public class UsersController: BaseController
     /// </summary>
     /// <remarks>
     /// Sample request: <br/><br/>
-    ///     ```GET /users/page=1&amp;pageSize=21&amp;orderBy="username desc"&amp;filter="firstName=Dastan"/```
+    ///     ```GET /users?page=1&amp;pageSize=5&amp;orderBy=email asc&amp;filter=firstName=Peter```
     /// </remarks>
     /// <response code="200">Returns users</response>
     /// <returns>List of users</returns>
