@@ -9,7 +9,6 @@ public static class SwaggerServiceExtension
     internal static void AddSwagger(this IServiceCollection services) =>
         services.AddSwaggerGen(x =>
         {
-
             x.SwaggerDoc("v1",
                 new OpenApiInfo
                 {
@@ -18,6 +17,7 @@ public static class SwaggerServiceExtension
                     Version = "v1",
                 });
             x.DescribeAllParametersInCamelCase();
+            x.SchemaFilter<EnumSchemaFilter>();
             var commentsFileName = Assembly.GetExecutingAssembly().GetName().Name + ".xml";
             x.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, commentsFileName));
         });
