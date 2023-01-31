@@ -124,7 +124,7 @@ public class UserServiceTests
         };
 
         // Act
-        var pageOfUsers = await _userService.GetUsersAsync(query, default);
+        var pageOfUsers = await _userService.GetUsers(query, default);
 
         // Assert
         var listOfUsers = pageOfUsers.Query.ToList();
@@ -150,7 +150,7 @@ public class UserServiceTests
         };
 
         // Act
-        var pageOfUsers = await _userService.GetUsersAsync(query, default);
+        var pageOfUsers = await _userService.GetUsers(query, default);
 
         // Assert
         var listOfUsers = pageOfUsers.Query.ToList();
@@ -176,7 +176,7 @@ public class UserServiceTests
         };
 
         // Act
-        var page = await _userService.GetUsersAsync(query, default);
+        var page = await _userService.GetUsers(query, default);
 
         // Assert
         page.Count.Should().Be(6);

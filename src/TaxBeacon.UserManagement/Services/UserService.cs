@@ -51,15 +51,22 @@ public class UserService: IUserService
         }
     }
 
-    public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
+    public IOrderedEnumerable<UserDto> GetUsers(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken)
     {
-        var users = await _context
+        var users = _context
             .Users
-            .ProjectToType<UserDto>()
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+            .ApplyPaging(gridifyQuery.Page, gridifyQuery.PageSize)
+            .Adapt<List<UserDto>>();
 
-        return users;
+        var expressions = gridifyQuery.GetOrderingExpressions<UserDto>();
+
+        var orderedUsers = users.OrderBy(x => x.Email);
+        foreach (var expression in expressions)
+        {
+            var res = users.OrderByDescending(expression.Compile());
+        }
+        return orderedUsers;
     }
 
     private async Task<User> CreateUserAsync(

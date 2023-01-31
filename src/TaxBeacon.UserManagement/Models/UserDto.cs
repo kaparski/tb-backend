@@ -17,4 +17,6 @@ public class UserDto
     public UserStatus UserStatus { get; set; }
 
     public DateTime? LastLoginDateUtc { get; set; }
+
+    public string FullName => $"{FirstName} {LastName}";
 }
