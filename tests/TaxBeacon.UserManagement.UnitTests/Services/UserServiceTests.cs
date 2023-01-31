@@ -95,7 +95,6 @@ public class UserServiceTests
             actualResult.Email.Should().Be(user.Email);
             actualResult.LastName.Should().BeEmpty();
             actualResult.FirstName.Should().BeEmpty();
-            actualResult.Username.Should().BeEmpty();
             actualResult.TenantUsers.Should()
                 .NotBeEmpty()
                 .And
@@ -112,7 +111,7 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Username, (f, u) => TestData.GetNextName());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNextName());
         var users = TestData.TestUser.Generate(5);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
@@ -124,12 +123,12 @@ public class UserServiceTests
         };
 
         // Act
-        var pageOfUsers = await _userService.GetUsers(query, default);
+        var pageOfUsers = await _userService.GetUsersAsync(query, default);
 
         // Assert
         var listOfUsers = pageOfUsers.Query.ToList();
         listOfUsers.Count().Should().Be(1);
-        listOfUsers[0].Username.Should().Be("abc");
+        listOfUsers[0].Email.Should().Be("abc");
         pageOfUsers.Count.Should().Be(5);
     }
 
@@ -138,7 +137,7 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Username, (f, u) => TestData.GetNextName());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNextName());
         var users = TestData.TestUser.Generate(6);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
@@ -150,12 +149,12 @@ public class UserServiceTests
         };
 
         // Act
-        var pageOfUsers = await _userService.GetUsers(query, default);
+        var pageOfUsers = await _userService.GetUsersAsync(query, default);
 
         // Assert
         var listOfUsers = pageOfUsers.Query.ToList();
         listOfUsers.Count().Should().Be(6);
-        listOfUsers.Select(x => x.Username).Should().BeInDescendingOrder();
+        listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
         pageOfUsers.Count.Should().Be(6);
     }
 
@@ -164,7 +163,7 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Username, (f, u) => TestData.GetNextName());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNextName());
         var users = TestData.TestUser.Generate(6);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
@@ -176,7 +175,7 @@ public class UserServiceTests
         };
 
         // Act
-        var page = await _userService.GetUsers(query, default);
+        var page = await _userService.GetUsersAsync(query, default);
 
         // Assert
         page.Count.Should().Be(6);
@@ -186,7 +185,7 @@ public class UserServiceTests
 
     private static class TestData
     {
-        public static List<string> CustomUsernames = new()
+        public static List<string> CustomEmails = new()
         {
             "aaa",
             "abb",
@@ -206,16 +205,15 @@ public class UserServiceTests
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
-                .RuleFor(u => u.Username, (f, u) => f.Internet.UserName(u.FirstName, u.LastName))
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.UserStatus, f => f.PickRandom<UserStatus>());
 
         public static string GetNextName()
         {
-            if (_nameIndex >= CustomUsernames.Count)
+            if (_nameIndex >= CustomEmails.Count)
                 _nameIndex = 0;
-            return CustomUsernames[_nameIndex++];
+            return CustomEmails[_nameIndex++];
         }
     }
 }

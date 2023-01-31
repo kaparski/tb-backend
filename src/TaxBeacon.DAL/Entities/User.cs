@@ -6,8 +6,6 @@ public class User: BaseEntity
 {
     public Guid Id { get; set; }
 
-    public string Username { get; set; } = null!;
-
     public string FirstName { get; set; } = null!;
 
     public string LastName { get; set; } = null!;
@@ -17,6 +15,8 @@ public class User: BaseEntity
     public UserStatus UserStatus { get; set; }
 
     public DateTime? LastLoginDateUtc { get; set; }
+
+    public string FullName { get; } = null!;
 
     // TODO: Add department, roles and Job title in the future
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();

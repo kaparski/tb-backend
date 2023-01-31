@@ -37,7 +37,6 @@ public class UserService: IUserService
             await CreateUserAsync(
                 new User
                 {
-                    Username = string.Empty,
                     FirstName = string.Empty,
                     LastName = string.Empty,
                     Email = mailAddress.Address,
@@ -51,22 +50,15 @@ public class UserService: IUserService
         }
     }
 
-    public IOrderedEnumerable<UserDto> GetUsers(GridifyQuery gridifyQuery,
+    public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken)
     {
-        var users = _context
+
+        var users = await _context
             .Users
-            .ApplyPaging(gridifyQuery.Page, gridifyQuery.PageSize)
-            .Adapt<List<UserDto>>();
-
-        var expressions = gridifyQuery.GetOrderingExpressions<UserDto>();
-
-        var orderedUsers = users.OrderBy(x => x.Email);
-        foreach (var expression in expressions)
-        {
-            var res = users.OrderByDescending(expression.Compile());
-        }
-        return orderedUsers;
+            .ProjectToType<UserDto>()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+        return users;
     }
 
     private async Task<User> CreateUserAsync(

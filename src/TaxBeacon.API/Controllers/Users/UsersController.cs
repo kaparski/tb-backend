@@ -28,7 +28,7 @@ public class UsersController: BaseController
     [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
-        var users = await _userService.GetUsers(query, cancellationToken);
+        var users = await _userService.GetUsersAsync(query, cancellationToken);
         var userListResponse = new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>());
 
         return Ok(userListResponse);

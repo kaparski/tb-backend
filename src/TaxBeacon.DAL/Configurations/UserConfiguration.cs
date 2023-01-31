@@ -8,12 +8,6 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> user)
     {
         user
-            .Property(u => u.Username)
-            .HasColumnType("nvarchar")
-            .HasMaxLength(100)
-            .IsRequired();
-
-        user
             .Property(u => u.FirstName)
             .HasColumnType("nvarchar")
             .HasMaxLength(100)
@@ -36,5 +30,11 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
             .HasConversion<string>()
             .HasColumnType("nvarchar")
             .HasMaxLength(100);
+
+        user
+            .Property(u => u.FullName)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(202)
+            .HasComputedColumnSql("CONCAT([FirstName], ' ', [LastName])", stored: true);
     }
 }

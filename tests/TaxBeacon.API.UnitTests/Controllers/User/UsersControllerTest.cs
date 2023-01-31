@@ -30,7 +30,7 @@ public class UsersControllerTest
             PageSize = 25,
             OrderBy = "username desc",
         };
-        _userServiceMock.Setup(p => p.GetUsers(query, default)).ReturnsAsync(
+        _userServiceMock.Setup(p => p.GetUsersAsync(query, default)).ReturnsAsync(
             new QueryablePaging<UserDto>(0,
                 Enumerable.Empty<UserDto>().AsQueryable()));
 
