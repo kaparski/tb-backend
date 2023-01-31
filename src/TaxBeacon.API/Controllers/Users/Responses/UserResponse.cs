@@ -6,21 +6,23 @@ public class UserResponse
 {
     public Guid Id { get; set; }
 
-    public string Username { get; set; }
+    public string Username { get; set; } = null!;
 
-    public string FirstName { get; set; }
+    public string FirstName { get; set; } = null!;
 
-    public string LastName { get; set; }
+    public string LastName { get; set; } = null!;
 
     public UserStatus UserStatus { get; set; }
 
     public DateTime? LastLoginDateUtc { get; set; }
 
-    public string Email { get; set; }
+    public string Email { get; set; } = null!;
 
-    public string Role { get; set; }
+    public string Role { get; set; } = null!;
 
-    public string Department { get; set; }
+    public string Department { get; set; } = null!;
 
-    public string JobTitle { get; set; }
+    public string JobTitle { get; set; } = null!;
+
+    public string FullName => $"{FirstName} {LastName}".Trim();
 }

@@ -6,7 +6,7 @@ public class TenantUser
 
     public Guid TenantId { get; set; }
 
-    public User User { get; set; }
+    public User User { get; set; } = null!;
 
-    public Tenant Tenant { get; set; }
+    public Tenant Tenant { get; set; } = null!;
 }
