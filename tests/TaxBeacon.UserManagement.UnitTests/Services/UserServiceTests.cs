@@ -119,7 +119,7 @@ public class UserServiceTests
         {
             Page = 2,
             PageSize = 4,
-            OrderBy = "username asc",
+            OrderBy = "email asc",
         };
 
         // Act
@@ -128,7 +128,7 @@ public class UserServiceTests
         // Assert
         var listOfUsers = pageOfUsers.Query.ToList();
         listOfUsers.Count().Should().Be(1);
-        listOfUsers[0].Email.Should().Be("abc");
+        listOfUsers[0].Email.Should().Be("abc@gmail.com");
         pageOfUsers.Count.Should().Be(5);
     }
 
@@ -145,7 +145,7 @@ public class UserServiceTests
         {
             Page = 1,
             PageSize = 25,
-            OrderBy = "username desc",
+            OrderBy = "email desc",
         };
 
         // Act
@@ -171,7 +171,7 @@ public class UserServiceTests
         {
             Page = 2,
             PageSize = 25,
-            OrderBy = "username asc",
+            OrderBy = "email asc",
         };
 
         // Act
@@ -187,9 +187,9 @@ public class UserServiceTests
     {
         public static List<string> CustomEmails = new()
         {
-            "aaa",
-            "abb",
-            "abc"
+            "aaa@gmail.com",
+            "abb@gmail.com",
+            "abc@gmail.com"
         };
 
         static int _nameIndex = 0;
