@@ -111,7 +111,7 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNextName());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNextEmail());
         var users = TestData.TestUser.Generate(5);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
@@ -137,7 +137,7 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNextName());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNextEmail());
         var users = TestData.TestUser.Generate(6);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
@@ -163,7 +163,7 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNextName());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNextEmail());
         var users = TestData.TestUser.Generate(6);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
@@ -209,7 +209,7 @@ public class UserServiceTests
                 .RuleFor(u => u.CreatedDateUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.UserStatus, f => f.PickRandom<UserStatus>());
 
-        public static string GetNextName()
+        public static string GetNextEmail()
         {
             if (_nameIndex >= CustomEmails.Count)
                 _nameIndex = 0;
