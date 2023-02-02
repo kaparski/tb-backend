@@ -12,8 +12,8 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    [Migration("20230131155627_AddedComputedColumnAndRemoveUsernameInUsersTable")]
-    partial class AddedComputedColumnAndRemoveUsernameInUsersTable
+    [Migration("20230202104428_RemoveUserNameFromUsersTable")]
+    partial class RemoveUserNameFromUsersTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -95,7 +95,7 @@ namespace TaxBeacon.DAL.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(202)
                         .HasColumnType("nvarchar")
-                        .HasComputedColumnSql("CONCAT([FirstName], ' ', [LastName])", true);
+                        .HasComputedColumnSql("TRIM(CONCAT([FirstName], ' ', [LastName]))", true);
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");

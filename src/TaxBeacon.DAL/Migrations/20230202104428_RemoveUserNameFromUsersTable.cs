@@ -5,7 +5,7 @@
 namespace TaxBeacon.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedComputedColumnAndRemoveUsernameInUsersTable : Migration
+    public partial class RemoveUserNameFromUsersTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,7 +20,7 @@ namespace TaxBeacon.DAL.Migrations
                 type: "nvarchar(202)",
                 maxLength: 202,
                 nullable: false,
-                computedColumnSql: "CONCAT([FirstName], ' ', [LastName])",
+                computedColumnSql: "TRIM(CONCAT([FirstName], ' ', [LastName]))",
                 stored: true);
         }
 
