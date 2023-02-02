@@ -35,6 +35,6 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
             .Property(u => u.FullName)
             .HasColumnType("nvarchar")
             .HasMaxLength(202)
-            .HasComputedColumnSql("CONCAT([FirstName], ' ', [LastName])", stored: true);
+            .HasComputedColumnSql("TRIM(CONCAT([FirstName], ' ', [LastName]))", stored: true);
     }
 }

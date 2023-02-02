@@ -41,7 +41,6 @@ public class UserService: IUserService
                     LastName = string.Empty,
                     Email = mailAddress.Address,
                     LastLoginDateUtc = _dateTimeService.UtcNow,
-                    FullName = string.Empty,
                 }, cancellationToken);
         }
         else
