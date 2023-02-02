@@ -40,7 +40,8 @@ public class UserService: IUserService
                     FirstName = string.Empty,
                     LastName = string.Empty,
                     Email = mailAddress.Address,
-                    LastLoginDateUtc = _dateTimeService.UtcNow
+                    LastLoginDateUtc = _dateTimeService.UtcNow,
+                    FullName = string.Empty,
                 }, cancellationToken);
         }
         else
