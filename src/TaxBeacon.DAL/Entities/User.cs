@@ -16,7 +16,7 @@ public class User: BaseEntity
 
     public DateTime? LastLoginDateUtc { get; set; }
 
-    public string FullName { get; } = string.Empty;
+    public string FullName { get; private set; } = string.Empty;
 
     // TODO: Add department, roles and Job title in the future
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
