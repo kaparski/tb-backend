@@ -37,11 +37,10 @@ public class UserService: IUserService
             await CreateUserAsync(
                 new User
                 {
-                    Username = string.Empty,
                     FirstName = string.Empty,
                     LastName = string.Empty,
                     Email = mailAddress.Address,
-                    LastLoginDateUtc = _dateTimeService.UtcNow
+                    LastLoginDateUtc = _dateTimeService.UtcNow,
                 }, cancellationToken);
         }
         else

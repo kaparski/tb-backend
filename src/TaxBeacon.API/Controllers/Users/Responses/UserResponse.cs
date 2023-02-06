@@ -6,8 +6,6 @@ public class UserResponse
 {
     public Guid Id { get; set; }
 
-    public string Username { get; set; } = null!;
-
     public string FirstName { get; set; } = null!;
 
     public string LastName { get; set; } = null!;
@@ -24,5 +22,5 @@ public class UserResponse
 
     public string JobTitle { get; set; } = null!;
 
-    public string FullName => $"{FirstName} {LastName}".Trim();
+    public string FullName { get; set; } = null!;
 }
