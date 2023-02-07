@@ -10,6 +10,8 @@ public class UserDto
 
     public string LastName { get; set; } = null!;
 
+    public DateTime CreatedDateUtc { get; set; }
+
     public string Email { get; set; } = null!;
 
     public UserStatus UserStatus { get; set; }
