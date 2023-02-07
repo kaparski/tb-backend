@@ -19,7 +19,17 @@ jobs:
     environment: ${{ github.ref_name == 'dev' && 'dev' || github.ref_name == 'qa' && 'qa' || 'prod' }}
     if: github.event_name == 'pull_request'
     steps:
-      - run: echo ${{ github.ref_name }}
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.*'
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        run: dotnet test
 
 
   build:
