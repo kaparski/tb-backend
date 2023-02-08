@@ -5,7 +5,7 @@
 namespace TaxBeacon.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class ExplicitlyUsedUserStatusEnum: Migration
+    public partial class ExplicitlyUsedUserStatusEnum : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

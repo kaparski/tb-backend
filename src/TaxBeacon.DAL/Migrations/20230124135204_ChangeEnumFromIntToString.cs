@@ -5,7 +5,7 @@
 namespace TaxBeacon.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class ChangeEnumFromIntToString: Migration
+    public partial class ChangeEnumFromIntToString : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
