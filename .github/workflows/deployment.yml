@@ -16,7 +16,7 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'dev' && 'dev' || github.ref_name == 'qa' && 'qa' || 'prod' }}
+    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v3
@@ -34,8 +34,9 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'dev' && 'dev' || github.ref_name == 'qa' && 'qa' || 'prod' }}
-    if: github.event_name == 'push'
+    needs: tests
+    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
+    #if: github.event_name == 'push'
     steps:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
@@ -62,7 +63,7 @@ jobs:
     name: Deployment job
     runs-on: ubuntu-latest
     needs: build
-    environment: ${{ github.ref_name == 'dev' && 'dev' || github.ref_name == 'qa' && 'qa' || 'prod' }}
+    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
 
     steps:
       - name: Azure Login
