@@ -1,7 +1,6 @@
 using Microsoft.IdentityModel.Logging;
 using TaxBeacon.API;
 using TaxBeacon.API.Extensions.SwaggerServices;
-using TaxBeacon.API.Middlewares;
 using TaxBeacon.Common;
 using TaxBeacon.UserManagement;
 
@@ -19,7 +18,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUi();
     IdentityModelEventSource.ShowPII = true;
 }
-app.UseMiddleware<ExceptionMiddleware>();
 
 // app.UseHttpsRedirection();
 app.UseCors("DefaultCorsPolicy");

@@ -2,7 +2,6 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Controllers.Users.Responses;
-using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Users;
@@ -45,7 +44,6 @@ public class UsersController: BaseController
     /// <response code="200">Returns user details</response>
     /// <returns>User</returns>
     [HttpGet("{id:guid}", Name = "GetUserDetails")]
-    [ProducesDefaultResponseType(typeof(ErrorResult))]
     [ProducesResponseType(typeof(UserDetailsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {

@@ -66,12 +66,7 @@ public class UserService: IUserService
     {
         var user = await _context
             .Users
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-        if (user is null)
-        {
-            throw new NotFoundException("userId");
-        }
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ?? throw new Exception("User id is not found");
 
         return user.Adapt<UserDto>();
     }
