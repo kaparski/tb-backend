@@ -47,7 +47,7 @@ public class UsersController: BaseController
     [ProducesResponseType(typeof(UserDetailsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var userDto = await _userService.GetUserDetails(id, cancellationToken);
+        var userDto = await _userService.GetUserByIdAsync(id, cancellationToken);
 
         return Ok(userDto);
     }

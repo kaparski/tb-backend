@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 
@@ -62,11 +61,11 @@ public class UserService: IUserService
         return users;
     }
 
-    public async Task<UserDto> GetUserDetails(Guid id, CancellationToken cancellationToken)
+    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var user = await _context
             .Users
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ?? throw new Exception("User id is not found");
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ?? throw new Exception("User is not found");
 
         return user.Adapt<UserDto>();
     }
