@@ -44,11 +44,11 @@ public class UsersController: BaseController
     /// <response code="200">Returns user details</response>
     /// <returns>User</returns>
     [HttpGet("{id:guid}", Name = "GetUserDetails")]
-    [ProducesResponseType(typeof(UserDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var userDto = await _userService.GetUserByIdAsync(id, cancellationToken);
 
-        return Ok(userDto);
+        return Ok(userDto.Adapt<UserResponse>());
     }
 }
