@@ -24,6 +24,7 @@ public static class ConfigureServices
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
+        services.AddLocalization();
         services.AddSwagger();
         services.AddGridify(configuration);
         services.AddFluentValidationAutoValidation();

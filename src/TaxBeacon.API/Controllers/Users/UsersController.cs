@@ -2,6 +2,7 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Users;
@@ -32,5 +33,24 @@ public class UsersController: BaseController
         var userListResponse = new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>());
 
         return Ok(userListResponse);
+    }
+
+    /// <summary>
+    /// User Details
+    /// </summary>
+    /// <remarks>
+    /// Sample requests: <br/><br/>
+    ///     ```GET api/users/{someGuid}```<br/><br/>
+    /// </remarks>
+    /// <response code="200">Returns user details</response>
+    /// <returns>User</returns>
+    [HttpGet("{id:guid}", Name = "GetUserDetails")]
+    [ProducesDefaultResponseType(typeof(ErrorResult))]
+    [ProducesResponseType(typeof(QueryablePaging<UserDetailsResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var userDto = await _userService.GetUserDetails(id, cancellationToken);
+
+        return Ok(userDto);
     }
 }

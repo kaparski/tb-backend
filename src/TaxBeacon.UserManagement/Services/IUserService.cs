@@ -8,4 +8,5 @@ public interface IUserService
 {
     Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken);
     Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
+    Task<UserDto> GetUserDetails(Guid id, CancellationToken cancellationToken);
 }

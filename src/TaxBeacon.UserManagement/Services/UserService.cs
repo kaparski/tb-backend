@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 
@@ -59,6 +60,20 @@ public class UserService: IUserService
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
         return users;
+    }
+
+    public async Task<UserDto> GetUserDetails(Guid id, CancellationToken cancellationToken)
+    {
+        var user = await _context
+            .Users
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (user is null)
+        {
+            throw new NotFoundException("userId");
+        }
+
+        return user.Adapt<UserDto>();
     }
 
     private async Task<User> CreateUserAsync(
