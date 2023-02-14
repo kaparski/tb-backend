@@ -46,7 +46,7 @@ public class UsersController: BaseController
     /// <returns>User</returns>
     [HttpGet("{id:guid}", Name = "GetUserDetails")]
     [ProducesDefaultResponseType(typeof(ErrorResult))]
-    [ProducesResponseType(typeof(QueryablePaging<UserDetailsResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserDetailsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var userDto = await _userService.GetUserDetails(id, cancellationToken);
