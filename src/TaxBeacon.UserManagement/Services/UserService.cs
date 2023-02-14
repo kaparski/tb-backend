@@ -61,6 +61,15 @@ public class UserService: IUserService
         return users;
     }
 
+    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var user = await _context
+            .Users
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ?? throw new Exception("User is not found");
+
+        return user.Adapt<UserDto>();
+    }
+
     private async Task<User> CreateUserAsync(
         User user,
         CancellationToken cancellationToken = default)

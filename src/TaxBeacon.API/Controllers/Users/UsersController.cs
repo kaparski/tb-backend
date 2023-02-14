@@ -33,4 +33,22 @@ public class UsersController: BaseController
 
         return Ok(userListResponse);
     }
+
+    /// <summary>
+    /// User Details
+    /// </summary>
+    /// <remarks>
+    /// Sample requests: <br/><br/>
+    ///     ```GET api/users/8da4f695-6d47-4ce8-da8f-08db0052f325```<br/><br/>
+    /// </remarks>
+    /// <response code="200">Returns user details</response>
+    /// <returns>User</returns>
+    [HttpGet("{id:guid}", Name = "GetUserDetails")]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var userDto = await _userService.GetUserByIdAsync(id, cancellationToken);
+
+        return Ok(userDto.Adapt<UserResponse>());
+    }
 }

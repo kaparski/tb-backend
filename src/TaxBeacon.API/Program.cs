@@ -24,7 +24,6 @@ app.UseCors("DefaultCorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapDefaultControllerRoute();
 
