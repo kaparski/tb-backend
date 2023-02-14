@@ -40,7 +40,7 @@ public class UsersController: BaseController
     /// </summary>
     /// <remarks>
     /// Sample requests: <br/><br/>
-    ///     ```GET api/users/{someGuid}```<br/><br/>
+    ///     ```GET api/users/8da4f695-6d47-4ce8-da8f-08db0052f325```<br/><br/>
     /// </remarks>
     /// <response code="200">Returns user details</response>
     /// <returns>User</returns>
