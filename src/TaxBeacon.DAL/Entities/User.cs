@@ -18,6 +18,8 @@ public class User: BaseEntity
 
     public string FullName { get; private set; } = string.Empty;
 
+    public DateTime? DeactivationDateUtc { get; set; }
+
     // TODO: Add department, roles and Job title in the future
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
 }

@@ -24,7 +24,6 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        modelBuilder.Entity<User>().HasQueryFilter(b => b.IsDeleted == null || !b.IsDeleted.Value);
         base.OnModelCreating(modelBuilder);
     }
 
