@@ -1,7 +1,10 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.DAL.Entities;
+using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Users;
@@ -50,5 +53,32 @@ public class UsersController: BaseController
         var userDto = await _userService.GetUserByIdAsync(id, cancellationToken);
 
         return Ok(userDto.Adapt<UserResponse>());
+    }
+
+    /// <summary>
+    /// Create User
+    /// </summary>
+    /// <param name="userRequest">User Dto</param>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST api/users
+    ///     {
+    ///        "email": "john@gmail.com",
+    ///        "firstName": "John",
+    ///        "lastName": "White-Holland"
+    ///     }
+    /// </remarks>
+    /// <response code="201">Returns created user</response>
+    /// <returns>User</returns>
+    [HttpPost(Name = "CreateUser")]
+    [ProducesDefaultResponseType(typeof(ProblemDetails))]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> CreateUser(UserRequest userRequest, CancellationToken cancellationToken)
+    {
+        var user = userRequest.Adapt<User>();
+        user = await _userService.CreateUserAsync(user, cancellationToken);
+
+        return Created($"/users/{user.Id}", user.Adapt<UserResponse>());
     }
 }

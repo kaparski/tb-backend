@@ -6,7 +6,10 @@ using TaxBeacon.UserManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
+using System.Text.Json;
+using TaxBeacon.Common.Constants;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 
@@ -70,7 +73,7 @@ public class UserService: IUserService
         return user.Adapt<UserDto>();
     }
 
-    private async Task<User> CreateUserAsync(
+    public async Task<User> CreateUserAsync(
         User user,
         CancellationToken cancellationToken = default)
     {
@@ -78,10 +81,18 @@ public class UserService: IUserService
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
 
+        if (await EmailExistsAsync(user.Email))
+        {
+            throw new ConflictException(ExceptionMessages.Messages[ExceptionKey.EmailExists],
+                Enum.GetName(typeof(ExceptionKey), ExceptionKey.EmailExists)!);
+        }
+
         user.TenantUsers.Add(new TenantUser { Tenant = tenant });
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         return user;
     }
+
+    private async Task<bool> EmailExistsAsync(string email) => await _context.Users.AnyAsync(x => x.Email == email);
 }
