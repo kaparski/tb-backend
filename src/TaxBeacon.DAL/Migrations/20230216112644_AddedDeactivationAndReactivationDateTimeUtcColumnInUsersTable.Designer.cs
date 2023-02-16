@@ -12,8 +12,8 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    [Migration("20230215160908_AddedDeactivationDateUtcInUsersTable")]
-    partial class AddedDeactivationDateUtcInUsersTable
+    [Migration("20230216112644_AddedDeactivationAndReactivationDateTimeUtcColumnInUsersTable")]
+    partial class AddedDeactivationAndReactivationDateTimeUtcColumnInUsersTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,7 +77,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeactivationDateUtc")
+                    b.Property<DateTime?>("DeactivationDateTimeUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedDateUtc")
@@ -96,7 +96,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<string>("FullName")
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasMaxLength(201)
+                        .HasMaxLength(202)
                         .HasColumnType("nvarchar")
                         .HasComputedColumnSql("TRIM(CONCAT([FirstName], ' ', [LastName]))", true);
 
@@ -113,6 +113,9 @@ namespace TaxBeacon.DAL.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
+
+                    b.Property<DateTime?>("ReactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserStatus")
                         .IsRequired()

@@ -14,11 +14,14 @@ public class User: BaseEntity
 
     public UserStatus UserStatus { get; set; }
 
+    //  TODO: Rename such columns to LastLoginDateTimeUtc
     public DateTime? LastLoginDateUtc { get; set; }
 
     public string FullName { get; private set; } = string.Empty;
 
-    public DateTime? DeactivationDateUtc { get; set; }
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
 
     // TODO: Add department, roles and Job title in the future
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
