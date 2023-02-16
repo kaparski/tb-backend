@@ -34,7 +34,7 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
         user
             .Property(u => u.FullName)
             .HasColumnType("nvarchar")
-            .HasMaxLength(201)
+            .HasMaxLength(202)
             .HasComputedColumnSql("TRIM(CONCAT([FirstName], ' ', [LastName]))", stored: true);
 
         user.HasQueryFilter(b => b.IsDeleted == null || !b.IsDeleted.Value);

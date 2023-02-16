@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 
@@ -64,9 +65,37 @@ public class UserService: IUserService
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var user = await _context
-            .Users
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ?? throw new Exception("User is not found");
+                       .Users
+                       .ProjectToType<UserDto>()
+                       .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+                   ?? throw new NotFoundException(nameof(User), id);
 
+        return user;
+    }
+
+    public async Task<UserDto> UpdateUserStatusAsync(Guid id, UserStatus userStatus,
+        CancellationToken cancellationToken)
+    {
+        var user = await _context
+                       .Users
+                       .FirstOrDefaultAsync(user => user.Id == id, cancellationToken)
+                   ?? throw new NotFoundException(nameof(User), id);
+
+        switch (userStatus)
+        {
+            case UserStatus.Deactivated:
+                user.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
+                user.ReactivationDateTimeUtc = null;
+                break;
+            case UserStatus.Active:
+                user.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
+                user.DeactivationDateTimeUtc = null;
+                break;
+        }
+
+        user.UserStatus = userStatus;
+
+        await _context.SaveChangesAsync(cancellationToken);
         return user.Adapt<UserDto>();
     }
 
