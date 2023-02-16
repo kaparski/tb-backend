@@ -183,6 +183,36 @@ public class UserServiceTests
         listOfUsers.Count().Should().Be(0);
     }
 
+    [Fact]
+    public async Task CreateAsync_ValidEmailAndUserNotExist_NewUserCreated()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var user = TestData.TestUser.Generate();
+        var currentDate = DateTime.UtcNow;
+        _dbContextMock.Tenants.Add(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        await _userService.CreateUserAsync(user);
+        var actualResult = await _dbContextMock.Users.LastAsync();
+
+        //Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.Email.Should().Be(user.Email);
+            actualResult.LastName.Should().Be(user.LastName);
+            actualResult.FirstName.Should().Be(user.FirstName);
+            actualResult.TenantUsers.Should()
+                .NotBeEmpty()
+                .And
+                .HaveCount(1);
+            actualResult.TenantUsers.First().TenantId.Should().Be(tenant.Id);
+            actualResult.CreatedDateUtc.Should().Be(user.CreatedDateUtc);
+        }
+    }
+
     private static class TestData
     {
         public static List<string> CustomEmails = new()
