@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Net.Mime;
 
 namespace TaxBeacon.API.Controllers;
 
 [ApiController]
+[Route("api/[controller]")]
 public class BaseController: ControllerBase
 {
 
