@@ -3,6 +3,7 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Users;
@@ -52,5 +53,24 @@ public class UsersController: BaseController
         var userDto = await _userService.GetUserByIdAsync(id, cancellationToken);
 
         return Ok(userDto.Adapt<UserResponse>());
+    }
+
+    /// <summary>
+    /// Endpoint to update user status
+    /// </summary>
+    /// <param name="id">User id</param>
+    /// <param name="userStatus">New user status</param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns updated user</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <returns>Updated user</returns>
+    [HttpPut("{id:guid}/status", Name = "UpdateUserStatus")]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateUserStatusAsync(Guid id, [FromBody] UserStatus userStatus,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userService.UpdateUserStatusAsync(id, userStatus, cancellationToken);
+
+        return Ok(user.Adapt<UserResponse>());
     }
 }

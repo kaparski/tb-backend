@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Net.Mail;
 using System.Security.Claims;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.UserManagement.Services;
 
@@ -37,7 +38,7 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
         {
             var user = await _userService.GetUserByEmailAsync(new MailAddress(email), default);
 
-            if (user.DeactivationDateTimeUtc is not null)
+            if (user.DeactivationDateTimeUtc is not null || user.UserStatus == UserStatus.Deactivated)
             {
                 context.Result = new ForbidResult();
                 return;

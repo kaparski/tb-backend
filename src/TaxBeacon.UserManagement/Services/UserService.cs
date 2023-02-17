@@ -18,15 +18,18 @@ public class UserService: IUserService
     private readonly ILogger<UserService> _logger;
     private readonly ITaxBeaconDbContext _context;
     private readonly IDateTimeService _dateTimeService;
+    private readonly ICurrentUserService _currentUserService;
 
     public UserService(
         ILogger<UserService> logger,
         ITaxBeaconDbContext context,
-        IDateTimeService dateTimeService)
+        IDateTimeService dateTimeService,
+        ICurrentUserService currentUserService)
     {
         _logger = logger;
         _context = context;
         _dateTimeService = dateTimeService;
+        _currentUserService = currentUserService;
     }
 
     public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
@@ -99,10 +102,12 @@ public class UserService: IUserService
             case UserStatus.Deactivated:
                 user.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
                 user.ReactivationDateTimeUtc = null;
+                user.UserStatus = UserStatus.Deactivated;
                 break;
             case UserStatus.Active:
                 user.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
                 user.DeactivationDateTimeUtc = null;
+                user.UserStatus = UserStatus.Active;
                 break;
         }
 
