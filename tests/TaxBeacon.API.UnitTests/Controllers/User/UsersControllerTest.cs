@@ -5,7 +5,6 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Runtime.CompilerServices;
 using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
