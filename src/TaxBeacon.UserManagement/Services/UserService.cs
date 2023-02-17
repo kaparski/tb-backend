@@ -81,7 +81,7 @@ public class UserService: IUserService
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
 
-        if (await EmailExistsAsync(user.Email))
+        if (await EmailExistsAsync(user.Email, cancellationToken))
         {
             throw new ConflictException(ExceptionMessages.Messages[ExceptionKey.EmailExists],
                 Enum.GetName(typeof(ExceptionKey), ExceptionKey.EmailExists)!);
@@ -94,5 +94,5 @@ public class UserService: IUserService
         return user;
     }
 
-    private async Task<bool> EmailExistsAsync(string email) => await _context.Users.AnyAsync(x => x.Email == email);
+    private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken) => await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
 }

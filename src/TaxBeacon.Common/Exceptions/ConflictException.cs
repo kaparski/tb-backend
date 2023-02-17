@@ -2,12 +2,7 @@
 
 public class ConflictException: Exception
 {
-    public string Message { get; }
     public string Key { get; }
 
-    public ConflictException(string message, string key)
-    {
-        Message = message;
-        Key = key;
-    }
+    public ConflictException(string? message, string key) : base(message) => Key = key;
 }
