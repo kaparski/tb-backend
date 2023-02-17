@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TaxBeacon.API.Exceptions;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -26,13 +28,13 @@ public class ExceptionMiddleware
     {
         var problemDetails = exception switch
         {
-            ConflictException e => new ProblemDetails()
+            ConflictException e => new CustomProblemDetails()
             {
                 Status = StatusCodes.Status409Conflict,
                 Title = e.Message,
-                Type = e.Key
+                ErrorCode = (int)e.Key,
             },
-            _ => new ProblemDetails()
+            _ => new CustomProblemDetails()
             {
                 Status = StatusCodes.Status500InternalServerError,
                 Title = "Something went wrong"

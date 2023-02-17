@@ -6,8 +6,6 @@ using TaxBeacon.UserManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
-using System.Text.Json;
-using TaxBeacon.Common.Constants;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
@@ -83,8 +81,8 @@ public class UserService: IUserService
 
         if (await EmailExistsAsync(user.Email, cancellationToken))
         {
-            throw new ConflictException(ExceptionMessages.Messages[ExceptionKey.EmailExists],
-                Enum.GetName(typeof(ExceptionKey), ExceptionKey.EmailExists)!);
+            throw new ConflictException(ConflictExceptionMessages.EmailExistsMessage,
+                ConflictExceptionKey.UserEmail);
         }
 
         user.TenantUsers.Add(new TenantUser { Tenant = tenant });

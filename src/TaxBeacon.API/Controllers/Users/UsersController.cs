@@ -3,8 +3,8 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.API.Exceptions;
 using TaxBeacon.DAL.Entities;
-using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Users;
@@ -27,7 +27,7 @@ public class UsersController: BaseController
     /// <response code="200">Returns users</response>
     /// <returns>List of users</returns>
     [HttpGet(Name = "GetUsers")]
-    [ProducesDefaultResponseType(typeof(ProblemDetails))]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
@@ -72,7 +72,7 @@ public class UsersController: BaseController
     /// <response code="201">Returns created user</response>
     /// <returns>User</returns>
     [HttpPost(Name = "CreateUser")]
-    [ProducesDefaultResponseType(typeof(ProblemDetails))]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateUser(UserRequest userRequest, CancellationToken cancellationToken)
     {

@@ -1,8 +1,10 @@
-﻿namespace TaxBeacon.Common.Exceptions;
+﻿using TaxBeacon.Common.Enums;
+
+namespace TaxBeacon.Common.Exceptions;
 
 public class ConflictException: Exception
 {
-    public string Key { get; }
+    public ConflictExceptionKey Key { get; }
 
-    public ConflictException(string? message, string key) : base(message) => Key = key;
+    public ConflictException(string? message, ConflictExceptionKey key) : base(message) => Key = key;
 }
