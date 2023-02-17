@@ -57,41 +57,31 @@ public class UserService: IUserService
     }
 
     public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken)
-    {
-        var users = await _context
+        CancellationToken cancellationToken) =>
+        await _context
             .Users
             .ProjectToType<UserDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
-        return users;
-    }
+    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken) =>
+        await _context
+            .Users
+            .ProjectToType<UserDto>()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+        ?? throw new NotFoundException(nameof(User), id);
 
-    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)
-    {
-        var user = await _context
-                       .Users
-                       .ProjectToType<UserDto>()
-                       .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
-                   ?? throw new NotFoundException(nameof(User), id);
-
-        return user;
-    }
-
-    public async Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress, CancellationToken cancellationToken)
-    {
-        var user = await _context
-                       .Users
-                       .ProjectToType<UserDto>()
-                       .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
-                   ?? throw new NotFoundException(nameof(User), mailAddress.Address);
-
-        return user;
-    }
+    public async Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Users
+            .ProjectToType<UserDto>()
+            .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
+        ?? throw new NotFoundException(nameof(User), mailAddress.Address);
 
     public async Task<UserDto> UpdateUserStatusAsync(Guid id, UserStatus userStatus,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
+        // TODO: Move the same code into separated method
         var user = await _context
                        .Users
                        .FirstOrDefaultAsync(user => user.Id == id, cancellationToken)
@@ -114,6 +104,13 @@ public class UserService: IUserService
         user.UserStatus = userStatus;
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - User ({createdUserId}) status was changed to {newUserStatus} by {@userId}",
+            _dateTimeService.UtcNow,
+            user.Id,
+            userStatus,
+            _currentUserService.UserId);
+
         return user.Adapt<UserDto>();
     }
 
