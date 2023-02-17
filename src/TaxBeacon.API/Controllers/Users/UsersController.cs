@@ -66,7 +66,7 @@ public class UsersController: BaseController
     /// <returns>Updated user</returns>
     [HttpPut("{id:guid}/status", Name = "UpdateUserStatus")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateUserStatusAsync(Guid id, [FromBody] UserStatus userStatus,
+    public async Task<ActionResult<UserResponse>> UpdateUserStatusAsync(Guid id, [FromBody] UserStatus userStatus,
         CancellationToken cancellationToken)
     {
         var user = await _userService.UpdateUserStatusAsync(id, userStatus, cancellationToken);
