@@ -4,8 +4,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Extensions.SwaggerServices;
+using TaxBeacon.API.Filters;
+using TaxBeacon.API.Services;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
@@ -19,7 +23,8 @@ public static class ConfigureServices
         IConfiguration configuration)
     {
         services.AddRouting(options => options.LowercaseUrls = true);
-        services.AddControllers();
+        services.AddControllers(options => options.Filters.Add<AuthorizeFilter>())
+            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
@@ -41,6 +46,8 @@ public static class ConfigureServices
             builder.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader()));
+
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         return services;
     }

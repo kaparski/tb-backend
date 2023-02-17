@@ -31,7 +31,9 @@ public class UserService: IUserService
 
     public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
+        var user = await _context
+            .Users
+            .FirstOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
 
         if (user is null)
         {
@@ -69,6 +71,17 @@ public class UserService: IUserService
                        .ProjectToType<UserDto>()
                        .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
                    ?? throw new NotFoundException(nameof(User), id);
+
+        return user;
+    }
+
+    public async Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress, CancellationToken cancellationToken)
+    {
+        var user = await _context
+                       .Users
+                       .ProjectToType<UserDto>()
+                       .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
+                   ?? throw new NotFoundException(nameof(User), mailAddress.Address);
 
         return user;
     }
