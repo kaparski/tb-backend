@@ -110,7 +110,7 @@ public class UserServiceTests
             actualResult.TenantUsers.First().TenantId.Should().Be(tenant.Id);
             actualResult.LastLoginDateUtc.Should().Be(currentDate);
             _dateTimeServiceMock
-                .Verify(ds => ds.UtcNow, Times.Once);
+                .Verify(ds => ds.UtcNow, Times.Exactly(2));
         }
     }
 
