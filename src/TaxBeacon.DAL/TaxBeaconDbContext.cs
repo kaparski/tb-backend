@@ -21,6 +21,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
 
     public DbSet<TenantUser> TenantUsers => Set<TenantUser>();
 
+    public DbSet<Permission> Permissions => Set<Permission>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

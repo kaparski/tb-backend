@@ -10,5 +10,7 @@ public interface ITaxBeaconDbContext
 
     DbSet<TenantUser> TenantUsers { get; }
 
+    DbSet<Permission> Permissions { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
