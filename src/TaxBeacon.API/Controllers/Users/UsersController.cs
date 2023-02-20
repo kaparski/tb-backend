@@ -1,7 +1,9 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using TaxBeacon.API.Attributes;
 using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Users;
@@ -44,6 +46,7 @@ public class UsersController: BaseController
     /// <response code="200">Returns user details</response>
     /// <returns>User</returns>
     [HttpGet("{id:guid}", Name = "GetUserDetails")]
+    [HasPermission(PermissionEnum.CreateUser)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {
