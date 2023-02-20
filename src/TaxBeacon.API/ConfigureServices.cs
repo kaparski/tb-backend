@@ -23,8 +23,7 @@ public static class ConfigureServices
         IConfiguration configuration)
     {
         services.AddRouting(options => options.LowercaseUrls = true);
-        services.AddControllers(options => options.Filters.Add<AuthorizeFilter>())
-            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+        services.AddControllers(options => options.Filters.Add<AuthorizeFilter>());
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
