@@ -26,6 +26,7 @@ public class UsersController: BaseController
     /// <response code="200">Returns users</response>
     /// <returns>List of users</returns>
     [HttpGet(Name = "GetUsers")]
+    [HasPermission(PermissionEnum.ReadListOfUsers)]
     [ProducesDefaultResponseType(typeof(ProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
@@ -46,7 +47,6 @@ public class UsersController: BaseController
     /// <response code="200">Returns user details</response>
     /// <returns>User</returns>
     [HttpGet("{id:guid}", Name = "GetUserDetails")]
-    [HasPermission(PermissionEnum.CreateUser)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {
