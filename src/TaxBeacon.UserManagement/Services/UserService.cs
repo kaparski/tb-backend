@@ -133,6 +133,11 @@ public class UserService: IUserService
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
+        _logger.LogInformation("{dateTime} - User ({createdUserId}) was created by {@userId}",
+            _dateTimeService.UtcNow,
+            user.Id,
+            _currentUserService.UserId);
+
         return user.Adapt<UserDto>();
     }
 
