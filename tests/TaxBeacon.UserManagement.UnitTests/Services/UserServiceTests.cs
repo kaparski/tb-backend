@@ -13,6 +13,7 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
@@ -176,12 +177,18 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_ValidEmailAndUserNotExist_NewUserCreated()
+    public async Task CreateUserAsync_ValidEmailAndUserNotExist_NewUserCreated()
     {
         //Arrange
+        var faker = new Faker();
         var tenant = TestData.TestTenant.Generate();
-        var user = TestData.TestUser.Generate();
-        var currentDate = DateTime.UtcNow;
+        var user = new UserDto
+        {
+            FirstName = faker.Name.FirstName(),
+            LastName = faker.Name.LastName(),
+            Email = faker.Internet.Email()
+        };
+
         _dbContextMock.Tenants.Add(tenant);
         await _dbContextMock.SaveChangesAsync();
 
@@ -294,7 +301,7 @@ public class UserServiceTests
         //Arrange
         var tenant = TestData.TestTenant.Generate();
         var users = TestData.TestUser.Generate(5);
-        var userEmail = users.FirstOrDefault()?.Email;
+        var userEmail = users.First().Email;
 
         foreach (var user in users)
         {
@@ -318,7 +325,7 @@ public class UserServiceTests
         //Arrange
         var tenant = TestData.TestTenant.Generate();
         var users = TestData.TestUser.Generate(5);
-        var email = "1@1.com";
+        var email = new Faker().Internet.Email();
 
         foreach (var user in users)
         {

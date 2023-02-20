@@ -41,7 +41,7 @@ public class UserService: IUserService
         if (user is null)
         {
             await CreateUserAsync(
-                new User
+                new UserDto
                 {
                     FirstName = string.Empty,
                     LastName = string.Empty,
@@ -57,13 +57,13 @@ public class UserService: IUserService
     }
 
     public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken) =>
+        CancellationToken cancellationToken = default) =>
         await _context
             .Users
             .ProjectToType<UserDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
-    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken) =>
+    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
             .Users
             .ProjectToType<UserDto>()
@@ -114,11 +114,12 @@ public class UserService: IUserService
         return user.Adapt<UserDto>();
     }
 
-    public async Task<User> CreateUserAsync(
-        User user,
+    public async Task<UserDto> CreateUserAsync(
+        UserDto newUserData,
         CancellationToken cancellationToken = default)
     {
         // TODO: This is a temporary solution for tenants, because we will always keep one tenant in db for now
+        var user = newUserData.Adapt<User>();
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
 
@@ -132,8 +133,9 @@ public class UserService: IUserService
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return user;
+        return user.Adapt<UserDto>();
     }
 
-    private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken) => await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
+    private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
+        await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
 }

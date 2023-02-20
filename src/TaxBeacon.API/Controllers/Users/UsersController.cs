@@ -2,9 +2,11 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities;
+using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Users;
@@ -59,7 +61,8 @@ public class UsersController: BaseController
     /// <summary>
     /// Create User
     /// </summary>
-    /// <param name="userRequest">User Dto</param>
+    /// <param name="createUserRequest">User Dto</param>
+    /// <param name="cancellationToken"></param>
     /// <remarks>
     /// Sample request:
     ///
@@ -75,14 +78,12 @@ public class UsersController: BaseController
     [HttpPost(Name = "CreateUser")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateUser(UserRequest userRequest, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest, CancellationToken cancellationToken)
     {
-        var user = userRequest.Adapt<User>();
-        user = await _userService.CreateUserAsync(user, cancellationToken);
+        var newUser = await _userService.CreateUserAsync(createUserRequest.Adapt<UserDto>(), cancellationToken);
 
-        return Created($"/users/{user.Id}", user.Adapt<UserResponse>());
+        return Created($"/users/{newUser.Id}", newUser.Adapt<UserResponse>());
     }
-
 
     /// <summary>
     /// Endpoint to update user status
@@ -102,6 +103,4 @@ public class UsersController: BaseController
 
         return Ok(user.Adapt<UserResponse>());
     }
-}
-
 }
