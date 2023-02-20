@@ -114,7 +114,7 @@ public class UserService: IUserService
         return user.Adapt<UserDto>();
     }
 
-    private async Task<User> CreateUserAsync(
+    public async Task<User> CreateUserAsync(
         User user,
         CancellationToken cancellationToken = default)
     {
@@ -122,10 +122,18 @@ public class UserService: IUserService
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
 
+        if (await EmailExistsAsync(user.Email, cancellationToken))
+        {
+            throw new ConflictException(ConflictExceptionMessages.EmailExistsMessage,
+                ConflictExceptionKey.UserEmail);
+        }
+
         user.TenantUsers.Add(new TenantUser { Tenant = tenant });
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         return user;
     }
+
+    private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken) => await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
 }
