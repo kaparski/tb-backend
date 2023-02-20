@@ -2,11 +2,14 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using TaxBeacon.API.Extensions;
-using TaxBeacon.API.Extensions.GridifyServices;
 using Microsoft.Identity.Web;
 using System.Reflection;
+using System.Text.Json.Serialization;
+using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Extensions.SwaggerServices;
+using TaxBeacon.API.Filters;
+using TaxBeacon.API.Services;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
@@ -19,8 +22,9 @@ public static class ConfigureServices
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Add services to the container.
-        services.AddControllers();
+        services.AddRouting(options => options.LowercaseUrls = true);
+        services.AddControllers(options => options.Filters.Add<AuthorizeFilter>())
+            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
@@ -29,12 +33,9 @@ public static class ConfigureServices
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        // TODO: Decide if we should move this into TaxBeacon.UserManagement layer
         services.AddScoped<EntitySaveChangesInterceptor>();
         services.AddDbContext<TaxBeaconDbContext>(options =>
-            options.UseSqlServer(
-                configuration.GetConnectionString(
-                    "DefaultConnection"),
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
                 builder => builder.MigrationsAssembly(typeof(TaxBeaconDbContext).Assembly.FullName)));
         services.AddScoped<ITaxBeaconDbContext>(provider => provider.GetRequiredService<TaxBeaconDbContext>());
 
@@ -42,11 +43,11 @@ public static class ConfigureServices
             .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
 
         services.AddCors(o => o.AddPolicy("DefaultCorsPolicy", builder =>
-        {
             builder.AllowAnyOrigin()
                 .AllowAnyMethod()
-                .AllowAnyHeader();
-        }));
+                .AllowAnyHeader()));
+
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         return services;
     }

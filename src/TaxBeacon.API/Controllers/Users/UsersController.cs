@@ -1,15 +1,17 @@
 ﻿using Gridify;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
-using TaxBeacon.DAL.Entities;
+using TaxBeacon.Common.Enums;
+using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Users;
 
-[Route("api/users")]
+[Authorize]
 public class UsersController: BaseController
 {
     private readonly IUserService _userService;
@@ -32,7 +34,8 @@ public class UsersController: BaseController
     public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
         var users = await _userService.GetUsersAsync(query, cancellationToken);
-        var userListResponse = new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>());
+        var userListResponse =
+            new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>());
 
         return Ok(userListResponse);
     }
@@ -58,7 +61,8 @@ public class UsersController: BaseController
     /// <summary>
     /// Create User
     /// </summary>
-    /// <param name="userRequest">User Dto</param>
+    /// <param name="createUserRequest">User Dto</param>
+    /// <param name="cancellationToken"></param>
     /// <remarks>
     /// Sample request:
     ///
@@ -74,11 +78,29 @@ public class UsersController: BaseController
     [HttpPost(Name = "CreateUser")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateUser(UserRequest userRequest, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest, CancellationToken cancellationToken)
     {
-        var user = userRequest.Adapt<User>();
-        user = await _userService.CreateUserAsync(user, cancellationToken);
+        var newUser = await _userService.CreateUserAsync(createUserRequest.Adapt<UserDto>(), cancellationToken);
 
-        return Created($"/users/{user.Id}", user.Adapt<UserResponse>());
+        return Created($"/users/{newUser.Id}", newUser.Adapt<UserResponse>());
+    }
+
+    /// <summary>
+    /// Endpoint to update user status
+    /// </summary>
+    /// <param name="id">User id</param>
+    /// <param name="userStatus">New user status</param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns updated user</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <returns>Updated user</returns>
+    [HttpPut("{id:guid}/status", Name = "UpdateUserStatus")]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<UserResponse>> UpdateUserStatusAsync(Guid id, [FromBody] UserStatus userStatus,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userService.UpdateUserStatusAsync(id, userStatus, cancellationToken);
+
+        return Ok(user.Adapt<UserResponse>());
     }
 }

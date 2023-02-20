@@ -25,4 +25,8 @@ public class UserResponse
     public string JobTitle { get; set; } = null!;
 
     public string FullName { get; set; } = null!;
+
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
 }
