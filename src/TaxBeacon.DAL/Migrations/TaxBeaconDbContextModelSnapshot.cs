@@ -22,88 +22,6 @@ namespace TaxBeacon.DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.Permission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWID()");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Permissions");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.Role", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWID()");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Roles");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.RoleTenantPermission", b =>
-                {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("PermissionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TenantId", "RoleId", "PermissionId");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("TenantId", "PermissionId");
-
-                    b.ToTable("RoleTenantPermissions");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.RoleTenantUser", b =>
-                {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TenantId", "RoleId", "UserId");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("TenantId", "UserId");
-
-                    b.ToTable("RoleTenantUsers");
-                });
-
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -129,22 +47,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tenants");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantPermission", b =>
-                {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("PermissionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TenantId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("TenantPermissions");
+                    b.ToTable("Tenants", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantUser", b =>
@@ -159,7 +62,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TenantUsers");
+                    b.ToTable("TenantUsers", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.User", b =>
@@ -212,70 +115,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.RoleTenantPermission", b =>
-                {
-                    b.HasOne("TaxBeacon.DAL.Entities.Role", "Role")
-                        .WithMany("RoleTenantPermissions")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaxBeacon.DAL.Entities.TenantPermission", "TenantPermission")
-                        .WithMany("RoleTenantPermissions")
-                        .HasForeignKey("TenantId", "PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-
-                    b.Navigation("TenantPermission");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.RoleTenantUser", b =>
-                {
-                    b.HasOne("TaxBeacon.DAL.Entities.Role", "Role")
-                        .WithMany("RoleTenantUsers")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaxBeacon.DAL.Entities.User", null)
-                        .WithMany("RolesTenantUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaxBeacon.DAL.Entities.TenantUser", "TenantUser")
-                        .WithMany("RoleTenantUsers")
-                        .HasForeignKey("TenantId", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-
-                    b.Navigation("TenantUser");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantPermission", b =>
-                {
-                    b.HasOne("TaxBeacon.DAL.Entities.Permission", "Permission")
-                        .WithMany("TenantPermissions")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
-                        .WithMany("TenantPermissions")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Tenant");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantUser", b =>
@@ -297,39 +137,13 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.Permission", b =>
-                {
-                    b.Navigation("TenantPermissions");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.Role", b =>
-                {
-                    b.Navigation("RoleTenantPermissions");
-
-                    b.Navigation("RoleTenantUsers");
-                });
-
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Tenant", b =>
                 {
-                    b.Navigation("TenantPermissions");
-
                     b.Navigation("TenantUsers");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantPermission", b =>
-                {
-                    b.Navigation("RoleTenantPermissions");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantUser", b =>
-                {
-                    b.Navigation("RoleTenantUsers");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.User", b =>
                 {
-                    b.Navigation("RolesTenantUsers");
-
                     b.Navigation("TenantUsers");
                 });
 #pragma warning restore 612, 618
