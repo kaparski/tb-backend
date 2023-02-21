@@ -5,10 +5,8 @@ using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Authorization
 {
-    [Route("api/[controller]")]
-    [ApiController]
     [Authorize]
-    public class AuthorizationController: ControllerBase
+    public class AuthorizationController: BaseController
     {
         private readonly ILogger<AuthorizationController> _logger;
         private readonly IUserService _userService;

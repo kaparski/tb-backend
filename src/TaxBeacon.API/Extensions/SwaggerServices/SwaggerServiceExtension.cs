@@ -12,7 +12,7 @@ public static class SwaggerServiceExtension
             x.SwaggerDoc("v1",
                 new OpenApiInfo { Title = "TaxBeacon API", Description = "TaxBeacon API Description", Version = "v1" });
             x.DescribeAllParametersInCamelCase();
-            x.SchemaFilter<EnumSchemaFilter>();
+            x.SupportNonNullableReferenceTypes();
             var commentsFileName = Assembly.GetExecutingAssembly().GetName().Name + ".xml";
             x.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, commentsFileName));
         });
@@ -25,7 +25,6 @@ public static class SwaggerServiceExtension
             x.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
             x.DefaultModelExpandDepth(4);
             x.DefaultModelRendering(ModelRendering.Example);
-            x.DefaultModelsExpandDepth(-1);
             x.DisplayOperationId();
             x.DisplayRequestDuration();
             x.DocExpansion(DocExpansion.None);
