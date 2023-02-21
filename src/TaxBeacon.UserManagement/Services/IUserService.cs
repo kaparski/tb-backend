@@ -10,5 +10,8 @@ public interface IUserService
     Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken);
     Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
     Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken);
-    Task<HashSet<PermissionEnum>> GetUserPermissionsByEmailAsync(string email);
+    HashSet<PermissionEnum> GetUserPermissionsByEmail(string email);
+    Task<User> CreateUserAsync(
+        User user,
+        CancellationToken cancellationToken = default);
 }

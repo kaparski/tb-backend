@@ -17,5 +17,9 @@ public class PermissionConfiguration: IEntityTypeConfiguration<Permission>
         permission
             .HasIndex(p => p.Name)
             .IsUnique();
+
+        permission
+            .Property(p => p.Id)
+            .HasDefaultValueSql("NEWID()");
     }
 }

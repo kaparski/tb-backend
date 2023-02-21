@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 
@@ -70,29 +71,23 @@ public class UserService: IUserService
         return user.Adapt<UserDto>();
     }
 
-    public async Task<HashSet<PermissionEnum>> GetUserPermissionsByEmailAsync(string email)
-    {
-        var userRoles = await _context.Users
+    public HashSet<PermissionEnum> GetUserPermissionsByEmail(string email) => _context.Users
             .Include(x => x.TenantUsers)
-            .ThenInclude(x => x.RoleTenantUsers)
-            .ThenInclude(x => x.Role)
-            .ThenInclude(x => x.RoleTenantPermissions)
-            .ThenInclude(x => x.TenantPermission)
-            .ThenInclude(x => x.Permission)
+                .ThenInclude(x => x.RoleTenantUsers)
+                .ThenInclude(x => x.Role)
+                .ThenInclude(x => x.RoleTenantPermissions)
+                .ThenInclude(x => x.TenantPermission)
+                .ThenInclude(x => x.Permission)
             .Where(x => x.Email == email)
             .SelectMany(x => x.RolesTenantUsers)
             .Select(x => x.Role)
-            .ToArrayAsync();
-
-        return userRoles
             .SelectMany(x => x.RoleTenantPermissions)
             .Select(x => x.TenantPermission)
             .Select(x => x.Permission)
             .Select(x => x.Name)
             .ToHashSet();
-    }
 
-    private async Task<User> CreateUserAsync(
+    public async Task<User> CreateUserAsync(
         User user,
         CancellationToken cancellationToken = default)
     {
@@ -100,10 +95,18 @@ public class UserService: IUserService
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
 
+        if (await EmailExistsAsync(user.Email, cancellationToken))
+        {
+            throw new ConflictException(ConflictExceptionMessages.EmailExistsMessage,
+                ConflictExceptionKey.UserEmail);
+        }
+
         user.TenantUsers.Add(new TenantUser { Tenant = tenant });
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         return user;
     }
+
+    private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken) => await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
 }

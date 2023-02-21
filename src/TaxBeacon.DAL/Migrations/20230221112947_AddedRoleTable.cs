@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TaxBeacon.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedPermissionTable : Migration
+    public partial class AddedRoleTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,7 +15,7 @@ namespace TaxBeacon.DAL.Migrations
                 name: "Permissions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
@@ -24,19 +24,19 @@ namespace TaxBeacon.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Role",
+                name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Role", x => x.Id);
+                    table.PrimaryKey("PK_Roles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TenantPermission",
+                name: "TenantPermissions",
                 columns: table => new
                 {
                     TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -44,15 +44,15 @@ namespace TaxBeacon.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TenantPermission", x => new { x.TenantId, x.PermissionId });
+                    table.PrimaryKey("PK_TenantPermissions", x => new { x.TenantId, x.PermissionId });
                     table.ForeignKey(
-                        name: "FK_TenantPermission_Permissions_PermissionId",
+                        name: "FK_TenantPermissions_Permissions_PermissionId",
                         column: x => x.PermissionId,
                         principalTable: "Permissions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TenantPermission_Tenants_TenantId",
+                        name: "FK_TenantPermissions_Tenants_TenantId",
                         column: x => x.TenantId,
                         principalTable: "Tenants",
                         principalColumn: "Id",
@@ -60,7 +60,7 @@ namespace TaxBeacon.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoleTenantUser",
+                name: "RoleTenantUsers",
                 columns: table => new
                 {
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -69,15 +69,15 @@ namespace TaxBeacon.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoleTenantUser", x => new { x.TenantId, x.RoleId, x.UserId });
+                    table.PrimaryKey("PK_RoleTenantUsers", x => new { x.TenantId, x.RoleId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_RoleTenantUser_Role_RoleId",
+                        name: "FK_RoleTenantUsers_Roles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "Role",
+                        principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RoleTenantUser_TenantUsers_TenantId_UserId",
+                        name: "FK_RoleTenantUsers_TenantUsers_TenantId_UserId",
                         columns: x => new { x.TenantId, x.UserId },
                         principalTable: "TenantUsers",
                         principalColumns: new[] { "TenantId", "UserId" },
@@ -85,7 +85,7 @@ namespace TaxBeacon.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoleTenantPermission",
+                name: "RoleTenantPermissions",
                 columns: table => new
                 {
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -94,17 +94,17 @@ namespace TaxBeacon.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoleTenantPermission", x => new { x.TenantId, x.RoleId, x.PermissionId });
+                    table.PrimaryKey("PK_RoleTenantPermissions", x => new { x.TenantId, x.RoleId, x.PermissionId });
                     table.ForeignKey(
-                        name: "FK_RoleTenantPermission_Role_RoleId",
+                        name: "FK_RoleTenantPermissions_Roles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "Role",
+                        principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RoleTenantPermission_TenantPermission_TenantId_PermissionId",
+                        name: "FK_RoleTenantPermissions_TenantPermissions_TenantId_PermissionId",
                         columns: x => new { x.TenantId, x.PermissionId },
-                        principalTable: "TenantPermission",
+                        principalTable: "TenantPermissions",
                         principalColumns: new[] { "TenantId", "PermissionId" },
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -116,34 +116,39 @@ namespace TaxBeacon.DAL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Role_Name",
-                table: "Role",
+                name: "IX_Roles_Name",
+                table: "Roles",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleTenantPermission_RoleId",
-                table: "RoleTenantPermission",
+                name: "IX_RoleTenantPermissions_RoleId",
+                table: "RoleTenantPermissions",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleTenantPermission_TenantId_PermissionId",
-                table: "RoleTenantPermission",
+                name: "IX_RoleTenantPermissions_TenantId_PermissionId",
+                table: "RoleTenantPermissions",
                 columns: new[] { "TenantId", "PermissionId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleTenantUser_RoleId",
-                table: "RoleTenantUser",
+                name: "IX_RoleTenantUsers_RoleId",
+                table: "RoleTenantUsers",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleTenantUser_TenantId_UserId",
-                table: "RoleTenantUser",
+                name: "IX_RoleTenantUsers_TenantId_UserId",
+                table: "RoleTenantUsers",
                 columns: new[] { "TenantId", "UserId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_TenantPermission_PermissionId",
-                table: "TenantPermission",
+                name: "IX_RoleTenantUsers_UserId",
+                table: "RoleTenantUsers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TenantPermissions_PermissionId",
+                table: "TenantPermissions",
                 column: "PermissionId");
         }
 
@@ -151,16 +156,16 @@ namespace TaxBeacon.DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "RoleTenantPermission");
+                name: "RoleTenantPermissions");
 
             migrationBuilder.DropTable(
-                name: "RoleTenantUser");
+                name: "RoleTenantUsers");
 
             migrationBuilder.DropTable(
-                name: "TenantPermission");
+                name: "TenantPermissions");
 
             migrationBuilder.DropTable(
-                name: "Role");
+                name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "Permissions");

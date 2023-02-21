@@ -16,5 +16,9 @@ public class RoleConfiguration: IEntityTypeConfiguration<Role>
         role
             .HasIndex(r => r.Name)
             .IsUnique();
+
+        role
+            .Property(r => r.Id)
+            .HasDefaultValueSql("NEWID()");
     }
 }

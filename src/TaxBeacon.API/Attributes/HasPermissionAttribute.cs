@@ -6,14 +6,14 @@ using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Attributes;
 
-public sealed class HasPermissionAttribute: AuthorizeAttribute, IAsyncAuthorizationFilter
+public sealed class HasPermissionAttribute: AuthorizeAttribute, IAuthorizationFilter
 {
     private readonly PermissionEnum _permission;
-    private const string EmailClaimName = "userId";
+    private const string EmailClaimName = "preferred_username";
 
     public HasPermissionAttribute(PermissionEnum permission) => _permission = permission;
 
-    public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+    public void OnAuthorization(AuthorizationFilterContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
@@ -31,7 +31,7 @@ public sealed class HasPermissionAttribute: AuthorizeAttribute, IAsyncAuthorizat
             context.HttpContext.RequestServices.GetRequiredService<ILogger<HasPermissionAttribute>>();
         try
         {
-            var permissions = await userService.GetUserPermissionsByEmailAsync(email);
+            var permissions = userService.GetUserPermissionsByEmail(email);
 
             if (!permissions.Contains(_permission))
             {

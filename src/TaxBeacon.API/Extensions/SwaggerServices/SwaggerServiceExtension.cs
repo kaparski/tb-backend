@@ -10,12 +10,7 @@ public static class SwaggerServiceExtension
         services.AddSwaggerGen(x =>
         {
             x.SwaggerDoc("v1",
-                new OpenApiInfo
-                {
-                    Title = "TaxBeacon API",
-                    Description = "TaxBeacon API Description",
-                    Version = "v1",
-                });
+                new OpenApiInfo { Title = "TaxBeacon API", Description = "TaxBeacon API Description", Version = "v1" });
             x.DescribeAllParametersInCamelCase();
             x.SchemaFilter<EnumSchemaFilter>();
             var commentsFileName = Assembly.GetExecutingAssembly().GetName().Name + ".xml";

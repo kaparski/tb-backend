@@ -2,7 +2,10 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Attributes;
+using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.API.Exceptions;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Services;
 
@@ -27,7 +30,7 @@ public class UsersController: BaseController
     /// <returns>List of users</returns>
     [HttpGet(Name = "GetUsers")]
     [HasPermission(PermissionEnum.ReadListOfUsers)]
-    [ProducesDefaultResponseType(typeof(ProblemDetails))]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
@@ -47,11 +50,40 @@ public class UsersController: BaseController
     /// <response code="200">Returns user details</response>
     /// <returns>User</returns>
     [HttpGet("{id:guid}", Name = "GetUserDetails")]
+    [HasPermission(PermissionEnum.ReadUserDetails)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var userDto = await _userService.GetUserByIdAsync(id, cancellationToken);
 
         return Ok(userDto.Adapt<UserResponse>());
+    }
+
+    /// <summary>
+    /// Create User
+    /// </summary>
+    /// <param name="userRequest">User Dto</param>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST api/users
+    ///     {
+    ///        "email": "john@gmail.com",
+    ///        "firstName": "John",
+    ///        "lastName": "White-Holland"
+    ///     }
+    /// </remarks>
+    /// <response code="201">Returns created user</response>
+    /// <returns>User</returns>
+    [HttpPost(Name = "CreateUser")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [HasPermission(PermissionEnum.CreateUser)]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> CreateUser(UserRequest userRequest, CancellationToken cancellationToken)
+    {
+        var user = userRequest.Adapt<User>();
+        user = await _userService.CreateUserAsync(user, cancellationToken);
+
+        return Created($"/users/{user.Id}", user.Adapt<UserResponse>());
     }
 }
