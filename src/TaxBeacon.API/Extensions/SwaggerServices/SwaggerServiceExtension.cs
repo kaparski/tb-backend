@@ -17,7 +17,7 @@ public static class SwaggerServiceExtension
                     Version = "v1",
                 });
             x.DescribeAllParametersInCamelCase();
-            x.SchemaFilter<EnumSchemaFilter>();
+            x.SupportNonNullableReferenceTypes();
             var commentsFileName = Assembly.GetExecutingAssembly().GetName().Name + ".xml";
             x.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, commentsFileName));
         });
