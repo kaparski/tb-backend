@@ -19,17 +19,20 @@ public class UserService: IUserService
     private readonly ITaxBeaconDbContext _context;
     private readonly IDateTimeService _dateTimeService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IUserExternalStore _userExternalStore;
 
     public UserService(
         ILogger<UserService> logger,
         ITaxBeaconDbContext context,
         IDateTimeService dateTimeService,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IUserExternalStore userExternalStore)
     {
         _logger = logger;
         _context = context;
         _dateTimeService = dateTimeService;
         _currentUserService = currentUserService;
+        _userExternalStore = userExternalStore;
     }
 
     public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
@@ -122,6 +125,10 @@ public class UserService: IUserService
         var user = newUserData.Adapt<User>();
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
+
+        var password = await _userExternalStore.CreateUserAsync(new MailAddress(newUserData.Email),
+                                                                newUserData.FirstName,
+                                                                newUserData.LastName);
 
         if (await EmailExistsAsync(user.Email, cancellationToken))
         {
