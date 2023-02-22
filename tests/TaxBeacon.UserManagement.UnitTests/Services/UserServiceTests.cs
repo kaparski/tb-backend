@@ -26,6 +26,7 @@ public class UserServiceTests
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly UserService _userService;
+    private readonly Mock<IUserExternalStore> _userExternalStore;
 
     public UserServiceTests()
     {
@@ -33,6 +34,7 @@ public class UserServiceTests
         _entitySaveChangesInterceptorMock = new();
         _currentUserServiceMock = new();
         _dateTimeServiceMock = new();
+        _userExternalStore = new();
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -44,7 +46,8 @@ public class UserServiceTests
             _userServiceLoggerMock.Object,
             _dbContextMock,
             _dateTimeServiceMock.Object,
-            _currentUserServiceMock.Object);
+            _currentUserServiceMock.Object,
+            _userExternalStore.Object);
     }
 
     [Fact]
