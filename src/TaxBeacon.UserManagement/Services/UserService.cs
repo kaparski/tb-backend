@@ -128,7 +128,8 @@ public class UserService: IUserService
 
         var password = await _userExternalStore.CreateUserAsync(new MailAddress(newUserData.Email),
                                                                 newUserData.FirstName,
-                                                                newUserData.LastName);
+                                                                newUserData.LastName,
+                                                                cancellationToken);
 
         if (await EmailExistsAsync(user.Email, cancellationToken))
         {

@@ -9,6 +9,6 @@ namespace TaxBeacon.UserManagement.Services
         /// </summary>
         /// <param name="mailAddress"></param>
         /// <returns></returns>
-        Task<string> CreateUserAsync(MailAddress mailAddress, string firstName, string lastName);
+        Task<string> CreateUserAsync(MailAddress mailAddress, string firstName, string lastName, CancellationToken cancellationToken = default);
     }
 }

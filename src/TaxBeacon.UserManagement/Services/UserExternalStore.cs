@@ -17,12 +17,12 @@ namespace TaxBeacon.UserManagement.Services
             _azureAd = _azureAdOptions.Value;
         }
 
-        public async Task<string> CreateUserAsync(MailAddress mailAddress, string firstName, string lastName)
+        public async Task<string> CreateUserAsync(MailAddress mailAddress, string firstName, string lastName, CancellationToken cancellationToken)
         {
             var credentials = new ClientSecretCredential(_azureAd.TenantId, _azureAd.ClientId, _azureAd.Secret);
             var graphClient = new GraphServiceClient(credentials);
 
-            var existedUser = await graphClient.Users.Request().Filter($"mail eq '{mailAddress.Address}'").GetAsync();
+            var existedUser = await graphClient.Users.Request().Filter($"mail eq '{mailAddress.Address}'").GetAsync(cancellationToken);
             if (existedUser.Count != 0)
             {
                 return string.Empty;
@@ -51,7 +51,7 @@ namespace TaxBeacon.UserManagement.Services
 
             await graphClient.Users
                 .Request()
-                .AddAsync(user);
+                .AddAsync(user, cancellationToken);
 
             return user.PasswordProfile.Password;
         }
