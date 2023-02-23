@@ -12,5 +12,13 @@ public interface ITaxBeaconDbContext
 
     DbSet<Permission> Permissions { get; }
 
+    DbSet<Role> Roles { get; }
+
+    DbSet<TenantPermission> TenantPermissions { get; }
+
+    DbSet<RoleTenantPermission> RoleTenantPermissions { get; }
+
+    DbSet<RoleTenantUser> RoleTenantUsers { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

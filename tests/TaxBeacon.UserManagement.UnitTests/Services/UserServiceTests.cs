@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Collections.ObjectModel;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
@@ -119,11 +120,11 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNextEmail());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNext<string>(TestData.CustomEmails));
         var users = TestData.TestUser.Generate(5);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 4, OrderBy = "email asc", };
+        var query = new GridifyQuery { Page = 2, PageSize = 4, OrderBy = "email asc" };
 
         // Act
         var pageOfUsers = await _userService.GetUsersAsync(query, default);
@@ -140,11 +141,11 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNextEmail());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNext<string>(TestData.CustomEmails));
         var users = TestData.TestUser.Generate(6);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc" };
 
         // Act
         var pageOfUsers = await _userService.GetUsersAsync(query, default);
@@ -161,7 +162,7 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNextEmail());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNext<string>(TestData.CustomEmails));
         var users = TestData.TestUser.Generate(6);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
@@ -346,17 +347,95 @@ public class UserServiceTests
             .WithMessage($"Entity \"{nameof(User)}\" ({email}) was not found.");
     }
 
+    [Fact]
+    public async Task GetUserPermissions_UserHasPermissions_ReturnsAllPermission()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var users = TestData.TestUser.Generate(5);
+        var permissions = TestData.TestPermissions.RuleFor(x => x.Name,
+                TestData.GetNext<PermissionEnum>(Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>().ToList()))
+            .Generate(5);
+
+        await AssignToRoleAsync(users.First(), TestData.TestRoles.First(), tenant);
+        await AssignToRoleAsync(permissions, TestData.TestRoles.First(), tenant);
+
+        await _dbContextMock.Permissions.AddRangeAsync(permissions);
+        await _dbContextMock.Roles.AddRangeAsync(TestData.TestRoles);
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var permissionSet = _userService.GetUserPermissionsByEmail(users.First().Email);
+
+        //Assert
+        permissionSet
+            .Should()
+            .HaveCount(5);
+    }
+
+    [Fact]
+    public async Task GetUserPermissions_UserHasNoPermissions_ReturnsNoPermission()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var users = TestData.TestUser.Generate(5);
+        var permissions = TestData.TestPermissions
+            .Generate(5);
+        var enumValues = Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>();
+        var i = 0;
+        foreach (var enumValue in enumValues)
+        {
+            permissions[i].Name = enumValue;
+            i++;
+        }
+        await AssignToRoleAsync(users[1], TestData.TestRoles.First(), tenant);
+        await AssignToRoleAsync(permissions, TestData.TestRoles.First(), tenant);
+
+        await _dbContextMock.Permissions.AddRangeAsync(permissions);
+        await _dbContextMock.Roles.AddRangeAsync(TestData.TestRoles);
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var permissionSet = _userService.GetUserPermissionsByEmail(users.First().Email);
+
+        //Assert
+        permissionSet
+            .Should()
+            .HaveCount(0);
+    }
+
+    public async Task AssignToRoleAsync(User user, Role role, Tenant tenant) =>
+        await _dbContextMock.RoleTenantUsers.AddAsync(
+            new RoleTenantUser { Role = role, TenantUser = new TenantUser() { User = user, Tenant = tenant } });
+
+    public async Task AssignToRoleAsync(List<Permission> permissions, Role role, Tenant tenant)
+    {
+        foreach (var permission in permissions)
+        {
+            await _dbContextMock.RoleTenantPermissions.AddAsync(
+                new RoleTenantPermission()
+                {
+                    Role = role,
+                    TenantPermission = new TenantPermission() { Permission = permission, Tenant = tenant }
+                });
+        }
+    }
+
     private static class TestData
     {
-        private static readonly List<string> CustomEmails = new() { "aaa@gmail.com", "abb@gmail.com", "abc@gmail.com" };
+        public static readonly List<string> CustomEmails = new() { "aaa@gmail.com", "abb@gmail.com", "abc@gmail.com" };
 
         static int _nameIndex = 0;
 
-        public static string GetNextEmail()
+        public static T GetNext<T>(List<T> list)
         {
-            if (_nameIndex >= CustomEmails.Count)
+            if (_nameIndex >= list.Count)
                 _nameIndex = 0;
-            return CustomEmails[_nameIndex++];
+            return list[_nameIndex++];
         }
 
         public static readonly Faker<Tenant> TestTenant =
@@ -374,11 +453,17 @@ public class UserServiceTests
                 .RuleFor(u => u.CreatedDateUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.UserStatus, f => f.PickRandom<UserStatus>());
 
+        public static readonly Faker<Permission> TestPermissions =
+            new Faker<Permission>()
+                .RuleFor(u => u.Id, f => Guid.NewGuid())
+                .RuleFor(u => u.Name, f => f.PickRandom<PermissionEnum>());
+
+        public static readonly IEnumerable<Role> TestRoles = new List<Role> { new() { Id = new Guid(), Name = "Admin" } };
+
         public static IEnumerable<object[]> UpdatedStatusInvalidData =>
             new List<object[]>
             {
-                new object[] { UserStatus.Active, Guid.NewGuid() },
-                new object[] { UserStatus.Deactivated, Guid.Empty }
+                new object[] {UserStatus.Active, Guid.NewGuid()}, new object[] {UserStatus.Deactivated, Guid.Empty}
             };
     }
 }

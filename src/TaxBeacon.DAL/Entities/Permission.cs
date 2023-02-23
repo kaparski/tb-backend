@@ -15,4 +15,5 @@ public enum PermissionEnum
     CreateUser = 2,
     ReadListOfUsers = 3,
     ReadUserDetails = 4,
+    UpdateUserStatus = 5
 }

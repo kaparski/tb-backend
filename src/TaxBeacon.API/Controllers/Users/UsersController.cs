@@ -100,6 +100,7 @@ public class UsersController: BaseController
     /// <response code="401">User is unauthorized</response>
     /// <returns>Updated user</returns>
     [HttpPut("{id:guid}/status", Name = "UpdateUserStatus")]
+    [HasPermission(PermissionEnum.UpdateUserStatus)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<UserResponse>> UpdateUserStatusAsync(Guid id, [FromBody] UserStatus userStatus,
         CancellationToken cancellationToken)

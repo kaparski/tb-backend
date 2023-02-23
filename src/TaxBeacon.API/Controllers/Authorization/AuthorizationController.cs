@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
+using TaxBeacon.API.Attributes;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Authorization
@@ -29,6 +31,7 @@ namespace TaxBeacon.API.Controllers.Authorization
         /// <response code="400">User email invalid</response>
         /// <response code="401">User is unauthorized</response>
         [HttpPost("login", Name = "Login")]
+        [HasPermission(PermissionEnum.Login)]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest loginRequest,
             CancellationToken cancellationToken)
         {
