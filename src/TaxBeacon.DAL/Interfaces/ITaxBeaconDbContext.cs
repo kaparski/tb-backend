@@ -21,5 +21,6 @@ public interface ITaxBeaconDbContext
     DbSet<TenantRoleUser> TenantRoleUsers { get; }
 
     DbSet<TenantRole> TenantRoles { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
