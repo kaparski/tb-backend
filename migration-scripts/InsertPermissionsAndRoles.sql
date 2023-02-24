@@ -14,14 +14,15 @@ INSERT INTO @Permissions VALUES('B0E3DAB5-8C55-4151-A6CF-12D25FF4F3C3',N'Login')
                                ('3D2A2949-CBF7-4FCF-B421-4E77A6E57857',N'UpdateUserStatus')
 
 BEGIN TRANSACTION [Tran1];
-    BEGIN TRY
-        INSERT INTO Permissions SELECT Id, Name FROM @Permissions
-        INSERT INTO Roles VALUES (@RoleId, @RoleName)
-        INSERT INTO TenantPermissions SELECT @TenantId, Id FROM @Permissions
-        INSERT INTO RoleTenantPermissions SELECT @RoleId, @TenantId, Id FROM @Permissions
-        INSERT INTO RoleTenantUsers SELECT @RoleId, TenantId, UserId FROM TenantUsers
-        COMMIT TRANSACTION [Tran1]
-    END TRY
-    BEGIN CATCH
-        ROLLBACK TRANSACTION [Tran1]
-    END CATCH
+BEGIN TRY
+INSERT INTO Permissions SELECT Id, Name FROM @Permissions
+  INSERT INTO Roles VALUES (@RoleId, @RoleName)
+                        INSERT INTO TenantRoles VALUES (@RoleId, @TenantId)
+                        INSERT INTO TenantPermissions SELECT @TenantId, Id FROM @Permissions
+  INSERT INTO TenantRolePermissions SELECT @RoleId, @TenantId, Id FROM @Permissions
+  INSERT INTO TenantRoleUsers SELECT @RoleId, TenantId, UserId FROM TenantUsers
+  COMMIT TRANSACTION [Tran1]
+END TRY
+BEGIN CATCH
+ROLLBACK TRANSACTION [Tran1]
+END CATCH

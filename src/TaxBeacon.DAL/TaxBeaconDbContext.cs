@@ -27,9 +27,11 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
 
     public DbSet<TenantPermission> TenantPermissions => Set<TenantPermission>();
 
-    public DbSet<RoleTenantPermission> RoleTenantPermissions => Set<RoleTenantPermission>();
+    public DbSet<TenantRolePermission> TenantRolePermissions => Set<TenantRolePermission>();
 
-    public DbSet<RoleTenantUser> RoleTenantUsers => Set<RoleTenantUser>();
+    public DbSet<TenantRoleUser> TenantRoleUsers => Set<TenantRoleUser>();
+
+    public DbSet<TenantRole> TenantRoles => Set<TenantRole>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

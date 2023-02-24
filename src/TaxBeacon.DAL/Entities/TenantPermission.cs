@@ -10,5 +10,5 @@ public class TenantPermission
 
     public Tenant Tenant { get; set; } = null!;
 
-    public ICollection<RoleTenantPermission> RoleTenantPermissions { get; set; } = new HashSet<RoleTenantPermission>();
+    public ICollection<TenantRolePermission> TenantRolePermissions { get; set; } = new HashSet<TenantRolePermission>();
 }

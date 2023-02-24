@@ -57,15 +57,15 @@ public class UserService: IUserService
         }
     }
 
-    public PageDto<UserDto> GetUsers(GridifyQuery gridifyQuery,
+    public Paging<UserDto> GetUsers(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
         var users = _context
             .Users
             .Include(x => x.TenantUsers)
-                .ThenInclude(x => x.RoleTenantUsers)
-                    .ThenInclude(x => x.Role)
-            .ApplyPaging(gridifyQuery.Page, gridifyQuery.PageSize)
+                .ThenInclude(x => x.TenantRoleUsers)
+                    .ThenInclude(x => x.TenantRole)
+                        .ThenInclude(x => x.Role)
             .ToList();
 
         var userDtos = users.Select(x => new UserDto()
@@ -82,40 +82,18 @@ public class UserService: IUserService
             ReactivationDateTimeUtc = x.ReactivationDateTimeUtc,
             Roles = x.TenantUsers.FirstOrDefault() == null ? new List<RoleDto>() :
                 x.TenantUsers.FirstOrDefault()
-                    ?.RoleTenantUsers
-                        .OrderBy(x => x.Role.Name)
+                    ?.TenantRoleUsers
+                        .OrderBy(x => x.TenantRole.Role.Name)
                         .Select(x => new RoleDto
                         {
-                            Id = x.Role.Id,
-                            Name = x.Role.Name
+                            Id = x.TenantRole.Role.Id,
+                            Name = x.TenantRole.Role.Name
                         }),
         });
 
-        if (!string.IsNullOrWhiteSpace(gridifyQuery.Filter))
-        {
-            var filterExpression = gridifyQuery.GetFilteringExpression<UserDto>();
-            userDtos = userDtos.Where(filterExpression.Compile());
-        }
-
-        var orderedUsers = userDtos.OrderBy(x => x.Email);
-
-        if (!string.IsNullOrWhiteSpace(gridifyQuery.OrderBy))
-        {
-            var orderingExpressions = gridifyQuery.GetOrderingExpressions<UserDto>().ToList();
-            var orderings = gridifyQuery.GetOrderings();
-            for (var i = 0; i < orderingExpressions.Count; i++)
-            {
-                orderedUsers = orderings[i]
-                    ? orderedUsers.OrderBy(orderingExpressions[i].Compile())
-                    : orderedUsers.OrderByDescending(orderingExpressions[i].Compile());
-            }
-        }
-
-        return new PageDto<UserDto>()
-        {
-            Count = _context.Users.Count(),
-            Query = orderedUsers.AsEnumerable(),
-        };
+        var result = userDtos.AsQueryable().Gridify(gridifyQuery);
+        result.Count = _context.Users.Count();
+        return result;
     }
 
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
@@ -171,17 +149,17 @@ public class UserService: IUserService
 
     public HashSet<PermissionEnum> GetUserPermissionsByEmail(string email) => _context.Users
             .Include(x => x.TenantUsers)
-                .ThenInclude(x => x.RoleTenantUsers)
-                .ThenInclude(x => x.Role)
-                .ThenInclude(x => x.RoleTenantPermissions)
+                .ThenInclude(x => x.TenantRoleUsers)
+                .ThenInclude(x => x.TenantRole)
+                .ThenInclude(x => x.TenantRolePermissions)
                 .ThenInclude(x => x.TenantPermission)
                 .ThenInclude(x => x.Permission)
             .Where(x => x.Email == email)
             .Select(x => x.TenantUsers)
             .First()
-            .SelectMany(x => x.RoleTenantUsers)
-            .Select(x => x.Role)
-            .SelectMany(x => x.RoleTenantPermissions)
+            .SelectMany(x => x.TenantRoleUsers)
+            .Select(x => x.TenantRole)
+            .SelectMany(x => x.TenantRolePermissions)
             .Select(x => x.TenantPermission)
             .Select(x => x.Permission)
             .Select(x => x.Name)

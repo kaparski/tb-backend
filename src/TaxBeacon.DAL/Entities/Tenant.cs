@@ -9,4 +9,6 @@ public class Tenant: BaseEntity
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
 
     public ICollection<TenantPermission> TenantPermissions { get; set; } = new HashSet<TenantPermission>();
+
+    public ICollection<TenantRole> TenantRoles { get; set; } = new HashSet<TenantRole>();
 }

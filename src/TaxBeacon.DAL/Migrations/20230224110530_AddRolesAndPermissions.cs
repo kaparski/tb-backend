@@ -60,32 +60,31 @@ namespace TaxBeacon.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoleTenantUsers",
+                name: "TenantRoles",
                 columns: table => new
                 {
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoleTenantUsers", x => new { x.TenantId, x.RoleId, x.UserId });
+                    table.PrimaryKey("PK_TenantRoles", x => new { x.TenantId, x.RoleId });
                     table.ForeignKey(
-                        name: "FK_RoleTenantUsers_Roles_RoleId",
+                        name: "FK_TenantRoles_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RoleTenantUsers_TenantUsers_TenantId_UserId",
-                        columns: x => new { x.TenantId, x.UserId },
-                        principalTable: "TenantUsers",
-                        principalColumns: new[] { "TenantId", "UserId" },
+                        name: "FK_TenantRoles_Tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalTable: "Tenants",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoleTenantPermissions",
+                name: "TenantRolePermissions",
                 columns: table => new
                 {
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -94,18 +93,41 @@ namespace TaxBeacon.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoleTenantPermissions", x => new { x.TenantId, x.RoleId, x.PermissionId });
+                    table.PrimaryKey("PK_TenantRolePermissions", x => new { x.TenantId, x.RoleId, x.PermissionId });
                     table.ForeignKey(
-                        name: "FK_RoleTenantPermissions_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RoleTenantPermissions_TenantPermissions_TenantId_PermissionId",
+                        name: "FK_TenantRolePermissions_TenantPermissions_TenantId_PermissionId",
                         columns: x => new { x.TenantId, x.PermissionId },
                         principalTable: "TenantPermissions",
                         principalColumns: new[] { "TenantId", "PermissionId" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TenantRolePermissions_TenantRoles_TenantId_RoleId",
+                        columns: x => new { x.TenantId, x.RoleId },
+                        principalTable: "TenantRoles",
+                        principalColumns: new[] { "TenantId", "RoleId" });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TenantRoleUsers",
+                columns: table => new
+                {
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TenantRoleUsers", x => new { x.TenantId, x.RoleId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_TenantRoleUsers_TenantRoles_TenantId_RoleId",
+                        columns: x => new { x.TenantId, x.RoleId },
+                        principalTable: "TenantRoles",
+                        principalColumns: new[] { "TenantId", "RoleId" });
+                    table.ForeignKey(
+                        name: "FK_TenantRoleUsers_TenantUsers_TenantId_UserId",
+                        columns: x => new { x.TenantId, x.UserId },
+                        principalTable: "TenantUsers",
+                        principalColumns: new[] { "TenantId", "UserId" },
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -122,48 +144,46 @@ namespace TaxBeacon.DAL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleTenantPermissions_RoleId",
-                table: "RoleTenantPermissions",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RoleTenantPermissions_TenantId_PermissionId",
-                table: "RoleTenantPermissions",
-                columns: new[] { "TenantId", "PermissionId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RoleTenantUsers_RoleId",
-                table: "RoleTenantUsers",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RoleTenantUsers_TenantId_UserId",
-                table: "RoleTenantUsers",
-                columns: new[] { "TenantId", "UserId" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_TenantPermissions_PermissionId",
                 table: "TenantPermissions",
                 column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TenantRolePermissions_TenantId_PermissionId",
+                table: "TenantRolePermissions",
+                columns: new[] { "TenantId", "PermissionId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TenantRoles_RoleId",
+                table: "TenantRoles",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TenantRoleUsers_TenantId_UserId",
+                table: "TenantRoleUsers",
+                columns: new[] { "TenantId", "UserId" });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "RoleTenantPermissions");
+                name: "TenantRolePermissions");
 
             migrationBuilder.DropTable(
-                name: "RoleTenantUsers");
+                name: "TenantRoleUsers");
 
             migrationBuilder.DropTable(
                 name: "TenantPermissions");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "TenantRoles");
 
             migrationBuilder.DropTable(
                 name: "Permissions");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
         }
     }
 }

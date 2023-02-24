@@ -11,7 +11,6 @@ public static class GridifyServiceExtension
             .GetSection(GridifyOptionsSetup.ConfigurationSectionName)
             .Get<GridifyOptions>();
 
-        GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer = true;
         GridifyGlobalConfiguration.CaseSensitiveMapper = false;
         if (settings != null)
         {

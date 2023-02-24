@@ -6,7 +6,5 @@ public class Role
 
     public string Name { get; set; } = null!;
 
-    public ICollection<RoleTenantPermission> RoleTenantPermissions { get; set; } = new HashSet<RoleTenantPermission>();
-
-    public ICollection<RoleTenantUser> RoleTenantUsers { get; set; } = new HashSet<RoleTenantUser>();
+    public ICollection<TenantRole> TenantRoles { get; set; } = new HashSet<TenantRole>();
 }

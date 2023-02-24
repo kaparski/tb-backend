@@ -10,5 +10,5 @@ public class TenantUser
 
     public Tenant Tenant { get; set; } = null!;
 
-    public ICollection<RoleTenantUser> RoleTenantUsers { get; set; } = new HashSet<RoleTenantUser>();
+    public ICollection<TenantRoleUser> TenantRoleUsers { get; set; } = new HashSet<TenantRoleUser>();
 }

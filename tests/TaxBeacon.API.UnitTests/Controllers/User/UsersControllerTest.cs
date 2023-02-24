@@ -32,13 +32,13 @@ public class UsersControllerTest
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "username desc", };
         _userServiceMock.Setup(p => p.GetUsers(query, default)).Returns(
-            new PageDto<UserDto>());
+           new Paging<UserDto>());
 
         // Act
-        var actualResponse = _controller.GetUserList(query, default);
+        var actualResponse = _controller.GetUserList(query);
 
         // Assert
-        actualResponse.Should().BeOfType<OkObjectResult>();
+        actualResponse.Should().BeOfType<ActionResult<Paging<UserResponse>>>();
         actualResponse.Should().NotBeNull();
     }
 

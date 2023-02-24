@@ -33,13 +33,12 @@ public class UsersController: BaseController
     [HttpGet(Name = "GetUsers")]
     [HasPermission(PermissionEnum.ReadListOfUsers)]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
-    public IActionResult GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(Paging<UserResponse>), StatusCodes.Status200OK)]
+    public ActionResult<Paging<UserResponse>> GetUserList([FromQuery] GridifyQuery query)
     {
-        var users = _userService.GetUsers(query, cancellationToken);
+        var users = _userService.GetUsers(query);
 
-        var userResponse = users.Adapt<PageDto<UserResponse>>();
-        return Ok(userResponse);
+        return Ok(users.Adapt<Paging<UserResponse>>());
     }
 
     /// <summary>

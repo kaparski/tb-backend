@@ -130,7 +130,7 @@ public class UserServiceTests
         var pageOfUsers = _userService.GetUsers(query, default);
 
         // Assert
-        var listOfUsers = pageOfUsers.Query.ToList();
+        var listOfUsers = pageOfUsers.Data.ToList();
         listOfUsers.Count().Should().Be(1);
         listOfUsers[0].Email.Should().Be("abc@gmail.com");
         pageOfUsers.Count.Should().Be(5);
@@ -151,7 +151,7 @@ public class UserServiceTests
         var pageOfUsers = _userService.GetUsers(query, default);
 
         // Assert
-        var listOfUsers = pageOfUsers.Query.ToList();
+        var listOfUsers = pageOfUsers.Data.ToList();
         listOfUsers.Count().Should().Be(6);
         listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
         pageOfUsers.Count.Should().Be(6);
@@ -173,8 +173,7 @@ public class UserServiceTests
 
         // Assert
         page.Count.Should().Be(6);
-        var listOfUsers = page.Query.ToList();
-        listOfUsers.Count().Should().Be(0);
+        page.Data.Count().Should().Be(0);
     }
 
     [Fact]
@@ -353,12 +352,20 @@ public class UserServiceTests
         //Arrange
         var tenant = TestData.TestTenant.Generate();
         var users = TestData.TestUser.Generate(5);
-        var permissions = TestData.TestPermissions.RuleFor(x => x.Name,
-                TestData.GetNext<PermissionEnum>(Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>().ToList()))
+        var permissions = TestData.TestPermissions
             .Generate(5);
+        var enumValues = Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>();
+        var i = 0;
+        foreach (var enumValue in enumValues)
+        {
+            permissions[i].Name = enumValue;
+            i++;
+        }
 
-        await AssignToRoleAsync(users.First(), TestData.TestRoles.First(), tenant);
-        await AssignToRoleAsync(permissions, TestData.TestRoles.First(), tenant);
+        var tenantRole = new TenantRole() { Role = TestData.TestRoles.First(), Tenant = tenant };
+
+        await AssignToRoleAsync(users.First(), tenantRole);
+        await AssignToRoleAsync(permissions, tenantRole);
 
         await _dbContextMock.Permissions.AddRangeAsync(permissions);
         await _dbContextMock.Roles.AddRangeAsync(TestData.TestRoles);
@@ -390,8 +397,11 @@ public class UserServiceTests
             permissions[i].Name = enumValue;
             i++;
         }
-        await AssignToRoleAsync(users[1], TestData.TestRoles.First(), tenant);
-        await AssignToRoleAsync(permissions, TestData.TestRoles.First(), tenant);
+
+        var tenantRole = new TenantRole() { Role = TestData.TestRoles.First(), Tenant = tenant };
+
+        await AssignToRoleAsync(users[1], tenantRole);
+        await AssignToRoleAsync(permissions, tenantRole);
 
         await _dbContextMock.Permissions.AddRangeAsync(permissions);
         await _dbContextMock.Roles.AddRangeAsync(TestData.TestRoles);
@@ -408,19 +418,23 @@ public class UserServiceTests
             .HaveCount(0);
     }
 
-    public async Task AssignToRoleAsync(User user, Role role, Tenant tenant) =>
-        await _dbContextMock.RoleTenantUsers.AddAsync(
-            new RoleTenantUser { Role = role, TenantUser = new TenantUser() { User = user, Tenant = tenant } });
+    public async Task AssignToRoleAsync(User user, TenantRole tenantRole) =>
+        await _dbContextMock.TenantRoleUsers.AddAsync(
+            new TenantRoleUser
+            {
+                TenantRole = tenantRole,
+                TenantUser = new TenantUser { User = user, Tenant = tenantRole.Tenant }
+            });
 
-    public async Task AssignToRoleAsync(List<Permission> permissions, Role role, Tenant tenant)
+    public async Task AssignToRoleAsync(List<Permission> permissions, TenantRole tenantRole)
     {
         foreach (var permission in permissions)
         {
-            await _dbContextMock.RoleTenantPermissions.AddAsync(
-                new RoleTenantPermission()
+            await _dbContextMock.TenantRolePermissions.AddAsync(
+                new TenantRolePermission()
                 {
-                    Role = role,
-                    TenantPermission = new TenantPermission() { Permission = permission, Tenant = tenant }
+                    TenantRole = tenantRole,
+                    TenantPermission = new TenantPermission() { Permission = permission, Tenant = tenantRole.Tenant }
                 });
         }
     }
