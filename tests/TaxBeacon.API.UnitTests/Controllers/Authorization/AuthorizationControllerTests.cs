@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TaxBeacon.API.Controllers.Authorization;
+using TaxBeacon.API.Controllers.Authorization.Requests;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Authorization;
