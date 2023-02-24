@@ -167,6 +167,10 @@ public class UserService: IUserService
             u.LastLoginDateUtc = u.LastLoginDateUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
         });
 
+        _logger.LogInformation("{dateTime} - Users export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
         return _listToFileConverters.First(x => x.FileType == fileType)
                                     .Convert(exportUsers);
 
