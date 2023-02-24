@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Net.Mail;
+using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
@@ -26,6 +27,7 @@ public class UserServiceTests
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly UserService _userService;
+    private readonly Mock<IEnumerable<IListToFileConverter>> _listToFileConverters;
 
     public UserServiceTests()
     {
@@ -33,6 +35,7 @@ public class UserServiceTests
         _entitySaveChangesInterceptorMock = new();
         _currentUserServiceMock = new();
         _dateTimeServiceMock = new();
+        _listToFileConverters = new();
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -44,7 +47,8 @@ public class UserServiceTests
             _userServiceLoggerMock.Object,
             _dbContextMock,
             _dateTimeServiceMock.Object,
-            _currentUserServiceMock.Object);
+            _currentUserServiceMock.Object,
+            _listToFileConverters.Object);
     }
 
     [Fact]
