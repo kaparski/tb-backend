@@ -1,5 +1,4 @@
 ﻿using Gridify;
-using Gridify.EntityFramework;
 using Mapster;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
-using TaxBeacon.Common.Extensions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 
