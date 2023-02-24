@@ -103,4 +103,28 @@ public class UsersController: BaseController
 
         return Ok(user.Adapt<UserResponse>());
     }
+
+    /// <summary>
+    /// Endpoint to export users
+    /// </summary>
+    /// <param name="exportUsersRequest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns file content</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <returns>File content</returns>
+    [HttpGet("export", Name = "ExportUsers")]
+    [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    public async Task<ActionResult<UserResponse>> ExportUsersAsync([FromQuery] ExportUsersRequest exportUsersRequest,
+                                                                   CancellationToken cancellationToken)
+    {
+        var users = await _userService.ExportUsersAsync(Guid.Empty, exportUsersRequest.FileType, exportUsersRequest.IanaTimeZone, cancellationToken);
+        var mimeType = exportUsersRequest.FileType switch
+        {
+            FileType.Csv => "text/csv",
+            FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            _ => string.Empty
+        };
+
+        return File(users, mimeType, $"users.{exportUsersRequest.FileType.ToString().ToLowerInvariant()}");
+    }
 }

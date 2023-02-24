@@ -10,6 +10,9 @@ using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
+using TaxBeacon.Common.Converters;
+using System.Globalization;
+using TaxBeacon.Common.Extensions;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -19,17 +22,20 @@ public class UserService: IUserService
     private readonly ITaxBeaconDbContext _context;
     private readonly IDateTimeService _dateTimeService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IEnumerable<IListToFileConverter> _listToFileConverters;
 
     public UserService(
         ILogger<UserService> logger,
         ITaxBeaconDbContext context,
         IDateTimeService dateTimeService,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IEnumerable<IListToFileConverter> listToFileConverters)
     {
         _logger = logger;
         _context = context;
         _dateTimeService = dateTimeService;
         _currentUserService = currentUserService;
+        _listToFileConverters = listToFileConverters;
     }
 
     public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
@@ -141,6 +147,32 @@ public class UserService: IUserService
         return user.Adapt<UserDto>();
     }
 
+    public async Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, string ianaTimeZone, CancellationToken cancellationToken)
+    {
+        tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;
+
+        var users = await _context.Users
+                            .Include(u => u.TenantUsers)
+                            .Where(u => u.TenantUsers.Any(tu => tu.TenantId == tenantId))
+                            .OrderBy(u => u.Email)
+                            .AsNoTracking()
+                            .ToListAsync(cancellationToken);
+
+        var exportUsers = users.Adapt<List<UserExportModel>>();
+        exportUsers.ForEach(u =>
+        {
+            u.DeactivationDateTimeUtc = u.DeactivationDateTimeUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
+            u.ReactivationDateTimeUtc = u.ReactivationDateTimeUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
+            u.CreatedDateUtc = u.CreatedDateUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
+            u.LastLoginDateUtc = u.LastLoginDateUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
+        });
+
+        return _listToFileConverters.First(x => x.FileType == fileType)
+                                    .Convert(exportUsers);
+
+    }
+
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
         await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
+
 }
