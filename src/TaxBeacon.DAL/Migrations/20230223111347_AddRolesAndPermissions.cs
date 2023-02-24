@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TaxBeacon.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedRoleTable : Migration
+    public partial class AddRolesAndPermissions : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -140,11 +140,6 @@ namespace TaxBeacon.DAL.Migrations
                 name: "IX_RoleTenantUsers_TenantId_UserId",
                 table: "RoleTenantUsers",
                 columns: new[] { "TenantId", "UserId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RoleTenantUsers_UserId",
-                table: "RoleTenantUsers",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TenantPermissions_PermissionId",

@@ -12,8 +12,8 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    [Migration("20230221142708_AddedRoleTable")]
-    partial class AddedRoleTable
+    [Migration("20230223111347_AddRolesAndPermissions")]
+    partial class AddRolesAndPermissions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -99,8 +99,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.HasKey("TenantId", "RoleId", "UserId");
 
                     b.HasIndex("RoleId");
-
-                    b.HasIndex("UserId");
 
                     b.HasIndex("TenantId", "UserId");
 
@@ -251,12 +249,6 @@ namespace TaxBeacon.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TaxBeacon.DAL.Entities.User", null)
-                        .WithMany("RolesTenantUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TaxBeacon.DAL.Entities.TenantUser", "TenantUser")
                         .WithMany("RoleTenantUsers")
                         .HasForeignKey("TenantId", "UserId")
@@ -337,8 +329,6 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.User", b =>
                 {
-                    b.Navigation("RolesTenantUsers");
-
                     b.Navigation("TenantUsers");
                 });
 #pragma warning restore 612, 618

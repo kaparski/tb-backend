@@ -34,13 +34,12 @@ public class UsersController: BaseController
     [HasPermission(PermissionEnum.ReadListOfUsers)]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
+    public IActionResult GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
-        var users = await _userService.GetUsersAsync(query, cancellationToken);
-        var userListResponse =
-            new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>());
+        var users = _userService.GetUsers(query, cancellationToken);
 
-        return Ok(userListResponse);
+        var userResponse = users.Adapt<PageDto<UserResponse>>();
+        return Ok(userResponse);
     }
 
     /// <summary>

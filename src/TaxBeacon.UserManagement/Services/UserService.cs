@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Extensions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 
@@ -56,12 +57,66 @@ public class UserService: IUserService
         }
     }
 
-    public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) =>
-        await _context
+    public PageDto<UserDto> GetUsers(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default)
+    {
+        var users = _context
             .Users
-            .ProjectToType<UserDto>()
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+            .Include(x => x.TenantUsers)
+                .ThenInclude(x => x.RoleTenantUsers)
+                    .ThenInclude(x => x.Role)
+            .ApplyPaging(gridifyQuery.Page, gridifyQuery.PageSize)
+            .ToList();
+
+        var userDtos = users.Select(x => new UserDto()
+        {
+            Id = x.Id,
+            FirstName = x.FirstName,
+            LastName = x.LastName,
+            FullName = x.FullName,
+            CreatedDateUtc = x.CreatedDateUtc,
+            Email = x.Email,
+            UserStatus = x.UserStatus,
+            LastLoginDateUtc = x.LastLoginDateUtc,
+            DeactivationDateTimeUtc = x.DeactivationDateTimeUtc,
+            ReactivationDateTimeUtc = x.ReactivationDateTimeUtc,
+            Roles = x.TenantUsers.FirstOrDefault() == null ? new List<RoleDto>() :
+                x.TenantUsers.FirstOrDefault()
+                    ?.RoleTenantUsers
+                        .OrderBy(x => x.Role.Name)
+                        .Select(x => new RoleDto
+                        {
+                            Id = x.Role.Id,
+                            Name = x.Role.Name
+                        }),
+        });
+
+        if (!string.IsNullOrWhiteSpace(gridifyQuery.Filter))
+        {
+            var filterExpression = gridifyQuery.GetFilteringExpression<UserDto>();
+            userDtos = userDtos.Where(filterExpression.Compile());
+        }
+
+        var orderedUsers = userDtos.OrderBy(x => x.Email);
+
+        if (!string.IsNullOrWhiteSpace(gridifyQuery.OrderBy))
+        {
+            var orderingExpressions = gridifyQuery.GetOrderingExpressions<UserDto>().ToList();
+            var orderings = gridifyQuery.GetOrderings();
+            for (var i = 0; i < orderingExpressions.Count; i++)
+            {
+                orderedUsers = orderings[i]
+                    ? orderedUsers.OrderBy(orderingExpressions[i].Compile())
+                    : orderedUsers.OrderByDescending(orderingExpressions[i].Compile());
+            }
+        }
+
+        return new PageDto<UserDto>()
+        {
+            Count = _context.Users.Count(),
+            Query = orderedUsers.AsEnumerable(),
+        };
+    }
 
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
@@ -122,7 +177,9 @@ public class UserService: IUserService
                 .ThenInclude(x => x.TenantPermission)
                 .ThenInclude(x => x.Permission)
             .Where(x => x.Email == email)
-            .SelectMany(x => x.RolesTenantUsers)
+            .Select(x => x.TenantUsers)
+            .First()
+            .SelectMany(x => x.RoleTenantUsers)
             .Select(x => x.Role)
             .SelectMany(x => x.RoleTenantPermissions)
             .Select(x => x.TenantPermission)

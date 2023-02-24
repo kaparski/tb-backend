@@ -127,7 +127,7 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 4, OrderBy = "email asc" };
 
         // Act
-        var pageOfUsers = await _userService.GetUsersAsync(query, default);
+        var pageOfUsers = _userService.GetUsers(query, default);
 
         // Assert
         var listOfUsers = pageOfUsers.Query.ToList();
@@ -148,7 +148,7 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc" };
 
         // Act
-        var pageOfUsers = await _userService.GetUsersAsync(query, default);
+        var pageOfUsers = _userService.GetUsers(query, default);
 
         // Assert
         var listOfUsers = pageOfUsers.Query.ToList();
@@ -169,7 +169,7 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "email asc", };
 
         // Act
-        var page = await _userService.GetUsersAsync(query, default);
+        var page = _userService.GetUsers(query, default);
 
         // Assert
         page.Count.Should().Be(6);

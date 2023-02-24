@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Data;
 using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
@@ -30,12 +31,11 @@ public class UsersControllerTest
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "username desc", };
-        _userServiceMock.Setup(p => p.GetUsersAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<UserDto>(0,
-                Enumerable.Empty<UserDto>().AsQueryable()));
+        _userServiceMock.Setup(p => p.GetUsers(query, default)).Returns(
+            new PageDto<UserDto>());
 
         // Act
-        var actualResponse = await _controller.GetUserList(query, default);
+        var actualResponse = _controller.GetUserList(query, default);
 
         // Assert
         actualResponse.Should().BeOfType<OkObjectResult>();
