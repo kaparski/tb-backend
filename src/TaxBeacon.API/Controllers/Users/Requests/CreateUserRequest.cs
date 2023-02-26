@@ -9,14 +9,19 @@ public class CreateUserRequestValidator: AbstractValidator<CreateUserRequest>
     public CreateUserRequestValidator()
     {
         RuleFor(x => x.Email)
-            .EmailAddress();
+            .NotEmpty()
+            .EmailAddress()
+            .MaximumLength(150)
+            .WithMessage("The email must contain no more than 150 characters");
 
         RuleFor(x => x.FirstName)
-            .NotNull()
-            .Matches("^[a-zA-Z-]+$");
+            .NotEmpty()
+            .MaximumLength(100)
+            .WithMessage("The first name must contain no more than 100 characters");
 
         RuleFor(x => x.LastName)
-            .NotNull()
-            .Matches("^[a-zA-Z-]+$");
+            .NotEmpty()
+            .MaximumLength(100)
+            .WithMessage("The last name must contain no more than 100 characters");
     }
 }
