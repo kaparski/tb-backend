@@ -7,4 +7,8 @@ public class Tenant: BaseEntity
     public string Name { get; set; } = null!;
 
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
+
+    public ICollection<TenantRole> TenantRoles { get; set; } = new HashSet<TenantRole>();
+
+    public ICollection<TenantPermission> TenantPermissions { get; set; } = new HashSet<TenantPermission>();
 }
