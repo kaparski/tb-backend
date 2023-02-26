@@ -122,7 +122,7 @@ public class UsersController: BaseController
         {
             FileType.Csv => "text/csv",
             FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            _ => string.Empty
+            _ => throw new InvalidOperationException()
         };
 
         return File(users, mimeType, $"users.{exportUsersRequest.FileType.ToString().ToLowerInvariant()}");

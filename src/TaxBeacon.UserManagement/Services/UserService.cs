@@ -11,8 +11,8 @@ using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.Common.Converters;
-using System.Globalization;
 using TaxBeacon.Common.Extensions;
+using System.Collections.Immutable;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -22,7 +22,7 @@ public class UserService: IUserService
     private readonly ITaxBeaconDbContext _context;
     private readonly IDateTimeService _dateTimeService;
     private readonly ICurrentUserService _currentUserService;
-    private readonly IEnumerable<IListToFileConverter> _listToFileConverters;
+    private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
 
     public UserService(
         ILogger<UserService> logger,
@@ -35,7 +35,8 @@ public class UserService: IUserService
         _context = context;
         _dateTimeService = dateTimeService;
         _currentUserService = currentUserService;
-        _listToFileConverters = listToFileConverters;
+        _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
+                                                    ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
     }
 
     public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
@@ -151,14 +152,16 @@ public class UserService: IUserService
     {
         tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;
 
-        var users = await _context.Users
+        var exportUsers = await _context.Users
                             .Include(u => u.TenantUsers)
                             .Where(u => u.TenantUsers.Any(tu => tu.TenantId == tenantId))
                             .OrderBy(u => u.Email)
+                            .ProjectToType<UserExportModel>()
                             .AsNoTracking()
                             .ToListAsync(cancellationToken);
 
-        var exportUsers = users.Adapt<List<UserExportModel>>();
+        //TODO: add roles
+
         exportUsers.ForEach(u =>
         {
             u.DeactivationDateTimeUtc = u.DeactivationDateTimeUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
@@ -171,8 +174,7 @@ public class UserService: IUserService
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
-        return _listToFileConverters.First(x => x.FileType == fileType)
-                                    .Convert(exportUsers);
+        return _listToFileConverters[fileType].Convert(exportUsers);
 
     }
 
