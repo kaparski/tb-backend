@@ -31,6 +31,7 @@ public class UsersController: BaseController
     [HttpGet(Name = "GetUsers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
+    [AllowAnonymous]
     public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
         var users = await _userService.GetUsersAsync(query, cancellationToken);

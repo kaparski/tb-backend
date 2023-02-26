@@ -57,11 +57,28 @@ public class UserService: IUserService
     }
 
     public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        var test = await _context
+            .Users
+            .Select(user => new
+            {
+                user = user,
+                roles = user.
+                    TenantUsers
+                    .SelectMany(tu => tu.TenantUserRoles.Select(tur => tur.TenantRole.Role.Name))
+                    .GroupBy(keySelector => 1, valueSelector => valueSelector)
+                    .Select(group => string.Join(", ", group.Select(name => name)))
+                    .FirstOrDefault()
+            })
+            .OrderBy(obj => obj.roles)
+            .ToListAsync(cancellationToken);
+
+        return await _context
             .Users
             .ProjectToType<UserDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+    }
 
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
