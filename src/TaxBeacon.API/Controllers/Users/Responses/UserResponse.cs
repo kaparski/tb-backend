@@ -18,7 +18,7 @@ public class UserResponse
 
     public string Email { get; set; } = null!;
 
-    public string Role { get; set; } = null!;
+    public string Roles { get; set; } = null!;
 
     public string Department { get; set; } = null!;
 
