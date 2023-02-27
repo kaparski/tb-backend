@@ -37,7 +37,7 @@ public class UserServiceTests
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
-                .UseInMemoryDatabase($"{nameof(UserServiceTests)}-InMemoryDb-{Guid.NewGuid()}")
+                .UseInMemoryDatabase($"{nameof(UserServiceTests)}-InMemoryDb-{Guid.NewGuid()}", b => b.EnableNullChecks(false))
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
@@ -419,8 +419,8 @@ public class UserServiceTests
     }
 
     public async Task AssignToRoleAsync(User user, TenantRole tenantRole) =>
-        await _dbContextMock.TenantRoleUsers.AddAsync(
-            new TenantRoleUser
+        await _dbContextMock.TenantUserRoles.AddAsync(
+            new TenantUserRole
             {
                 TenantRole = tenantRole,
                 TenantUser = new TenantUser { User = user, Tenant = tenantRole.Tenant }

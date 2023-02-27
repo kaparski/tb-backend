@@ -12,5 +12,5 @@ public class TenantRole
 
     public ICollection<TenantRolePermission> TenantRolePermissions { get; set; } = null!;
 
-    public ICollection<TenantRoleUser> TenantRoleUsers { get; set; } = null!;
+    public ICollection<TenantUserRole> TenantUserRoles { get; set; } = null!;
 }

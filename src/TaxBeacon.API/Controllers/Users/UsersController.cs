@@ -2,12 +2,10 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaxBeacon.API.Attributes;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -31,7 +29,6 @@ public class UsersController: BaseController
     /// <response code="200">Returns users</response>
     /// <returns>List of users</returns>
     [HttpGet(Name = "GetUsers")]
-    [HasPermission(PermissionEnum.ReadListOfUsers)]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(Paging<UserResponse>), StatusCodes.Status200OK)]
     public ActionResult<Paging<UserResponse>> GetUserList([FromQuery] GridifyQuery query)
@@ -51,7 +48,6 @@ public class UsersController: BaseController
     /// <response code="200">Returns user details</response>
     /// <returns>User</returns>
     [HttpGet("{id:guid}", Name = "GetUserDetails")]
-    [HasPermission(PermissionEnum.ReadUserDetails)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -79,7 +75,6 @@ public class UsersController: BaseController
     /// <returns>User</returns>
     [HttpPost(Name = "CreateUser")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [HasPermission(PermissionEnum.CreateUser)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest, CancellationToken cancellationToken)
     {
@@ -98,7 +93,6 @@ public class UsersController: BaseController
     /// <response code="401">User is unauthorized</response>
     /// <returns>Updated user</returns>
     [HttpPut("{id:guid}/status", Name = "UpdateUserStatus")]
-    [HasPermission(PermissionEnum.UpdateUserStatus)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<UserResponse>> UpdateUserStatusAsync(Guid id, [FromBody] UserStatus userStatus,
         CancellationToken cancellationToken)

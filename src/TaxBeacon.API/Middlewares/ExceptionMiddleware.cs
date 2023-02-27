@@ -32,7 +32,11 @@ public class ExceptionMiddleware
                 Title = e.Message,
                 ErrorCode = (int)e.Key,
             },
-            _ => throw exception
+            _ => new CustomProblemDetails()
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Title = exception.Message
+            }
         };
 
         var response = context.Response;

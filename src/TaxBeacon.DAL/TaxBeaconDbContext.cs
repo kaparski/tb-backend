@@ -29,7 +29,7 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
 
     public DbSet<TenantRolePermission> TenantRolePermissions => Set<TenantRolePermission>();
 
-    public DbSet<TenantRoleUser> TenantRoleUsers => Set<TenantRoleUser>();
+    public DbSet<TenantUserRole> TenantUserRoles => Set<TenantUserRole>();
 
     public DbSet<TenantRole> TenantRoles => Set<TenantRole>();
 

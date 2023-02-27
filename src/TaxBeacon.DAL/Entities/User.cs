@@ -17,7 +17,7 @@ public class User: BaseEntity
     //  TODO: Rename such columns to LastLoginDateTimeUtc
     public DateTime? LastLoginDateUtc { get; set; }
 
-    public string? FullName { get; private set; } = string.Empty;
+    public string FullName { get; private set; } = string.Empty;
 
     public DateTime? DeactivationDateTimeUtc { get; set; }
 

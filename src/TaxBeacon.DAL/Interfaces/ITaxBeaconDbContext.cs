@@ -18,7 +18,7 @@ public interface ITaxBeaconDbContext
 
     DbSet<TenantRolePermission> TenantRolePermissions { get; }
 
-    DbSet<TenantRoleUser> TenantRoleUsers { get; }
+    DbSet<TenantUserRole> TenantUserRoles { get; }
 
     DbSet<TenantRole> TenantRoles { get; }
 

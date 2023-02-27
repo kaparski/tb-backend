@@ -61,7 +61,7 @@ public class UserService: IUserService
         var users = _context
             .Users
             .Include(x => x.TenantUsers)
-                .ThenInclude(x => x.TenantRoleUsers)
+                .ThenInclude(x => x.TenantUserRoles)
                     .ThenInclude(x => x.TenantRole)
                         .ThenInclude(x => x.Role)
             .ToList();
@@ -80,7 +80,7 @@ public class UserService: IUserService
             ReactivationDateTimeUtc = x.ReactivationDateTimeUtc,
             Roles = x.TenantUsers.FirstOrDefault() == null ? new List<RoleDto>() :
                 x.TenantUsers.FirstOrDefault()
-                    ?.TenantRoleUsers
+                    ?.TenantUserRoles
                         .OrderBy(x => x.TenantRole.Role.Name)
                         .Select(x => new RoleDto
                         {
@@ -147,7 +147,7 @@ public class UserService: IUserService
 
     public HashSet<PermissionEnum> GetUserPermissionsByEmail(string email) => _context.Users
             .Include(x => x.TenantUsers)
-                .ThenInclude(x => x.TenantRoleUsers)
+                .ThenInclude(x => x.TenantUserRoles)
                 .ThenInclude(x => x.TenantRole)
                 .ThenInclude(x => x.TenantRolePermissions)
                 .ThenInclude(x => x.TenantPermission)
@@ -155,7 +155,7 @@ public class UserService: IUserService
             .Where(x => x.Email == email)
             .Select(x => x.TenantUsers)
             .First()
-            .SelectMany(x => x.TenantRoleUsers)
+            .SelectMany(x => x.TenantUserRoles)
             .Select(x => x.TenantRole)
             .SelectMany(x => x.TenantRolePermissions)
             .Select(x => x.TenantPermission)
