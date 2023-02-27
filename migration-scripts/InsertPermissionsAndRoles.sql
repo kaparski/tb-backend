@@ -15,11 +15,14 @@ INSERT INTO @Permissions VALUES('B0E3DAB5-8C55-4151-A6CF-12D25FF4F3C3',N'Login')
 
 BEGIN TRANSACTION [Tran1];
 BEGIN TRY
-INSERT INTO Permissions SELECT Id, Name, '2020-12-23' FROM @Permissions
-  INSERT INTO Roles VALUES (@RoleId, @RoleName, '2020-12-23')
-
+  INSERT INTO Permissions SELECT Id, Name, '2020-12-23 15:40:45.2756145', null, 0, null FROM @Permissions
+  INSERT INTO Roles VALUES (@RoleId, @RoleName, '2020-12-23 15:40:45.2756145', null, 0, null)
+  INSERT INTO TenantRoles VALUES (@TenantId, @RoleId)
+  INSERT INTO TenantPermissions SELECT @TenantId, Id FROM @Permissions
+  INSERT INTO TenantRolePermissions SELECT @TenantId, @RoleId,  Id FROM @Permissions
+  INSERT INTO TenantUserRoles SELECT TenantId, @RoleId, UserId FROM TenantUsers
   COMMIT TRANSACTION [Tran1]
 END TRY
 BEGIN CATCH
-ROLLBACK TRANSACTION [Tran1]
+  ROLLBACK TRANSACTION [Tran1]
 END CATCH
