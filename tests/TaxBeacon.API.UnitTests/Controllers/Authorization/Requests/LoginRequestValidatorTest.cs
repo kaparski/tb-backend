@@ -1,8 +1,8 @@
 ﻿using Bogus;
 using FluentValidation.TestHelper;
-using TaxBeacon.API.Controllers.Authorization;
+using TaxBeacon.API.Controllers.Authorization.Requests;
 
-namespace TaxBeacon.API.UnitTests.Controllers.Authorization;
+namespace TaxBeacon.API.UnitTests.Controllers.Authorization.Requests;
 
 public class LoginRequestValidatorTest
 {

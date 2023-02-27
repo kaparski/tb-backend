@@ -89,7 +89,7 @@ public class AuthorizeFilterTests
         await _authorizeFilter.OnAuthorizationAsync(authorizationFilterContext);
 
         // Assert
-        authorizationFilterContext.Result.Should().BeOfType<ForbidResult>();
+        authorizationFilterContext.Result.Should().BeOfType<UnauthorizedResult>();
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public class AuthorizeFilterTests
         await _authorizeFilter.OnAuthorizationAsync(authorizationFilterContext);
 
         // Assert
-        authorizationFilterContext.Result.Should().BeOfType<ForbidResult>();
+        authorizationFilterContext.Result.Should().BeOfType<UnauthorizedResult>();
     }
 
     [Fact]
@@ -148,7 +148,7 @@ public class AuthorizeFilterTests
         await _authorizeFilter.OnAuthorizationAsync(authorizationFilterContext);
 
         // Assert
-        authorizationFilterContext.Result.Should().BeOfType<ForbidResult>();
+        authorizationFilterContext.Result.Should().BeOfType<UnauthorizedResult>();
     }
 
     private static class TestData

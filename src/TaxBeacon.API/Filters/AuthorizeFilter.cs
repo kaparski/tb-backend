@@ -31,6 +31,7 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
 
         if (email is null)
         {
+            context.Result = new UnauthorizedResult();
             return;
         }
 
@@ -40,7 +41,7 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
 
             if (user.DeactivationDateTimeUtc is not null || user.UserStatus == UserStatus.Deactivated)
             {
-                context.Result = new ForbidResult();
+                context.Result = new UnauthorizedResult();
                 return;
             }
 
@@ -54,7 +55,7 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
         }
         catch (NotFoundException ex)
         {
-            context.Result = new ForbidResult();
+            context.Result = new UnauthorizedResult();
             _logger.LogError(ex, "Failed to authenticate user with {@email}", email);
         }
     }
