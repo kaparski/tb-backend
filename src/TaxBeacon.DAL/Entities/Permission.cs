@@ -2,11 +2,11 @@
 
 namespace TaxBeacon.DAL.Entities;
 
-public class Permission
+public class Permission: BaseEntity
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public PermissionEnum Name { get; set; }
+    public PermissionEnum Name { get; init; }
 
     public ICollection<TenantPermission> TenantPermissions { get; set; } = new HashSet<TenantPermission>();
 }

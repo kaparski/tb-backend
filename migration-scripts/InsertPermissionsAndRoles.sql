@@ -15,12 +15,9 @@ INSERT INTO @Permissions VALUES('B0E3DAB5-8C55-4151-A6CF-12D25FF4F3C3',N'Login')
 
 BEGIN TRANSACTION [Tran1];
 BEGIN TRY
-INSERT INTO Permissions SELECT Id, Name FROM @Permissions
-  INSERT INTO Roles VALUES (@RoleId, @RoleName)
-                        INSERT INTO TenantRoles VALUES (@RoleId, @TenantId)
-                        INSERT INTO TenantPermissions SELECT @TenantId, Id FROM @Permissions
-  INSERT INTO TenantRolePermissions SELECT @RoleId, @TenantId, Id FROM @Permissions
-  INSERT INTO TenantRoleUsers SELECT @RoleId, TenantId, UserId FROM TenantUsers
+INSERT INTO Permissions SELECT Id, Name, '2020-12-23' FROM @Permissions
+  INSERT INTO Roles VALUES (@RoleId, @RoleName, '2020-12-23')
+
   COMMIT TRANSACTION [Tran1]
 END TRY
 BEGIN CATCH

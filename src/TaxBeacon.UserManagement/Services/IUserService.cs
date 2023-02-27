@@ -1,14 +1,13 @@
 ﻿using Gridify;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models;
 
 namespace TaxBeacon.UserManagement.Services;
 
 public interface IUserService
 {
-    Paging<UserDto> GetUsers(GridifyQuery gridifyQuery,
+    Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
     Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);

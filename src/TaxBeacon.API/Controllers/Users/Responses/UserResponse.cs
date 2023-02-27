@@ -19,7 +19,7 @@ public class UserResponse
 
     public string Email { get; set; } = null!;
 
-    public ICollection<RoleResponse> Roles { get; set; } = null!;
+    public string Roles { get; set; } = null!;
 
     public string Department { get; set; } = null!;
 
@@ -30,6 +30,4 @@ public class UserResponse
     public DateTime? DeactivationDateTimeUtc { get; set; }
 
     public DateTime? ReactivationDateTimeUtc { get; set; }
-
-    public string RoleString => string.Join(", ", Roles.Select(x => x.Name));
 }

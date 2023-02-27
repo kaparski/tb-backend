@@ -2,15 +2,15 @@
 
 public class TenantRole
 {
-    public Guid RoleId { get; set; }
-
     public Guid TenantId { get; set; }
 
-    public Role Role { get; set; } = null!;
+    public Guid RoleId { get; set; }
 
     public Tenant Tenant { get; set; } = null!;
 
-    public ICollection<TenantRolePermission> TenantRolePermissions { get; set; } = null!;
+    public Role Role { get; set; } = null!;
 
-    public ICollection<TenantUserRole> TenantUserRoles { get; set; } = null!;
+    public ICollection<TenantRolePermission> TenantRolePermissions { get; set; } = new HashSet<TenantRolePermission>();
+
+    public ICollection<TenantUserRole> TenantUserRoles { get; set; } = new HashSet<TenantUserRole>();
 }

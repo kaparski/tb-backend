@@ -127,10 +127,10 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 4, OrderBy = "email asc" };
 
         // Act
-        var pageOfUsers = _userService.GetUsers(query, default);
+        var pageOfUsers = await _userService.GetUsersAsync(query, default);
 
         // Assert
-        var listOfUsers = pageOfUsers.Data.ToList();
+        var listOfUsers = pageOfUsers.Query.ToList();
         listOfUsers.Count().Should().Be(1);
         listOfUsers[0].Email.Should().Be("abc@gmail.com");
         pageOfUsers.Count.Should().Be(5);
@@ -148,10 +148,10 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc" };
 
         // Act
-        var pageOfUsers = _userService.GetUsers(query, default);
+        var pageOfUsers = await _userService.GetUsersAsync(query, default);
 
         // Assert
-        var listOfUsers = pageOfUsers.Data.ToList();
+        var listOfUsers = pageOfUsers.Query.ToList();
         listOfUsers.Count().Should().Be(6);
         listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
         pageOfUsers.Count.Should().Be(6);
@@ -169,11 +169,11 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "email asc", };
 
         // Act
-        var page = _userService.GetUsers(query, default);
+        var page = await _userService.GetUsersAsync(query, default);
 
         // Assert
         page.Count.Should().Be(6);
-        page.Data.Count().Should().Be(0);
+        page.Query.Count().Should().Be(0);
     }
 
     [Fact]
@@ -352,15 +352,11 @@ public class UserServiceTests
         //Arrange
         var tenant = TestData.TestTenant.Generate();
         var users = TestData.TestUser.Generate(5);
-        var permissions = TestData.TestPermissions
-            .Generate(5);
-        var enumValues = Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>();
-        var i = 0;
-        foreach (var enumValue in enumValues)
+        var permissions = Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>().Select(x => new Permission()
         {
-            permissions[i].Name = enumValue;
-            i++;
-        }
+            Id = new Guid(),
+            Name = x
+        }).ToList();
 
         var tenantRole = new TenantRole() { Role = TestData.TestRoles.First(), Tenant = tenant };
 
@@ -388,15 +384,11 @@ public class UserServiceTests
         //Arrange
         var tenant = TestData.TestTenant.Generate();
         var users = TestData.TestUser.Generate(5);
-        var permissions = TestData.TestPermissions
-            .Generate(5);
-        var enumValues = Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>();
-        var i = 0;
-        foreach (var enumValue in enumValues)
+        var permissions = Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>().Select(x => new Permission()
         {
-            permissions[i].Name = enumValue;
-            i++;
-        }
+            Id = new Guid(),
+            Name = x
+        }).ToList();
 
         var tenantRole = new TenantRole() { Role = TestData.TestRoles.First(), Tenant = tenant };
 

@@ -5,19 +5,19 @@ namespace TaxBeacon.DAL.Configurations;
 
 public class TenantRolePermissionConfiguration: IEntityTypeConfiguration<TenantRolePermission>
 {
-    public void Configure(EntityTypeBuilder<TenantRolePermission> roleTenantPermission)
+    public void Configure(EntityTypeBuilder<TenantRolePermission> tenantRolePermission)
     {
-        roleTenantPermission
+        tenantRolePermission
             .HasOne<TenantPermission>(trp => trp.TenantPermission)
-            .WithMany(trp => trp.TenantRolePermissions)
+            .WithMany(tp => tp.TenantRolePermissions)
             .HasForeignKey(trp => new { trp.TenantId, trp.PermissionId });
 
-        roleTenantPermission
+        tenantRolePermission
             .HasOne<TenantRole>(trp => trp.TenantRole)
             .WithMany(tr => tr.TenantRolePermissions)
             .HasForeignKey(trp => new { trp.TenantId, trp.RoleId })
             .OnDelete(DeleteBehavior.NoAction);
 
-        roleTenantPermission.HasKey(trp => new { trp.TenantId, trp.RoleId, trp.PermissionId });
+        tenantRolePermission.HasKey(trp => new { trp.TenantId, trp.RoleId, trp.PermissionId });
     }
 }

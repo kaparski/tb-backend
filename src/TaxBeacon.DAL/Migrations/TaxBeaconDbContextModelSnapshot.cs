@@ -17,7 +17,7 @@ namespace TaxBeacon.DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.2")
+                .HasAnnotation("ProductVersion", "7.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -28,6 +28,18 @@ namespace TaxBeacon.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("CreatedDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -48,6 +60,18 @@ namespace TaxBeacon.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("CreatedDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -309,13 +333,13 @@ namespace TaxBeacon.DAL.Migrations
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantUserRole", b =>
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.TenantRole", "TenantRole")
-                        .WithMany("TenantRoleUsers")
+                        .WithMany("TenantUserRoles")
                         .HasForeignKey("TenantId", "RoleId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TaxBeacon.DAL.Entities.TenantUser", "TenantUser")
-                        .WithMany("TenantRoleUsers")
+                        .WithMany("TenantUserRoles")
                         .HasForeignKey("TenantId", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -353,12 +377,12 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.Navigation("TenantRolePermissions");
 
-                    b.Navigation("TenantRoleUsers");
+                    b.Navigation("TenantUserRoles");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantUser", b =>
                 {
-                    b.Navigation("TenantRoleUsers");
+                    b.Navigation("TenantUserRoles");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.User", b =>

@@ -1,4 +1,5 @@
 ﻿using Gridify;
+using Gridify.EntityFramework;
 using Mapster;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
@@ -55,44 +56,11 @@ public class UserService: IUserService
         }
     }
 
-    public Paging<UserDto> GetUsers(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var users = _context
+    public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default) => await _context
             .Users
-            .Include(x => x.TenantUsers)
-                .ThenInclude(x => x.TenantUserRoles)
-                    .ThenInclude(x => x.TenantRole)
-                        .ThenInclude(x => x.Role)
-            .ToList();
-
-        var userDtos = users.Select(x => new UserDto()
-        {
-            Id = x.Id,
-            FirstName = x.FirstName,
-            LastName = x.LastName,
-            CreatedDateUtc = x.CreatedDateUtc,
-            FullName = x.FullName!,
-            Email = x.Email,
-            UserStatus = x.UserStatus,
-            LastLoginDateUtc = x.LastLoginDateUtc,
-            DeactivationDateTimeUtc = x.DeactivationDateTimeUtc,
-            ReactivationDateTimeUtc = x.ReactivationDateTimeUtc,
-            Roles = x.TenantUsers.FirstOrDefault() == null ? new List<RoleDto>() :
-                x.TenantUsers.FirstOrDefault()
-                    ?.TenantUserRoles
-                        .OrderBy(x => x.TenantRole.Role.Name)
-                        .Select(x => new RoleDto
-                        {
-                            Id = x.TenantRole.Role.Id,
-                            Name = x.TenantRole.Role.Name
-                        }),
-        });
-
-        var result = userDtos.AsQueryable().Gridify(gridifyQuery);
-        result.Count = _context.Users.Count();
-        return result;
-    }
+            .ProjectToType<UserDto>()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context

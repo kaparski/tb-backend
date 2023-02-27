@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.DAL.Entities;
 
-public class Role
+public class Role: BaseEntity
 {
     public Guid Id { get; set; }
 

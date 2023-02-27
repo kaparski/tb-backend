@@ -19,11 +19,21 @@ public class UserDto
 
     public DateTime? LastLoginDateUtc { get; set; }
 
+<<<<<<< HEAD
+    public string FullName { get; init; }
+=======
     public string FullName { get; init; } = string.Empty;
+>>>>>>> 24b11d170db1284cef7bd2bdf43400362401a092
 
     public DateTime? DeactivationDateTimeUtc { get; set; }
 
     public DateTime? ReactivationDateTimeUtc { get; set; }
 
+<<<<<<< HEAD
+    public IEnumerable<RoleDto> Roles { get; set; }
+
+    public string RoleString => string.Join(", ", Roles.Select(x => x.Name));
+=======
     public string Roles { get; set; }
+>>>>>>> 24b11d170db1284cef7bd2bdf43400362401a092
 }

@@ -15,7 +15,7 @@ public class PermissionConfiguration: IEntityTypeConfiguration<Permission>
             .IsRequired();
 
         permission
-            .HasIndex(p => p.Name)
+            .HasIndex(r => r.Name)
             .IsUnique();
 
         permission
