@@ -31,7 +31,7 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
 
         if (email is null)
         {
-            // context.Result = new UnauthorizedResult();
+            context.Result = new UnauthorizedResult();
             return;
         }
 

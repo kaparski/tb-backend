@@ -57,7 +57,8 @@ public class UserService: IUserService
     }
 
     public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) => await _context
+        CancellationToken cancellationToken = default) =>
+        await _context
             .Users
             .ProjectToType<UserDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
@@ -112,24 +113,6 @@ public class UserService: IUserService
 
         return user.Adapt<UserDto>();
     }
-
-    public HashSet<PermissionEnum> GetUserPermissionsByEmail(string email) => _context.Users
-            .Include(x => x.TenantUsers)
-                .ThenInclude(x => x.TenantUserRoles)
-                .ThenInclude(x => x.TenantRole)
-                .ThenInclude(x => x.TenantRolePermissions)
-                .ThenInclude(x => x.TenantPermission)
-                .ThenInclude(x => x.Permission)
-            .Where(x => x.Email == email)
-            .Select(x => x.TenantUsers)
-            .First()
-            .SelectMany(x => x.TenantUserRoles)
-            .Select(x => x.TenantRole)
-            .SelectMany(x => x.TenantRolePermissions)
-            .Select(x => x.TenantPermission)
-            .Select(x => x.Permission)
-            .Select(x => x.Name)
-            .ToHashSet();
 
     public async Task<UserDto> CreateUserAsync(
         UserDto newUserData,

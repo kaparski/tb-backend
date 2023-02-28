@@ -34,10 +34,9 @@ public class UsersControllerTest
         _userServiceMock.Setup(p => p.GetUsersAsync(query, default)).ReturnsAsync(
             new QueryablePaging<UserDto>(0,
                 Enumerable.Empty<UserDto>().AsQueryable()));
-        var cancelationToken = new CancellationToken();
 
         // Act
-        var actualResponse = await _controller.GetUserList(query, cancelationToken);
+        var actualResponse = await _controller.GetUserList(query, default);
 
         // Assert
         actualResponse.Should().BeOfType<ActionResult<QueryablePaging<UserResponse>>>();

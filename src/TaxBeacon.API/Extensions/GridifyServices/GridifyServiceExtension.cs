@@ -12,6 +12,7 @@ public static class GridifyServiceExtension
             .Get<GridifyOptions>();
 
         GridifyGlobalConfiguration.CaseSensitiveMapper = false;
+        GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer = true;
         if (settings != null)
         {
             GridifyGlobalConfiguration.DefaultPageSize = settings.DefaultPageSize;

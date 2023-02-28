@@ -35,7 +35,7 @@ public class ExceptionMiddleware
             _ => new CustomProblemDetails()
             {
                 Status = StatusCodes.Status500InternalServerError,
-                Title = exception.Message
+                Title = "Internal server error occurred"
             }
         };
 
