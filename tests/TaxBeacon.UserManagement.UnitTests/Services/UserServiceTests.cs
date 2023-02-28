@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Net.Mail;
+using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
@@ -26,6 +27,9 @@ public class UserServiceTests
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly UserService _userService;
+    private readonly Mock<IEnumerable<IListToFileConverter>> _listToFileConverters;
+    private readonly Mock<IListToFileConverter> _csvMock;
+    private readonly Mock<IListToFileConverter> _xlsxMock;
 
     public UserServiceTests()
     {
@@ -33,6 +37,16 @@ public class UserServiceTests
         _entitySaveChangesInterceptorMock = new();
         _currentUserServiceMock = new();
         _dateTimeServiceMock = new();
+        _listToFileConverters = new();
+        _csvMock = new();
+        _xlsxMock = new();
+
+        _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
+        _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
+
+        _listToFileConverters
+            .Setup(x => x.GetEnumerator())
+            .Returns((IEnumerator<IListToFileConverter>)new[] { _csvMock.Object, _xlsxMock.Object }.ToList().GetEnumerator());
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -44,7 +58,8 @@ public class UserServiceTests
             _userServiceLoggerMock.Object,
             _dbContextMock,
             _dateTimeServiceMock.Object,
-            _currentUserServiceMock.Object);
+            _currentUserServiceMock.Object,
+            _listToFileConverters.Object);
     }
 
     [Fact]
@@ -343,6 +358,75 @@ public class UserServiceTests
             .Should()
             .ThrowAsync<NotFoundException>()
             .WithMessage($"Entity \"{nameof(User)}\" ({email}) was not found.");
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportUsersAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var users = TestData.TestUser.Generate(5);
+
+        foreach (var user in users)
+        {
+            user.TenantUsers.Add(new TenantUser { Tenant = tenant });
+        }
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        _ = await _userService.ExportUsersAsync(tenant.Id, fileType, "", default);
+
+        //Assert
+        if (fileType == FileType.Csv)
+        {
+            _csvMock.Verify(x => x.Convert(It.IsAny<List<UserExportModel>>()), Times.Once());
+        }
+        else if (fileType == FileType.Xlsx)
+        {
+            _xlsxMock.Verify(x => x.Convert(It.IsAny<List<UserExportModel>>()), Times.Once());
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    [Fact]
+    public async Task ExportUsersAsync_ValidInputData_DatesShoulBeInAppropriateTimeZone()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var users = TestData.TestUser.Generate(1);
+
+        foreach (var user in users)
+        {
+            user.CreatedDateUtc = new DateTime(2023, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+            user.LastLoginDateUtc = new DateTime(2023, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+            user.ReactivationDateTimeUtc = new DateTime(2023, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+            user.DeactivationDateTimeUtc = new DateTime(2023, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+
+            user.TenantUsers.Add(new TenantUser { Tenant = tenant });
+        }
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        _ = await _userService.ExportUsersAsync(tenant.Id, FileType.Csv, "America/New_York", default);
+
+        //Assert
+        _csvMock.Verify(x => x.Convert(It.Is<List<UserExportModel>>(l => l.Count == 1 &&
+                                                                         l[0].LastLoginDateUtc == new DateTime(2023, 1, 1, 5, 0, 0) &&
+                                                                         l[0].CreatedDateUtc == new DateTime(2023, 1, 1, 5, 0, 0) &&
+                                                                         l[0].ReactivationDateTimeUtc == new DateTime(2023, 1, 1, 5, 0, 0) &&
+                                                                         l[0].DeactivationDateTimeUtc == new DateTime(2023, 1, 1, 5, 0, 0))));
+
     }
 
     private static class TestData

@@ -78,7 +78,8 @@ public class UsersController: BaseController
     [HttpPost(Name = "CreateUser")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest,
+        CancellationToken cancellationToken)
     {
         var newUser = await _userService.CreateUserAsync(createUserRequest.Adapt<UserDto>(), cancellationToken);
 
@@ -102,5 +103,30 @@ public class UsersController: BaseController
         var user = await _userService.UpdateUserStatusAsync(id, userStatus, cancellationToken);
 
         return Ok(user.Adapt<UserResponse>());
+    }
+
+    /// <summary>
+    /// Endpoint to export users
+    /// </summary>
+    /// <param name="exportUsersRequest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns file content</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <returns>File content</returns>
+    [HttpGet("export", Name = "ExportUsers")]
+    [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportUsersAsync([FromQuery] ExportUsersRequest exportUsersRequest,
+        CancellationToken cancellationToken)
+    {
+        var users = await _userService.ExportUsersAsync(Guid.Empty, exportUsersRequest.FileType,
+            exportUsersRequest.IanaTimeZone, cancellationToken);
+        var mimeType = exportUsersRequest.FileType switch
+        {
+            FileType.Csv => "text/csv",
+            FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            _ => throw new InvalidOperationException()
+        };
+
+        return File(users, mimeType, $"users.{exportUsersRequest.FileType.ToString().ToLowerInvariant()}");
     }
 }
