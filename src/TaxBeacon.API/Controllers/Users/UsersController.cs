@@ -78,7 +78,8 @@ public class UsersController: BaseController
     [HttpPost(Name = "CreateUser")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest,
+        CancellationToken cancellationToken)
     {
         var newUser = await _userService.CreateUserAsync(createUserRequest.Adapt<UserDto>(), cancellationToken);
 
@@ -114,10 +115,11 @@ public class UsersController: BaseController
     /// <returns>File content</returns>
     [HttpGet("export", Name = "ExportUsers")]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
-    public async Task<ActionResult<UserResponse>> ExportUsersAsync([FromQuery] ExportUsersRequest exportUsersRequest,
-                                                                   CancellationToken cancellationToken)
+    public async Task<IActionResult> ExportUsersAsync([FromQuery] ExportUsersRequest exportUsersRequest,
+        CancellationToken cancellationToken)
     {
-        var users = await _userService.ExportUsersAsync(Guid.Empty, exportUsersRequest.FileType, exportUsersRequest.IanaTimeZone, cancellationToken);
+        var users = await _userService.ExportUsersAsync(Guid.Empty, exportUsersRequest.FileType,
+            exportUsersRequest.IanaTimeZone, cancellationToken);
         var mimeType = exportUsersRequest.FileType switch
         {
             FileType.Csv => "text/csv",

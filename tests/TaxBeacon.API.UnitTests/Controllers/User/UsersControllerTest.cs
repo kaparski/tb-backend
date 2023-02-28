@@ -99,7 +99,7 @@ public class UsersControllerTest
         using (new AssertionScope())
         {
             actualResponse.Should().NotBeNull();
-            var actualResult = actualResponse.Result as FileContentResult;
+            var actualResult = actualResponse as FileContentResult;
             actualResult.Should().NotBeNull();
             actualResult!.FileDownloadName.Should().Be($"users.{fileType.ToString().ToLowerInvariant()}");
             actualResult!.ContentType.Should().Be(fileType switch
