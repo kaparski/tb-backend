@@ -134,11 +134,11 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNextEmail());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNext<string>(TestData.CustomEmails));
         var users = TestData.TestUser.Generate(5);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 4, OrderBy = "email asc", };
+        var query = new GridifyQuery { Page = 2, PageSize = 4, OrderBy = "email asc" };
 
         // Act
         var pageOfUsers = await _userService.GetUsersAsync(query, default);
@@ -155,11 +155,11 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNextEmail());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNext<string>(TestData.CustomEmails));
         var users = TestData.TestUser.Generate(6);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc" };
 
         // Act
         var pageOfUsers = await _userService.GetUsersAsync(query, default);
@@ -176,7 +176,7 @@ public class UserServiceTests
     {
         // Arrange
         TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNextEmail());
+            .RuleFor(u => u.Email, (f, u) => TestData.GetNext<string>(TestData.CustomEmails));
         var users = TestData.TestUser.Generate(6);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
@@ -187,8 +187,7 @@ public class UserServiceTests
 
         // Assert
         page.Count.Should().Be(6);
-        var listOfUsers = page.Query.ToList();
-        listOfUsers.Count().Should().Be(0);
+        page.Query.Count().Should().Be(0);
     }
 
     [Fact]
@@ -432,15 +431,15 @@ public class UserServiceTests
 
     private static class TestData
     {
-        private static readonly List<string> CustomEmails = new() { "aaa@gmail.com", "abb@gmail.com", "abc@gmail.com" };
+        public static readonly List<string> CustomEmails = new() { "aaa@gmail.com", "abb@gmail.com", "abc@gmail.com" };
 
         static int _nameIndex = 0;
 
-        public static string GetNextEmail()
+        public static T GetNext<T>(List<T> list)
         {
-            if (_nameIndex >= CustomEmails.Count)
+            if (_nameIndex >= list.Count)
                 _nameIndex = 0;
-            return CustomEmails[_nameIndex++];
+            return list[_nameIndex++];
         }
 
         public static readonly Faker<Tenant> TestTenant =
@@ -461,8 +460,7 @@ public class UserServiceTests
         public static IEnumerable<object[]> UpdatedStatusInvalidData =>
             new List<object[]>
             {
-                new object[] { UserStatus.Active, Guid.NewGuid() },
-                new object[] { UserStatus.Deactivated, Guid.Empty }
+                new object[] {UserStatus.Active, Guid.NewGuid()}, new object[] {UserStatus.Deactivated, Guid.Empty}
             };
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 
@@ -20,6 +19,18 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
     public DbSet<User> Users => Set<User>();
 
     public DbSet<TenantUser> TenantUsers => Set<TenantUser>();
+
+    public DbSet<Permission> Permissions => Set<Permission>();
+
+    public DbSet<TenantPermission> TenantPermissions => Set<TenantPermission>();
+
+    public DbSet<Role> Roles => Set<Role>();
+
+    public DbSet<TenantRole> TenantRoles => Set<TenantRole>();
+
+    public DbSet<TenantRolePermission> TenantRolePermissions => Set<TenantRolePermission>();
+
+    public DbSet<TenantUserRole> TenantUserRoles => Set<TenantUserRole>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
