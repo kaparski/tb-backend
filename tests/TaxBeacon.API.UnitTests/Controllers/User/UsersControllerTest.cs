@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Data;
 using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
@@ -38,7 +39,7 @@ public class UsersControllerTest
         var actualResponse = await _controller.GetUserList(query, default);
 
         // Assert
-        actualResponse.Should().BeOfType<OkObjectResult>();
+        actualResponse.Should().BeOfType<ActionResult<QueryablePaging<UserResponse>>>();
         actualResponse.Should().NotBeNull();
     }
 
