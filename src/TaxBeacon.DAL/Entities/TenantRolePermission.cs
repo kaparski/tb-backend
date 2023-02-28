@@ -8,7 +8,7 @@ public class TenantRolePermission
 
     public Guid PermissionId { get; set; }
 
-    public TenantPermission TenantPermission { get; set; }
+    public TenantPermission TenantPermission { get; set; } = null!;
 
-    public TenantRole TenantRole { get; set; }
+    public TenantRole TenantRole { get; set; } = null!;
 }
