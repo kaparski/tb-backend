@@ -5,7 +5,6 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Collections.ObjectModel;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
@@ -346,27 +345,6 @@ public class UserServiceTests
             .WithMessage($"Entity \"{nameof(User)}\" ({email}) was not found.");
     }
 
-    public async Task AssignToRoleAsync(User user, TenantRole tenantRole) =>
-        await _dbContextMock.TenantUserRoles.AddAsync(
-            new TenantUserRole
-            {
-                TenantRole = tenantRole,
-                TenantUser = new TenantUser { User = user, Tenant = tenantRole.Tenant }
-            });
-
-    public async Task AssignToRoleAsync(List<Permission> permissions, TenantRole tenantRole)
-    {
-        foreach (var permission in permissions)
-        {
-            await _dbContextMock.TenantRolePermissions.AddAsync(
-                new TenantRolePermission()
-                {
-                    TenantRole = tenantRole,
-                    TenantPermission = new TenantPermission() { Permission = permission, Tenant = tenantRole.Tenant }
-                });
-        }
-    }
-
     private static class TestData
     {
         public static readonly List<string> CustomEmails = new() { "aaa@gmail.com", "abb@gmail.com", "abc@gmail.com" };
@@ -394,13 +372,6 @@ public class UserServiceTests
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.UserStatus, f => f.PickRandom<UserStatus>());
-
-        public static readonly Faker<Permission> TestPermissions =
-            new Faker<Permission>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
-                .RuleFor(u => u.Name, f => f.PickRandom<PermissionEnum>());
-
-        public static readonly IEnumerable<Role> TestRoles = new List<Role> { new() { Id = new Guid(), Name = "Admin" } };
 
         public static IEnumerable<object[]> UpdatedStatusInvalidData =>
             new List<object[]>

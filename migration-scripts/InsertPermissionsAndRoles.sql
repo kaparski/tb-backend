@@ -12,7 +12,13 @@ BEGIN TRY
   IF NOT EXISTS(SELECT Id FROM Roles WHERE Id = @RoleId)
     BEGIN
       INSERT INTO Roles(Id, Name, CreatedDateUtc) VALUES (@RoleId, @RoleName, GETUTCDATE())
+    END
+  IF NOT EXISTS(SELECT RoleId FROM TenantRoles WHERE RoleId = @RoleId AND TenantId = @TenantId)
+    BEGIN
       INSERT INTO TenantRoles VALUES (@TenantId, @RoleId)
+    END
+  IF NOT EXISTS(SELECT RoleId FROM TenantUserRoles WHERE RoleId = @RoleId AND TenantId = @TenantId)
+    BEGIN
       INSERT INTO TenantUserRoles SELECT TenantId, @RoleId, UserId FROM TenantUsers
     END
   COMMIT TRANSACTION [Tran1]
