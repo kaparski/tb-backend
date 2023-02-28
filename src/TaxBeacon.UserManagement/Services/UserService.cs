@@ -153,7 +153,6 @@ public class UserService: IUserService
         tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;
 
         var exportUsers = await _context.Users
-                            .Include(u => u.TenantUsers)
                             .Where(u => u.TenantUsers.Any(tu => tu.TenantId == tenantId))
                             .OrderBy(u => u.Email)
                             .ProjectToType<UserExportModel>()
