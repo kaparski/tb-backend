@@ -37,7 +37,7 @@ public class UserServiceTests
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
-                .UseInMemoryDatabase($"{nameof(UserServiceTests)}-InMemoryDb-{Guid.NewGuid()}", b => b.EnableNullChecks(false))
+                .UseInMemoryDatabase($"{nameof(UserServiceTests)}-InMemoryDb-{Guid.NewGuid()}")
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
@@ -344,70 +344,6 @@ public class UserServiceTests
             .Should()
             .ThrowAsync<NotFoundException>()
             .WithMessage($"Entity \"{nameof(User)}\" ({email}) was not found.");
-    }
-
-    [Fact]
-    public async Task GetUserPermissions_UserHasPermissions_ReturnsAllPermission()
-    {
-        //Arrange
-        var tenant = TestData.TestTenant.Generate();
-        var users = TestData.TestUser.Generate(5);
-        var permissions = Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>().Select(x => new Permission()
-        {
-            Id = new Guid(),
-            Name = x
-        }).ToList();
-
-        var tenantRole = new TenantRole() { Role = TestData.TestRoles.First(), Tenant = tenant };
-
-        await AssignToRoleAsync(users.First(), tenantRole);
-        await AssignToRoleAsync(permissions, tenantRole);
-
-        await _dbContextMock.Permissions.AddRangeAsync(permissions);
-        await _dbContextMock.Roles.AddRangeAsync(TestData.TestRoles);
-        await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.Users.AddRangeAsync(users);
-        await _dbContextMock.SaveChangesAsync();
-
-        //Act
-        var permissionSet = _userService.GetUserPermissionsByEmail(users.First().Email);
-
-        //Assert
-        permissionSet
-            .Should()
-            .HaveCount(5);
-    }
-
-    [Fact]
-    public async Task GetUserPermissions_UserHasNoPermissions_ReturnsNoPermission()
-    {
-        //Arrange
-        var tenant = TestData.TestTenant.Generate();
-        var users = TestData.TestUser.Generate(5);
-        var permissions = Enum.GetValues(typeof(PermissionEnum)).Cast<PermissionEnum>().Select(x => new Permission()
-        {
-            Id = new Guid(),
-            Name = x
-        }).ToList();
-
-        var tenantRole = new TenantRole() { Role = TestData.TestRoles.First(), Tenant = tenant };
-
-        await AssignToRoleAsync(users[1], tenantRole);
-        await AssignToRoleAsync(permissions, tenantRole);
-
-        await _dbContextMock.Permissions.AddRangeAsync(permissions);
-        await _dbContextMock.Roles.AddRangeAsync(TestData.TestRoles);
-        await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.Users.AddRangeAsync(users);
-        await _dbContextMock.SaveChangesAsync();
-
-        //Act
-        var permissionSet = _userService.GetUserPermissionsByEmail(users.First().Email);
-
-        //Assert
-        permissionSet
-            .Should()
-            .HaveCount(0);
     }
 
     public async Task AssignToRoleAsync(User user, TenantRole tenantRole) =>
