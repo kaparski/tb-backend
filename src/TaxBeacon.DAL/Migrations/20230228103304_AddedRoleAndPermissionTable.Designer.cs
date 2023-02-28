@@ -12,8 +12,8 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    [Migration("20230227142852_AddedRolesAndPermissions")]
-    partial class AddedRolesAndPermissions
+    [Migration("20230228103304_AddedRoleAndPermissionTable")]
+    partial class AddedRoleAndPermissionTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -17,10 +17,21 @@ BEGIN TRY
     BEGIN
       INSERT INTO TenantRoles VALUES (@TenantId, @RoleId)
     END
-  IF NOT EXISTS(SELECT RoleId FROM TenantUserRoles WHERE RoleId = @RoleId AND TenantId = @TenantId)
-    BEGIN
-      INSERT INTO TenantUserRoles SELECT TenantId, @RoleId, UserId FROM TenantUsers
-    END
+    INSERT INTO TenantUsers
+      SELECT Id, @TenantId
+      FROM Users AS u
+      WHERE NOT EXISTS(SELECT UserId
+                     FROM TenantUsers
+                     WHERE UserId = u.Id
+                     AND TenantId = @TenantId)
+  INSERT INTO TenantUserRoles
+    SELECT TenantId, @RoleId, UserId
+    FROM TenantUsers AS tu
+    WHERE NOT EXISTS(SELECT UserId
+                   FROM TenantUserRoles
+                   WHERE UserId = tu.UserId
+                   AND TenantId = tu.TenantId
+                   AND RoleId = @RoleId)
   COMMIT TRANSACTION [Tran1]
 END TRY
 BEGIN CATCH

@@ -9,7 +9,6 @@ public class PermissionConfiguration: IEntityTypeConfiguration<Permission>
     {
         permission
             .Property(p => p.Name)
-            .HasConversion<string>()
             .HasColumnType("nvarchar")
             .HasMaxLength(100)
             .IsRequired();

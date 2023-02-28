@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TaxBeacon.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedRolesAndPermissions : Migration
+    public partial class AddedRoleAndPermissionTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
