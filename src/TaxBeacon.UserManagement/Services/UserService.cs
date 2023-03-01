@@ -159,8 +159,6 @@ public class UserService: IUserService
                             .AsNoTracking()
                             .ToListAsync(cancellationToken);
 
-        //TODO: add roles
-
         exportUsers.ForEach(u =>
         {
             u.DeactivationDateTimeUtc = u.DeactivationDateTimeUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
