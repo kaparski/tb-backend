@@ -47,7 +47,8 @@ public static class ConfigureServices
         services.AddCors(o => o.AddPolicy("DefaultCorsPolicy", builder =>
             builder.AllowAnyOrigin()
                 .AllowAnyMethod()
-                .AllowAnyHeader()));
+                .AllowAnyHeader()
+                .WithExposedHeaders("Content-Disposition")));
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 

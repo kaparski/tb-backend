@@ -23,4 +23,6 @@ public class UserDto
     public DateTime? DeactivationDateTimeUtc { get; set; }
 
     public DateTime? ReactivationDateTimeUtc { get; set; }
+
+    public string Roles { get; set; } = string.Empty;
 }

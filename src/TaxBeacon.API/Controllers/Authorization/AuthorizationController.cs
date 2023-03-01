@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
+using TaxBeacon.API.Controllers.Authorization.Requests;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Authorization

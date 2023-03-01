@@ -21,4 +21,6 @@ public interface IUserService
     Task<UserDto> CreateUserAsync(
         UserDto user,
         CancellationToken cancellationToken = default);
+
+    Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, string ianaTimeZone, CancellationToken cancellationToken);
 }

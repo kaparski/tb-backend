@@ -5,7 +5,9 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Data;
 using TaxBeacon.API.Controllers.Users;
+using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
@@ -38,7 +40,7 @@ public class UsersControllerTest
         var actualResponse = await _controller.GetUserList(query, default);
 
         // Assert
-        actualResponse.Should().BeOfType<OkObjectResult>();
+        actualResponse.Should().BeOfType<ActionResult<QueryablePaging<UserResponse>>>();
         actualResponse.Should().NotBeNull();
     }
 
@@ -73,6 +75,40 @@ public class UsersControllerTest
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
             actualResult?.Value.Should().BeOfType<UserResponse>();
             (actualResult?.Value as UserResponse)?.Id.Should().Be(userDto.Id);
+        }
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportUsersAsync_ValidQuery_ReturnsFileContent(FileType fileType)
+    {
+        // Arrange
+        var request = new ExportUsersRequest(fileType, "America/New_York");
+        _userServiceMock
+            .Setup(x => x.ExportUsersAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<FileType>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<byte>());
+
+        // Act
+        var actualResponse = await _controller.ExportUsersAsync(request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResponse.Should().NotBeNull();
+            var actualResult = actualResponse as FileContentResult;
+            actualResult.Should().NotBeNull();
+            actualResult!.FileDownloadName.Should().Be($"users.{fileType.ToString().ToLowerInvariant()}");
+            actualResult!.ContentType.Should().Be(fileType switch
+            {
+                FileType.Csv => "text/csv",
+                FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                _ => throw new InvalidOperationException()
+            });
         }
     }
 
