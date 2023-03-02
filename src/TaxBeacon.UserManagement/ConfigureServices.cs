@@ -11,6 +11,7 @@ public static class ConfigureServices
     {
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
         serviceCollection.AddScoped<IUserService, UserService>();
+        serviceCollection.AddScoped<IRoleService, RoleService>();
 
         return serviceCollection;
     }
