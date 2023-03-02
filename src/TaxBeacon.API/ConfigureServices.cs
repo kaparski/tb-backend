@@ -33,7 +33,7 @@ public static class ConfigureServices
         services.AddGridify(configuration);
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-        services.Configure<AzureAD>(configuration.GetSection(nameof(AzureAD)));
+        services.Configure<AzureAd>(configuration.GetSection(nameof(AzureAd)));
 
         services.AddScoped<EntitySaveChangesInterceptor>();
         services.AddDbContext<TaxBeaconDbContext>(options =>

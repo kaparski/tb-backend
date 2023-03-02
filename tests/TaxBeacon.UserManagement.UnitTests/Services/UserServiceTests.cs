@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Net.Mail;
+using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
@@ -24,12 +25,12 @@ public class UserServiceTests
     private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
     private readonly Mock<ILogger<UserService>> _userServiceLoggerMock;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
-    private readonly ITaxBeaconDbContext _dbContextMock;
-    private readonly UserService _userService;
     private readonly Mock<IEnumerable<IListToFileConverter>> _listToFileConverters;
     private readonly Mock<IListToFileConverter> _csvMock;
     private readonly Mock<IListToFileConverter> _xlsxMock;
     private readonly Mock<IUserExternalStore> _userExternalStore;
+    private readonly ITaxBeaconDbContext _dbContextMock;
+    private readonly UserService _userService;
 
     public UserServiceTests()
     {
@@ -47,7 +48,8 @@ public class UserServiceTests
 
         _listToFileConverters
             .Setup(x => x.GetEnumerator())
-            .Returns((IEnumerator<IListToFileConverter>)new[] { _csvMock.Object, _xlsxMock.Object }.ToList().GetEnumerator());
+            .Returns((IEnumerator<IListToFileConverter>)new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
+                .GetEnumerator());
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -423,12 +425,13 @@ public class UserServiceTests
         _ = await _userService.ExportUsersAsync(tenant.Id, FileType.Csv, "America/New_York", default);
 
         //Assert
-        _csvMock.Verify(x => x.Convert(It.Is<List<UserExportModel>>(l => l.Count == 1 &&
-                                                                         l[0].LastLoginDateUtc == new DateTime(2023, 1, 1, 5, 0, 0) &&
-                                                                         l[0].CreatedDateUtc == new DateTime(2023, 1, 1, 5, 0, 0) &&
-                                                                         l[0].ReactivationDateTimeUtc == new DateTime(2023, 1, 1, 5, 0, 0) &&
-                                                                         l[0].DeactivationDateTimeUtc == new DateTime(2023, 1, 1, 5, 0, 0))));
-
+        _csvMock.Verify(x => x
+            .Convert(It.Is<List<UserExportModel>>(l =>
+                l.Count == 1
+                && l[0].LastLoginDateUtc == new DateTime(2023, 1, 1, 5, 0, 0)
+                && l[0].CreatedDateUtc == new DateTime(2023, 1, 1, 5, 0, 0)
+                && l[0].ReactivationDateTimeUtc == new DateTime(2023, 1, 1, 5, 0, 0)
+                && l[0].DeactivationDateTimeUtc == new DateTime(2023, 1, 1, 5, 0, 0))));
     }
 
     private static class TestData

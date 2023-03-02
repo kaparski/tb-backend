@@ -9,20 +9,23 @@ namespace TaxBeacon.UserManagement.Services
     public sealed class UserExternalStore: IUserExternalStore
     {
         private readonly IPasswordGenerator _passwordGenerator;
-        private readonly AzureAD _azureAd;
+        private readonly AzureAd _azureAd;
 
-        public UserExternalStore(IPasswordGenerator passwordGenerator, IOptions<AzureAD> _azureAdOptions)
+        public UserExternalStore(IPasswordGenerator passwordGenerator, IOptions<AzureAd> azureAdOptions)
         {
             _passwordGenerator = passwordGenerator;
-            _azureAd = _azureAdOptions.Value;
+            _azureAd = azureAdOptions.Value;
         }
 
-        public async Task<string> CreateUserAsync(MailAddress mailAddress, string firstName, string lastName, CancellationToken cancellationToken)
+        public async Task<string> CreateUserAsync(MailAddress mailAddress, string firstName, string lastName,
+            CancellationToken cancellationToken)
         {
             var credentials = new ClientSecretCredential(_azureAd.TenantId, _azureAd.ClientId, _azureAd.Secret);
             var graphClient = new GraphServiceClient(credentials);
 
-            var existedUser = await graphClient.Users.Request().Filter($"mail eq '{mailAddress.Address}'").GetAsync(cancellationToken);
+            var existedUser = await graphClient.Users.Request().Filter($"mail eq '{mailAddress.Address}'")
+                .GetAsync(cancellationToken);
+
             if (existedUser.Count != 0)
             {
                 return string.Empty;
