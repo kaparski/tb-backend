@@ -7,6 +7,6 @@ public class RoleMappingConfig: IRegister
 {
     public void Register(TypeAdapterConfig config) => config.NewConfig<Role, RoleDto>()
         .Map(dest => dest.NumberOfUsers, src =>
-            src.TenantRoles.FirstOrDefault()!.TenantUserRoles.Count);
+            src.TenantRoles.FirstOrDefault() == null ? 0 : src.TenantRoles.FirstOrDefault()!.TenantUserRoles.Count);
 }
 
