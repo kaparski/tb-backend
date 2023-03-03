@@ -38,23 +38,9 @@ public class RoleServiceTests
     public async Task GetRolesAsync_DescendingOrderingAndPaginationWithSecondPage_CorrectNumberOfRolesInAscendingOrder()
     {
         //Arrange
-        var tenant = TestData.TestTenant.Generate();
-        var users = TestData.TestUser.Generate(2);
-        var roles = TestData.TestRole.Generate(3);
-
-        var tenantRoles = TestData.GenerateTenantRoles(roles, tenant);
-        var tenantUsers = TestData.GenerateTenantUsers(users, tenant);
-        var tenantUserRoles = TestData.GenerateTenantUserRoles(tenantRoles, tenantUsers);
-
-        await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.Users.AddRangeAsync(users);
-        await _dbContextMock.Roles.AddRangeAsync(roles);
-        await _dbContextMock.TenantUsers.AddRangeAsync(tenantUsers);
-        await _dbContextMock.TenantRoles.AddRangeAsync(tenantRoles);
-        await _dbContextMock.TenantUserRoles.AddRangeAsync(tenantUserRoles);
+        await TestData.SeedTestDataAsync(_dbContextMock);
 
         var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "name asc" };
-        await _dbContextMock.SaveChangesAsync();
 
         //Act
         var pageOfUsers = await _roleService.GetRolesAsync(query, default);
@@ -71,22 +57,8 @@ public class RoleServiceTests
     public async Task GetRolesAsync_PageNumberOutsideOfTotalRange_RoleListIsEmpty()
     {
         //Arrange
-        var tenant = TestData.TestTenant.Generate();
-        var users = TestData.TestUser.Generate(2);
-        var roles = TestData.TestRole.Generate(3);
+        await TestData.SeedTestDataAsync(_dbContextMock);
 
-        var tenantRoles = TestData.GenerateTenantRoles(roles, tenant);
-        var tenantUsers = TestData.GenerateTenantUsers(users, tenant);
-        var tenantUserRoles = TestData.GenerateTenantUserRoles(tenantRoles, tenantUsers);
-
-        await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.Users.AddRangeAsync(users);
-        await _dbContextMock.Roles.AddRangeAsync(roles);
-        await _dbContextMock.TenantUsers.AddRangeAsync(tenantUsers);
-        await _dbContextMock.TenantRoles.AddRangeAsync(tenantRoles);
-        await _dbContextMock.TenantUserRoles.AddRangeAsync(tenantUserRoles);
-
-        await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 3, PageSize = 25, OrderBy = "name asc", };
 
         //Act
@@ -99,6 +71,26 @@ public class RoleServiceTests
 
     private static class TestData
     {
+        public static async Task SeedTestDataAsync(ITaxBeaconDbContext dbContext)
+        {
+            var tenant = TestTenant.Generate();
+            var users = TestUser.Generate(2);
+            var roles = TestRole.Generate(3);
+
+            var tenantRoles = GenerateTenantRoles(roles, tenant);
+            var tenantUsers = GenerateTenantUsers(users, tenant);
+            var tenantUserRoles = GenerateTenantUserRoles(tenantRoles, tenantUsers);
+
+            await dbContext.Tenants.AddAsync(tenant);
+            await dbContext.Users.AddRangeAsync(users);
+            await dbContext.Roles.AddRangeAsync(roles);
+            await dbContext.TenantUsers.AddRangeAsync(tenantUsers);
+            await dbContext.TenantRoles.AddRangeAsync(tenantRoles);
+            await dbContext.TenantUserRoles.AddRangeAsync(tenantUserRoles);
+
+            await dbContext.SaveChangesAsync();
+        }
+
         public static List<TenantUser> GenerateTenantUsers(List<User> users, Tenant tenant)
         {
             var listOfTenantUsers = new List<TenantUser>();
