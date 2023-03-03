@@ -2,6 +2,7 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -60,6 +61,8 @@ public class UserServiceTests
             _dateTimeServiceMock.Object,
             _currentUserServiceMock.Object,
             _listToFileConverters.Object);
+
+        TypeAdapterConfig.GlobalSettings.Scan(typeof(UserMappingConfig).Assembly);
     }
 
     [Fact]
