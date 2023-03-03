@@ -13,12 +13,8 @@ public class RoleService: IRoleService
     public RoleService(ITaxBeaconDbContext context) => _context = context;
 
     public async Task<QueryablePaging<RoleDto>> GetRolesAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var roles = await _context.Roles
-             .ProjectToType<RoleDto>()
-             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        return roles;
-    }
+        CancellationToken cancellationToken = default) =>
+        await _context.Roles
+            .ProjectToType<RoleDto>()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 }

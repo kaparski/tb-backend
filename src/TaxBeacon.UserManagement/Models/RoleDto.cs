@@ -6,5 +6,5 @@ public class RoleDto
 
     public string Name { get; set; } = null!;
 
-    public int NumberOfUsers { get; set; }
+    public int AssignedUsersCount { get; set; }
 }

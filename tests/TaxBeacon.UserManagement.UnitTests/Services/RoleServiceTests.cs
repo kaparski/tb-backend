@@ -1,15 +1,10 @@
 ﻿using Bogus;
 using FluentAssertions;
-using FluentAssertions.Execution;
 using Gridify;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using System.Net.Mail;
-using System.Reflection;
-using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Exceptions;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
@@ -47,28 +42,16 @@ public class RoleServiceTests
         var users = TestData.TestUser.Generate(2);
         var roles = TestData.TestRole.Generate(3);
 
-        var listOfTenantUsers = new List<TenantUser>();
-        var listOfTenantRoles = new List<TenantRole>();
-        users.ForEach(x => listOfTenantUsers.Add(new TenantUser { Tenant = tenant, User = x }));
-        roles.ForEach(x => listOfTenantRoles.Add(new TenantRole { Tenant = tenant, Role = x }));
+        var tenantRoles = TestData.GenerateTenantRoles(roles, tenant);
+        var tenantUsers = TestData.GenerateTenantUsers(users, tenant);
+        var tenantUserRoles = TestData.GenerateTenantUserRoles(tenantRoles, tenantUsers);
 
         await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.Roles.AddRangeAsync(roles);
-        await _dbContextMock.TenantUsers.AddRangeAsync(listOfTenantUsers);
-        await _dbContextMock.TenantRoles.AddRangeAsync(listOfTenantRoles);
-
-        foreach (var tenantUser in listOfTenantUsers)
-        {
-            foreach (var tenantRole in listOfTenantRoles)
-            {
-                await _dbContextMock.TenantUserRoles.AddAsync(new TenantUserRole()
-                {
-                    TenantRole = tenantRole,
-                    TenantUser = tenantUser,
-                });
-            }
-        }
+        await _dbContextMock.TenantUsers.AddRangeAsync(tenantUsers);
+        await _dbContextMock.TenantRoles.AddRangeAsync(tenantRoles);
+        await _dbContextMock.TenantUserRoles.AddRangeAsync(tenantUserRoles);
 
         var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "name asc" };
         await _dbContextMock.SaveChangesAsync();
@@ -80,7 +63,7 @@ public class RoleServiceTests
         var listOfRoles = pageOfUsers.Query.ToList();
         listOfRoles.Count().Should().Be(1);
         listOfRoles.Select(x => x.Name).Should().BeInAscendingOrder();
-        listOfRoles[0].NumberOfUsers.Should().Be(2);
+        listOfRoles[0].AssignedUsersCount.Should().Be(2);
         pageOfUsers.Count.Should().Be(3);
     }
 
@@ -92,28 +75,16 @@ public class RoleServiceTests
         var users = TestData.TestUser.Generate(2);
         var roles = TestData.TestRole.Generate(3);
 
-        var listOfTenantUsers = new List<TenantUser>();
-        var listOfTenantRoles = new List<TenantRole>();
-        users.ForEach(x => listOfTenantUsers.Add(new TenantUser { Tenant = tenant, User = x }));
-        roles.ForEach(x => listOfTenantRoles.Add(new TenantRole { Tenant = tenant, Role = x }));
+        var tenantRoles = TestData.GenerateTenantRoles(roles, tenant);
+        var tenantUsers = TestData.GenerateTenantUsers(users, tenant);
+        var tenantUserRoles = TestData.GenerateTenantUserRoles(tenantRoles, tenantUsers);
 
         await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.Roles.AddRangeAsync(roles);
-        await _dbContextMock.TenantUsers.AddRangeAsync(listOfTenantUsers);
-        await _dbContextMock.TenantRoles.AddRangeAsync(listOfTenantRoles);
-
-        foreach (var tenantUser in listOfTenantUsers)
-        {
-            foreach (var tenantRole in listOfTenantRoles)
-            {
-                await _dbContextMock.TenantUserRoles.AddAsync(new TenantUserRole()
-                {
-                    TenantRole = tenantRole,
-                    TenantUser = tenantUser,
-                });
-            }
-        }
+        await _dbContextMock.TenantUsers.AddRangeAsync(tenantUsers);
+        await _dbContextMock.TenantRoles.AddRangeAsync(tenantRoles);
+        await _dbContextMock.TenantUserRoles.AddRangeAsync(tenantUserRoles);
 
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 3, PageSize = 25, OrderBy = "name asc", };
@@ -128,6 +99,43 @@ public class RoleServiceTests
 
     private static class TestData
     {
+        public static List<TenantUser> GenerateTenantUsers(List<User> users, Tenant tenant)
+        {
+            var listOfTenantUsers = new List<TenantUser>();
+
+            users.ForEach(x => listOfTenantUsers.Add(new TenantUser { Tenant = tenant, User = x }));
+
+            return listOfTenantUsers;
+        }
+
+        public static List<TenantRole> GenerateTenantRoles(List<Role> roles, Tenant tenant)
+        {
+            var listOfTenantRoles = new List<TenantRole>();
+
+            roles.ForEach(x => listOfTenantRoles.Add(new TenantRole { Tenant = tenant, Role = x }));
+
+            return listOfTenantRoles;
+        }
+
+        public static List<TenantUserRole> GenerateTenantUserRoles(List<TenantRole> listOfTenantRoles, List<TenantUser> listOfTenantUsers)
+        {
+            var listOfTenantUserRoles = new List<TenantUserRole>();
+
+            foreach (var tenantUser in listOfTenantUsers)
+            {
+                foreach (var tenantRole in listOfTenantRoles)
+                {
+                    listOfTenantUserRoles.Add(new TenantUserRole()
+                    {
+                        TenantRole = tenantRole,
+                        TenantUser = tenantUser,
+                    });
+                }
+            }
+
+            return listOfTenantUserRoles;
+        }
+
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
