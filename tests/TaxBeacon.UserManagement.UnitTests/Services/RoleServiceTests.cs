@@ -77,42 +77,13 @@ public class RoleServiceTests
             var users = TestUser.Generate(2);
             var roles = TestRole.Generate(3);
 
-            var tenantRoles = GenerateTenantRoles(roles, tenant);
-            var tenantUsers = GenerateTenantUsers(users, tenant);
-            var tenantUserRoles = GenerateTenantUserRoles(tenantRoles, tenantUsers);
-
-            await dbContext.Tenants.AddAsync(tenant);
-            await dbContext.Users.AddRangeAsync(users);
-            await dbContext.Roles.AddRangeAsync(roles);
-            await dbContext.TenantUsers.AddRangeAsync(tenantUsers);
-            await dbContext.TenantRoles.AddRangeAsync(tenantRoles);
-            await dbContext.TenantUserRoles.AddRangeAsync(tenantUserRoles);
-
-            await dbContext.SaveChangesAsync();
-        }
-
-        public static List<TenantUser> GenerateTenantUsers(List<User> users, Tenant tenant)
-        {
             var listOfTenantUsers = new List<TenantUser>();
-
             users.ForEach(x => listOfTenantUsers.Add(new TenantUser { Tenant = tenant, User = x }));
 
-            return listOfTenantUsers;
-        }
-
-        public static List<TenantRole> GenerateTenantRoles(List<Role> roles, Tenant tenant)
-        {
             var listOfTenantRoles = new List<TenantRole>();
-
             roles.ForEach(x => listOfTenantRoles.Add(new TenantRole { Tenant = tenant, Role = x }));
 
-            return listOfTenantRoles;
-        }
-
-        public static List<TenantUserRole> GenerateTenantUserRoles(List<TenantRole> listOfTenantRoles, List<TenantUser> listOfTenantUsers)
-        {
             var listOfTenantUserRoles = new List<TenantUserRole>();
-
             foreach (var tenantUser in listOfTenantUsers)
             {
                 foreach (var tenantRole in listOfTenantRoles)
@@ -125,7 +96,14 @@ public class RoleServiceTests
                 }
             }
 
-            return listOfTenantUserRoles;
+            await dbContext.Tenants.AddAsync(tenant);
+            await dbContext.Users.AddRangeAsync(users);
+            await dbContext.Roles.AddRangeAsync(roles);
+            await dbContext.TenantUsers.AddRangeAsync(listOfTenantUsers);
+            await dbContext.TenantRoles.AddRangeAsync(listOfTenantRoles);
+            await dbContext.TenantUserRoles.AddRangeAsync(listOfTenantUserRoles);
+
+            await dbContext.SaveChangesAsync();
         }
 
         public static readonly Faker<Tenant> TestTenant =
