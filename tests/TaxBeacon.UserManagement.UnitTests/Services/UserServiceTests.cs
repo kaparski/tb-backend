@@ -64,6 +64,8 @@ public class UserServiceTests
             _currentUserServiceMock.Object,
             _listToFileConverters.Object,
             _userExternalStore.Object);
+
+        TypeAdapterConfig.GlobalSettings.Scan(typeof(UserMappingConfig).Assembly);
     }
 
     [Fact]
