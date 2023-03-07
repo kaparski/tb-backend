@@ -23,13 +23,15 @@ public class UserService: IUserService
     private readonly IDateTimeService _dateTimeService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
+    private readonly IUserExternalStore _userExternalStore;
 
     public UserService(
         ILogger<UserService> logger,
         ITaxBeaconDbContext context,
         IDateTimeService dateTimeService,
         ICurrentUserService currentUserService,
-        IEnumerable<IListToFileConverter> listToFileConverters)
+        IEnumerable<IListToFileConverter> listToFileConverters,
+        IUserExternalStore userExternalStore)
     {
         _logger = logger;
         _context = context;
@@ -37,6 +39,7 @@ public class UserService: IUserService
         _currentUserService = currentUserService;
         _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
                                                     ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
+        _userExternalStore = userExternalStore;
     }
 
     public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
@@ -129,6 +132,11 @@ public class UserService: IUserService
         var user = newUserData.Adapt<User>();
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
+
+        var password = await _userExternalStore.CreateUserAsync(new MailAddress(newUserData.Email),
+                                                                newUserData.FirstName,
+                                                                newUserData.LastName,
+                                                                cancellationToken);
 
         if (await EmailExistsAsync(user.Email, cancellationToken))
         {

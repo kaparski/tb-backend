@@ -9,6 +9,7 @@ using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.API.Filters;
 using TaxBeacon.API.Services;
+using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
@@ -32,6 +33,7 @@ public static class ConfigureServices
         services.AddGridify(configuration);
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.Configure<AzureAd>(configuration.GetSection(nameof(AzureAd)));
 
         services.AddScoped<EntitySaveChangesInterceptor>();
         services.AddDbContext<TaxBeaconDbContext>(options =>
