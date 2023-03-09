@@ -1,5 +1,4 @@
 ﻿using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.API.Controllers.Users.Responses;
 

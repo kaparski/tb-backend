@@ -183,6 +183,12 @@ public class UserService: IUserService
 
     }
 
+    public Task<Guid> GetTenantIdAsync(Guid userId) =>
+        _context.TenantUsers
+                .Where(tu => tu.UserId == userId)
+                .Select(tu => tu.TenantId)
+                .FirstOrDefaultAsync();
+
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
         await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
 

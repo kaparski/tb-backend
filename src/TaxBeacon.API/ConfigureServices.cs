@@ -1,10 +1,12 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.API.Filters;
@@ -24,7 +26,7 @@ public static class ConfigureServices
         IConfiguration configuration)
     {
         services.AddRouting(options => options.LowercaseUrls = true);
-        services.AddControllers(options => options.Filters.Add<AuthorizeFilter>())
+        services.AddControllers(/*options => options.Filters.Add<AuthorizeFilter>()*/)
             .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -43,6 +45,9 @@ public static class ConfigureServices
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
+
+        services.AddSingleton<IAuthorizationHandler, PermissionsAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionsAuthorizationPolicyProvider>();
 
         services.AddCors(o => o.AddPolicy("DefaultCorsPolicy", builder =>
             builder.AllowAnyOrigin()

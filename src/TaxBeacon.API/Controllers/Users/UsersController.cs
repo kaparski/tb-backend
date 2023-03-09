@@ -2,6 +2,7 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
@@ -28,6 +29,10 @@ public class UsersController: BaseController
     /// </remarks>
     /// <response code="200">Returns users</response>
     /// <returns>List of users</returns>
+    [HasPermissions(
+        Common.Permissions.Users.Read,
+        Common.Permissions.Users.ReadWrite,
+        Common.Permissions.Users.ReadExport)]
     [HttpGet(Name = "GetUsers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
@@ -49,6 +54,10 @@ public class UsersController: BaseController
     /// </remarks>
     /// <response code="200">Returns user details</response>
     /// <returns>User</returns>
+    [HasPermissions(
+        Common.Permissions.Users.Read,
+        Common.Permissions.Users.ReadWrite,
+        Common.Permissions.Users.ReadExport)]
     [HttpGet("{id:guid}", Name = "GetUserDetails")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
@@ -75,6 +84,7 @@ public class UsersController: BaseController
     /// </remarks>
     /// <response code="201">Returns created user</response>
     /// <returns>User</returns>
+    [HasPermissions(Common.Permissions.Users.ReadWrite)]
     [HttpPost(Name = "CreateUser")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
@@ -95,6 +105,7 @@ public class UsersController: BaseController
     /// <response code="200">Returns updated user</response>
     /// <response code="401">User is unauthorized</response>
     /// <returns>Updated user</returns>
+    [HasPermissions(Common.Permissions.Users.ReadWrite)]
     [HttpPut("{id:guid}/status", Name = "UpdateUserStatus")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<UserResponse>> UpdateUserStatusAsync(Guid id, [FromBody] UserStatus userStatus,
@@ -113,6 +124,7 @@ public class UsersController: BaseController
     /// <response code="200">Returns file content</response>
     /// <response code="401">User is unauthorized</response>
     /// <returns>File content</returns>
+    [HasPermissions(Common.Permissions.Users.ReadExport)]
     [HttpGet("export", Name = "ExportUsers")]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
     public async Task<IActionResult> ExportUsersAsync([FromQuery] ExportUsersRequest exportUsersRequest,
