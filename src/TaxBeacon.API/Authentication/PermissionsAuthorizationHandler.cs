@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using System.Net.Mail;
-using System.Security.Claims;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.UserManagement.Services;
@@ -9,9 +8,6 @@ namespace TaxBeacon.API.Authentication
 {
     public sealed class PermissionsAuthorizationHandler: AuthorizationHandler<PermissionsRequirement>
     {
-        private const string UserIdClaimName = "userId";
-        private const string EmailClaimName = "preferred_username";
-        private const string TenantId = "tenantId";
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<PermissionsAuthorizationHandler> _logger;
 
@@ -27,7 +23,7 @@ namespace TaxBeacon.API.Authentication
         {
 
             var email = context.User.Claims
-                .FirstOrDefault(claim => claim.Type.Equals(EmailClaimName, StringComparison.OrdinalIgnoreCase))
+                .FirstOrDefault(claim => claim.Type.Equals(Claims.EmailClaimName, StringComparison.OrdinalIgnoreCase))
                 ?.Value;
 
             if (email is null)
@@ -41,7 +37,6 @@ namespace TaxBeacon.API.Authentication
             {
                 var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
                 var user = await userService.GetUserByEmailAsync(new MailAddress(email), default);
-                var tenantId = await userService.GetTenantIdAsync(user.Id);
 
                 if (user.DeactivationDateTimeUtc is not null || user.UserStatus == UserStatus.Deactivated)
                 {
@@ -49,16 +44,16 @@ namespace TaxBeacon.API.Authentication
                     return;
                 }
 
-                if (!context.User.HasClaim(claim =>
-                        claim.Type.Equals(UserIdClaimName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    var claimsIdentity = new ClaimsIdentity();
-                    claimsIdentity.AddClaim(new Claim(UserIdClaimName, user.Id.ToString()));
-                    claimsIdentity.AddClaim(new Claim(TenantId, tenantId.ToString()));
-                    context.User.AddIdentity(claimsIdentity);
-                }
-
                 var permissionsService = scope.ServiceProvider.GetRequiredService<IPermissionsService>();
+
+                var tenantIdClaim = context.User.Claims
+                    .FirstOrDefault(claim => claim.Type.Equals(Claims.TenantId, StringComparison.OrdinalIgnoreCase))
+                    ?.Value;
+
+                if (!Guid.TryParse(tenantIdClaim, out var tenantId))
+                {
+                    return;
+                }
 
                 IEnumerable<string> permissions = await permissionsService.GetPermissionsAsync(tenantId, user.Id);
 
