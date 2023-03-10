@@ -10,7 +10,7 @@ WHERE Name ='CTI'
 SELECT @adminRoleId = Id
 FROM ROLES r
 JOIN TenantRoles tr ON tr.RoleId = r.Id
-AND tr.TenantId = @tenantId AND r.Name = 'Administrator'
+AND tr.TenantId = @tenantId AND r.Name = 'Admin'
 
 INSERT INTO @adminRolePermissions (Name)
 VALUES ('Users.Read'),
