@@ -24,6 +24,10 @@ public class UserService: IUserService
     private readonly ICurrentUserService _currentUserService;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
     private readonly IUserExternalStore _userExternalStore;
+    private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new string[]
+    {
+        "ctitaxbeacon.onmicrosoft.com"
+    };
 
     public UserService(
         ILogger<UserService> logger,
@@ -133,10 +137,15 @@ public class UserService: IUserService
         var tenant = _context.Tenants.First();
         user.UserStatus = UserStatus.Active;
 
-        var password = await _userExternalStore.CreateUserAsync(new MailAddress(newUserData.Email),
-                                                                newUserData.FirstName,
-                                                                newUserData.LastName,
-                                                                cancellationToken);
+        var userEmail = new MailAddress(newUserData.Email);
+
+        if (!_domainsToSkipExternalStorageUserCreation.Contains(userEmail.Host))
+        {
+            _ = await _userExternalStore.CreateUserAsync(userEmail,
+                                                         newUserData.FirstName,
+                                                         newUserData.LastName,
+                                                         cancellationToken);
+        }
 
         if (await EmailExistsAsync(user.Email, cancellationToken))
         {
