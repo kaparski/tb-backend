@@ -35,7 +35,7 @@ namespace TaxBeacon.API.Controllers.Authorization
         {
             await _userService.LoginAsync(new MailAddress(loginRequest.Email), cancellationToken);
 
-            return Ok();
+            return Ok(new { Permissions = new string[] { "Users.Read", "Users.ReadWrite", "Users.ReadExport" } });
         }
     }
 }
