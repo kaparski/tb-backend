@@ -36,8 +36,8 @@ public class AuthorizationControllerTests
         var actualResponse = await _controller.LoginAsync(loginRequest, default);
 
         //Assert
-        actualResponse.Should().BeOfType<OkResult>();
+        actualResponse.Should().BeOfType<OkObjectResult>();
         actualResponse.Should().NotBeNull();
-        ((OkResult)actualResponse).StatusCode.Should().Be(StatusCodes.Status200OK);
+        ((OkObjectResult)actualResponse).StatusCode.Should().Be(StatusCodes.Status200OK);
     }
 }
