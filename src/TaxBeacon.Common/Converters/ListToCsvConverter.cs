@@ -22,53 +22,36 @@ namespace TaxBeacon.Common.Converters
 
         private static void CreateHeader<T>(StreamWriter sw)
         {
-            var properties = typeof(T).GetProperties();
+            var properties = typeof(T).GetProperties()
+                                      .Where(x => x.GetCustomAttribute<IgnoreAttribute>() is null)
+                                      .ToArray();
             for (var i = 0; i < properties.Length - 1; i++)
             {
                 var property = properties[i];
-                if (property.GetCustomAttribute<IgnoreAttribute>() is not null)
-                {
-                    continue;
-                }
                 var columnAttribute = property.GetCustomAttributes(typeof(ColumnAttribute), false)
                                                .FirstOrDefault() as ColumnAttribute;
                 sw.Write((columnAttribute?.Name ?? property.Name) + ",");
             }
             var lastProp = properties[^1];
-            if (lastProp.GetCustomAttribute<IgnoreAttribute>() is null)
-            {
-                var lastPropColumnAttribute = lastProp.GetCustomAttributes(typeof(ColumnAttribute), false)
-                           .FirstOrDefault() as ColumnAttribute;
-                sw.Write((lastPropColumnAttribute?.Name ?? lastProp.Name) + Environment.NewLine);
-            }
-            else
-            {
-                sw.Write(Environment.NewLine);
-            }
+            var lastPropColumnAttribute = lastProp.GetCustomAttributes(typeof(ColumnAttribute), false)
+                               .FirstOrDefault() as ColumnAttribute;
+            sw.Write((lastPropColumnAttribute?.Name ?? lastProp.Name) + Environment.NewLine);
         }
 
         private static void CreateRows<T>(List<T> list, StreamWriter sw)
         {
+            var properties = typeof(T).GetProperties()
+                          .Where(x => x.GetCustomAttribute<IgnoreAttribute>() is null)
+                          .ToArray();
             foreach (var item in list)
             {
-                var properties = typeof(T).GetProperties();
                 for (var i = 0; i < properties.Length - 1; i++)
                 {
                     var property = properties[i];
-                    if (property.GetCustomAttribute<IgnoreAttribute>() is null)
-                    {
-                        ProcessRow(sw, item, property);
-                    }
+                    ProcessRow(sw, item, property);
                 }
                 var lastProp = properties[^1];
-                if (lastProp.GetCustomAttribute<IgnoreAttribute>() is null)
-                {
-                    ProcessRow(sw, item, lastProp, true);
-                }
-                else
-                {
-                    sw.Write(Environment.NewLine);
-                }
+                ProcessRow(sw, item, lastProp, true);
             }
         }
 

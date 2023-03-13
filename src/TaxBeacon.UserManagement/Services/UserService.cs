@@ -184,7 +184,7 @@ public class UserService: IUserService
         var tz = TimeZoneInfo.FindSystemTimeZoneById(windowsId);
         var abbreviations = TZNames.GetAbbreviationsForTimeZone(windowsId, "en-US");
 
-        var format = $"MM.dd.yyyy hh:mm:ss tt";
+        const string format = $"MM.dd.yyyy hh:mm:ss tt";
 
         exportUsers.ForEach(u =>
         {
