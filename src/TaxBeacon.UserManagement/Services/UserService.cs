@@ -13,6 +13,7 @@ using TaxBeacon.DAL.Entities;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Extensions;
 using System.Collections.Immutable;
+using TimeZoneNames;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -176,12 +177,44 @@ public class UserService: IUserService
                             .AsNoTracking()
                             .ToListAsync(cancellationToken);
 
+        TimeZoneInfo.TryConvertIanaIdToWindowsId(ianaTimeZone, out var windowsId);
+
+        windowsId ??= "UTC";
+
+        var tz = TimeZoneInfo.FindSystemTimeZoneById(windowsId);
+        var abbreviations = TZNames.GetAbbreviationsForTimeZone(windowsId, "en-US");
+
+        const string format = $"MM.dd.yyyy hh:mm:ss tt";
+
         exportUsers.ForEach(u =>
         {
             u.DeactivationDateTimeUtc = u.DeactivationDateTimeUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
             u.ReactivationDateTimeUtc = u.ReactivationDateTimeUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
             u.CreatedDateUtc = u.CreatedDateUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
             u.LastLoginDateUtc = u.LastLoginDateUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
+
+            if (u.DeactivationDateTimeUtc.HasValue)
+            {
+                u.DeactivationDateTimeUtcView = tz.IsDaylightSavingTime(u.DeactivationDateTimeUtc.Value)
+                    ? $"{u.DeactivationDateTimeUtc.Value.ToString(format)} {abbreviations.Daylight}"
+                    : $"{u.DeactivationDateTimeUtc.Value.ToString(format)} {abbreviations.Standard}";
+            }
+            if (u.ReactivationDateTimeUtc.HasValue)
+            {
+                u.ReactivationDateTimeUtcView = tz.IsDaylightSavingTime(u.ReactivationDateTimeUtc.Value)
+                    ? $"{u.ReactivationDateTimeUtc.Value.ToString(format)} {abbreviations.Daylight}"
+                    : $"{u.ReactivationDateTimeUtc.Value.ToString(format)} {abbreviations.Standard}";
+            }
+            if (u.LastLoginDateUtc.HasValue)
+            {
+                u.LastLoginDateUtcView = tz.IsDaylightSavingTime(u.LastLoginDateUtc.Value)
+                    ? $"{u.LastLoginDateUtc.Value.ToString(format)} {abbreviations.Daylight}"
+                    : $"{u.LastLoginDateUtc.Value.ToString(format)} {abbreviations.Standard}";
+            }
+
+            u.CreatedDateUtcView = tz.IsDaylightSavingTime(u.CreatedDateUtc)
+                ? $"{u.CreatedDateUtc.ToString(format)} {abbreviations.Daylight}"
+                : $"{u.CreatedDateUtc.ToString(format)} {abbreviations.Standard}";
         });
 
         _logger.LogInformation("{dateTime} - Users export was executed by {@userId}",

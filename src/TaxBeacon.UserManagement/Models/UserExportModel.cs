@@ -18,24 +18,32 @@ namespace TaxBeacon.UserManagement.Models
 
         public string Roles { get; set; } = string.Empty;
 
-        [Display(Name = "Last Login")]
-        [Column("Last Login", CustomFormat = "MM.dd.yyyy hh:mm:ss AM/PM")]
+        [Ignore]
         public DateTime? LastLoginDateUtc { get; set; }
+
+        [Column("Last Login")]
+        public string LastLoginDateUtcView { get; set; } = string.Empty;
 
         [Display(Name = "Status")]
         [Column("Status")]
         public UserStatus UserStatus { get; set; }
 
-        [Display(Name = "Creation date")]
-        [Column("Creation date", CustomFormat = "MM.dd.yyyy hh:mm:ss AM/PM")]
+        [Ignore]
         public DateTime CreatedDateUtc { get; set; }
 
-        [Display(Name = "Deactivation date")]
-        [Column("Deactivation date", CustomFormat = "MM.dd.yyyy hh:mm:ss AM/PM")]
+        [Column("Creation date")]
+        public string CreatedDateUtcView { get; set; } = string.Empty;
+
+        [Ignore]
         public DateTime? DeactivationDateTimeUtc { get; set; }
 
-        [Display(Name = "Reactivation date")]
-        [Column("Reactivation date", CustomFormat = "MM.dd.yyyy hh:mm:ss AM/PM")]
+        [Column("Deactivation date")]
+        public string DeactivationDateTimeUtcView { get; set; } = string.Empty;
+
+        [Ignore]
         public DateTime? ReactivationDateTimeUtc { get; set; }
+
+        [Column("Reactivation date")]
+        public string ReactivationDateTimeUtcView { get; set; } = string.Empty;
     }
 }

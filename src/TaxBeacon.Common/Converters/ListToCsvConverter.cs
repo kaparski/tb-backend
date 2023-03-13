@@ -22,7 +22,9 @@ namespace TaxBeacon.Common.Converters
 
         private static void CreateHeader<T>(StreamWriter sw)
         {
-            var properties = typeof(T).GetProperties();
+            var properties = typeof(T).GetProperties()
+                                      .Where(x => x.GetCustomAttribute<IgnoreAttribute>() is null)
+                                      .ToArray();
             for (var i = 0; i < properties.Length - 1; i++)
             {
                 var property = properties[i];
@@ -38,12 +40,13 @@ namespace TaxBeacon.Common.Converters
 
         private static void CreateRows<T>(List<T> list, StreamWriter sw)
         {
+            var properties = typeof(T).GetProperties()
+                          .Where(x => x.GetCustomAttribute<IgnoreAttribute>() is null)
+                          .ToArray();
             foreach (var item in list)
             {
-                var properties = typeof(T).GetProperties();
                 for (var i = 0; i < properties.Length - 1; i++)
                 {
-
                     var property = properties[i];
                     ProcessRow(sw, item, property);
                 }
@@ -59,7 +62,7 @@ namespace TaxBeacon.Common.Converters
 
             if (string.IsNullOrEmpty(columnAttribute?.CustomFormat))
             {
-                sw.Write(property.GetValue(item) + (!isLast ? "," : Environment.NewLine));
+                sw.Write($"\"{property.GetValue(item)}\"" + (!isLast ? "," : Environment.NewLine));
             }
             else
             {
