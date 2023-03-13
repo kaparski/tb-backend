@@ -14,6 +14,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IRoleService, RoleService>();
         serviceCollection.AddScoped<IPasswordGenerator, PasswordGenerator>();
         serviceCollection.AddScoped<IUserExternalStore, UserExternalStore>();
+        serviceCollection.AddScoped<IPermissionsService, PermissionsService>();
 
         return serviceCollection;
     }

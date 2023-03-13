@@ -13,21 +13,22 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.DAL", "src\TaxBea
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{228716C1-EB3B-45F4-AA50-A5DFCDC4623E}"
 	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
-		.dockerignore = .dockerignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Common", "src\TaxBeacon.Common\TaxBeacon.Common.csproj", "{4420293B-B679-4DD3-8226-1F08066EBE13}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Common", "src\TaxBeacon.Common\TaxBeacon.Common.csproj", "{4420293B-B679-4DD3-8226-1F08066EBE13}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{78103266-2E2B-4710-9139-0AB800F12A71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.UserManagement.UnitTests", "tests\TaxBeacon.UserManagement.UnitTests\TaxBeacon.UserManagement.UnitTests.csproj", "{BF40CE7B-1B35-4BAF-819E-998431E1C239}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.UserManagement.UnitTests", "tests\TaxBeacon.UserManagement.UnitTests\TaxBeacon.UserManagement.UnitTests.csproj", "{BF40CE7B-1B35-4BAF-819E-998431E1C239}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.API.UnitTests", "tests\TaxBeacon.API.UnitTests\TaxBeacon.API.UnitTests.csproj", "{FA27BB92-9E96-4117-84C8-95787C922BED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.API.UnitTests", "tests\TaxBeacon.API.UnitTests\TaxBeacon.API.UnitTests.csproj", "{FA27BB92-9E96-4117-84C8-95787C922BED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migration-scripts", "{E149189A-4D39-48F3-9B5A-DBDA8D351B70}"
 	ProjectSection(SolutionItems) = preProject
+		migration-scripts\AddPermisionsToAdminRole.sql = migration-scripts\AddPermisionsToAdminRole.sql
 		migration-scripts\InsertPermissionsAndRoles.sql = migration-scripts\InsertPermissionsAndRoles.sql
 	EndProjectSection
 EndProject

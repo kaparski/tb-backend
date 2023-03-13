@@ -23,4 +23,6 @@ public interface IUserService
         CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, string ianaTimeZone, CancellationToken cancellationToken);
+
+    Task<Guid> GetTenantIdAsync(Guid userId);
 }

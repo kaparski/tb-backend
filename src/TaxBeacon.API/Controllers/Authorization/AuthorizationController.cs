@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
+using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Authorization.Requests;
+using TaxBeacon.API.Controllers.Authorization.Responses;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Authorization
@@ -11,13 +13,16 @@ namespace TaxBeacon.API.Controllers.Authorization
     {
         private readonly ILogger<AuthorizationController> _logger;
         private readonly IUserService _userService;
+        private readonly IPermissionsService _permissionsService;
 
         public AuthorizationController(
             ILogger<AuthorizationController> logger,
-            IUserService userService)
+            IUserService userService,
+            IPermissionsService permissionsService)
         {
             _logger = logger;
             _userService = userService;
+            _permissionsService = permissionsService;
         }
 
         /// <summary>
@@ -30,12 +35,19 @@ namespace TaxBeacon.API.Controllers.Authorization
         /// <response code="400">User email invalid</response>
         /// <response code="401">User is unauthorized</response>
         [HttpPost("login", Name = "Login")]
-        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest loginRequest,
+        public async Task<ActionResult<LoginResponse>> LoginAsync([FromBody] LoginRequest loginRequest,
             CancellationToken cancellationToken)
         {
             await _userService.LoginAsync(new MailAddress(loginRequest.Email), cancellationToken);
 
-            return Ok();
+            var permissions = Guid.TryParse(Request?.HttpContext?.User?.Claims?.FirstOrDefault(c => c.Type == Claims.TenantId)?.Value, out var tenantId) &&
+                              Guid.TryParse(Request?.HttpContext?.User?.Claims?.FirstOrDefault(c => c.Type == Claims.UserIdClaimName)?.Value, out var userId)
+                              ? await _permissionsService.GetPermissionsAsync(tenantId, userId) : Array.Empty<string>();
+
+            return Ok(new LoginResponse
+            {
+                Permissions = permissions
+            });
         }
     }
 }
