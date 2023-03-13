@@ -51,6 +51,4 @@ WHERE p.Name in
      FROM TenantRolePermissions
      WHERE TenantId = @tenantId
        AND RoleId = @adminRoleId
-       AND p.Name in
-         (SELECT Name
-          FROM @adminRolePermissions))
+       AND PermissionId = p.Id)
