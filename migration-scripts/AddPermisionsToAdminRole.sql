@@ -15,7 +15,8 @@ AND tr.TenantId = @tenantId AND r.Name = 'Admin'
 INSERT INTO @adminRolePermissions (Name)
 VALUES ('Users.Read'),
        ('Users.ReadWrite'),
-       ('Users.ReadExport')
+       ('Users.ReadExport'),
+       ('Roles.Read')
 
 INSERT INTO Permissions (Id, Name, CreatedDateUtc)
 SELECT NEWID(),

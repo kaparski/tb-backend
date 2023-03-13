@@ -2,6 +2,7 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.UserManagement.Services;
@@ -23,6 +24,7 @@ public class RolesController: BaseController
     ///     ```GET /roles?page=1&amp;pageSize=10&amp;orderBy=name%20asc&amp;filter=name%3DAdmin```<br/><br/>
     /// </remarks>
     /// <response code="200">Returns roles</response>
+    [HasPermissions(Common.Permissions.Roles.Read)]
     [HttpGet(Name = "GetRoles")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<RoleResponse>), StatusCodes.Status200OK)]

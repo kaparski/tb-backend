@@ -30,13 +30,10 @@ namespace TaxBeacon.API.Authentication
                 var userId = user?.Id.ToString() ?? string.Empty;
                 claimsIdentity.AddClaim(new Claim(Claims.UserIdClaimName, userId));
 
-                if (!principal.HasClaim(claim => claim.Type == Claims.TenantId))
+                if (!principal.HasClaim(claim => claim.Type == Claims.TenantId) && !string.IsNullOrEmpty(userId))
                 {
-                    if (!string.IsNullOrEmpty(userId))
-                    {
-                        var tenantId = await _userService.GetTenantIdAsync(user!.Id);
-                        claimsIdentity.AddClaim(new Claim(Claims.TenantId, tenantId.ToString()));
-                    }
+                    var tenantId = await _userService.GetTenantIdAsync(user!.Id);
+                    claimsIdentity.AddClaim(new Claim(Claims.TenantId, tenantId.ToString()));
                 }
             }
 
