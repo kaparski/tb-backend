@@ -26,14 +26,25 @@ namespace TaxBeacon.Common.Converters
             for (var i = 0; i < properties.Length - 1; i++)
             {
                 var property = properties[i];
+                if (property.GetCustomAttribute<IgnoreAttribute>() is not null)
+                {
+                    continue;
+                }
                 var columnAttribute = property.GetCustomAttributes(typeof(ColumnAttribute), false)
                                                .FirstOrDefault() as ColumnAttribute;
                 sw.Write((columnAttribute?.Name ?? property.Name) + ",");
             }
             var lastProp = properties[^1];
-            var lastPropColumnAttribute = lastProp.GetCustomAttributes(typeof(ColumnAttribute), false)
-                               .FirstOrDefault() as ColumnAttribute;
-            sw.Write((lastPropColumnAttribute?.Name ?? lastProp.Name) + Environment.NewLine);
+            if (lastProp.GetCustomAttribute<IgnoreAttribute>() is null)
+            {
+                var lastPropColumnAttribute = lastProp.GetCustomAttributes(typeof(ColumnAttribute), false)
+                           .FirstOrDefault() as ColumnAttribute;
+                sw.Write((lastPropColumnAttribute?.Name ?? lastProp.Name) + Environment.NewLine);
+            }
+            else
+            {
+                sw.Write(Environment.NewLine);
+            }
         }
 
         private static void CreateRows<T>(List<T> list, StreamWriter sw)
@@ -43,12 +54,21 @@ namespace TaxBeacon.Common.Converters
                 var properties = typeof(T).GetProperties();
                 for (var i = 0; i < properties.Length - 1; i++)
                 {
-
                     var property = properties[i];
-                    ProcessRow(sw, item, property);
+                    if (property.GetCustomAttribute<IgnoreAttribute>() is null)
+                    {
+                        ProcessRow(sw, item, property);
+                    }
                 }
                 var lastProp = properties[^1];
-                ProcessRow(sw, item, lastProp, true);
+                if (lastProp.GetCustomAttribute<IgnoreAttribute>() is null)
+                {
+                    ProcessRow(sw, item, lastProp, true);
+                }
+                else
+                {
+                    sw.Write(Environment.NewLine);
+                }
             }
         }
 
@@ -59,7 +79,7 @@ namespace TaxBeacon.Common.Converters
 
             if (string.IsNullOrEmpty(columnAttribute?.CustomFormat))
             {
-                sw.Write(property.GetValue(item) + (!isLast ? "," : Environment.NewLine));
+                sw.Write($"\"{property.GetValue(item)}\"" + (!isLast ? "," : Environment.NewLine));
             }
             else
             {
