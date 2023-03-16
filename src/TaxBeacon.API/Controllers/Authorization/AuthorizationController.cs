@@ -40,14 +40,15 @@ namespace TaxBeacon.API.Controllers.Authorization
         {
             await _userService.LoginAsync(new MailAddress(loginRequest.Email), cancellationToken);
 
-            var permissions = Guid.TryParse(Request?.HttpContext?.User?.Claims?.FirstOrDefault(c => c.Type == Claims.TenantId)?.Value, out var tenantId) &&
-                              Guid.TryParse(Request?.HttpContext?.User?.Claims?.FirstOrDefault(c => c.Type == Claims.UserIdClaimName)?.Value, out var userId)
-                              ? await _permissionsService.GetPermissionsAsync(tenantId, userId) : Array.Empty<string>();
+            var permissions =
+                Guid.TryParse(Request?.HttpContext?.User?.Claims?
+                    .FirstOrDefault(c => c.Type == Claims.UserIdClaimName)?.Value, out var userId)
+                && Guid.TryParse(Request?.HttpContext?.User?.Claims?
+                    .FirstOrDefault(c => c.Type == Claims.TenantId)?.Value, out var tenantId)
+                    ? await _permissionsService.GetPermissionsAsync(tenantId, userId)
+                    : Array.Empty<string>();
 
-            return Ok(new LoginResponse
-            {
-                Permissions = permissions
-            });
+            return Ok(new LoginResponse { UserId = userId, Permissions = permissions });
         }
     }
 }
