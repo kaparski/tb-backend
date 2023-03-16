@@ -5,6 +5,8 @@ using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using OneOf;
+using OneOf.Types;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Exceptions;
@@ -25,6 +27,7 @@ public class UserService: IUserService
     private readonly ICurrentUserService _currentUserService;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
     private readonly IUserExternalStore _userExternalStore;
+
     private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new string[]
     {
         "ctitaxbeacon.onmicrosoft.com"
@@ -43,7 +46,7 @@ public class UserService: IUserService
         _dateTimeService = dateTimeService;
         _currentUserService = currentUserService;
         _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
-                                                    ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
+                                ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
         _userExternalStore = userExternalStore;
     }
 
@@ -71,12 +74,18 @@ public class UserService: IUserService
         }
     }
 
-    public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) =>
-        await _context
+    public async Task<OneOf<QueryablePaging<UserDto>, NotFound>> GetUsersAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default)
+    {
+        var users = await _context
             .Users
             .ProjectToType<UserDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return gridifyQuery.Page != 1 && gridifyQuery.Page > Math.Ceiling((double)users.Count / gridifyQuery.PageSize)
+            ? new NotFound()
+            : users;
+    }
 
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
@@ -143,9 +152,9 @@ public class UserService: IUserService
         if (!_domainsToSkipExternalStorageUserCreation.Contains(userEmail.Host))
         {
             _ = await _userExternalStore.CreateUserAsync(userEmail,
-                                                         newUserData.FirstName,
-                                                         newUserData.LastName,
-                                                         cancellationToken);
+                newUserData.FirstName,
+                newUserData.LastName,
+                cancellationToken);
         }
 
         if (await EmailExistsAsync(user.Email, cancellationToken))
@@ -154,7 +163,10 @@ public class UserService: IUserService
                 ConflictExceptionKey.UserEmail);
         }
 
-        user.TenantUsers.Add(new TenantUser { Tenant = tenant });
+        user.TenantUsers.Add(new TenantUser
+        {
+            Tenant = tenant
+        });
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -166,16 +178,17 @@ public class UserService: IUserService
         return user.Adapt<UserDto>();
     }
 
-    public async Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, string ianaTimeZone, CancellationToken cancellationToken)
+    public async Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, string ianaTimeZone,
+        CancellationToken cancellationToken)
     {
         tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;
 
         var exportUsers = await _context.Users
-                            .Where(u => u.TenantUsers.Any(tu => tu.TenantId == tenantId))
-                            .OrderBy(u => u.Email)
-                            .ProjectToType<UserExportModel>()
-                            .AsNoTracking()
-                            .ToListAsync(cancellationToken);
+            .Where(u => u.TenantUsers.Any(tu => tu.TenantId == tenantId))
+            .OrderBy(u => u.Email)
+            .ProjectToType<UserExportModel>()
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
         TimeZoneInfo.TryConvertIanaIdToWindowsId(ianaTimeZone, out var windowsId);
 
@@ -227,9 +240,9 @@ public class UserService: IUserService
 
     public Task<Guid> GetTenantIdAsync(Guid userId) =>
         _context.TenantUsers
-                .Where(tu => tu.UserId == userId)
-                .Select(tu => tu.TenantId)
-                .FirstOrDefaultAsync();
+            .Where(tu => tu.UserId == userId)
+            .Select(tu => tu.TenantId)
+            .FirstOrDefaultAsync();
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
         await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);

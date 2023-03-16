@@ -1,6 +1,7 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users.Requests;
@@ -36,13 +37,21 @@ public class UsersController: BaseController
     [HttpGet(Name = "GetUsers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<QueryablePaging<UserResponse>>> GetUserList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(BadRequest), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query,
+        CancellationToken cancellationToken)
     {
-        var users = await _userService.GetUsersAsync(query, cancellationToken);
-        var userListResponse =
-            new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>());
+        if (!query.IsValid<UserDto>())
+        {
+            // TODO: Add an object with errors that we can use to detail the answers
+            return BadRequest();
+        }
 
-        return Ok(userListResponse);
+        var usersOneOf = await _userService.GetUsersAsync(query, cancellationToken);
+        return usersOneOf.Match<IActionResult>(
+            users => Ok(new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>())),
+            notFound => NotFound());
     }
 
     /// <summary>
