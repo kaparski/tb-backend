@@ -31,6 +31,30 @@ public class UsersControllerTest
     public async Task GetUserList_ValidQuery_ReturnSuccessStatusCode()
     {
         // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+        _userServiceMock.Setup(p => p.GetUsersAsync(query, default)).ReturnsAsync(
+            new QueryablePaging<UserDto>(0,
+                Enumerable.Empty<UserDto>().AsQueryable()));
+
+        // Act
+        var actualResponse = await _controller.GetUserList(query, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<QueryablePaging<UserResponse>>();
+        }
+    }
+
+    [Fact]
+    public async Task GetUserList_InvalidQuery_ReturnBadRequest()
+    {
+        // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "username desc", };
         _userServiceMock.Setup(p => p.GetUsersAsync(query, default)).ReturnsAsync(
             new QueryablePaging<UserDto>(0,
@@ -39,9 +63,15 @@ public class UsersControllerTest
         // Act
         var actualResponse = await _controller.GetUserList(query, default);
 
-        // Assert
-        actualResponse.Should().BeOfType<ActionResult<QueryablePaging<UserResponse>>>();
-        actualResponse.Should().NotBeNull();
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as BadRequestResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<BadRequestResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        }
     }
 
     [Theory]
