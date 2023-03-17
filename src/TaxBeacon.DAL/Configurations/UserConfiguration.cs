@@ -38,5 +38,17 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
             .HasComputedColumnSql("TRIM(CONCAT([FirstName], ' ', [LastName]))", stored: true);
 
         user.HasQueryFilter(b => b.IsDeleted == null || !b.IsDeleted.Value);
+
+        user
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
+        user
+            .Property(u => u.Id)
+            .HasDefaultValueSql("NEWID()");
+
+        user
+            .Property(u => u.CreatedDateUtc)
+            .HasDefaultValueSql("GETUTCDATE()");
     }
 }
