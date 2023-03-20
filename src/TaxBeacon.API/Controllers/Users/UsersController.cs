@@ -59,12 +59,12 @@ public class UsersController: BaseController
         Common.Permissions.Users.ReadWrite,
         Common.Permissions.Users.ReadExport)]
     [HttpGet("{id:guid}", Name = "GetUserDetails")]
-    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserDetailsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var userDto = await _userService.GetUserByIdAsync(id, cancellationToken);
 
-        return Ok(userDto.Adapt<UserResponse>());
+        return Ok(userDto.Adapt<UserDetailsResponse>());
     }
 
     /// <summary>

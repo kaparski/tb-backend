@@ -12,7 +12,7 @@ public interface IUserService
 
     Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
 
-    Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<UserDetailsDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
 

@@ -78,10 +78,10 @@ public class UserService: IUserService
             .ProjectToType<UserDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
-    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+    public async Task<UserDetailsDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .ProjectToType<UserDto>()
+            .ProjectToType<UserDetailsDto>()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
         ?? throw new NotFoundException(nameof(User), id);
 
