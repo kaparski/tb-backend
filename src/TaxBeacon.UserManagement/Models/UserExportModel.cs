@@ -19,20 +19,20 @@ namespace TaxBeacon.UserManagement.Models
         public string Roles { get; set; } = string.Empty;
 
         [Ignore]
-        public DateTime? LastLoginDateUtc { get; set; }
+        public DateTime? LastLoginDateTimeUtc { get; set; }
 
         [Column("Last Login")]
-        public string LastLoginDateUtcView { get; set; } = string.Empty;
+        public string LastLoginDateTimeUtcView { get; set; } = string.Empty;
 
         [Display(Name = "Status")]
         [Column("Status")]
-        public UserStatus UserStatus { get; set; }
+        public Status Status { get; set; }
 
         [Ignore]
-        public DateTime CreatedDateUtc { get; set; }
+        public DateTime CreatedDateTimeUtc { get; set; }
 
         [Column("Creation date")]
-        public string CreatedDateUtcView { get; set; } = string.Empty;
+        public string CreatedDateTimeUtcView { get; set; } = string.Empty;
 
         [Ignore]
         public DateTime? DeactivationDateTimeUtc { get; set; }

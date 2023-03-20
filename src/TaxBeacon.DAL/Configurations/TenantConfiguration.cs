@@ -22,7 +22,7 @@ public class TenantConfiguration: IEntityTypeConfiguration<Tenant>
             .HasDefaultValueSql("NEWID()");
 
         tenant
-            .Property(t => t.CreatedDateUtc)
+            .Property(t => t.CreatedDateTimeUtc)
             .HasDefaultValueSql("GETUTCDATE()");
     }
 }

@@ -110,7 +110,7 @@ public class RoleServiceTests
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.CreatedDateUtc, f => DateTime.UtcNow);
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
         public static readonly Faker<User> TestUser =
             new Faker<User>()
@@ -118,8 +118,8 @@ public class RoleServiceTests
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
                 .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateUtc, f => DateTime.UtcNow)
-                .RuleFor(u => u.UserStatus, f => f.PickRandom<UserStatus>());
+                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
         public static readonly Faker<Role> TestRole =
             new Faker<Role>()
