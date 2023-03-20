@@ -1,4 +1,5 @@
 ﻿using Gridify;
+using System.Net;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
@@ -25,4 +26,6 @@ public interface IUserService
     Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, string ianaTimeZone, CancellationToken cancellationToken);
 
     Task<Guid> GetTenantIdAsync(Guid userId);
+
+    Task AssignRole(Guid[] roleIds, Guid userId, CancellationToken cancellationToken);
 }

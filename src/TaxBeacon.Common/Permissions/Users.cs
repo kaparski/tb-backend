@@ -4,6 +4,7 @@
     {
         Read,
         ReadWrite,
-        ReadExport
+        ReadExport,
+        AssignRole
     }
 }

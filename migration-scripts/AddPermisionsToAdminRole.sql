@@ -16,6 +16,7 @@ INSERT INTO @adminRolePermissions (Name)
 VALUES ('Users.Read'),
        ('Users.ReadWrite'),
        ('Users.ReadExport'),
+       ('Users.AssignRole'),
        ('Roles.Read')
 
 INSERT INTO Permissions (Id, Name, CreatedDateUtc)

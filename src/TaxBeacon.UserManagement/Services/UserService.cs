@@ -13,6 +13,7 @@ using TaxBeacon.DAL.Entities;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Extensions;
 using System.Collections.Immutable;
+using System.Net;
 using TimeZoneNames;
 
 namespace TaxBeacon.UserManagement.Services;
@@ -230,6 +231,31 @@ public class UserService: IUserService
                 .Where(tu => tu.UserId == userId)
                 .Select(tu => tu.TenantId)
                 .FirstOrDefaultAsync();
+
+    public async Task AssignRole(Guid[] roleIds, Guid userId, CancellationToken cancellationToken)
+    {
+        _context.TenantUserRoles.RemoveRange(_context
+            .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId));
+
+        foreach (var roleId in roleIds)
+        {
+            var existingEntity = await _context.TenantUserRoles
+                .FirstOrDefaultAsync(e => e.RoleId == roleId, cancellationToken);
+
+            if (existingEntity is null)
+            {
+                _context
+                    .TenantUserRoles.Add(new TenantUserRole()
+                    {
+                        RoleId = roleId,
+                        UserId = userId,
+                        TenantId = (await _context.Tenants.FirstAsync(cancellationToken)).Id
+                    });
+            }
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
         await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
