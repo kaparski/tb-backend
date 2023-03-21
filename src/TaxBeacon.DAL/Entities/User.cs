@@ -25,4 +25,6 @@ public class User: BaseEntity
 
     // TODO: Add department, roles and Job title in the future
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
+
+    public ICollection<UserActivityLog> UserActivityLogs { get; set; } = new HashSet<UserActivityLog>();
 }

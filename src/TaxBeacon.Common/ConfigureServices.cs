@@ -11,6 +11,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IDateTimeService, DateTimeService>();
         serviceCollection.AddScoped<IListToFileConverter, ListToCsvConverter>();
         serviceCollection.AddScoped<IListToFileConverter, ListToXlsxConverter>();
+        serviceCollection.AddScoped<IDateTimeFormatter, DateTimeFormatter>();
 
         return serviceCollection;
     }

@@ -31,6 +31,7 @@ public class UserServiceTests
     private readonly Mock<IListToFileConverter> _xlsxMock;
     private readonly Mock<IUserExternalStore> _userExternalStore;
     private readonly ITaxBeaconDbContext _dbContextMock;
+    private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
     private readonly UserService _userService;
 
     public UserServiceTests()
@@ -43,6 +44,7 @@ public class UserServiceTests
         _userExternalStore = new();
         _csvMock = new();
         _xlsxMock = new();
+        _dateTimeFormatterMock = new();
 
         _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
         _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
@@ -58,13 +60,18 @@ public class UserServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
+        var currentUser = TestData.TestUser.Generate();
+        _dbContextMock.Users.Add(currentUser);
+        _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id.ToString());
+
         _userService = new UserService(
             _userServiceLoggerMock.Object,
             _dbContextMock,
             _dateTimeServiceMock.Object,
             _currentUserServiceMock.Object,
             _listToFileConverters.Object,
-            _userExternalStore.Object);
+            _userExternalStore.Object,
+            _dateTimeFormatterMock.Object);
 
         TypeAdapterConfig.GlobalSettings.Scan(typeof(UserMappingConfig).Assembly);
     }
@@ -132,7 +139,7 @@ public class UserServiceTests
             actualResult.TenantUsers.First().TenantId.Should().Be(tenant.Id);
             actualResult.LastLoginDateUtc.Should().Be(currentDate);
             _dateTimeServiceMock
-                .Verify(ds => ds.UtcNow, Times.Exactly(2));
+                .Verify(ds => ds.UtcNow, Times.Exactly(4));
         }
     }
 
@@ -140,35 +147,10 @@ public class UserServiceTests
     public async Task GetUsersAsync_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfUsersAndCorrectPage()
     {
         // Arrange
-        TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNext<string>(TestData.CustomEmails));
         var users = TestData.TestUser.Generate(5);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 4, OrderBy = "email asc" };
-
-        // Act
-        var usersOneOf = await _userService.GetUsersAsync(query, default);
-
-        // Assert
-        usersOneOf.TryPickT0(out var pageOfUsers, out _);
-        pageOfUsers.Should().NotBeNull();
-        var listOfUsers = pageOfUsers.Query.ToList();
-        listOfUsers.Count.Should().Be(1);
-        listOfUsers[0].Email.Should().Be("abc@gmail.com");
-        pageOfUsers.Count.Should().Be(5);
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfUsersInDescendingOrder()
-    {
-        // Arrange
-        TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNext<string>(TestData.CustomEmails));
-        var users = TestData.TestUser.Generate(6);
-        await _dbContextMock.Users.AddRangeAsync(users);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc" };
+        var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "email asc" };
 
         // Act
         var usersOneOf = await _userService.GetUsersAsync(query, default);
@@ -178,16 +160,38 @@ public class UserServiceTests
         pageOfUsers.Should().NotBeNull();
         var listOfUsers = pageOfUsers.Query.ToList();
         listOfUsers.Count.Should().Be(6);
-        listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
+        listOfUsers.Select(x => x.Email).Should().BeInAscendingOrder();
         pageOfUsers.Count.Should().Be(6);
+    }
+
+    [Fact]
+    public async Task GetUsersAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfUsersInDescendingOrder()
+    {
+        // Arrange
+        var users = TestData.TestUser.Generate(6);
+        await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "email desc" };
+
+        // Act
+        var usersOneOf = await _userService.GetUsersAsync(query, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            usersOneOf.TryPickT0(out var pageOfUsers, out _);
+            pageOfUsers.Should().NotBeNull();
+            var listOfUsers = pageOfUsers.Query.ToList();
+            listOfUsers.Count.Should().Be(4);
+            listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
+            pageOfUsers.Count.Should().Be(7);
+        }
     }
 
     [Fact]
     public async Task GetUsersAsync_PageNumberOutsideOfTotalRange_UserListIsEmpty()
     {
         // Arrange
-        TestData.TestUser
-            .RuleFor(u => u.Email, (f, u) => TestData.GetNext<string>(TestData.CustomEmails));
         var users = TestData.TestUser.Generate(6);
         await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
@@ -255,7 +259,7 @@ public class UserServiceTests
             .Returns(currentDate);
 
         //Act
-        var actualResult = await _userService.UpdateUserStatusAsync(user.Id, UserStatus.Active);
+        var actualResult = await _userService.UpdateUserStatusAsync(tenant.Id, user.Id, UserStatus.Active);
 
         //Assert
         using (new AssertionScope())
@@ -266,7 +270,7 @@ public class UserServiceTests
             actualResult.ReactivationDateTimeUtc.Should().Be(currentDate);
 
             _dateTimeServiceMock
-                .Verify(ds => ds.UtcNow, Times.Exactly(2));
+                .Verify(ds => ds.UtcNow, Times.Exactly(3));
         }
     }
 
@@ -288,7 +292,7 @@ public class UserServiceTests
             .Returns(currentDate);
 
         //Act
-        var actualResult = await _userService.UpdateUserStatusAsync(user.Id, UserStatus.Deactivated);
+        var actualResult = await _userService.UpdateUserStatusAsync(tenant.Id, user.Id, UserStatus.Deactivated);
 
         //Assert
         using (new AssertionScope())
@@ -299,7 +303,7 @@ public class UserServiceTests
             actualResult.DeactivationDateTimeUtc.Should().Be(currentDate);
 
             _dateTimeServiceMock
-                .Verify(ds => ds.UtcNow, Times.Exactly(2));
+                .Verify(ds => ds.UtcNow, Times.Exactly(4));
 
             // TODO: Verify logs
         }
@@ -311,7 +315,7 @@ public class UserServiceTests
         Guid userId)
     {
         //Act
-        Func<Task> act = async () => await _userService.UpdateUserStatusAsync(userId, userStatus);
+        Func<Task> act = async () => await _userService.UpdateUserStatusAsync(Guid.NewGuid(), userId, userStatus);
 
         //Assert
         await act
@@ -390,7 +394,7 @@ public class UserServiceTests
         await _dbContextMock.SaveChangesAsync();
 
         //Act
-        _ = await _userService.ExportUsersAsync(tenant.Id, fileType, "", default);
+        _ = await _userService.ExportUsersAsync(tenant.Id, fileType, default);
 
         //Assert
         if (fileType == FileType.Csv)
@@ -407,53 +411,8 @@ public class UserServiceTests
         }
     }
 
-    [Fact]
-    public async Task ExportUsersAsync_ValidInputData_DatesShoulBeInAppropriateTimeZone()
-    {
-        //Arrange
-        var tenant = TestData.TestTenant.Generate();
-        var users = TestData.TestUser.Generate(1);
-
-        foreach (var user in users)
-        {
-            user.CreatedDateUtc = new DateTime(2023, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-            user.LastLoginDateUtc = new DateTime(2023, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-            user.ReactivationDateTimeUtc = new DateTime(2023, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-            user.DeactivationDateTimeUtc = new DateTime(2023, 1, 1, 10, 0, 0, DateTimeKind.Utc);
-
-            user.TenantUsers.Add(new TenantUser { Tenant = tenant });
-        }
-
-        await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.Users.AddRangeAsync(users);
-        await _dbContextMock.SaveChangesAsync();
-
-        //Act
-        _ = await _userService.ExportUsersAsync(tenant.Id, FileType.Csv, "America/New_York", default);
-
-        //Assert
-        _csvMock.Verify(x => x
-            .Convert(It.Is<List<UserExportModel>>(l =>
-                l.Count == 1
-                && l[0].LastLoginDateUtc == new DateTime(2023, 1, 1, 5, 0, 0)
-                && l[0].CreatedDateUtc == new DateTime(2023, 1, 1, 5, 0, 0)
-                && l[0].ReactivationDateTimeUtc == new DateTime(2023, 1, 1, 5, 0, 0)
-                && l[0].DeactivationDateTimeUtc == new DateTime(2023, 1, 1, 5, 0, 0))));
-    }
-
     private static class TestData
     {
-        public static readonly List<string> CustomEmails = new() { "aaa@gmail.com", "abb@gmail.com", "abc@gmail.com" };
-
-        static int _nameIndex = 0;
-
-        public static T GetNext<T>(List<T> list)
-        {
-            if (_nameIndex >= list.Count)
-                _nameIndex = 0;
-            return list[_nameIndex++];
-        }
-
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())

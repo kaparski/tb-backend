@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Data;
+using System.Security.Claims;
+using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
@@ -24,7 +26,16 @@ public class UsersControllerTest
     {
         _userServiceMock = new();
 
-        _controller = new UsersController(_userServiceMock.Object);
+        _controller = new UsersController(_userServiceMock.Object)
+        {
+            ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new[] { new ClaimsIdentity(new[] { new Claim(Claims.TenantId, Guid.NewGuid().ToString()) }) })
+                }
+            }
+        };
     }
 
     [Fact]
@@ -86,6 +97,7 @@ public class UsersControllerTest
 
         _userServiceMock
             .Setup(service => service.UpdateUserStatusAsync(
+                It.IsAny<Guid>(),
                 It.Is<Guid>(id => id == userDto.Id),
                 It.IsAny<UserStatus>(),
                 It.IsAny<CancellationToken>()))
@@ -119,7 +131,6 @@ public class UsersControllerTest
             .Setup(x => x.ExportUsersAsync(
                 It.IsAny<Guid>(),
                 It.IsAny<FileType>(),
-                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<byte>());
 
