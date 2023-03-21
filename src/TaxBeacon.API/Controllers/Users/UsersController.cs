@@ -152,7 +152,7 @@ public class UsersController: BaseController
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        await _userService.AssignRole(roleIds, id, cancellationToken);
+        await _userService.AssignRoleAsync(roleIds, id, cancellationToken);
 
         return Ok();
     }

@@ -232,7 +232,7 @@ public class UserService: IUserService
                 .Select(tu => tu.TenantId)
                 .FirstOrDefaultAsync();
 
-    public async Task AssignRole(Guid[] roleIds, Guid userId, CancellationToken cancellationToken)
+    public async Task AssignRoleAsync(Guid[] roleIds, Guid userId, CancellationToken cancellationToken)
     {
         _context.TenantUserRoles.RemoveRange(_context
             .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId));

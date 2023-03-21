@@ -437,6 +437,69 @@ public class UserServiceTests
                 && l[0].DeactivationDateTimeUtc == new DateTime(2023, 1, 1, 5, 0, 0))));
     }
 
+    [Fact]
+    public async Task AssignRoleAsync_ValidRoleIds_ShouldAssignAllProvidedRoles()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var user = TestData.TestUser.Generate();
+        var roles = TestData.TestRoles.Generate(2);
+        var tenantUser = new TenantUser
+        {
+            Tenant = tenant,
+            User = user
+        };
+
+        user.TenantUsers.Add(tenantUser);
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        await _userService.AssignRoleAsync(roles.Select(x => x.Id).ToArray(), user.Id, default);
+
+        //Assert
+        _dbContextMock.TenantUserRoles.Count().Should().Be(2);
+    }
+
+    [Fact]
+    public async Task AssignRoleAsync_ValidRoleIds_ShouldAssignAllProvidedRolesAndRemoveNotAssigned()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var user = TestData.TestUser.Generate();
+        var roles = TestData.TestRoles.Generate(2);
+        var tenantRoles = roles.Select(x => new TenantRole
+        {
+            Tenant = tenant,
+            Role = x
+        });
+        var tenantUser = new TenantUser
+        {
+            Tenant = tenant,
+            User = user
+        };
+
+        foreach (var tenantRole in tenantRoles)
+        {
+            await _dbContextMock.TenantUserRoles.AddAsync(new TenantUserRole()
+            {
+                TenantUser = tenantUser,
+                TenantRole = tenantRole
+            });
+        }
+        user.TenantUsers.Add(tenantUser);
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        await _userService.AssignRoleAsync(new[] { roles.Select(x => x.Id).First() }, user.Id, default);
+
+        //Assert
+        _dbContextMock.TenantUserRoles.Count().Should().Be(1);
+    }
+
     private static class TestData
     {
         public static readonly List<string> CustomEmails = new() { "aaa@gmail.com", "abb@gmail.com", "abc@gmail.com" };
@@ -471,5 +534,10 @@ public class UserServiceTests
                 new object[] { UserStatus.Active, Guid.NewGuid() },
                 new object[] { UserStatus.Deactivated, Guid.Empty }
             };
+
+        public static readonly Faker<Role> TestRoles =
+            new Faker<Role>()
+                .RuleFor(u => u.Id, f => Guid.NewGuid())
+                .RuleFor(u => u.Name, f => f.Name.JobTitle());
     }
 }

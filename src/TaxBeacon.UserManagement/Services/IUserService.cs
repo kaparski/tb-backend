@@ -27,5 +27,5 @@ public interface IUserService
 
     Task<Guid> GetTenantIdAsync(Guid userId);
 
-    Task AssignRole(Guid[] roleIds, Guid userId, CancellationToken cancellationToken);
+    Task AssignRoleAsync(Guid[] roleIds, Guid userId, CancellationToken cancellationToken);
 }
