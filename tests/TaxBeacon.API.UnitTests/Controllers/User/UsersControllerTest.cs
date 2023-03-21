@@ -9,6 +9,7 @@ using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -22,7 +23,6 @@ public class UsersControllerTest
     public UsersControllerTest()
     {
         _userServiceMock = new();
-
         _controller = new UsersController(_userServiceMock.Object);
     }
 
