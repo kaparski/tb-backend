@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using TaxBeacon.API.Authentication;
 using TaxBeacon.Common.Services;
 
 namespace TaxBeacon.API.Services;
