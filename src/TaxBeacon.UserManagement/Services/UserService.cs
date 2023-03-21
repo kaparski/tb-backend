@@ -239,10 +239,10 @@ public class UserService: IUserService
 
         foreach (var roleId in roleIds)
         {
-            var existingEntity = await _context.TenantUserRoles
+            var existingRole = await _context.TenantUserRoles
                 .FirstOrDefaultAsync(e => e.RoleId == roleId, cancellationToken);
 
-            if (existingEntity is null)
+            if (existingRole is null)
             {
                 _context
                     .TenantUserRoles.Add(new TenantUserRole()
@@ -253,7 +253,11 @@ public class UserService: IUserService
                     });
             }
         }
-
+        _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roleIds} roles by {@userId}",
+            _dateTimeService.UtcNow,
+            userId,
+            string.Join(",", roleIds),
+            _currentUserService.UserId);
         await _context.SaveChangesAsync(cancellationToken);
     }
 

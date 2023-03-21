@@ -145,15 +145,14 @@ public class UsersController: BaseController
     /// <summary>
     /// Assign Role to User
     /// </summary>
-    [HasPermissions(Common.Permissions.Users.AssignRole)]
-    [HasPermissions(Common.Permissions.Roles.Read)]
-    [HttpPut("{id:guid}/assign", Name = "AssignRoles")]
+    [HasPermissions(Common.Permissions.Users.AssignRole, Common.Permissions.Roles.Read)]
+    [HttpPost("{id:guid}/assign", Name = "AssignRoles")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> AssignRoleToUser([FromBody] Guid[] roleIds,
-        [FromRoute] Guid userId,
+    public async Task<IActionResult> AssignRole([FromBody] Guid[] roleIds,
+        [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        await _userService.AssignRole(roleIds, userId, cancellationToken);
+        await _userService.AssignRole(roleIds, id, cancellationToken);
 
         return Ok();
     }
