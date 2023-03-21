@@ -14,7 +14,7 @@ public class CurrentUserService: ICurrentUserService
         get
         {
             var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue("userId");
-            return userId is null ? new Guid() : new Guid(userId);
+            return userId is null ? Guid.Empty : new Guid(userId);
         }
     }
 }
