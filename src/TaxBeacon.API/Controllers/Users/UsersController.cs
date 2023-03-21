@@ -122,7 +122,8 @@ public class UsersController: BaseController
         CancellationToken cancellationToken)
     {
 
-        var user = await _userService.UpdateUserStatusAsync(Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value), id, userStatus, cancellationToken);
+        var user = await _userService.UpdateUserStatusAsync(
+            Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value), id, userStatus, cancellationToken);
 
         return Ok(user.Adapt<UserResponse>());
     }

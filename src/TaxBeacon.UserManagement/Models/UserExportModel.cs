@@ -38,12 +38,12 @@ namespace TaxBeacon.UserManagement.Models
         public DateTime? DeactivationDateTimeUtc { get; set; }
 
         [Column("Deactivation date")]
-        public string DeactivationDateTimeUtcView { get; set; } = string.Empty;
+        public string DeactivationDateTimeView { get; set; } = string.Empty;
 
         [Ignore]
         public DateTime? ReactivationDateTimeUtc { get; set; }
 
         [Column("Reactivation date")]
-        public string ReactivationDateTimeUtcView { get; set; } = string.Empty;
+        public string ReactivationDateTimeView { get; set; } = string.Empty;
     }
 }
