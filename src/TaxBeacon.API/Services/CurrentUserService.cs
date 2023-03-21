@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using TaxBeacon.API.Authentication;
 using TaxBeacon.Common.Services;
 
 namespace TaxBeacon.API.Services;
@@ -9,5 +10,8 @@ public class CurrentUserService: ICurrentUserService
 
     public CurrentUserService(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
-    public string UserId => _httpContextAccessor.HttpContext?.User?.FindFirstValue("userId") ?? string.Empty;
+    public Guid UserId =>
+        Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(Claims.UserIdClaimName), null, out var id)
+            ? id
+            : Guid.Empty;
 }
