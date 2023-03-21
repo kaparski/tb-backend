@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TaxBeacon.API.Controllers.Roles;
 using TaxBeacon.API.Controllers.Roles.Responses;
-using TaxBeacon.API.Controllers.Users;
-using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -28,10 +26,8 @@ public class RolesControllerTest
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name asc", };
-        _roleServiceMock.Setup(p => p.GetRolesAsync(query, default))
-            .ReturnsAsync(
-                new QueryablePaging<RoleDto>(0,
-                    Enumerable.Empty<RoleDto>().AsQueryable()));
+        _roleServiceMock.Setup(p => p.GetRolesAsync(It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(new QueryablePaging<RoleDto>(0, Enumerable.Empty<RoleDto>().AsQueryable()));
 
         // Act
         var actualResponse = await _controller.GetRoleList(query, default);

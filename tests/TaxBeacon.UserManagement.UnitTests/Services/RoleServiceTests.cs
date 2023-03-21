@@ -22,8 +22,6 @@ public class RoleServiceTests
 
     public RoleServiceTests()
     {
-        TypeAdapterConfig.GlobalSettings.Scan(typeof(RoleMappingConfig).Assembly);
-
         _entitySaveChangesInterceptorMock = new();
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -39,11 +37,12 @@ public class RoleServiceTests
     {
         //Arrange
         await TestData.SeedTestDataAsync(_dbContextMock);
+        var tenantId = (await _dbContextMock.Tenants.FirstAsync()).Id;
 
         var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "name asc" };
 
         //Act
-        var pageOfUsers = await _roleService.GetRolesAsync(query, default);
+        var pageOfUsers = await _roleService.GetRolesAsync(tenantId, query);
 
         //Assert
         var listOfRoles = pageOfUsers.Query.ToList();
@@ -58,11 +57,12 @@ public class RoleServiceTests
     {
         //Arrange
         await TestData.SeedTestDataAsync(_dbContextMock);
+        var tenantId = (await _dbContextMock.Tenants.FirstAsync()).Id;
 
         var query = new GridifyQuery { Page = 3, PageSize = 25, OrderBy = "name asc", };
 
         //Act
-        var pageOfRoles = await _roleService.GetRolesAsync(query, default);
+        var pageOfRoles = await _roleService.GetRolesAsync(tenantId, query);
 
         //Assert
         pageOfRoles.Count.Should().Be(3);
@@ -106,13 +106,13 @@ public class RoleServiceTests
             await dbContext.SaveChangesAsync();
         }
 
-        public static readonly Faker<Tenant> TestTenant =
+        private static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
-        public static readonly Faker<User> TestUser =
+        private static readonly Faker<User> TestUser =
             new Faker<User>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
@@ -121,7 +121,7 @@ public class RoleServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
-        public static readonly Faker<Role> TestRole =
+        private static readonly Faker<Role> TestRole =
             new Faker<Role>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.Name, f => f.Name.JobTitle());

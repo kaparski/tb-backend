@@ -5,6 +5,6 @@ namespace TaxBeacon.UserManagement.Services;
 
 public interface IRoleService
 {
-    Task<QueryablePaging<RoleDto>> GetRolesAsync(GridifyQuery gridifyQuery,
+    Task<QueryablePaging<RoleDto>> GetRolesAsync(Guid tenantId, GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 }
