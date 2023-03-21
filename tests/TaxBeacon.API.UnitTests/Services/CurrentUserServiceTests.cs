@@ -38,7 +38,6 @@ public class CurrentUserServiceTests
 
         // Assert
         actualResult.Should().NotBeEmpty();
-        actualResult.Should().NotBe(Guid.Empty);
         actualResult.Should().Be(userId);
     }
 
