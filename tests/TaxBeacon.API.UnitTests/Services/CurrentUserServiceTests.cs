@@ -37,8 +37,9 @@ public class CurrentUserServiceTests
         var actualResult = _currentUserService.UserId;
 
         // Assert
-        actualResult.ToString().Should().NotBeNullOrEmpty();
-        actualResult.ToString().Should().Be(userId.ToString());
+        actualResult.Should().NotBeEmpty();
+        actualResult.Should().NotBe(Guid.Empty);
+        actualResult.Should().Be(userId);
     }
 
     [Fact]
