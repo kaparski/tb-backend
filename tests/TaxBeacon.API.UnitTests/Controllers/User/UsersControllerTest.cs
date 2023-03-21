@@ -10,6 +10,7 @@ using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -18,13 +19,14 @@ namespace TaxBeacon.API.UnitTests.Controllers.User;
 public class UsersControllerTest
 {
     private readonly Mock<IUserService> _userServiceMock;
+    private readonly Mock<ICurrentUserService> _currentServiceMock;
     private readonly UsersController _controller;
 
     public UsersControllerTest()
     {
         _userServiceMock = new();
-
-        _controller = new UsersController(_userServiceMock.Object);
+        _currentServiceMock = new Mock<ICurrentUserService>();
+        _controller = new UsersController(_userServiceMock.Object, _currentServiceMock.Object);
     }
 
     [Fact]

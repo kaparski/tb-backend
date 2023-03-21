@@ -8,6 +8,7 @@ using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -17,8 +18,13 @@ namespace TaxBeacon.API.Controllers.Users;
 public class UsersController: BaseController
 {
     private readonly IUserService _userService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public UsersController(IUserService userService) => _userService = userService;
+    public UsersController(IUserService userService, ICurrentUserService currentUserService)
+    {
+        _userService = userService;
+        _currentUserService = currentUserService;
+    }
 
     /// <summary>
     /// List of users
@@ -149,5 +155,20 @@ public class UsersController: BaseController
         };
 
         return File(users, mimeType, $"users.{exportUsersRequest.FileType.ToString().ToLowerInvariant()}");
+    }
+
+    /// <summary>
+    /// My Profile
+    /// </summary>
+    /// <response code="200">Returns my profile details</response>
+    /// <returns>User</returns>
+    [HttpGet("/api/me/profile", Name = "GetMyProfile")]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
+    {
+        var currentUserId = _currentUserService.UserId;
+        var userDto = await _userService.GetUserByIdAsync(currentUserId, cancellationToken);
+
+        return Ok(userDto.Adapt<UserResponse>());
     }
 }

@@ -9,5 +9,12 @@ public class CurrentUserService: ICurrentUserService
 
     public CurrentUserService(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
-    public string UserId => _httpContextAccessor.HttpContext?.User?.FindFirstValue("userId") ?? string.Empty;
+    public Guid UserId
+    {
+        get
+        {
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue("userId");
+            return userId is null ? new Guid() : new Guid(userId);
+        }
+    }
 }
