@@ -58,6 +58,7 @@ public static class ConfigureServices
                 .WithExposedHeaders("Content-Disposition")));
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<ICurrentTimeZoneService, CurrentTimeZoneService>();
 
         return services;
     }
