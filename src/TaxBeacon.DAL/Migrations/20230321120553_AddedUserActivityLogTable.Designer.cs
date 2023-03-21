@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230321120553_AddedUserActivityLogTable")]
+    partial class AddedUserActivityLogTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,18 +32,18 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<DateTime>("CreatedDateTimeUtc")
+                    b.Property<DateTime>("CreatedDateUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                    b.Property<DateTime?>("DeletedDateUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                    b.Property<DateTime?>("LastModifiedUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -63,18 +66,18 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<DateTime>("CreatedDateTimeUtc")
+                    b.Property<DateTime>("CreatedDateUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                    b.Property<DateTime?>("DeletedDateUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                    b.Property<DateTime?>("LastModifiedUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -97,18 +100,18 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<DateTime>("CreatedDateTimeUtc")
+                    b.Property<DateTime>("CreatedDateUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                    b.Property<DateTime?>("DeletedDateUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                    b.Property<DateTime?>("LastModifiedUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -212,7 +215,7 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<DateTime>("CreatedDateTimeUtc")
+                    b.Property<DateTime>("CreatedDateUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
@@ -220,7 +223,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("DeactivationDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                    b.Property<DateTime?>("DeletedDateUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
@@ -243,10 +246,10 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("LastLoginDateTimeUtc")
+                    b.Property<DateTime?>("LastLoginDateUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                    b.Property<DateTime?>("LastModifiedUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LastName")
@@ -257,7 +260,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("ReactivationDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Status")
+                    b.Property<string>("UserStatus")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");

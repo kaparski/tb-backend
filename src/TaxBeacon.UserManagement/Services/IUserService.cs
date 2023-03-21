@@ -18,13 +18,13 @@ public interface IUserService
 
     Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
 
-    Task<UserDto> UpdateUserStatusAsync(Guid id, Status status, CancellationToken cancellationToken = default);
+    Task<UserDto> UpdateUserStatusAsync(Guid tenantId, Guid id, Status userStatus, CancellationToken cancellationToken = default);
 
     Task<UserDto> CreateUserAsync(
         UserDto user,
         CancellationToken cancellationToken = default);
 
-    Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, string ianaTimeZone, CancellationToken cancellationToken);
+    Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, CancellationToken cancellationToken);
 
     Task<Guid> GetTenantIdAsync(Guid userId);
 }

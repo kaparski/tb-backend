@@ -22,5 +22,7 @@ public interface ITaxBeaconDbContext
 
     DbSet<TenantRole> TenantRoles { get; }
 
+    DbSet<UserActivityLog> UserActivityLogs { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

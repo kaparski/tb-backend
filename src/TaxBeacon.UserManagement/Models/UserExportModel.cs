@@ -22,7 +22,7 @@ namespace TaxBeacon.UserManagement.Models
         public DateTime? LastLoginDateTimeUtc { get; set; }
 
         [Column("Last Login")]
-        public string LastLoginDateTimeUtcView { get; set; } = string.Empty;
+        public string LastLoginDateView { get; set; } = string.Empty;
 
         [Display(Name = "Status")]
         [Column("Status")]
@@ -32,7 +32,7 @@ namespace TaxBeacon.UserManagement.Models
         public DateTime CreatedDateTimeUtc { get; set; }
 
         [Column("Creation date")]
-        public string CreatedDateTimeUtcView { get; set; } = string.Empty;
+        public string CreatedDateView { get; set; } = string.Empty;
 
         [Ignore]
         public DateTime? DeactivationDateTimeUtc { get; set; }
