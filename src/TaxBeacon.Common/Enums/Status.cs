@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.Common.Enums;
 
-public enum UserStatus
+public enum Status
 {
     Active = 1,
 

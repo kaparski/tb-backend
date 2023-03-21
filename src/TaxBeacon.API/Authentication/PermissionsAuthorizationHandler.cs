@@ -38,7 +38,7 @@ namespace TaxBeacon.API.Authentication
                 var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
                 var user = await userService.GetUserByEmailAsync(new MailAddress(email), default);
 
-                if (user.DeactivationDateTimeUtc is not null || user.UserStatus == UserStatus.Deactivated)
+                if (user.DeactivationDateTimeUtc is not null || user.Status == Status.Deactivated)
                 {
                     context.Fail();
                     return;

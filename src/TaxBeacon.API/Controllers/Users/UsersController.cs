@@ -118,11 +118,12 @@ public class UsersController: BaseController
     [HasPermissions(Common.Permissions.Users.ReadWrite)]
     [HttpPut("{id:guid}/status", Name = "UpdateUserStatus")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<UserResponse>> UpdateUserStatusAsync(Guid id, [FromBody] UserStatus userStatus,
+    public async Task<ActionResult<UserResponse>> UpdateUserStatusAsync(Guid id, [FromBody] Status userStatus,
         CancellationToken cancellationToken)
     {
 
-        var user = await _userService.UpdateUserStatusAsync(Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value), id, userStatus, cancellationToken);
+        var user = await _userService.UpdateUserStatusAsync(
+            Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value), id, userStatus, cancellationToken);
 
         return Ok(user.Adapt<UserResponse>());
     }

@@ -37,7 +37,7 @@ public class AuthorizeFilterTests
     {
         // Arrange
         var user = TestData.TestUser.Generate();
-        user.UserStatus = UserStatus.Active;
+        user.Status = Status.Active;
         var identity = new GenericIdentity("test", "test");
         identity.AddClaim(new Claim("preferred_username", user.Email));
         var contextUser = new ClaimsPrincipal(identity);
@@ -68,7 +68,7 @@ public class AuthorizeFilterTests
     {
         // Arrange
         var user = TestData.TestUser.Generate();
-        user.UserStatus = UserStatus.Deactivated;
+        user.Status = Status.Deactivated;
         var identity = new GenericIdentity("test", "test");
         identity.AddClaim(new Claim("preferred_username", user.Email));
         var contextUser = new ClaimsPrincipal(identity);
@@ -97,7 +97,7 @@ public class AuthorizeFilterTests
     {
         // Arrange
         var user = TestData.TestUser.Generate();
-        user.UserStatus = UserStatus.Active;
+        user.Status = Status.Active;
         user.DeactivationDateTimeUtc = DateTime.UtcNow;
         var identity = new GenericIdentity("test", "test");
         identity.AddClaim(new Claim("preferred_username", user.Email));
@@ -159,9 +159,9 @@ public class AuthorizeFilterTests
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
                 .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateUtc, f => DateTime.UtcNow)
+                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.ReactivationDateTimeUtc, f => null)
                 .RuleFor(u => u.DeactivationDateTimeUtc, f => null)
-                .RuleFor(u => u.UserStatus, f => f.PickRandom<UserStatus>());
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
     }
 }

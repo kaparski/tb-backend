@@ -18,7 +18,7 @@ public interface IUserService
 
     Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
 
-    Task<UserDto> UpdateUserStatusAsync(Guid tenantId, Guid id, UserStatus userStatus, CancellationToken cancellationToken = default);
+    Task<UserDto> UpdateUserStatusAsync(Guid tenantId, Guid id, Status userStatus, CancellationToken cancellationToken = default);
 
     Task<UserDto> CreateUserAsync(
         UserDto user,

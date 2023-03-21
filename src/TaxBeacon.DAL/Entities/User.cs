@@ -12,10 +12,9 @@ public class User: BaseEntity
 
     public string Email { get; set; } = null!;
 
-    public UserStatus UserStatus { get; set; }
+    public Status Status { get; set; }
 
-    //  TODO: Rename such columns to LastLoginDateTimeUtc
-    public DateTime? LastLoginDateUtc { get; set; }
+    public DateTime? LastLoginDateTimeUtc { get; set; }
 
     public string FullName { get; private set; } = string.Empty;
 

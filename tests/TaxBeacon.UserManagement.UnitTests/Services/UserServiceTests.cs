@@ -100,7 +100,7 @@ public class UserServiceTests
 
         //Assert
         (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-        actualResult.LastLoginDateUtc.Should().BeAfter(currentDate);
+        actualResult.LastLoginDateTimeUtc.Should().BeAfter(currentDate);
         _dateTimeServiceMock
             .Verify(ds => ds.UtcNow, Times.Once);
     }
@@ -137,7 +137,7 @@ public class UserServiceTests
                 .And
                 .HaveCount(1);
             actualResult.TenantUsers.First().TenantId.Should().Be(tenant.Id);
-            actualResult.LastLoginDateUtc.Should().Be(currentDate);
+            actualResult.LastLoginDateTimeUtc.Should().Be(currentDate);
             _dateTimeServiceMock
                 .Verify(ds => ds.UtcNow, Times.Exactly(4));
         }
@@ -237,7 +237,7 @@ public class UserServiceTests
                 .And
                 .HaveCount(1);
             actualResult.TenantUsers.First().TenantId.Should().Be(tenant.Id);
-            actualResult.CreatedDateUtc.Should().Be(user.CreatedDateUtc);
+            actualResult.CreatedDateTimeUtc.Should().Be(user.CreatedDateTimeUtc);
         }
     }
 
@@ -259,13 +259,13 @@ public class UserServiceTests
             .Returns(currentDate);
 
         //Act
-        var actualResult = await _userService.UpdateUserStatusAsync(tenant.Id, user.Id, UserStatus.Active);
+        var actualResult = await _userService.UpdateUserStatusAsync(tenant.Id, user.Id, Status.Active);
 
         //Assert
         using (new AssertionScope())
         {
             (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-            actualResult.UserStatus.Should().Be(UserStatus.Active);
+            actualResult.Status.Should().Be(Status.Active);
             actualResult.DeactivationDateTimeUtc.Should().BeNull();
             actualResult.ReactivationDateTimeUtc.Should().Be(currentDate);
 
@@ -292,13 +292,13 @@ public class UserServiceTests
             .Returns(currentDate);
 
         //Act
-        var actualResult = await _userService.UpdateUserStatusAsync(tenant.Id, user.Id, UserStatus.Deactivated);
+        var actualResult = await _userService.UpdateUserStatusAsync(tenant.Id, user.Id, Status.Deactivated);
 
         //Assert
         using (new AssertionScope())
         {
             (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-            actualResult.UserStatus.Should().Be(UserStatus.Deactivated);
+            actualResult.Status.Should().Be(Status.Deactivated);
             actualResult.ReactivationDateTimeUtc.Should().BeNull();
             actualResult.DeactivationDateTimeUtc.Should().Be(currentDate);
 
@@ -311,11 +311,11 @@ public class UserServiceTests
 
     [Theory]
     [MemberData(nameof(TestData.UpdatedStatusInvalidData), MemberType = typeof(TestData))]
-    public async Task UpdateUserStatusAsync_UserStatusAndUserIdNotInDb_ThrowNotFoundException(UserStatus userStatus,
+    public async Task UpdateUserStatusAsync_UserStatusAndUserIdNotInDb_ThrowNotFoundException(Status status,
         Guid userId)
     {
         //Act
-        Func<Task> act = async () => await _userService.UpdateUserStatusAsync(Guid.NewGuid(), userId, userStatus);
+        Func<Task> act = async () => await _userService.UpdateUserStatusAsync(Guid.NewGuid(), userId, status);
 
         //Assert
         await act
@@ -417,7 +417,7 @@ public class UserServiceTests
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.CreatedDateUtc, f => DateTime.UtcNow);
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
         public static readonly Faker<User> TestUser =
             new Faker<User>()
@@ -425,14 +425,14 @@ public class UserServiceTests
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
                 .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateUtc, f => DateTime.UtcNow)
-                .RuleFor(u => u.UserStatus, f => f.PickRandom<UserStatus>());
+                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
         public static IEnumerable<object[]> UpdatedStatusInvalidData =>
             new List<object[]>
             {
-                new object[] { UserStatus.Active, Guid.NewGuid() },
-                new object[] { UserStatus.Deactivated, Guid.Empty }
+                new object[] { Status.Active, Guid.NewGuid() },
+                new object[] { Status.Deactivated, Guid.Empty }
             };
     }
 }

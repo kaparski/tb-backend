@@ -68,12 +68,12 @@ public class UserService: IUserService
                     FirstName = string.Empty,
                     LastName = string.Empty,
                     Email = mailAddress.Address,
-                    LastLoginDateUtc = _dateTimeService.UtcNow,
+                    LastLoginDateTimeUtc = _dateTimeService.UtcNow,
                 }, cancellationToken);
         }
         else
         {
-            user.LastLoginDateUtc = _dateTimeService.UtcNow;
+            user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
         }
     }
@@ -106,7 +106,7 @@ public class UserService: IUserService
             .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
         ?? throw new NotFoundException(nameof(User), mailAddress.Address);
 
-    public async Task<UserDto> UpdateUserStatusAsync(Guid tenantId, Guid id, UserStatus userStatus,
+    public async Task<UserDto> UpdateUserStatusAsync(Guid tenantId, Guid id, Status status,
         CancellationToken cancellationToken = default)
     {
         // TODO: Move the same code into separated method
@@ -115,28 +115,28 @@ public class UserService: IUserService
                        .FirstOrDefaultAsync(user => user.Id == id, cancellationToken)
                    ?? throw new NotFoundException(nameof(User), id);
 
-        switch (userStatus)
+        switch (status)
         {
-            case UserStatus.Deactivated:
+            case Status.Deactivated:
                 user.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
                 user.ReactivationDateTimeUtc = null;
-                user.UserStatus = UserStatus.Deactivated;
+                user.Status = Status.Deactivated;
                 break;
-            case UserStatus.Active:
+            case Status.Active:
                 user.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
                 user.DeactivationDateTimeUtc = null;
-                user.UserStatus = UserStatus.Active;
+                user.Status = Status.Active;
                 break;
         }
 
-        user.UserStatus = userStatus;
+        user.Status = status;
 
         var now = _dateTimeService.UtcNow;
         var currentUser = await GetUserByIdAsync(_currentUserService.UserId, cancellationToken);
 
-        var userActivityLog = userStatus switch
+        var userActivityLog = status switch
         {
-            UserStatus.Active => new UserActivityLog
+            Status.Active => new UserActivityLog
             {
                 TenantId = tenantId,
                 UserId = user.Id,
@@ -149,7 +149,7 @@ public class UserService: IUserService
                                              currentUser.Roles)),
                 EventType = EventType.UserReactivated
             },
-            UserStatus.Deactivated => new UserActivityLog
+            Status.Deactivated => new UserActivityLog
             {
                 TenantId = tenantId,
                 UserId = user.Id,
@@ -171,7 +171,7 @@ public class UserService: IUserService
         _logger.LogInformation("{dateTime} - User ({createdUserId}) status was changed to {newUserStatus} by {@userId}",
             _dateTimeService.UtcNow,
             user.Id,
-            userStatus,
+            status,
             _currentUserService.UserId);
 
         return user.Adapt<UserDto>();
@@ -184,7 +184,7 @@ public class UserService: IUserService
         // TODO: This is a temporary solution for tenants, because we will always keep one tenant in db for now
         var user = newUserData.Adapt<User>();
         var tenant = _context.Tenants.First();
-        user.UserStatus = UserStatus.Active;
+        user.Status = Status.Active;
         user.Id = Guid.NewGuid();
 
         var userEmail = new MailAddress(newUserData.Email);
@@ -252,8 +252,8 @@ public class UserService: IUserService
         {
             u.DeactivationDateTimeView = _dateTimeFormatter.FormatDate(u.DeactivationDateTimeUtc);
             u.ReactivationDateTimeView = _dateTimeFormatter.FormatDate(u.ReactivationDateTimeUtc);
-            u.CreatedDateView = _dateTimeFormatter.FormatDate(u.CreatedDateUtc);
-            u.LastLoginDateView = _dateTimeFormatter.FormatDate(u.LastLoginDateUtc);
+            u.CreatedDateView = _dateTimeFormatter.FormatDate(u.CreatedDateTimeUtc);
+            u.LastLoginDateView = _dateTimeFormatter.FormatDate(u.LastLoginDateTimeUtc);
         });
 
         _logger.LogInformation("{dateTime} - Users export was executed by {@userId}",

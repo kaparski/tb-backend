@@ -5,14 +5,12 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Data;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -86,25 +84,25 @@ public class UsersControllerTest
     }
 
     [Theory]
-    [InlineData(UserStatus.Deactivated)]
-    [InlineData(UserStatus.Active)]
-    public async Task UpdateUserStatusAsync_NewUserStatus_ReturnUpdatedUser(UserStatus userStatus)
+    [InlineData(Status.Deactivated)]
+    [InlineData(Status.Active)]
+    public async Task UpdateUserStatusAsync_NewUserStatus_ReturnUpdatedUser(Status status)
     {
         // Arrange
         var userDto = TestData.TestUser.Generate();
-        userDto.UserStatus = UserStatus.Deactivated;
+        userDto.Status = Status.Deactivated;
         userDto.DeactivationDateTimeUtc = DateTime.UtcNow;
 
         _userServiceMock
             .Setup(service => service.UpdateUserStatusAsync(
                 It.IsAny<Guid>(),
                 It.Is<Guid>(id => id == userDto.Id),
-                It.IsAny<UserStatus>(),
+                It.IsAny<Status>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(userDto);
 
         // Act
-        var actualResponse = await _controller.UpdateUserStatusAsync(userDto.Id, userStatus, default);
+        var actualResponse = await _controller.UpdateUserStatusAsync(userDto.Id, status, default);
 
         // Arrange
         using (new AssertionScope())
@@ -161,9 +159,9 @@ public class UsersControllerTest
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
                 .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateUtc, f => DateTime.UtcNow)
+                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.ReactivationDateTimeUtc, f => null)
                 .RuleFor(u => u.DeactivationDateTimeUtc, f => null)
-                .RuleFor(u => u.UserStatus, f => f.PickRandom<UserStatus>());
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
     }
 }

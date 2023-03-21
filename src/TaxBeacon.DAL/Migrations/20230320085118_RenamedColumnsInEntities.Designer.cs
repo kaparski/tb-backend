@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230320085118_RenamedColumnsInEntities")]
+    partial class RenamedColumnsInEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -270,34 +273,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.UserActivityLog", b =>
-                {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Event")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("EventType")
-                        .HasColumnType("int");
-
-                    b.Property<long>("Revision")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("TenantId", "UserId", "Date");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserActivityLogs");
-                });
-
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantPermission", b =>
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.Permission", "Permission")
@@ -393,17 +368,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("TenantUser");
                 });
 
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.UserActivityLog", b =>
-                {
-                    b.HasOne("TaxBeacon.DAL.Entities.User", "User")
-                        .WithMany("UserActivityLogs")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Permission", b =>
                 {
                     b.Navigation("TenantPermissions");
@@ -443,8 +407,6 @@ namespace TaxBeacon.DAL.Migrations
             modelBuilder.Entity("TaxBeacon.DAL.Entities.User", b =>
                 {
                     b.Navigation("TenantUsers");
-
-                    b.Navigation("UserActivityLogs");
                 });
 #pragma warning restore 612, 618
         }
