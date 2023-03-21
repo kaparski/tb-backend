@@ -62,7 +62,7 @@ public class UserServiceTests
 
         var currentUser = TestData.TestUser.Generate();
         _dbContextMock.Users.Add(currentUser);
-        _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id.ToString());
+        _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
 
         _userService = new UserService(
             _userServiceLoggerMock.Object,

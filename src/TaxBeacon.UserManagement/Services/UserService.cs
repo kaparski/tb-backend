@@ -132,7 +132,7 @@ public class UserService: IUserService
         user.UserStatus = userStatus;
 
         var now = _dateTimeService.UtcNow;
-        var currentUser = await GetUserByIdAsync(Guid.Parse(_currentUserService.UserId), cancellationToken);
+        var currentUser = await GetUserByIdAsync(_currentUserService.UserId, cancellationToken);
 
         var userActivityLog = userStatus switch
         {
@@ -143,7 +143,7 @@ public class UserService: IUserService
                 Date = now,
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
-                    new UserReactivatedEvent(Guid.Parse(_currentUserService.UserId),
+                    new UserReactivatedEvent(_currentUserService.UserId,
                                              now,
                                              currentUser.FullName,
                                              currentUser.Roles)),
@@ -156,7 +156,7 @@ public class UserService: IUserService
                 Date = _dateTimeService.UtcNow,
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
-                    new UserDeactivatedEvent(Guid.Parse(_currentUserService.UserId),
+                    new UserDeactivatedEvent(_currentUserService.UserId,
                                              now,
                                              currentUser.FullName,
                                              currentUser.Roles)),
@@ -210,7 +210,7 @@ public class UserService: IUserService
         await _context.Users.AddAsync(user, cancellationToken);
 
         var now = _dateTimeService.UtcNow;
-        var currentUser = await GetUserByIdAsync(Guid.Parse(_currentUserService.UserId), cancellationToken);
+        var currentUser = await GetUserByIdAsync(_currentUserService.UserId, cancellationToken);
 
         await _context.UserActivityLogs.AddAsync(new UserActivityLog
         {
@@ -219,7 +219,7 @@ public class UserService: IUserService
             Date = _dateTimeService.UtcNow,
             Revision = 1,
             Event = JsonSerializer.Serialize(
-                new UserCreatedEvent(Guid.Parse(_currentUserService.UserId),
+                new UserCreatedEvent(_currentUserService.UserId,
                                      userEmail.Address,
                                      now,
                                      currentUser.FullName,
