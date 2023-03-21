@@ -20,5 +20,9 @@ public class RoleConfiguration: IEntityTypeConfiguration<Role>
         role
             .Property(r => r.Id)
             .HasDefaultValueSql("NEWID()");
+
+        role
+            .Property(r => r.CreatedDateUtc)
+            .HasDefaultValueSql("GETUTCDATE()");
     }
 }

@@ -148,11 +148,13 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 4, OrderBy = "email asc" };
 
         // Act
-        var pageOfUsers = await _userService.GetUsersAsync(query, default);
+        var usersOneOf = await _userService.GetUsersAsync(query, default);
 
         // Assert
+        usersOneOf.TryPickT0(out var pageOfUsers, out _);
+        pageOfUsers.Should().NotBeNull();
         var listOfUsers = pageOfUsers.Query.ToList();
-        listOfUsers.Count().Should().Be(1);
+        listOfUsers.Count.Should().Be(1);
         listOfUsers[0].Email.Should().Be("abc@gmail.com");
         pageOfUsers.Count.Should().Be(5);
     }
@@ -169,11 +171,13 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc" };
 
         // Act
-        var pageOfUsers = await _userService.GetUsersAsync(query, default);
+        var usersOneOf = await _userService.GetUsersAsync(query, default);
 
         // Assert
+        usersOneOf.TryPickT0(out var pageOfUsers, out _);
+        pageOfUsers.Should().NotBeNull();
         var listOfUsers = pageOfUsers.Query.ToList();
-        listOfUsers.Count().Should().Be(6);
+        listOfUsers.Count.Should().Be(6);
         listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
         pageOfUsers.Count.Should().Be(6);
     }
@@ -190,11 +194,11 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "email asc", };
 
         // Act
-        var page = await _userService.GetUsersAsync(query, default);
+        var usersOneOf = await _userService.GetUsersAsync(query, default);
 
         // Assert
-        page.Count.Should().Be(6);
-        page.Query.Count().Should().Be(0);
+        usersOneOf.TryPickT0(out var pageOfUsers, out _);
+        pageOfUsers.Should().BeNull();
     }
 
     [Fact]
