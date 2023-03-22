@@ -26,4 +26,6 @@ public class UserDetailsDto
     public DateTime? ReactivationDateTimeUtc { get; set; }
 
     public List<RoleDto> Roles { get; set; } = new();
+
+    public string RolesString => string.Join(",", Roles.Select(x => x.Name));
 }

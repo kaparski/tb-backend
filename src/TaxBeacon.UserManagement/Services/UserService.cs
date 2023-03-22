@@ -147,7 +147,7 @@ public class UserService: IUserService
                     new UserReactivatedEvent(_currentUserService.UserId,
                                              now,
                                              currentUser.FullName,
-                                             string.Join(",", currentUser.Roles.Select(x => x.Name)))),
+                                             currentUser.RolesString)),
                 EventType = EventType.UserReactivated
             },
             Status.Deactivated => new UserActivityLog
@@ -160,7 +160,7 @@ public class UserService: IUserService
                     new UserDeactivatedEvent(_currentUserService.UserId,
                                              now,
                                              currentUser.FullName,
-                                             string.Join(",", currentUser.Roles.Select(x => x.Name)))),
+                                             currentUser.RolesString)),
                 EventType = EventType.UserDeactivated
             },
             _ => throw new InvalidOperationException()
@@ -224,7 +224,7 @@ public class UserService: IUserService
                                      userEmail.Address,
                                      now,
                                      currentUser.FullName,
-                                     string.Join(",", currentUser.Roles.Select(x => x.Name)))),
+                                     currentUser.RolesString)),
             EventType = EventType.UserCreated
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
@@ -274,11 +274,16 @@ public class UserService: IUserService
     {
         _context.TenantUserRoles.RemoveRange(_context
             .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId));
+        var rolesString = await _context
+            .TenantUserRoles
+            .GroupBy(r => 1, name => name)
+            .Select(group => string.Join(", ", group.Select(name => name)))
+            .FirstOrDefaultAsync();
 
         foreach (var roleId in roleIds)
         {
             var existingRole = await _context.TenantUserRoles
-                .FirstOrDefaultAsync(e => e.RoleId == roleId, cancellationToken);
+                .FirstOrDefaultAsync(e => e.RoleId == roleId && e.UserId == userId, cancellationToken);
 
             if (existingRole is null)
             {
@@ -291,12 +296,29 @@ public class UserService: IUserService
                     });
             }
         }
-        _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roleIds} roles by {@userId}",
+
+        var tenant = _context.Tenants.First();
+        await _context.UserActivityLogs.AddAsync(new UserActivityLog
+        {
+            TenantId = tenant.Id,
+            UserId = _currentUserService.UserId,
+            Date = _dateTimeService.UtcNow,
+            Revision = 1,
+            Event = JsonSerializer.Serialize(
+                new RolesAssignToUserEvent(
+                    rolesString,
+                    userId,
+                    _currentUserService.UserId,
+                    _dateTimeService.UtcNow)),
+            EventType = EventType.UserAssignedToRole
+        }, cancellationToken);
+
+        await _context.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roles} roles by {@userId}",
             _dateTimeService.UtcNow,
             userId,
-            string.Join(",", roleIds),
+            rolesString,
             _currentUserService.UserId);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
