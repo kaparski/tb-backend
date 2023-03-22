@@ -11,7 +11,7 @@ public class UserDetailsResponse
 
     public string LastName { get; set; } = null!;
 
-    public UserStatus UserStatus { get; set; }
+    public Status UserStatus { get; set; }
 
     public DateTime CreatedDateUtc { get; set; }
 

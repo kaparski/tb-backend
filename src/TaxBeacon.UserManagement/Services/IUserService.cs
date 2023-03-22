@@ -1,7 +1,7 @@
 ﻿using Gridify;
-using System.Net;
 using OneOf;
 using OneOf.Types;
+using System.Net;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
@@ -19,13 +19,13 @@ public interface IUserService
 
     Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
 
-    Task<UserDto> UpdateUserStatusAsync(Guid id, UserStatus userStatus, CancellationToken cancellationToken = default);
+    Task<UserDto> UpdateUserStatusAsync(Guid tenantId, Guid id, Status userStatus, CancellationToken cancellationToken = default);
 
     Task<UserDto> CreateUserAsync(
         UserDto user,
         CancellationToken cancellationToken = default);
 
-    Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, string ianaTimeZone, CancellationToken cancellationToken);
+    Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, CancellationToken cancellationToken);
 
     Task<Guid> GetTenantIdAsync(Guid userId);
 

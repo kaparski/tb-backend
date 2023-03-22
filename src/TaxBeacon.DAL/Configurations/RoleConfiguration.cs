@@ -22,7 +22,7 @@ public class RoleConfiguration: IEntityTypeConfiguration<Role>
             .HasDefaultValueSql("NEWID()");
 
         role
-            .Property(r => r.CreatedDateUtc)
+            .Property(r => r.CreatedDateTimeUtc)
             .HasDefaultValueSql("GETUTCDATE()");
     }
 }

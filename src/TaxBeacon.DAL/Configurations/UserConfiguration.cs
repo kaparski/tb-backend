@@ -26,7 +26,7 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
             .IsRequired();
 
         user
-            .Property(u => u.UserStatus)
+            .Property(u => u.Status)
             .HasConversion<string>()
             .HasColumnType("nvarchar")
             .HasMaxLength(100);
@@ -48,7 +48,7 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
             .HasDefaultValueSql("NEWID()");
 
         user
-            .Property(u => u.CreatedDateUtc)
+            .Property(u => u.CreatedDateTimeUtc)
             .HasDefaultValueSql("GETUTCDATE()");
     }
 }

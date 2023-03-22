@@ -15,7 +15,7 @@ public class UserDetailsDto
 
     public string Email { get; set; } = null!;
 
-    public UserStatus UserStatus { get; set; }
+    public Status UserStatus { get; set; }
 
     public DateTime? LastLoginDateUtc { get; set; }
 
@@ -25,5 +25,5 @@ public class UserDetailsDto
 
     public DateTime? ReactivationDateTimeUtc { get; set; }
 
-    public List<RoleDto> Roles { get; set; }
+    public List<RoleDto> Roles { get; set; } = new();
 }

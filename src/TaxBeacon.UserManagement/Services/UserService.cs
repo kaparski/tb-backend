@@ -13,10 +13,11 @@ using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.Common.Extensions;
 using System.Collections.Immutable;
+using System.Text.Json;
 using System.Net;
-using TimeZoneNames;
+using TaxBeacon.UserManagement.Models.Activities;
+using TaxBeacon.Common.Enums.Activities;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -28,6 +29,7 @@ public class UserService: IUserService
     private readonly ICurrentUserService _currentUserService;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
     private readonly IUserExternalStore _userExternalStore;
+    private readonly IDateTimeFormatter _dateTimeFormatter;
 
     private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new string[]
     {
@@ -40,7 +42,8 @@ public class UserService: IUserService
         IDateTimeService dateTimeService,
         ICurrentUserService currentUserService,
         IEnumerable<IListToFileConverter> listToFileConverters,
-        IUserExternalStore userExternalStore)
+        IUserExternalStore userExternalStore,
+        IDateTimeFormatter dateTimeFormatter)
     {
         _logger = logger;
         _context = context;
@@ -49,6 +52,7 @@ public class UserService: IUserService
         _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
         _userExternalStore = userExternalStore;
+        _dateTimeFormatter = dateTimeFormatter;
     }
 
     public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
@@ -65,12 +69,12 @@ public class UserService: IUserService
                     FirstName = string.Empty,
                     LastName = string.Empty,
                     Email = mailAddress.Address,
-                    LastLoginDateUtc = _dateTimeService.UtcNow,
+                    LastLoginDateTimeUtc = _dateTimeService.UtcNow,
                 }, cancellationToken);
         }
         else
         {
-            user.LastLoginDateUtc = _dateTimeService.UtcNow;
+            user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
         }
     }
@@ -103,7 +107,7 @@ public class UserService: IUserService
             .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
         ?? throw new NotFoundException(nameof(User), mailAddress.Address);
 
-    public async Task<UserDto> UpdateUserStatusAsync(Guid id, UserStatus userStatus,
+    public async Task<UserDto> UpdateUserStatusAsync(Guid tenantId, Guid id, Status status,
         CancellationToken cancellationToken = default)
     {
         // TODO: Move the same code into separated method
@@ -112,28 +116,63 @@ public class UserService: IUserService
                        .FirstOrDefaultAsync(user => user.Id == id, cancellationToken)
                    ?? throw new NotFoundException(nameof(User), id);
 
-        switch (userStatus)
+        switch (status)
         {
-            case UserStatus.Deactivated:
+            case Status.Deactivated:
                 user.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
                 user.ReactivationDateTimeUtc = null;
-                user.UserStatus = UserStatus.Deactivated;
+                user.Status = Status.Deactivated;
                 break;
-            case UserStatus.Active:
+            case Status.Active:
                 user.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
                 user.DeactivationDateTimeUtc = null;
-                user.UserStatus = UserStatus.Active;
+                user.Status = Status.Active;
                 break;
         }
 
-        user.UserStatus = userStatus;
+        user.Status = status;
 
+        var now = _dateTimeService.UtcNow;
+        var currentUser = await GetUserByIdAsync(_currentUserService.UserId, cancellationToken);
+
+        var userActivityLog = status switch
+        {
+            Status.Active => new UserActivityLog
+            {
+                TenantId = tenantId,
+                UserId = user.Id,
+                Date = now,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new UserReactivatedEvent(_currentUserService.UserId,
+                                             now,
+                                             currentUser.FullName,
+                                             string.Join(",", currentUser.Roles.Select(x => x.Name)))),
+                EventType = EventType.UserReactivated
+            },
+            Status.Deactivated => new UserActivityLog
+            {
+                TenantId = tenantId,
+                UserId = user.Id,
+                Date = _dateTimeService.UtcNow,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new UserDeactivatedEvent(_currentUserService.UserId,
+                                             now,
+                                             currentUser.FullName,
+                                             string.Join(",", currentUser.Roles.Select(x => x.Name)))),
+                EventType = EventType.UserDeactivated
+            },
+            _ => throw new InvalidOperationException()
+        };
+
+        await _context.UserActivityLogs.AddAsync(userActivityLog, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - User ({createdUserId}) status was changed to {newUserStatus} by {@userId}",
             _dateTimeService.UtcNow,
             user.Id,
-            userStatus,
+            status,
             _currentUserService.UserId);
 
         return user.Adapt<UserDto>();
@@ -146,7 +185,8 @@ public class UserService: IUserService
         // TODO: This is a temporary solution for tenants, because we will always keep one tenant in db for now
         var user = newUserData.Adapt<User>();
         var tenant = _context.Tenants.First();
-        user.UserStatus = UserStatus.Active;
+        user.Status = Status.Active;
+        user.Id = Guid.NewGuid();
 
         var userEmail = new MailAddress(newUserData.Email);
 
@@ -169,6 +209,24 @@ public class UserService: IUserService
             Tenant = tenant
         });
         await _context.Users.AddAsync(user, cancellationToken);
+
+        var now = _dateTimeService.UtcNow;
+        var currentUser = await GetUserByIdAsync(_currentUserService.UserId, cancellationToken);
+
+        await _context.UserActivityLogs.AddAsync(new UserActivityLog
+        {
+            TenantId = tenant.Id,
+            UserId = user.Id,
+            Date = _dateTimeService.UtcNow,
+            Revision = 1,
+            Event = JsonSerializer.Serialize(
+                new UserCreatedEvent(_currentUserService.UserId,
+                                     userEmail.Address,
+                                     now,
+                                     currentUser.FullName,
+                                     string.Join(",", currentUser.Roles.Select(x => x.Name)))),
+            EventType = EventType.UserCreated
+        }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - User ({createdUserId}) was created by {@userId}",
@@ -179,7 +237,7 @@ public class UserService: IUserService
         return user.Adapt<UserDto>();
     }
 
-    public async Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, string ianaTimeZone,
+    public async Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType,
         CancellationToken cancellationToken)
     {
         tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;
@@ -191,44 +249,12 @@ public class UserService: IUserService
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        TimeZoneInfo.TryConvertIanaIdToWindowsId(ianaTimeZone, out var windowsId);
-
-        windowsId ??= "UTC";
-
-        var tz = TimeZoneInfo.FindSystemTimeZoneById(windowsId);
-        var abbreviations = TZNames.GetAbbreviationsForTimeZone(windowsId, "en-US");
-
-        const string format = $"MM.dd.yyyy hh:mm:ss tt";
-
         exportUsers.ForEach(u =>
         {
-            u.DeactivationDateTimeUtc = u.DeactivationDateTimeUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
-            u.ReactivationDateTimeUtc = u.ReactivationDateTimeUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
-            u.CreatedDateUtc = u.CreatedDateUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
-            u.LastLoginDateUtc = u.LastLoginDateUtc.ConvertUtcDateToTimeZone(ianaTimeZone);
-
-            if (u.DeactivationDateTimeUtc.HasValue)
-            {
-                u.DeactivationDateTimeUtcView = tz.IsDaylightSavingTime(u.DeactivationDateTimeUtc.Value)
-                    ? $"{u.DeactivationDateTimeUtc.Value.ToString(format)} {abbreviations.Daylight}"
-                    : $"{u.DeactivationDateTimeUtc.Value.ToString(format)} {abbreviations.Standard}";
-            }
-            if (u.ReactivationDateTimeUtc.HasValue)
-            {
-                u.ReactivationDateTimeUtcView = tz.IsDaylightSavingTime(u.ReactivationDateTimeUtc.Value)
-                    ? $"{u.ReactivationDateTimeUtc.Value.ToString(format)} {abbreviations.Daylight}"
-                    : $"{u.ReactivationDateTimeUtc.Value.ToString(format)} {abbreviations.Standard}";
-            }
-            if (u.LastLoginDateUtc.HasValue)
-            {
-                u.LastLoginDateUtcView = tz.IsDaylightSavingTime(u.LastLoginDateUtc.Value)
-                    ? $"{u.LastLoginDateUtc.Value.ToString(format)} {abbreviations.Daylight}"
-                    : $"{u.LastLoginDateUtc.Value.ToString(format)} {abbreviations.Standard}";
-            }
-
-            u.CreatedDateUtcView = tz.IsDaylightSavingTime(u.CreatedDateUtc)
-                ? $"{u.CreatedDateUtc.ToString(format)} {abbreviations.Daylight}"
-                : $"{u.CreatedDateUtc.ToString(format)} {abbreviations.Standard}";
+            u.DeactivationDateTimeView = _dateTimeFormatter.FormatDate(u.DeactivationDateTimeUtc);
+            u.ReactivationDateTimeView = _dateTimeFormatter.FormatDate(u.ReactivationDateTimeUtc);
+            u.CreatedDateView = _dateTimeFormatter.FormatDate(u.CreatedDateTimeUtc);
+            u.LastLoginDateView = _dateTimeFormatter.FormatDate(u.LastLoginDateTimeUtc);
         });
 
         _logger.LogInformation("{dateTime} - Users export was executed by {@userId}",
@@ -236,7 +262,6 @@ public class UserService: IUserService
             _currentUserService.UserId);
 
         return _listToFileConverters[fileType].Convert(exportUsers);
-
     }
 
     public Task<Guid> GetTenantIdAsync(Guid userId) =>
@@ -276,5 +301,10 @@ public class UserService: IUserService
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
         await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
+
+    private async Task<IEnumerable<string>> GetUserRolesAsync(Guid tenantId, Guid userId) =>
+        await _context.TenantUserRoles.Where(ur => ur.TenantId == tenantId && ur.UserId == userId)
+            .Select(ur => ur.TenantRole.Role.Name)
+            .ToListAsync();
 
 }

@@ -45,18 +45,18 @@ public class EntitySaveChangesInterceptor: SaveChangesInterceptor
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedDateUtc = DateTime.UtcNow;
+                entry.Entity.CreatedDateTimeUtc = DateTime.UtcNow;
             }
 
             if (entry.State is EntityState.Added or EntityState.Modified || entry.HasChangedOwnedEntities())
             {
-                entry.Entity.LastModifiedUtc = DateTime.UtcNow;
+                entry.Entity.LastModifiedDateTimeUtc = DateTime.UtcNow;
             }
 
             if (entry.State == EntityState.Deleted)
             {
                 entry.Entity.IsDeleted = true;
-                entry.Entity.DeletedDateUtc = DateTime.UtcNow;
+                entry.Entity.DeletedDateTimeUtc = DateTime.UtcNow;
                 entry.State = EntityState.Modified;
             }
         }

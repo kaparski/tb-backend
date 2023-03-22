@@ -22,7 +22,7 @@ public class PermissionConfiguration: IEntityTypeConfiguration<Permission>
             .HasDefaultValueSql("NEWID()");
 
         permission
-            .Property(p => p.CreatedDateUtc)
+            .Property(p => p.CreatedDateTimeUtc)
             .HasDefaultValueSql("GETUTCDATE()");
     }
 }

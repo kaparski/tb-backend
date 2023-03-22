@@ -28,9 +28,10 @@ public class RolesController: BaseController
     [HttpGet(Name = "GetRoles")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<RoleResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<QueryablePaging<RoleResponse>>> GetRoleList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
+    public async Task<ActionResult<QueryablePaging<RoleResponse>>> GetRoleList([FromQuery] GridifyQuery query,
+        CancellationToken cancellationToken)
     {
-        var roles = await _roleService.GetRolesAsync(query, cancellationToken);
+        var roles = await _roleService.GetRolesAsync(Guid.Empty, query, cancellationToken);
         var roleListResponse =
             new QueryablePaging<RoleResponse>(roles.Count, roles.Query.ProjectToType<RoleResponse>());
 
