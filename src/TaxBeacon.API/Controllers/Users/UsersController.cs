@@ -155,7 +155,7 @@ public class UsersController: BaseController
     /// <summary>
     /// Assign Role to User
     /// </summary>
-    [HasPermissions(Common.Permissions.Users.AssignRole, Common.Permissions.Roles.Read)]
+    [HasPermissions(Common.Permissions.Roles.ReadWrite, Common.Permissions.Roles.Read)]
     [HttpPost("{id:guid}/assign", Name = "AssignRoles")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> AssignRole([FromBody] Guid[] roleIds,
