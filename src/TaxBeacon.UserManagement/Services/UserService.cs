@@ -147,7 +147,7 @@ public class UserService: IUserService
                     new UserReactivatedEvent(_currentUserService.UserId,
                                              now,
                                              currentUser.FullName,
-                                             currentUser.RolesString)),
+                                             currentUser.Roles)),
                 EventType = EventType.UserReactivated
             },
             Status.Deactivated => new UserActivityLog
@@ -160,7 +160,7 @@ public class UserService: IUserService
                     new UserDeactivatedEvent(_currentUserService.UserId,
                                              now,
                                              currentUser.FullName,
-                                             currentUser.RolesString)),
+                                             currentUser.Roles)),
                 EventType = EventType.UserDeactivated
             },
             _ => throw new InvalidOperationException()
@@ -224,7 +224,7 @@ public class UserService: IUserService
                                      userEmail.Address,
                                      now,
                                      currentUser.FullName,
-                                     currentUser.RolesString)),
+                                     currentUser.Roles)),
             EventType = EventType.UserCreated
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
