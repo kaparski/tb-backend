@@ -22,10 +22,5 @@ public class UserMappingConfig: IRegister
                 .GroupBy(r => 1, name => name)
                 .Select(group => string.Join(", ", group.Select(name => name)))
                 .FirstOrDefault());
-
-        config.NewConfig<User, UserDetailsDto>()
-            .Map(dest => dest.Roles, src =>
-                src.TenantUsers
-                    .SelectMany(tu => tu.TenantUserRoles.Select(tur => tur.TenantRole.Role)));
     }
 }

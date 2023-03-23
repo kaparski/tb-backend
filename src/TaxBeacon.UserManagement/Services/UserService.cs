@@ -92,10 +92,10 @@ public class UserService: IUserService
             : users;
     }
 
-    public async Task<UserDetailsDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .ProjectToType<UserDetailsDto>()
+            .ProjectToType<UserDto>()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
         ?? throw new NotFoundException(nameof(User), id);
 
