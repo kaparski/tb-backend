@@ -272,8 +272,14 @@ public class UserService: IUserService
 
     public async Task AssignRoleAsync(Guid[] roleIds, Guid userId, CancellationToken cancellationToken)
     {
+        var existingRoles = await _context.TenantUserRoles
+            .Where(e => e.UserId == userId)
+            .Select(x => x.TenantRole.Role)
+            .ToListAsync(cancellationToken);
+
         _context.TenantUserRoles.RemoveRange(_context
             .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId));
+
         var rolesString = await _context
             .TenantUserRoles
             .Where(x => x.UserId == userId)
@@ -282,10 +288,6 @@ public class UserService: IUserService
             .FirstOrDefaultAsync(cancellationToken);
 
         var tenant = await _context.Tenants.FirstAsync(cancellationToken);
-        var existingRoles = await _context.TenantUserRoles
-            .Where(e => e.UserId == userId)
-            .Select(x => x.TenantRole.Role)
-            .ToListAsync(cancellationToken);
         var roleIdsToAdd = roleIds.Except(existingRoles.Select(x => x.Id));
         foreach (var roleId in roleIdsToAdd)
         {
