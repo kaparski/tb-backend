@@ -18,7 +18,8 @@ public interface IUserService
 
     Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
 
-    Task<UserDto> UpdateUserStatusAsync(Guid tenantId, Guid id, Status userStatus, CancellationToken cancellationToken = default);
+    Task<UserDto> UpdateUserStatusAsync(Guid tenantId, Guid id, Status userStatus,
+        CancellationToken cancellationToken = default);
 
     Task<UserDto> CreateUserAsync(
         UserDto user,
@@ -27,4 +28,7 @@ public interface IUserService
     Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, CancellationToken cancellationToken);
 
     Task<Guid> GetTenantIdAsync(Guid userId);
+
+    Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid tenantId, Guid userId, UpdateUserDto updateUserDto,
+        CancellationToken cancellationToken = default);
 }

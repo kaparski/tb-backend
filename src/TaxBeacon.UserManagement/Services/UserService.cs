@@ -144,9 +144,9 @@ public class UserService: IUserService
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
                     new UserReactivatedEvent(_currentUserService.UserId,
-                                             now,
-                                             currentUser.FullName,
-                                             currentUser.Roles)),
+                        now,
+                        currentUser.FullName,
+                        currentUser.Roles)),
                 EventType = EventType.UserReactivated
             },
             Status.Deactivated => new UserActivityLog
@@ -157,9 +157,9 @@ public class UserService: IUserService
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
                     new UserDeactivatedEvent(_currentUserService.UserId,
-                                             now,
-                                             currentUser.FullName,
-                                             currentUser.Roles)),
+                        now,
+                        currentUser.FullName,
+                        currentUser.Roles)),
                 EventType = EventType.UserDeactivated
             },
             _ => throw new InvalidOperationException()
@@ -220,10 +220,10 @@ public class UserService: IUserService
             Revision = 1,
             Event = JsonSerializer.Serialize(
                 new UserCreatedEvent(_currentUserService.UserId,
-                                     userEmail.Address,
-                                     now,
-                                     currentUser.FullName,
-                                     currentUser.Roles)),
+                    userEmail.Address,
+                    now,
+                    currentUser.FullName,
+                    currentUser.Roles)),
             EventType = EventType.UserCreated
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
@@ -268,6 +268,47 @@ public class UserService: IUserService
             .Where(tu => tu.UserId == userId)
             .Select(tu => tu.TenantId)
             .FirstOrDefaultAsync();
+
+    public async Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid tenantId,
+        Guid userId,
+        UpdateUserDto updateUserDto,
+        CancellationToken cancellationToken = default)
+    {
+        tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;
+
+        var user = await _context.Users
+            .Where(u => u.Id == userId && u.TenantUsers.Any(tu => tu.TenantId == tenantId))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (user is null)
+        {
+            return new NotFound();
+        }
+
+        user.FirstName = updateUserDto.FirstName;
+        user.LastName = updateUserDto.LastName;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var userDto = user.Adapt<UserDto>();
+        userDto.Roles = string.Join(", ", await _context
+            .TenantUserRoles
+            .Where(tu => tu.TenantId == tenantId && tu.UserId == userId)
+            .Join(_context.TenantRoles, tur => new
+            {
+                tur.TenantId,
+                tur.RoleId
+            }, tr => new
+            {
+                tr.TenantId,
+                tr.RoleId
+            }, (tur, tr) => tr.RoleId)
+            .Join(_context.Roles, id => id, r => r.Id, (id, r) => r.Name)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken));
+
+        return userDto;
+    }
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
         await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
