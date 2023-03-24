@@ -275,6 +275,7 @@ public class UserService: IUserService
         var existingRoles = await _context.TenantUserRoles
             .Where(e => e.UserId == userId)
             .Select(x => x.TenantRole.Role)
+            .ProjectToType<RoleActivityDto>()
             .ToListAsync(cancellationToken);
 
         _context.TenantUserRoles.RemoveRange(_context
@@ -305,6 +306,7 @@ public class UserService: IUserService
                 .FullName ?? "";
         var newRoles = await _context.Roles
             .Where(x => roleIds.Contains(x.Id))
+            .ProjectToType<RoleActivityDto>()
             .ToListAsync(cancellationToken);
 
         await _context.UserActivityLogs.AddAsync(new UserActivityLog

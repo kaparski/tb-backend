@@ -1,11 +1,9 @@
-﻿using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Entities;
-
+﻿
 namespace TaxBeacon.UserManagement.Models.Activities;
 
 public class AssignRolesEvent
 {
-    public AssignRolesEvent(string roles, Guid assignedByUserId, string fullName, List<Role> previousUserRoles, List<Role> currentUserRoles)
+    public AssignRolesEvent(string roles, Guid assignedByUserId, string fullName, List<RoleActivityDto> previousUserRoles, List<RoleActivityDto> currentUserRoles)
     {
         Roles = roles;
         AssignedByUserId = assignedByUserId;
@@ -20,9 +18,9 @@ public class AssignRolesEvent
 
     public string Roles { get; set; }
 
-    public List<Role> PreviousUserRoles { get; set; }
+    public List<RoleActivityDto> PreviousUserRoles { get; set; }
 
-    public List<Role> CurrentUserRoles { get; set; }
+    public List<RoleActivityDto> CurrentUserRoles { get; set; }
 
     public string ToString() => $"User was assigned to the following roles: {Roles} by {FullName}";
 }
