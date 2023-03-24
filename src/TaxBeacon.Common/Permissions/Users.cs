@@ -5,5 +5,6 @@
         Read,
         ReadWrite,
         ReadExport,
+        RolesWrite
     }
 }

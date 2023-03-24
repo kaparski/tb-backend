@@ -145,9 +145,9 @@ public class UserService: IUserService
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
                     new UserReactivatedEvent(_currentUserService.UserId,
-                                             now,
-                                             currentUser.FullName,
-                                             currentUser.Roles)),
+                        now,
+                        currentUser.FullName,
+                        currentUser.Roles)),
                 EventType = EventType.UserReactivated
             },
             Status.Deactivated => new UserActivityLog
@@ -158,9 +158,9 @@ public class UserService: IUserService
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
                     new UserDeactivatedEvent(_currentUserService.UserId,
-                                             now,
-                                             currentUser.FullName,
-                                             currentUser.Roles)),
+                        now,
+                        currentUser.FullName,
+                        currentUser.Roles)),
                 EventType = EventType.UserDeactivated
             },
             _ => throw new InvalidOperationException()
@@ -221,10 +221,10 @@ public class UserService: IUserService
             Revision = 1,
             Event = JsonSerializer.Serialize(
                 new UserCreatedEvent(_currentUserService.UserId,
-                                     userEmail.Address,
-                                     now,
-                                     currentUser.FullName,
-                                     currentUser.Roles)),
+                    userEmail.Address,
+                    now,
+                    currentUser.FullName,
+                    currentUser.Roles)),
             EventType = EventType.UserCreated
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
@@ -276,41 +276,49 @@ public class UserService: IUserService
             .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId));
         var rolesString = await _context
             .TenantUserRoles
-            .GroupBy(r => 1, name => name)
+            .Where(x => x.UserId == userId)
+            .GroupBy(r => 1, t => t.TenantRole.Role.Name)
             .Select(group => string.Join(", ", group.Select(name => name)))
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
-        foreach (var roleId in roleIds)
+        var tenant = await _context.Tenants.FirstAsync(cancellationToken);
+        var existingRoles = await _context.TenantUserRoles
+            .Where(e => e.UserId == userId)
+            .Select(x => x.TenantRole.Role)
+            .ToListAsync(cancellationToken);
+        var roleIdsToAdd = roleIds.Except(existingRoles.Select(x => x.Id));
+        foreach (var roleId in roleIdsToAdd)
         {
-            var existingRole = await _context.TenantUserRoles
-                .FirstOrDefaultAsync(e => e.RoleId == roleId && e.UserId == userId, cancellationToken);
-
-            if (existingRole is null)
-            {
-                _context
-                    .TenantUserRoles.Add(new TenantUserRole()
-                    {
-                        RoleId = roleId,
-                        UserId = userId,
-                        TenantId = (await _context.Tenants.FirstAsync(cancellationToken)).Id
-                    });
-            }
+            _context
+                .TenantUserRoles.Add(new TenantUserRole()
+                {
+                    RoleId = roleId,
+                    UserId = userId,
+                    TenantId = tenant.Id
+                });
         }
 
-        var tenant = _context.Tenants.First();
+        var fullName = (await _context.Users
+                .FirstOrDefaultAsync(x => x.Id == _currentUserService.UserId, cancellationToken))?
+                .FullName ?? "";
+        var newRoles = await _context.Roles
+            .Where(x => roleIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
         await _context.UserActivityLogs.AddAsync(new UserActivityLog
         {
             TenantId = tenant.Id,
-            UserId = _currentUserService.UserId,
+            UserId = userId,
             Date = _dateTimeService.UtcNow,
             Revision = 1,
             Event = JsonSerializer.Serialize(
-                new RolesAssignToUserEvent(
-                    rolesString,
-                    userId,
-                    _currentUserService.UserId,
-                    _dateTimeService.UtcNow)),
-            EventType = EventType.UserAssignedToRole
+                new AssignRolesEvent(
+                        rolesString ?? "",
+                        _currentUserService.UserId,
+                        fullName,
+                        existingRoles,
+                        newRoles)),
+            EventType = EventType.UserRolesAssign
         }, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -328,5 +336,4 @@ public class UserService: IUserService
         await _context.TenantUserRoles.Where(ur => ur.TenantId == tenantId && ur.UserId == userId)
             .Select(ur => ur.TenantRole.Role.Name)
             .ToListAsync();
-
 }
