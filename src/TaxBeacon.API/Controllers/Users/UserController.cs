@@ -63,7 +63,9 @@ public class UserController: BaseController
         CancellationToken cancellationToken)
     {
         var updatedUserOneOf =
-            await _userService.UpdateUserByIdAsync(Guid.Empty, id, updateUserRequest.Adapt<UpdateUserDto>(),
+            await _userService.UpdateUserByIdAsync(Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value),
+                id,
+                updateUserRequest.Adapt<UpdateUserDto>(),
                 cancellationToken);
 
         return updatedUserOneOf.Match<IActionResult>(
