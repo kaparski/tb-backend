@@ -285,8 +285,28 @@ public class UserService: IUserService
             return new NotFound();
         }
 
+        var previousUserValues = JsonSerializer.Serialize(user);
         user.FirstName = updateUserDto.FirstName;
         user.LastName = updateUserDto.LastName;
+
+        var currentUser = await GetUserByIdAsync(_currentUserService.UserId, cancellationToken);
+        var now = _dateTimeService.UtcNow;
+
+        await _context.UserActivityLogs.AddAsync(new UserActivityLog
+        {
+            TenantId = tenantId,
+            UserId = user.Id,
+            Date = _dateTimeService.UtcNow,
+            Revision = 1,
+            Event = JsonSerializer.Serialize(
+                new UserUpdatedEvent(currentUser.Id,
+                    now,
+                    currentUser.FullName,
+                    currentUser.Roles,
+                    previousUserValues,
+                    JsonSerializer.Serialize(user))),
+            EventType = EventType.UserCreated
+        }, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -307,6 +327,11 @@ public class UserService: IUserService
             .AsNoTracking()
             .ToListAsync(cancellationToken));
 
+        _logger.LogInformation("{dateTime} - User ({createdUserId}) was updated by {@userId}",
+            now,
+            user.Id,
+            _currentUserService.UserId);
+
         return userDto;
     }
 
@@ -317,5 +342,4 @@ public class UserService: IUserService
         await _context.TenantUserRoles.Where(ur => ur.TenantId == tenantId && ur.UserId == userId)
             .Select(ur => ur.TenantRole.Role.Name)
             .ToListAsync();
-
 }
