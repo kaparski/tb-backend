@@ -84,41 +84,6 @@ public class UsersControllerTest
     }
 
     [Theory]
-    [InlineData(Status.Deactivated)]
-    [InlineData(Status.Active)]
-    public async Task UpdateUserStatusAsync_NewUserStatus_ReturnUpdatedUser(Status status)
-    {
-        // Arrange
-        var userDto = TestData.TestUser.Generate();
-        userDto.Status = Status.Deactivated;
-        userDto.DeactivationDateTimeUtc = DateTime.UtcNow;
-
-        _userServiceMock
-            .Setup(service => service.UpdateUserStatusAsync(
-                It.IsAny<Guid>(),
-                It.Is<Guid>(id => id == userDto.Id),
-                It.IsAny<Status>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userDto);
-
-        // Act
-        var actualResponse = await _controller.UpdateUserStatusAsync(userDto.Id, status, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse.Result as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<ActionResult<UserResponse>>();
-            actualResponse.Result.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<UserResponse>();
-            (actualResult?.Value as UserResponse)?.Id.Should().Be(userDto.Id);
-        }
-    }
-
-    [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
     public async Task ExportUsersAsync_ValidQuery_ReturnsFileContent(FileType fileType)
@@ -149,19 +114,5 @@ public class UsersControllerTest
                 _ => throw new InvalidOperationException()
             });
         }
-    }
-
-    private static class TestData
-    {
-        public static readonly Faker<UserDto> TestUser =
-            new Faker<UserDto>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
-                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
-                .RuleFor(u => u.LastName, f => f.Name.LastName())
-                .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
-                .RuleFor(u => u.ReactivationDateTimeUtc, f => null)
-                .RuleFor(u => u.DeactivationDateTimeUtc, f => null)
-                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
     }
 }

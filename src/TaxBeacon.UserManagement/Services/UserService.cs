@@ -285,7 +285,7 @@ public class UserService: IUserService
             return new NotFound();
         }
 
-        var previousUserValues = JsonSerializer.Serialize(user);
+        var previousUserValues = JsonSerializer.Serialize(user.Adapt<UpdateUserDto>());
         user.FirstName = updateUserDto.FirstName;
         user.LastName = updateUserDto.LastName;
 
@@ -296,7 +296,7 @@ public class UserService: IUserService
         {
             TenantId = tenantId,
             UserId = user.Id,
-            Date = _dateTimeService.UtcNow,
+            Date = now,
             Revision = 1,
             Event = JsonSerializer.Serialize(
                 new UserUpdatedEvent(currentUser.Id,
@@ -304,8 +304,8 @@ public class UserService: IUserService
                     currentUser.FullName,
                     currentUser.Roles,
                     previousUserValues,
-                    JsonSerializer.Serialize(user))),
-            EventType = EventType.UserCreated
+                    JsonSerializer.Serialize(updateUserDto))),
+            EventType = EventType.UserUpdated
         }, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -314,15 +314,10 @@ public class UserService: IUserService
         userDto.Roles = string.Join(", ", await _context
             .TenantUserRoles
             .Where(tu => tu.TenantId == tenantId && tu.UserId == userId)
-            .Join(_context.TenantRoles, tur => new
-            {
-                tur.TenantId,
-                tur.RoleId
-            }, tr => new
-            {
-                tr.TenantId,
-                tr.RoleId
-            }, (tur, tr) => tr.RoleId)
+            .Join(_context.TenantRoles,
+                tur => new { tur.TenantId, tur.RoleId },
+                tr => new { tr.TenantId, tr.RoleId },
+                (tur, tr) => tr.RoleId)
             .Join(_context.Roles, id => id, r => r.Id, (id, r) => r.Name)
             .AsNoTracking()
             .ToListAsync(cancellationToken));

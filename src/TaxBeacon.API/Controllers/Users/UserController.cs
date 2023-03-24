@@ -58,7 +58,7 @@ public class UserController: BaseController
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequest), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> PathUserDetailsAsync([FromRoute] Guid id,
+    public async Task<IActionResult> UpdateUserAsync([FromRoute] Guid id,
         [FromBody] UpdateUserRequest updateUserRequest,
         CancellationToken cancellationToken)
     {

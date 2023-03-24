@@ -4,7 +4,7 @@ namespace TaxBeacon.API.Controllers.Users.Requests;
 
 public record UpdateUserRequest(string FirstName, string LastName);
 
-public class UpdateUserRequestValidator: AbstractValidator<CreateUserRequest>
+public class UpdateUserRequestValidator: AbstractValidator<UpdateUserRequest>
 {
     public UpdateUserRequestValidator()
     {
