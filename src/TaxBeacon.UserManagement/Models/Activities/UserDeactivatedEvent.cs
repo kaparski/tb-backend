@@ -6,21 +6,21 @@ namespace TaxBeacon.UserManagement.Models.Activities
     {
         public Guid DeactivatedById { get; }
 
-        public DateTime ReactivatedDate { get; }
+        public DateTime DectivatedDate { get; }
 
         public string FullName { get; }
 
         public string Roles { get; }
 
-        public UserDeactivatedEvent(Guid deactivatedById, DateTime reactivatedDate, string fullName, string roles)
+        public UserDeactivatedEvent(Guid deactivatedById, DateTime dectivatedDate, string fullName, string roles)
         {
             DeactivatedById = deactivatedById;
-            ReactivatedDate = reactivatedDate;
+            DectivatedDate = dectivatedDate;
             FullName = fullName;
             Roles = roles;
         }
 
         public string ToString(IDateTimeFormatter dateTimeFormatter)
-            => $"User deactivated {dateTimeFormatter.FormatDate(ReactivatedDate)} by {FullName} {Roles}";
+            => $"User deactivated {dateTimeFormatter.FormatDate(DectivatedDate)} by {FullName} {Roles}";
     }
 }
