@@ -105,7 +105,8 @@ public class UserController: BaseController
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        await _userService.AssignRoleAsync(roleIds, id, cancellationToken);
+        var tenantId = Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value);
+        await _userService.AssignRoleAsync(tenantId, roleIds, id, cancellationToken);
 
         return Ok();
     }

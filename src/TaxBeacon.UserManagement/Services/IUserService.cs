@@ -1,7 +1,6 @@
 ﻿using Gridify;
 using OneOf;
 using OneOf.Types;
-using System.Net;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
@@ -30,7 +29,7 @@ public interface IUserService
 
     Task<Guid> GetTenantIdAsync(Guid userId);
 
-    Task AssignRoleAsync(Guid[] roleIds, Guid userId, CancellationToken cancellationToken);
+    Task AssignRoleAsync(Guid tenantId, Guid[] roleIds, Guid userId, CancellationToken cancellationToken);
 
     Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid tenantId, Guid userId, UpdateUserDto updateUserDto,
         CancellationToken cancellationToken = default);
