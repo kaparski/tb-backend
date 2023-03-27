@@ -12,7 +12,6 @@ using TaxBeacon.UserManagement.Services;
 namespace TaxBeacon.API.Controllers.TableFilters;
 
 [Authorize]
-[Route("api/users/{userId:guid}/[controller]")]
 public class TableFiltersController: BaseController
 {
     private readonly ILogger<TableFiltersController> _logger;
@@ -27,7 +26,6 @@ public class TableFiltersController: BaseController
     /// <summary>
     /// Endpoint to get all filters for a specific table for a specific user
     /// </summary>
-    /// <param name="userId">User id</param>
     /// <param name="tableType">Table type</param>
     /// <param name="cancellationToken"></param>
     /// <response code="200">Filter collection successfully returned</response>
@@ -38,14 +36,10 @@ public class TableFiltersController: BaseController
     [HasPermissions(Common.Permissions.Filters.Read)]
     [ProducesErrorResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(List<TableFilterResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetFiltersAsync([FromRoute] Guid userId, [FromQuery] EntityType tableType,
+    public async Task<IActionResult> GetFiltersAsync([FromQuery] EntityType tableType,
         CancellationToken cancellationToken)
     {
-        var filters = await _tableFiltersService.GetFiltersAsync(
-            Guid.Parse(HttpContext.User.FindFirst(Claims.TenantId)!.Value),
-            userId,
-            tableType,
-            cancellationToken);
+        var filters = await _tableFiltersService.GetFiltersAsync(tableType, cancellationToken);
 
         return Ok(filters.Adapt<List<TableFilterResponse>>());
     }
@@ -53,29 +47,30 @@ public class TableFiltersController: BaseController
     /// <summary>
     /// Endpoint to create a new filter for table
     /// </summary>
-    /// <param name="userId">User id</param>
     /// <param name="createFilterRequest">Request with new filter data</param>
     /// <param name="cancellationToken"></param>
     /// <response code="200">Filter successfully created</response>
-    /// <response code="400">Invalid CreatedFilterRequest or filter name already exists</response>
+    /// <response code="400">Invalid CreatedFilterRequest</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
+    /// <response code="409">A filter with this name already exists</response>
     /// <returns>Created filter</returns>
     [HttpPost(Name = "CreateFilter")]
     [HasPermissions(Common.Permissions.Filters.ReadWrite)]
     [ProducesErrorResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(TableFilterDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(TableFilterResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(BadRequestResult), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateFilterAsync([FromRoute] Guid userId,
-        [FromBody] CreateFilterRequest createFilterRequest,
+    [ProducesResponseType(typeof(ConflictResult), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CreateFilterAsync([FromBody] CreateFilterRequest createFilterRequest,
         CancellationToken cancellationToken)
     {
-        var filterOneOf = await _tableFiltersService.AddFilterAsync(
-            Guid.Parse(HttpContext.User.FindFirst(Claims.TenantId)!.Value),
-            userId,
-            createFilterRequest.Adapt<CreateTableFilterDto>(), cancellationToken);
+        var filterOneOf =
+            await _tableFiltersService.CreateFilterAsync(createFilterRequest.Adapt<CreateTableFilterDto>(),
+                cancellationToken);
 
-        return filterOneOf.Match<IActionResult>(Ok, _ => BadRequest());
+        return filterOneOf.Match<IActionResult>(
+            addedFilter => Ok(addedFilter.Adapt<TableFilterResponse>()),
+            nameAlreadyExists => Conflict());
     }
 
     /// <summary>
@@ -98,6 +93,8 @@ public class TableFiltersController: BaseController
     {
         var deleteFilterOneOf = await _tableFiltersService.DeleteFilterAsync(filterId, cancellationToken);
 
-        return deleteFilterOneOf.Match<IActionResult>(_ => Ok(), _ => NotFound());
+        return deleteFilterOneOf.Match<IActionResult>(
+            success => Ok(),
+            notFound => NotFound());
     }
 }

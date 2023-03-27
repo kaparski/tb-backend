@@ -30,22 +30,22 @@ public class TableFilterService: ITableFiltersService
         _currentUserService = currentUserService;
     }
 
-    public async Task<OneOf<TableFilterDto, NameAlreadyExists>> AddFilterAsync(Guid tenantId,
-        Guid userId,
+    public async Task<OneOf<TableFilterDto, NameAlreadyExists>> CreateFilterAsync(
         CreateTableFilterDto createTableFilterDto,
         CancellationToken cancellationToken = default)
     {
-        if (await _context.TableFilters.AnyAsync(tf => tf.TenantId == tenantId
-                                                       && tf.UserId == userId
-                                                       && tf.Name == createTableFilterDto.Name, cancellationToken))
+        if (await _context.TableFilters
+                .AnyAsync(tf => tf.TenantId == _currentUserService.TenantId
+                                && tf.UserId == _currentUserService.UserId
+                                && tf.Name == createTableFilterDto.Name, cancellationToken))
         {
             return new NameAlreadyExists();
         }
 
         var newTableFilter = new TableFilter
         {
-            TenantId = tenantId,
-            UserId = userId,
+            TenantId = _currentUserService.TenantId,
+            UserId = _currentUserService.UserId,
             Name = createTableFilterDto.Name,
             Configuration = createTableFilterDto.Configuration,
             TableType = createTableFilterDto.TableType
@@ -84,12 +84,13 @@ public class TableFilterService: ITableFiltersService
         return new Success();
     }
 
-    public async Task<List<TableFilterDto>> GetFiltersAsync(Guid tenantId,
-        Guid userId,
-        EntityType tableType,
+    public async Task<List<TableFilterDto>> GetFiltersAsync(EntityType tableType,
         CancellationToken cancellationToken = default) =>
         await _context.TableFilters
-            .Where(tf => tf.TenantId == tenantId && tf.TableType == tableType && tf.UserId == userId)
+            .Where(tf =>
+                tf.TenantId == _currentUserService.TenantId
+                && tf.TableType == tableType
+                && tf.UserId == _currentUserService.UserId)
             .AsNoTracking()
             .ProjectToType<TableFilterDto>()
             .ToListAsync(cancellationToken);
