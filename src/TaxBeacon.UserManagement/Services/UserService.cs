@@ -144,9 +144,10 @@ public class UserService: IUserService
                 Date = now,
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
-                    new UserReactivatedEvent(_currentUserService.UserId, now,
-                        currentUser.FullName,
-                        currentUser.Roles)),
+                    new UserReactivatedEvent(_currentUserService.UserId,
+                                            now,
+                                            currentUser.FullName,
+                                            currentUser.Roles)),
                 EventType = EventType.UserReactivated
             },
             Status.Deactivated => new UserActivityLog
