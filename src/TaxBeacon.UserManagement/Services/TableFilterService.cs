@@ -34,8 +34,12 @@ public class TableFilterService: ITableFiltersService
         CreateTableFilterDto createTableFilterDto,
         CancellationToken cancellationToken = default)
     {
+        Guid? tenantId = _currentUserService.TenantId != default
+            ? _currentUserService.TenantId
+            : null;
+
         if (await _context.TableFilters
-                .AnyAsync(tf => tf.TenantId == _currentUserService.TenantId
+                .AnyAsync(tf => tf.TenantId == tenantId
                                 && tf.UserId == _currentUserService.UserId
                                 && tf.Name == createTableFilterDto.Name, cancellationToken))
         {
@@ -44,7 +48,7 @@ public class TableFilterService: ITableFiltersService
 
         var newTableFilter = new TableFilter
         {
-            TenantId = _currentUserService.TenantId,
+            TenantId = tenantId,
             UserId = _currentUserService.UserId,
             Name = createTableFilterDto.Name,
             Configuration = createTableFilterDto.Configuration,
@@ -85,13 +89,19 @@ public class TableFilterService: ITableFiltersService
     }
 
     public async Task<List<TableFilterDto>> GetFiltersAsync(EntityType tableType,
-        CancellationToken cancellationToken = default) =>
-        await _context.TableFilters
+        CancellationToken cancellationToken = default)
+    {
+        Guid? tenantId = _currentUserService.TenantId != default
+            ? _currentUserService.TenantId
+            : null;
+
+        return await _context.TableFilters
             .Where(tf =>
-                tf.TenantId == _currentUserService.TenantId
+                tf.TenantId == tenantId
                 && tf.TableType == tableType
                 && tf.UserId == _currentUserService.UserId)
             .AsNoTracking()
             .ProjectToType<TableFilterDto>()
             .ToListAsync(cancellationToken);
+    }
 }
