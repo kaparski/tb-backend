@@ -99,7 +99,7 @@ public class UserController: BaseController
     /// Assign Role to User
     /// </summary>
     [HasPermissions(Common.Permissions.Users.RolesWrite)]
-    [HttpPost("{id:guid}/assign", Name = "AssignRoles")]
+    [HttpPost("assign", Name = "AssignRoles")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> AssignRole([FromBody] Guid[] roleIds,
         [FromRoute] Guid id,
