@@ -86,8 +86,8 @@ namespace TaxBeacon.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     TableType = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Configuration = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -96,10 +96,16 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     table.PrimaryKey("PK_TableFilters", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TableFilters_TenantUsers_TenantId_UserId",
-                        columns: x => new { x.TenantId, x.UserId },
-                        principalTable: "TenantUsers",
-                        principalColumns: new[] { "TenantId", "UserId" },
+                        name: "FK_TableFilters_Tenants_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Tenants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TableFilters_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -110,9 +116,9 @@ namespace TaxBeacon.DAL.Migrations
                 .Annotation("SqlServer:Clustered", true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_TableFilters_TenantId_UserId",
+                name: "IX_TableFilters_UserId",
                 table: "TableFilters",
-                columns: new[] { "TenantId", "UserId" });
+                column: "UserId");
         }
 
         /// <inheritdoc />

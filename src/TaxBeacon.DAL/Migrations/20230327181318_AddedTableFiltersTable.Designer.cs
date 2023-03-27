@@ -12,7 +12,7 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    [Migration("20230327115034_AddedTableFiltersTable")]
+    [Migration("20230327181318_AddedTableFiltersTable")]
     partial class AddedTableFiltersTable
     {
         /// <inheritdoc />
@@ -112,7 +112,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<int>("TableType")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TenantId")
+                    b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
@@ -120,7 +120,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TenantId", "UserId");
+                    b.HasIndex("UserId");
 
                     b.HasIndex("TenantId", "TableType", "UserId");
 
@@ -339,13 +339,21 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TableFilter", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Entities.TenantUser", "TenantUser")
+                    b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
                         .WithMany("TableFilters")
-                        .HasForeignKey("TenantId", "UserId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("TenantUser");
+                    b.HasOne("TaxBeacon.DAL.Entities.User", "User")
+                        .WithMany("TableFilters")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantPermission", b =>
@@ -466,6 +474,8 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Tenant", b =>
                 {
+                    b.Navigation("TableFilters");
+
                     b.Navigation("TenantPermissions");
 
                     b.Navigation("TenantRoles");
@@ -487,13 +497,13 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantUser", b =>
                 {
-                    b.Navigation("TableFilters");
-
                     b.Navigation("TenantUserRoles");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.User", b =>
                 {
+                    b.Navigation("TableFilters");
+
                     b.Navigation("TenantUsers");
 
                     b.Navigation("UserActivityLogs");

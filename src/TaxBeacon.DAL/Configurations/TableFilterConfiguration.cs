@@ -26,9 +26,14 @@ public class TableFilterConfiguration: IEntityTypeConfiguration<TableFilter>
             .IsClustered();
 
         tableFilter
-            .HasOne<TenantUser>(tf => tf.TenantUser)
-            .WithMany(tu => tu.TableFilters)
-            .HasForeignKey(tf => new { tf.TenantId, tf.UserId });
+            .HasOne<Tenant>(tf => tf.Tenant)
+            .WithMany(t => t.TableFilters)
+            .HasForeignKey(tf => tf.UserId);
+
+        tableFilter
+            .HasOne<User>(tf => tf.User)
+            .WithMany(u => u.TableFilters)
+            .HasForeignKey(tf => tf.UserId);
 
         tableFilter
             .Property(p => p.Id)
