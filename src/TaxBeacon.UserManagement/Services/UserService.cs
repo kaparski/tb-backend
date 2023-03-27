@@ -272,8 +272,10 @@ public class UserService: IUserService
 
     public async Task AssignRoleAsync(Guid[] roleIds, Guid userId, CancellationToken cancellationToken)
     {
+        var tenant = await _context.Tenants.FirstAsync(cancellationToken);
+
         var existingRoles = await _context.TenantUserRoles
-            .Where(e => e.UserId == userId)
+            .Where(e => e.UserId == userId && e.TenantId == tenant.Id)
             .Select(x => x.TenantRole.Role)
             .ProjectToType<RoleActivityDto>()
             .ToListAsync(cancellationToken);
@@ -283,23 +285,23 @@ public class UserService: IUserService
 
         var rolesString = await _context
             .TenantUserRoles
-            .Where(x => x.UserId == userId)
+            .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == tenant.Id)
             .GroupBy(r => 1, t => t.TenantRole.Role.Name)
             .Select(group => string.Join(", ", group.Select(name => name)))
             .FirstOrDefaultAsync(cancellationToken);
 
-        var tenant = await _context.Tenants.FirstAsync(cancellationToken);
         var roleIdsToAdd = roleIds.Except(existingRoles.Select(x => x.Id));
+        var tenantUserRoles = new List<TenantUserRole>();
         foreach (var roleId in roleIdsToAdd)
         {
-            _context
-                .TenantUserRoles.Add(new TenantUserRole()
-                {
-                    RoleId = roleId,
-                    UserId = userId,
-                    TenantId = tenant.Id
-                });
+            tenantUserRoles.Add(new TenantUserRole()
+            {
+                RoleId = roleId,
+                UserId = userId,
+                TenantId = tenant.Id
+            });
         }
+        await _context.TenantUserRoles.AddRangeAsync(tenantUserRoles, cancellationToken);
 
         var fullName = (await _context.Users
                 .FirstOrDefaultAsync(x => x.Id == _currentUserService.UserId, cancellationToken))?
