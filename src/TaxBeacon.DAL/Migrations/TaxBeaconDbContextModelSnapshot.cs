@@ -123,7 +123,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "TableType", "UserId"));
 
-                    b.ToTable("TableFilter");
+                    b.ToTable("TableFilters");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Tenant", b =>

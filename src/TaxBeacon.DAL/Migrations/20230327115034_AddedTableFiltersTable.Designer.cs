@@ -12,7 +12,7 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    [Migration("20230327101530_AddedTableFiltersTable")]
+    [Migration("20230327115034_AddedTableFiltersTable")]
     partial class AddedTableFiltersTable
     {
         /// <inheritdoc />
@@ -126,7 +126,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "TableType", "UserId"));
 
-                    b.ToTable("TableFilter");
+                    b.ToTable("TableFilters");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Tenant", b =>

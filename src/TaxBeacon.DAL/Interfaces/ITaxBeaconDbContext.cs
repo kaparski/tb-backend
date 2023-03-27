@@ -24,5 +24,7 @@ public interface ITaxBeaconDbContext
 
     DbSet<UserActivityLog> UserActivityLogs { get; }
 
+    DbSet<TableFilter> TableFilters { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
