@@ -505,7 +505,7 @@ public class UserServiceTests
         await _dbContextMock.SaveChangesAsync();
 
         //Act
-        await _userService.AssignRoleAsync(Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value), roles.Select(x => x.Id).ToArray(), user.Id, default);
+        await _userService.AssignRoleAsync(tenant.Id, roles.Select(x => x.Id).ToArray(), user.Id, default);
 
         //Assert
         _dbContextMock.TenantUserRoles.Count().Should().Be(2);
@@ -543,7 +543,7 @@ public class UserServiceTests
         await _dbContextMock.SaveChangesAsync();
 
         //Act
-        await _userService.AssignRoleAsync(Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value), new[] { roles.Select(x => x.Id).First() }, user.Id, default);
+        await _userService.AssignRoleAsync(tenant.Id, new[] { roles.Select(x => x.Id).First() }, user.Id, default);
 
         //Assert
         _dbContextMock.TenantUserRoles.Count().Should().Be(1);
