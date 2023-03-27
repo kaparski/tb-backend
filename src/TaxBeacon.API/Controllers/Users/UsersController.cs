@@ -107,19 +107,4 @@ public class UsersController: BaseController
 
         return File(users, mimeType, $"users.{exportUsersRequest.FileType.ToString().ToLowerInvariant()}");
     }
-
-    /// <summary>
-    /// Assign Role to User
-    /// </summary>
-    [HasPermissions(Common.Permissions.Users.RolesWrite)]
-    [HttpPost("{id:guid}/assign", Name = "AssignRoles")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> AssignRole([FromBody] Guid[] roleIds,
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken)
-    {
-        await _userService.AssignRoleAsync(roleIds, id, cancellationToken);
-
-        return Ok();
-    }
 }

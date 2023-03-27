@@ -94,4 +94,19 @@ public class UserController: BaseController
 
         return Ok(user.Adapt<UserResponse>());
     }
+
+    /// <summary>
+    /// Assign Role to User
+    /// </summary>
+    [HasPermissions(Common.Permissions.Users.RolesWrite)]
+    [HttpPost("{id:guid}/assign", Name = "AssignRoles")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> AssignRole([FromBody] Guid[] roleIds,
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        await _userService.AssignRoleAsync(roleIds, id, cancellationToken);
+
+        return Ok();
+    }
 }
