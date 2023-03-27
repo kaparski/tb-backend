@@ -13,7 +13,7 @@ using TaxBeacon.UserManagement.Services;
 namespace TaxBeacon.API.Controllers.Users;
 
 [Authorize]
-[Route("user/{id:guid}")]
+[Route("api/[controller]/{id:guid}")]
 public class UserController: BaseController
 {
     private readonly IUserService _userService;
