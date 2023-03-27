@@ -281,7 +281,7 @@ public class UserService: IUserService
             .ToListAsync(cancellationToken);
 
         _context.TenantUserRoles.RemoveRange(_context
-            .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId));
+            .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId && x.TenantId == tenant.Id));
 
         var rolesString = await _context
             .TenantUserRoles
@@ -300,12 +300,14 @@ public class UserService: IUserService
             });
         await _context.TenantUserRoles.AddRangeAsync(tenantUserRoles, cancellationToken);
 
-        var fullName = (await _context.Users
-                           .FirstOrDefaultAsync(x => x.Id == _currentUserService.UserId, cancellationToken))?
-                       .FullName
+        var fullName = (await _context.TenantUsers
+                           .Include(x => x.User)
+                           .FirstOrDefaultAsync(x => x.UserId == _currentUserService.UserId && x.TenantId == tenant.Id, cancellationToken))?
+                       .User.FullName
                        ?? "";
-        var newRoles = await _context.Roles
-            .Where(x => roleIds.Contains(x.Id))
+        var newRoles = await _context.TenantRoles
+            .Where(x => roleIds.Contains(x.RoleId) && x.TenantId == tenant.Id)
+            .Select(x => x.Role)
             .ProjectToType<RoleActivityDto>()
             .ToListAsync(cancellationToken);
 
