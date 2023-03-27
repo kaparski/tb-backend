@@ -20,21 +20,21 @@ BEGIN TRY
   END;
 
   INSERT INTO TenantUsers
-  SELECT Id, @TenantId
-  FROM Users AS u
-  WHERE NOT EXISTS(SELECT UserId
-                   FROM TenantUsers
-                   WHERE UserId = u.Id
-                   AND TenantId = @TenantId);
+    SELECT Id, @TenantId
+    FROM Users AS u
+    WHERE NOT EXISTS(SELECT UserId
+                     FROM TenantUsers
+                     WHERE UserId = u.Id
+                     AND TenantId = @TenantId);
 
   INSERT INTO TenantUserRoles
-  SELECT TenantId, @RoleId, UserId
-  FROM TenantUsers AS tu
-  WHERE NOT EXISTS(SELECT UserId
-                   FROM TenantUserRoles
-                   WHERE UserId = tu.UserId
-                   AND TenantId = tu.TenantId
-                   AND RoleId = @RoleId);
+    SELECT TenantId, @RoleId, UserId
+    FROM TenantUsers AS tu
+    WHERE NOT EXISTS(SELECT UserId
+                     FROM TenantUserRoles
+                     WHERE UserId = tu.UserId
+                     AND TenantId = tu.TenantId
+                     AND RoleId = @RoleId);
 
   COMMIT TRANSACTION [Tran1];
 END TRY

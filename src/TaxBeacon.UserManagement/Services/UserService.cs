@@ -291,21 +291,19 @@ public class UserService: IUserService
             .FirstOrDefaultAsync(cancellationToken);
 
         var roleIdsToAdd = roleIds.Except(existingRoles.Select(x => x.Id));
-        var tenantUserRoles = new List<TenantUserRole>();
-        foreach (var roleId in roleIdsToAdd)
-        {
-            tenantUserRoles.Add(new TenantUserRole()
+        var tenantUserRoles = roleIdsToAdd.Select(roleId =>
+            new TenantUserRole()
             {
                 RoleId = roleId,
                 UserId = userId,
                 TenantId = tenant.Id
             });
-        }
         await _context.TenantUserRoles.AddRangeAsync(tenantUserRoles, cancellationToken);
 
         var fullName = (await _context.Users
-                .FirstOrDefaultAsync(x => x.Id == _currentUserService.UserId, cancellationToken))?
-                .FullName ?? "";
+                           .FirstOrDefaultAsync(x => x.Id == _currentUserService.UserId, cancellationToken))?
+                       .FullName
+                       ?? "";
         var newRoles = await _context.Roles
             .Where(x => roleIds.Contains(x.Id))
             .ProjectToType<RoleActivityDto>()
@@ -319,11 +317,11 @@ public class UserService: IUserService
             Revision = 1,
             Event = JsonSerializer.Serialize(
                 new AssignRolesEvent(
-                        rolesString ?? "",
-                        _currentUserService.UserId,
-                        fullName,
-                        existingRoles,
-                        newRoles)),
+                    rolesString ?? "",
+                    _currentUserService.UserId,
+                    fullName,
+                    existingRoles,
+                    newRoles)),
             EventType = EventType.UserRolesAssign
         }, cancellationToken);
 
@@ -381,8 +379,16 @@ public class UserService: IUserService
             .TenantUserRoles
             .Where(tu => tu.TenantId == tenantId && tu.UserId == userId)
             .Join(_context.TenantRoles,
-                tur => new { tur.TenantId, tur.RoleId },
-                tr => new { tr.TenantId, tr.RoleId },
+                tur => new
+                {
+                    tur.TenantId,
+                    tur.RoleId
+                },
+                tr => new
+                {
+                    tr.TenantId,
+                    tr.RoleId
+                },
                 (tur, tr) => tr.RoleId)
             .Join(_context.Roles, id => id, r => r.Id, (id, r) => r.Name)
             .AsNoTracking()
