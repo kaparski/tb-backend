@@ -11,4 +11,6 @@ public class TenantUser
     public Tenant Tenant { get; set; } = null!;
 
     public ICollection<TenantUserRole> TenantUserRoles { get; set; } = new HashSet<TenantUserRole>();
+
+    public ICollection<TableFilter> TableFilters { get; set; } = new HashSet<TableFilter>();
 }
