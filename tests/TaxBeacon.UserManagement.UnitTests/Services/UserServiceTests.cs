@@ -549,7 +549,6 @@ public class UserServiceTests
         _dbContextMock.TenantUserRoles.Count().Should().Be(1);
     }
 
-   
     private static class TestData
     {
         public static readonly Faker<Tenant> TestTenant =

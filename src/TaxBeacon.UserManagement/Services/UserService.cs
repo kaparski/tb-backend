@@ -393,7 +393,7 @@ public class UserService: IUserService
 
         return userDto;
     }
-    
+
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
         await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
 
