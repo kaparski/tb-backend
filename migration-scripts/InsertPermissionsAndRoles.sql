@@ -8,8 +8,8 @@ DECLARE @RoleId AS UNIQUEIDENTIFIER = NEWID()
 DECLARE @RoleName AS NVARCHAR(100) = N'Admin'
 
 BEGIN TRANSACTION [Tran1];
-  BEGIN TRY
-    IF NOT EXISTS(SELECT Id FROM Roles WHERE Id = @RoleId)
+BEGIN TRY
+  IF NOT EXISTS(SELECT Id FROM Roles WHERE Id = @RoleId)
   BEGIN
     INSERT INTO Roles(Id, Name, CreatedDateUtc) VALUES (@RoleId, @RoleName, GETUTCDATE());
   END;
@@ -25,7 +25,7 @@ BEGIN TRANSACTION [Tran1];
   WHERE NOT EXISTS(SELECT UserId
                    FROM TenantUsers
                    WHERE UserId = u.Id
-                     AND TenantId = @TenantId);
+                   AND TenantId = @TenantId);
 
   INSERT INTO TenantUserRoles
   SELECT TenantId, @RoleId, UserId
@@ -33,11 +33,11 @@ BEGIN TRANSACTION [Tran1];
   WHERE NOT EXISTS(SELECT UserId
                    FROM TenantUserRoles
                    WHERE UserId = tu.UserId
-                     AND TenantId = tu.TenantId
-                     AND RoleId = @RoleId);
+                   AND TenantId = tu.TenantId
+                   AND RoleId = @RoleId);
 
-    COMMIT TRANSACTION [Tran1];
-  END TRY
+  COMMIT TRANSACTION [Tran1];
+END TRY
 BEGIN CATCH
   ROLLBACK TRANSACTION [Tran1]
 END CATCH
