@@ -7,5 +7,6 @@
         UserDeactivated = 2,
         UserReactivated = 3,
         UserRolesAssign = 4,
+        UserUpdated = 4,
     }
 }

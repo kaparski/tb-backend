@@ -8,7 +8,6 @@ using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -56,28 +55,6 @@ public class UsersController: BaseController
     }
 
     /// <summary>
-    /// User Details
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET api/users/8da4f695-6d47-4ce8-da8f-08db0052f325```<br/><br/>
-    /// </remarks>
-    /// <response code="200">Returns user details</response>
-    /// <returns>User</returns>
-    [HasPermissions(
-        Common.Permissions.Users.Read,
-        Common.Permissions.Users.ReadWrite,
-        Common.Permissions.Users.ReadExport)]
-    [HttpGet("{id:guid}", Name = "GetUserDetails")]
-    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetUserDetails([FromRoute] Guid id, CancellationToken cancellationToken)
-    {
-        var userDto = await _userService.GetUserByIdAsync(id, cancellationToken);
-
-        return Ok(userDto.Adapt<UserResponse>());
-    }
-
-    /// <summary>
     /// Create User
     /// </summary>
     /// <param name="createUserRequest">User Dto</param>
@@ -104,28 +81,6 @@ public class UsersController: BaseController
         var newUser = await _userService.CreateUserAsync(createUserRequest.Adapt<UserDto>(), cancellationToken);
 
         return Created($"/users/{newUser.Id}", newUser.Adapt<UserResponse>());
-    }
-
-    /// <summary>
-    /// Endpoint to update user status
-    /// </summary>
-    /// <param name="id">User id</param>
-    /// <param name="userStatus">New user status</param>
-    /// <param name="cancellationToken"></param>
-    /// <response code="200">Returns updated user</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <returns>Updated user</returns>
-    [HasPermissions(Common.Permissions.Users.ReadWrite)]
-    [HttpPut("{id:guid}/status", Name = "UpdateUserStatus")]
-    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<UserResponse>> UpdateUserStatusAsync(Guid id, [FromBody] Status userStatus,
-        CancellationToken cancellationToken)
-    {
-
-        var user = await _userService.UpdateUserStatusAsync(
-            Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value), id, userStatus, cancellationToken);
-
-        return Ok(user.Adapt<UserResponse>());
     }
 
     /// <summary>

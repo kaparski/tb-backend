@@ -9,6 +9,7 @@ using Moq;
 using System.Net.Mail;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -412,6 +413,80 @@ public class UserServiceTests
     }
 
     [Fact]
+    public async Task UpdateUserByIdAsync_InvalidUserId_ReturnsNotFound()
+    {
+        // Arrange
+        var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
+        var user = TestData.TestUser.Generate();
+        var tenant = TestData.TestTenant.Generate();
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var usersOneOf = await _userService.UpdateUserByIdAsync(Guid.Empty, Guid.NewGuid(), updateUserDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            usersOneOf.TryPickT0(out var userDto, out _);
+            userDto.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateUserByIdAsync_ValidUserIdAndUpdateUserDto_ReturnsUpdatedUser()
+    {
+        // Arrange
+        var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
+        var user = TestData.TestUser.Generate();
+        var oldFirstName = user.FirstName;
+        var oldLastName = user.LastName;
+        var tenant = TestData.TestTenant.Generate();
+        var currentDate = DateTime.UtcNow;
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser
+        {
+            Tenant = tenant,
+            User = user
+        });
+
+        await _dbContextMock.SaveChangesAsync();
+
+        _dateTimeServiceMock
+            .Setup(service => service.UtcNow)
+            .Returns(currentDate);
+
+        // Act
+        var usersOneOf = await _userService.UpdateUserByIdAsync(Guid.Empty, user.Id, updateUserDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            usersOneOf.TryPickT0(out var userDto, out _);
+            userDto.Should().NotBeNull();
+            userDto.Id.Should().Be(user.Id);
+            userDto.FirstName.Should().Be(updateUserDto.FirstName);
+            userDto.FirstName.Should().NotBe(oldFirstName);
+            userDto.LastName.Should().Be(updateUserDto.LastName);
+            userDto.LastName.Should().NotBe(oldLastName);
+
+            var actualActivityLog = await _dbContextMock.UserActivityLogs.LastOrDefaultAsync();
+            actualActivityLog.Should().NotBeNull();
+            actualActivityLog?.Date.Should().Be(currentDate);
+            actualActivityLog?.EventType.Should().Be(EventType.UserUpdated);
+            actualActivityLog?.UserId.Should().Be(user.Id);
+            actualActivityLog?.TenantId.Should().Be(tenant.Id);
+
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Once);
+        }
+    }
+
+    [Fact]
     public async Task AssignRoleAsync_ValidRoleIds_ShouldAssignAllProvidedRoles()
     {
         //Arrange
@@ -474,6 +549,7 @@ public class UserServiceTests
         _dbContextMock.TenantUserRoles.Count().Should().Be(1);
     }
 
+   
     private static class TestData
     {
         public static readonly Faker<Tenant> TestTenant =
@@ -487,9 +563,15 @@ public class UserServiceTests
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
+                .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
+
+        public static readonly Faker<UpdateUserDto> UpdateUserDtoFaker =
+            new Faker<UpdateUserDto>()
+                .RuleFor(dto => dto.FirstName, f => f.Name.FirstName())
+                .RuleFor(dto => dto.LastName, f => f.Name.LastName());
 
         public static IEnumerable<object[]> UpdatedStatusInvalidData =>
             new List<object[]>
