@@ -19,7 +19,8 @@ public class TableFilterConfiguration: IEntityTypeConfiguration<TableFilter>
             .IsRequired();
 
         tableFilter
-            .HasKey(tf => tf.Id);
+            .HasKey(tf => tf.Id)
+            .IsClustered(false);
 
         tableFilter
             .HasIndex(tf => new { tf.TenantId, tf.TableType, tf.UserId })

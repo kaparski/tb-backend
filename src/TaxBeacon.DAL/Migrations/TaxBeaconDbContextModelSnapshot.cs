@@ -117,6 +117,8 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("Id");
 
+                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
+
                     b.HasIndex("UserId");
 
                     b.HasIndex("TenantId", "TableType", "UserId");
