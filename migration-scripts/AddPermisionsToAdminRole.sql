@@ -16,9 +16,10 @@ INSERT INTO @adminRolePermissions (Name)
 VALUES ('Users.Read'),
        ('Users.ReadWrite'),
        ('Users.ReadExport'),
+       ('Users.RolesWrite'),
        ('Roles.Read')
 
-INSERT INTO Permissions (Id, Name, CreatedDateUtc)
+INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 SELECT NEWID(),
        arp.Name,
        GETUTCDATE()
