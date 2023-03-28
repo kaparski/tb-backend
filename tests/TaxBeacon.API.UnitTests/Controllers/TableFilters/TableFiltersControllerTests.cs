@@ -77,11 +77,11 @@ public class TableFiltersControllerTests
         // Arrange
         using (new AssertionScope())
         {
-            var actualResult = actualResponse as OkObjectResult;
+            var actualResult = actualResponse as CreatedResult;
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResponse.Should().BeOfType<CreatedResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status201Created);
             actualResult?.Value.Should().BeOfType<TableFilterResponse>();
         }
     }

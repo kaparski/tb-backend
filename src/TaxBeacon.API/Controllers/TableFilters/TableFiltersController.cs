@@ -45,7 +45,7 @@ public class TableFiltersController: BaseController
     /// </summary>
     /// <param name="createTableFilterRequest">Request with new filter data</param>
     /// <param name="cancellationToken"></param>
-    /// <response code="200">Filter successfully created</response>
+    /// <response code="201">Filter successfully created</response>
     /// <response code="400">Invalid CreatedFilterRequest</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
@@ -65,7 +65,7 @@ public class TableFiltersController: BaseController
                 cancellationToken);
 
         return filterOneOf.Match<IActionResult>(
-            addedFilter => Ok(addedFilter.Adapt<TableFilterResponse>()),
+            addedFilter => Created($"filters/{addedFilter.Id}", addedFilter.Adapt<TableFilterResponse>()),
             nameAlreadyExists => Conflict());
     }
 
