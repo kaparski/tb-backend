@@ -16,12 +16,12 @@ using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.TableFilters;
 
-public class TableFiltersControllerTest
+public class TableFiltersControllerTests
 {
     private readonly Mock<ITableFiltersService> _tableFiltersServiceMock;
     private readonly TableFiltersController _controller;
 
-    public TableFiltersControllerTest()
+    public TableFiltersControllerTests()
     {
         _tableFiltersServiceMock = new();
 

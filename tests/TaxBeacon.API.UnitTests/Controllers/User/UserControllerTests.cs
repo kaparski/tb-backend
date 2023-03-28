@@ -16,12 +16,12 @@ using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.User;
 
-public class UserControllerTest
+public class UserControllerTests
 {
     private readonly Mock<IUserService> _userServiceMock;
     private readonly UserController _controller;
 
-    public UserControllerTest()
+    public UserControllerTests()
     {
         _userServiceMock = new();
         _controller = new UserController(_userServiceMock.Object)
