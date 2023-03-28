@@ -29,6 +29,8 @@ public interface IUserService
 
     Task<Guid> GetTenantIdAsync(Guid userId);
 
+    Task AssignRoleAsync(Guid tenantId, Guid[] roleIds, Guid userId, CancellationToken cancellationToken);
+
     Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid tenantId, Guid userId, UpdateUserDto updateUserDto,
         CancellationToken cancellationToken = default);
 }
