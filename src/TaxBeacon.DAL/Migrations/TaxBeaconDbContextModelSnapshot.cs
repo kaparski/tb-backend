@@ -340,9 +340,7 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
                         .WithMany("TableFilters")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TenantId");
 
                     b.HasOne("TaxBeacon.DAL.Entities.User", "User")
                         .WithMany("TableFilters")

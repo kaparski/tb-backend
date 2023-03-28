@@ -12,7 +12,7 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    [Migration("20230327184320_AddedTableFiltersTable")]
+    [Migration("20230328170041_AddedTableFiltersTable")]
     partial class AddedTableFiltersTable
     {
         /// <inheritdoc />
@@ -343,9 +343,7 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
                         .WithMany("TableFilters")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TenantId");
 
                     b.HasOne("TaxBeacon.DAL.Entities.User", "User")
                         .WithMany("TableFilters")

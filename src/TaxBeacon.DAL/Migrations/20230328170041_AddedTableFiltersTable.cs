@@ -27,11 +27,10 @@ namespace TaxBeacon.DAL.Migrations
                     table.PrimaryKey("PK_TableFilters", x => x.Id)
                         .Annotation("SqlServer:Clustered", false);
                     table.ForeignKey(
-                        name: "FK_TableFilters_Tenants_UserId",
-                        column: x => x.UserId,
+                        name: "FK_TableFilters_Tenants_TenantId",
+                        column: x => x.TenantId,
                         principalTable: "Tenants",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TableFilters_Users_UserId",
                         column: x => x.UserId,

@@ -29,7 +29,7 @@ public class TableFilterConfiguration: IEntityTypeConfiguration<TableFilter>
         tableFilter
             .HasOne<Tenant>(tf => tf.Tenant)
             .WithMany(t => t.TableFilters)
-            .HasForeignKey(tf => tf.UserId);
+            .HasForeignKey(tf => tf.TenantId);
 
         tableFilter
             .HasOne<User>(tf => tf.User)
