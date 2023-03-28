@@ -14,14 +14,10 @@ namespace TaxBeacon.API.Controllers.TableFilters;
 [Authorize]
 public class TableFiltersController: BaseController
 {
-    private readonly ILogger<TableFiltersController> _logger;
     private readonly ITableFiltersService _tableFiltersService;
 
-    public TableFiltersController(ILogger<TableFiltersController> logger, ITableFiltersService tableFiltersService)
-    {
-        _logger = logger;
+    public TableFiltersController(ITableFiltersService tableFiltersService) =>
         _tableFiltersService = tableFiltersService;
-    }
 
     /// <summary>
     /// Endpoint to get all filters for a specific table for a specific user
@@ -47,7 +43,7 @@ public class TableFiltersController: BaseController
     /// <summary>
     /// Endpoint to create a new filter for table
     /// </summary>
-    /// <param name="createFilterRequest">Request with new filter data</param>
+    /// <param name="createTableFilterRequest">Request with new filter data</param>
     /// <param name="cancellationToken"></param>
     /// <response code="200">Filter successfully created</response>
     /// <response code="400">Invalid CreatedFilterRequest</response>
@@ -61,11 +57,11 @@ public class TableFiltersController: BaseController
     [ProducesResponseType(typeof(TableFilterResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(BadRequestResult), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ConflictResult), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> CreateFilterAsync([FromBody] CreateFilterRequest createFilterRequest,
+    public async Task<IActionResult> CreateFilterAsync([FromBody] CreateTableFilterRequest createTableFilterRequest,
         CancellationToken cancellationToken)
     {
         var filterOneOf =
-            await _tableFiltersService.CreateFilterAsync(createFilterRequest.Adapt<CreateTableFilterDto>(),
+            await _tableFiltersService.CreateFilterAsync(createTableFilterRequest.Adapt<CreateTableFilterDto>(),
                 cancellationToken);
 
         return filterOneOf.Match<IActionResult>(
