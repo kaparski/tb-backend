@@ -72,13 +72,11 @@ public class UserService: IUserService
                     LastLoginDateTimeUtc = _dateTimeService.UtcNow,
                 }, cancellationToken);
         }
-        else
-        {
-            user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
-            await _context.SaveChangesAsync(cancellationToken);
 
-            return user.Adapt<UserDto>();
-        }
+        user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return user.Adapt<UserDto>();
     }
 
     public async Task<OneOf<QueryablePaging<UserDto>, NotFound>> GetUsersAsync(GridifyQuery gridifyQuery,
