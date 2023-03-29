@@ -29,9 +29,11 @@ public class TableFiltersController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>Collection of filters</returns>
     [HttpGet(Name = "GetFilters")]
-    [HasPermissions(Common.Permissions.Filters.Read)]
+    [HasPermissions(Common.Permissions.TableFilters.Read)]
     [ProducesErrorResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(List<TableFilterResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetFiltersAsync([FromQuery] EntityType tableType,
         CancellationToken cancellationToken)
     {
@@ -52,11 +54,13 @@ public class TableFiltersController: BaseController
     /// <response code="409">A filter with this name already exists</response>
     /// <returns>Created filter</returns>
     [HttpPost(Name = "CreateFilter")]
-    [HasPermissions(Common.Permissions.Filters.ReadWrite)]
+    [HasPermissions(Common.Permissions.TableFilters.ReadWrite)]
     [ProducesErrorResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(TableFilterResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(BadRequestResult), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ConflictResult), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateFilterAsync([FromBody] CreateTableFilterRequest createTableFilterRequest,
         CancellationToken cancellationToken)
     {
@@ -75,15 +79,17 @@ public class TableFiltersController: BaseController
     /// <param name="filterId">Filter id</param>
     /// <param name="cancellationToken"></param>
     /// <response code="200">Filter successfully deleted</response>
-    /// <response code="404">Filter was not found by id</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Filter was not found by id</response>
     /// <returns>Success status code</returns>
     [HttpDelete("{filterId:guid}", Name = "DeleteFilter")]
-    [HasPermissions(Common.Permissions.Filters.ReadWrite)]
+    [HasPermissions(Common.Permissions.TableFilters.ReadWrite)]
     [ProducesErrorResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(OkResult), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteFilterAsync([FromRoute] Guid filterId,
         CancellationToken cancellationToken)
     {

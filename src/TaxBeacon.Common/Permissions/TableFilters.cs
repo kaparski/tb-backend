@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.Common.Permissions;
 
-public enum Filters
+public enum TableFilters
 {
     Read,
 
