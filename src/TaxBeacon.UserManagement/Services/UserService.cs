@@ -63,7 +63,7 @@ public class UserService: IUserService
 
         if (user is null)
         {
-            var userDto = await CreateUserAsync(
+            return await CreateUserAsync(
                 new UserDto
                 {
                     FirstName = string.Empty,
@@ -71,16 +71,14 @@ public class UserService: IUserService
                     Email = mailAddress.Address,
                     LastLoginDateTimeUtc = _dateTimeService.UtcNow,
                 }, cancellationToken);
-
-            return userDto;
         }
         else
         {
             user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
-        }
 
-        return user.Adapt<UserDto>();
+            return user.Adapt<UserDto>();
+        }
     }
 
     public async Task<OneOf<QueryablePaging<UserDto>, NotFound>> GetUsersAsync(GridifyQuery gridifyQuery,
