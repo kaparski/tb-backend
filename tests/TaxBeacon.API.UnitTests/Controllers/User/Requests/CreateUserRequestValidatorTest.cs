@@ -62,7 +62,7 @@ public class CreateUserRequestValidatorTest
         //Assert
         actualResult
             .ShouldHaveValidationErrorFor(r => r.Email)
-            .WithErrorMessage("The email must contain no more than 150 characters");
+            .WithErrorMessage("The email must contain no more than 64 characters");
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
     }

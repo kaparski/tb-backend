@@ -11,8 +11,8 @@ public class CreateUserRequestValidator: AbstractValidator<CreateUserRequest>
         RuleFor(x => x.Email)
             .NotEmpty()
             .EmailAddress()
-            .MaximumLength(150)
-            .WithMessage("The email must contain no more than 150 characters");
+            .MaximumLength(64)
+            .WithMessage("The email must contain no more than 64 characters");
 
         RuleFor(x => x.FirstName)
             .NotEmpty()
