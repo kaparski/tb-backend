@@ -24,6 +24,10 @@ namespace TaxBeacon.API.Authentication
 
             var email = context.User.Claims
                 .FirstOrDefault(claim => claim.Type.Equals(Claims.EmailClaimName, StringComparison.OrdinalIgnoreCase))
+                ?.Value
+                ??
+                context.User.Claims
+                .FirstOrDefault(claim => claim.Type.Equals(Claims.OtherMails, StringComparison.OrdinalIgnoreCase))
                 ?.Value;
 
             if (email is null)

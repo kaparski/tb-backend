@@ -22,7 +22,7 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
         user
             .Property(u => u.Email)
             .HasColumnType("nvarchar")
-            .HasMaxLength(150)
+            .HasMaxLength(64)
             .IsRequired();
 
         user
