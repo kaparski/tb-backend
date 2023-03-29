@@ -15,6 +15,7 @@ using TaxBeacon.DAL.Entities;
 using TaxBeacon.Common.Converters;
 using System.Collections.Immutable;
 using System.Text.Json;
+using System.Net;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.Common.Enums.Activities;
 
@@ -144,9 +145,9 @@ public class UserService: IUserService
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
                     new UserReactivatedEvent(_currentUserService.UserId,
-                        now,
-                        currentUser.FullName,
-                        currentUser.Roles)),
+                                            now,
+                                            currentUser.FullName,
+                                            currentUser.Roles)),
                 EventType = EventType.UserReactivated
             },
             Status.Deactivated => new UserActivityLog
@@ -269,6 +270,69 @@ public class UserService: IUserService
             .Select(tu => tu.TenantId)
             .FirstOrDefaultAsync();
 
+    public async Task AssignRoleAsync(Guid tenantId, Guid[] roleIds, Guid userId, CancellationToken cancellationToken)
+    {
+        var existingRoles = await _context.TenantUserRoles
+            .Where(e => e.UserId == userId && e.TenantId == tenantId)
+            .Select(x => x.TenantRole.Role)
+            .ProjectToType<RoleActivityDto>()
+            .ToListAsync(cancellationToken);
+
+        _context.TenantUserRoles.RemoveRange(_context
+            .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId && x.TenantId == tenantId));
+
+        var rolesString = await _context
+            .TenantUserRoles
+            .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == tenantId)
+            .GroupBy(r => 1, t => t.TenantRole.Role.Name)
+            .Select(group => string.Join(", ", group.Select(name => name)))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var roleIdsToAdd = roleIds.Except(existingRoles.Select(x => x.Id));
+        var tenantUserRoles = roleIdsToAdd.Select(roleId =>
+            new TenantUserRole()
+            {
+                RoleId = roleId,
+                UserId = userId,
+                TenantId = tenantId
+            });
+        await _context.TenantUserRoles.AddRangeAsync(tenantUserRoles, cancellationToken);
+
+        var fullName = (await _context.TenantUsers
+                           .Include(x => x.User)
+                           .FirstOrDefaultAsync(x => x.UserId == _currentUserService.UserId && x.TenantId == tenantId, cancellationToken))?
+                       .User.FullName
+                       ?? "";
+        var newRoles = await _context.TenantRoles
+            .Where(x => roleIds.Contains(x.RoleId) && x.TenantId == tenantId)
+            .Select(x => x.Role)
+            .ProjectToType<RoleActivityDto>()
+            .ToListAsync(cancellationToken);
+
+        await _context.UserActivityLogs.AddAsync(new UserActivityLog
+        {
+            TenantId = tenantId,
+            UserId = userId,
+            Date = _dateTimeService.UtcNow,
+            Revision = 1,
+            Event = JsonSerializer.Serialize(
+                new AssignRolesEvent(
+                    rolesString ?? "",
+                    _currentUserService.UserId,
+                    fullName,
+                    existingRoles,
+                    newRoles)),
+            EventType = EventType.UserRolesAssign
+        }, cancellationToken);
+
+        await _context.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roles} roles by {@userId}",
+            _dateTimeService.UtcNow,
+            userId,
+            rolesString,
+            _currentUserService.UserId);
+    }
+
     public async Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid tenantId,
         Guid userId,
         UpdateUserDto updateUserDto,
@@ -315,8 +379,16 @@ public class UserService: IUserService
             .TenantUserRoles
             .Where(tu => tu.TenantId == tenantId && tu.UserId == userId)
             .Join(_context.TenantRoles,
-                tur => new { tur.TenantId, tur.RoleId },
-                tr => new { tr.TenantId, tr.RoleId },
+                tur => new
+                {
+                    tur.TenantId,
+                    tur.RoleId
+                },
+                tr => new
+                {
+                    tr.TenantId,
+                    tr.RoleId
+                },
                 (tur, tr) => tr.RoleId)
             .Join(_context.Roles, id => id, r => r.Id, (id, r) => r.Name)
             .AsNoTracking()
