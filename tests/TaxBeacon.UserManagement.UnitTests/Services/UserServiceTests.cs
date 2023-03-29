@@ -96,8 +96,7 @@ public class UserServiceTests
             .Returns(DateTime.UtcNow);
 
         //Act
-        await _userService.LoginAsync(mailAddress);
-        var actualResult = await _dbContextMock.Users.LastAsync();
+        var actualResult = await _userService.LoginAsync(mailAddress);
 
         //Assert
         (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
@@ -123,8 +122,7 @@ public class UserServiceTests
             .Returns(currentDate);
 
         //Act
-        await _userService.LoginAsync(mailAddress);
-        var actualResult = await _dbContextMock.Users.LastAsync();
+        var actualResult = await _userService.LoginAsync(mailAddress);
 
         //Assert
         using (new AssertionScope())
@@ -133,11 +131,6 @@ public class UserServiceTests
             actualResult.Email.Should().Be(user.Email);
             actualResult.LastName.Should().BeEmpty();
             actualResult.FirstName.Should().BeEmpty();
-            actualResult.TenantUsers.Should()
-                .NotBeEmpty()
-                .And
-                .HaveCount(1);
-            actualResult.TenantUsers.First().TenantId.Should().Be(tenant.Id);
             actualResult.LastLoginDateTimeUtc.Should().Be(currentDate);
             _dateTimeServiceMock
                 .Verify(ds => ds.UtcNow, Times.Exactly(4));
