@@ -55,7 +55,7 @@ public class UserService: IUserService
         _dateTimeFormatter = dateTimeFormatter;
     }
 
-    public async Task LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
+    public async Task<UserDto> LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
     {
         var user = await _context
             .Users
@@ -63,7 +63,7 @@ public class UserService: IUserService
 
         if (user is null)
         {
-            await CreateUserAsync(
+            return await CreateUserAsync(
                 new UserDto
                 {
                     FirstName = string.Empty,
@@ -72,11 +72,11 @@ public class UserService: IUserService
                     LastLoginDateTimeUtc = _dateTimeService.UtcNow,
                 }, cancellationToken);
         }
-        else
-        {
-            user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
-            await _context.SaveChangesAsync(cancellationToken);
-        }
+
+        user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return user.Adapt<UserDto>();
     }
 
     public async Task<OneOf<QueryablePaging<UserDto>, NotFound>> GetUsersAsync(GridifyQuery gridifyQuery,
