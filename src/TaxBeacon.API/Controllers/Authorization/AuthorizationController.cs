@@ -38,7 +38,7 @@ namespace TaxBeacon.API.Controllers.Authorization
         public async Task<ActionResult<LoginResponse>> LoginAsync([FromBody] LoginRequest loginRequest,
             CancellationToken cancellationToken)
         {
-            await _userService.LoginAsync(new MailAddress(loginRequest.Email), cancellationToken);
+            var userDto = await _userService.LoginAsync(new MailAddress(loginRequest.Email), cancellationToken);
 
             var permissions =
                 Guid.TryParse(Request?.HttpContext?.User?.Claims?
@@ -48,7 +48,7 @@ namespace TaxBeacon.API.Controllers.Authorization
                     ? await _permissionsService.GetPermissionsAsync(tenantId, userId)
                     : Array.Empty<string>();
 
-            return Ok(new LoginResponse { UserId = userId, Permissions = permissions });
+            return Ok(new LoginResponse { UserId = userId, Permissions = permissions, FullName = userDto.FullName });
         }
     }
 }
