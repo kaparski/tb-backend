@@ -47,7 +47,7 @@ public class TableFiltersController: BaseController
     /// </summary>
     /// <param name="createTableFilterRequest">Request with new filter data</param>
     /// <param name="cancellationToken"></param>
-    /// <response code="201">Filter successfully created</response>
+    /// <response code="200">Filter successfully created</response>
     /// <response code="400">Invalid CreatedFilterRequest</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
@@ -56,7 +56,7 @@ public class TableFiltersController: BaseController
     [HttpPost(Name = "CreateFilter")]
     [HasPermissions(Common.Permissions.TableFilters.ReadWrite)]
     [ProducesErrorResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(TableFilterResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(List<TableFilterResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -69,7 +69,7 @@ public class TableFiltersController: BaseController
                 cancellationToken);
 
         return filterOneOf.Match<IActionResult>(
-            addedFilter => Created($"filters/{addedFilter.Id}", addedFilter.Adapt<TableFilterResponse>()),
+            filters => Ok(filters.Adapt<List<TableFilterResponse>>()),
             nameAlreadyExists => Conflict());
     }
 
@@ -86,7 +86,7 @@ public class TableFiltersController: BaseController
     [HttpDelete("{filterId:guid}", Name = "DeleteFilter")]
     [HasPermissions(Common.Permissions.TableFilters.ReadWrite)]
     [ProducesErrorResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<TableFilterResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -96,7 +96,7 @@ public class TableFiltersController: BaseController
         var deleteFilterOneOf = await _tableFiltersService.DeleteFilterAsync(filterId, cancellationToken);
 
         return deleteFilterOneOf.Match<IActionResult>(
-            success => Ok(),
+            filters => Ok(filters.Adapt<List<TableFilterResponse>>()),
             notFound => NotFound());
     }
 }

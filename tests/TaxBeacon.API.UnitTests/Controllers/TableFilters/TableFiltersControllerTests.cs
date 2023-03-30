@@ -57,7 +57,7 @@ public class TableFiltersControllerTests
     }
 
     [Fact]
-    private async Task CreateFilterAsync_ValidCreateTableFilterRequest_ReturnsCreateTableFilter()
+    private async Task CreateFilterAsync_ValidCreateTableFilterRequest_ReturnsListOfFilters()
     {
         // Arrange
         var tableFilterDto = TestData.TableFilterDtoFaker.Generate();
@@ -69,7 +69,7 @@ public class TableFiltersControllerTests
                 It.Is<CreateTableFilterDto>(r =>
                     r.Name.Equals(createTableFilterDto.Name, StringComparison.OrdinalIgnoreCase)),
                 It.Is<CancellationToken>(ct => ct == default)))
-            .ReturnsAsync(tableFilterDto);
+            .ReturnsAsync(Enumerable.Empty<TableFilterDto>().ToList());
 
         // Act
         var actualResponse = await _controller.CreateFilterAsync(createTableFilterRequest, default);
@@ -77,12 +77,12 @@ public class TableFiltersControllerTests
         // Arrange
         using (new AssertionScope())
         {
-            var actualResult = actualResponse as CreatedResult;
+            var actualResult = actualResponse as OkObjectResult;
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<CreatedResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status201Created);
-            actualResult?.Value.Should().BeOfType<TableFilterResponse>();
+            actualResponse.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<List<TableFilterResponse>>();
         }
     }
 
@@ -115,7 +115,7 @@ public class TableFiltersControllerTests
     }
 
     [Fact]
-    private async Task DeleteFilterAsync_ValidFilterId_ReturnsSuccessResponse()
+    private async Task DeleteFilterAsync_ValidFilterId_ReturnsListOfFilters()
     {
         // Arrange
         var filterId = Guid.NewGuid();
@@ -123,7 +123,7 @@ public class TableFiltersControllerTests
             .Setup(s => s.DeleteFilterAsync(
                 It.Is<Guid>(id => id == filterId),
                 It.Is<CancellationToken>(ct => ct == default)))
-            .ReturnsAsync(new Success());
+            .ReturnsAsync(Enumerable.Empty<TableFilterDto>().ToList());
 
         // Act
         var actualResponse = await _controller.DeleteFilterAsync(filterId, default);
@@ -131,11 +131,12 @@ public class TableFiltersControllerTests
         // Arrange
         using (new AssertionScope())
         {
-            var actualResult = actualResponse as OkResult;
+            var actualResult = actualResponse as OkObjectResult;
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkResult>();
+            actualResponse.Should().BeOfType<OkObjectResult>();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<List<TableFilterResponse>>();
         }
     }
 

@@ -171,7 +171,7 @@ public class TableFiltersServiceTests
     }
 
     [Fact]
-    public async Task CreateFilterAsync_ValidCreateTableFilterDto_ReturnsCreatedTableFilters()
+    public async Task CreateFilterAsync_ValidCreateTableFilterDto_ReturnsCollectionOfTableFilters()
     {
         // Arrange
         var createTableFilterDto = TestData.CreateTableFilterDtoFaker.Generate();
@@ -199,10 +199,10 @@ public class TableFiltersServiceTests
 
             createdTableFilterOneOf.IsT0.Should().BeTrue();
             createdTableFilterOneOf.IsT1.Should().BeFalse();
-            createdTableFilterOneOf.TryPickT0(out var createdTableFilterDto, out _);
-            createdTableFilterDto.Should().NotBeNull();
-            createdTableFilterDto.Name.Should().Be(createTableFilterDto.Name);
-            createdTableFilterDto.Configuration.Should().Be(createTableFilterDto.Configuration);
+            createdTableFilterOneOf.TryPickT0(out var tableFilters, out _);
+            tableFilters.Should().NotBeNullOrEmpty();
+            tableFilters.Should().Contain(tf =>
+                tf.Name.Equals(createTableFilterDto.Name, StringComparison.OrdinalIgnoreCase));
 
             var actualDbTableFilter = await _dbContextMock.TableFilters.LastOrDefaultAsync();
             actualDbTableFilter.Should().NotBeNull();
@@ -215,7 +215,7 @@ public class TableFiltersServiceTests
     }
 
     [Fact]
-    public async Task CreateFilterAsync_ValidCreateTableFilterDtoAndUserWithoutTenant_ReturnsCreatedTableFilters()
+    public async Task CreateFilterAsync_ValidCreateTableFilterDtoAndUserWithoutTenant_ReturnsCollectionOfTableFilters()
     {
         // Arrange
         var createTableFilterDto = TestData.CreateTableFilterDtoFaker.Generate();
@@ -241,10 +241,10 @@ public class TableFiltersServiceTests
 
             createdTableFilterOneOf.IsT0.Should().BeTrue();
             createdTableFilterOneOf.IsT1.Should().BeFalse();
-            createdTableFilterOneOf.TryPickT0(out var createdTableFilterDto, out _);
-            createdTableFilterDto.Should().NotBeNull();
-            createdTableFilterDto.Name.Should().Be(createTableFilterDto.Name);
-            createdTableFilterDto.Configuration.Should().Be(createTableFilterDto.Configuration);
+            createdTableFilterOneOf.TryPickT0(out var tableFilters, out _);
+            tableFilters.Should().NotBeNullOrEmpty();
+            tableFilters.Should().Contain(tf =>
+                tf.Name.Equals(createTableFilterDto.Name, StringComparison.OrdinalIgnoreCase));
 
             var actualDbTableFilter = await _dbContextMock.TableFilters.LastOrDefaultAsync();
             actualDbTableFilter.Should().NotBeNull();
@@ -292,7 +292,7 @@ public class TableFiltersServiceTests
     }
 
     [Fact]
-    public async Task DeleteFiltersAsync_FilterExistsInDb_ReturnsSuccess()
+    public async Task DeleteFiltersAsync_FilterExistsInDb_ReturnsEmptyList()
     {
         // Arrange
         var tenant = TestData.TenantFaker.Generate();
@@ -322,6 +322,8 @@ public class TableFiltersServiceTests
         {
             deleteResultOneOf.IsT0.Should().BeTrue();
             deleteResultOneOf.IsT1.Should().BeFalse();
+            deleteResultOneOf.TryPickT0(out var tableFilters, out _);
+            tableFilters.Should().BeEmpty();
 
             (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
             (await _dbContextMock.TableFilters.AnyAsync(tf => tf.Id == tableFilter.Id)).Should().BeFalse();
@@ -329,7 +331,7 @@ public class TableFiltersServiceTests
     }
 
     [Fact]
-    public async Task DeleteFiltersAsync_FilterExistsInDbAndUserWithoutTenant_ReturnsSuccess()
+    public async Task DeleteFiltersAsync_FilterExistsInDbAndUserWithoutTenant_ReturnsEmptyList()
     {
         // Arrange
         var user = TestData.UserFaker.Generate();
@@ -356,6 +358,8 @@ public class TableFiltersServiceTests
         {
             deleteResultOneOf.IsT0.Should().BeTrue();
             deleteResultOneOf.IsT1.Should().BeFalse();
+            deleteResultOneOf.TryPickT0(out var tableFilters, out _);
+            tableFilters.Should().BeEmpty();
 
             (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
             (await _dbContextMock.TableFilters.AnyAsync(tf => tf.Id == tableFilter.Id)).Should().BeFalse();
@@ -363,7 +367,7 @@ public class TableFiltersServiceTests
     }
 
     [Fact]
-    public async Task DeleteFiltersAsync_FilterNotExistsInDb_ReturnsSuccess()
+    public async Task DeleteFiltersAsync_FilterNotExistsInDb_ReturnsNotFound()
     {
         // Arrange
         var tenant = TestData.TenantFaker.Generate();

@@ -30,7 +30,7 @@ public class TableFilterService: ITableFiltersService
         _currentUserService = currentUserService;
     }
 
-    public async Task<OneOf<TableFilterDto, NameAlreadyExists>> CreateFilterAsync(
+    public async Task<OneOf<List<TableFilterDto>, NameAlreadyExists>> CreateFilterAsync(
         CreateTableFilterDto createTableFilterDto,
         CancellationToken cancellationToken = default)
     {
@@ -64,10 +64,10 @@ public class TableFilterService: ITableFiltersService
             newTableFilter.Name,
             _currentUserService.UserId);
 
-        return newTableFilter.Adapt<TableFilterDto>();
+        return await GetFiltersAsync(createTableFilterDto.TableType, cancellationToken);
     }
 
-    public async Task<OneOf<Success, NotFound>> DeleteFilterAsync(Guid filterId,
+    public async Task<OneOf<List<TableFilterDto>, NotFound>> DeleteFilterAsync(Guid filterId,
         CancellationToken cancellationToken = default)
     {
         var tableFilter = await _context.TableFilters.FirstOrDefaultAsync(tf => tf.Id == filterId, cancellationToken);
@@ -85,7 +85,7 @@ public class TableFilterService: ITableFiltersService
             tableFilter.Id,
             _currentUserService.UserId);
 
-        return new Success();
+        return await GetFiltersAsync(tableFilter.TableType, cancellationToken);
     }
 
     public async Task<List<TableFilterDto>> GetFiltersAsync(EntityType tableType,

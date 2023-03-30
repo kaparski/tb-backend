@@ -8,10 +8,10 @@ namespace TaxBeacon.UserManagement.Services;
 
 public interface ITableFiltersService
 {
-    Task<OneOf<TableFilterDto, NameAlreadyExists>> CreateFilterAsync(CreateTableFilterDto createTableFilterDto,
+    Task<OneOf<List<TableFilterDto>, NameAlreadyExists>> CreateFilterAsync(CreateTableFilterDto createTableFilterDto,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<Success, NotFound>> DeleteFilterAsync(Guid filterId,
+    Task<OneOf<List<TableFilterDto>, NotFound>> DeleteFilterAsync(Guid filterId,
         CancellationToken cancellationToken = default);
 
     Task<List<TableFilterDto>> GetFiltersAsync(EntityType tableType, CancellationToken cancellationToken = default);
