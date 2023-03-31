@@ -36,4 +36,20 @@ public class RolesControllerTest
         actualResponse.Should().BeOfType<ActionResult<QueryablePaging<RoleResponse>>>();
         actualResponse.Should().NotBeNull();
     }
+
+    [Fact]
+    public async Task GetRoleUsers_ValidQuery_ReturnsSuccessStatusCode()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email asc", };
+        _roleServiceMock.Setup(p => p.GetRoleUsersAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(new QueryablePaging<UserDto>(0, Enumerable.Empty<UserDto>().AsQueryable()));
+
+        // Act
+        var actualResponse = await _controller.GetRoleUsers(It.IsAny<Guid>(), query, default);
+
+        // Assert
+        actualResponse.Should().BeOfType<ActionResult<QueryablePaging<RoleUserResponse>>>();
+        actualResponse.Should().NotBeNull();
+    }
 }
