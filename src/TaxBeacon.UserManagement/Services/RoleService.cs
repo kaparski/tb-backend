@@ -1,5 +1,6 @@
 ﻿using Gridify;
 using Gridify.EntityFramework;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
@@ -25,6 +26,18 @@ public class RoleService: IRoleService
                 AssignedUsersCount = tr.TenantUserRoles.Count
             })
             .AsNoTracking()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+    }
+
+    public async Task<QueryablePaging<UserDto>> GetRoleUsersAsync(Guid tenantId, Guid roleId, GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default)
+    {
+        tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;
+
+        return await _context.TenantUserRoles
+            .Where(tr => tr.TenantId == tenantId && tr.RoleId == roleId)
+            .Select(tr => tr.TenantUser.User)
+            .ProjectToType<UserDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
 }
