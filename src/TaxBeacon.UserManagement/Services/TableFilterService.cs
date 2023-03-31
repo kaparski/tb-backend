@@ -100,7 +100,6 @@ public class TableFilterService: ITableFiltersService
                 tf.TenantId == tenantId
                 && tf.TableType == tableType
                 && tf.UserId == _currentUserService.UserId)
-            .AsNoTracking()
             .ProjectToType<TableFilterDto>()
             .ToListAsync(cancellationToken);
     }
