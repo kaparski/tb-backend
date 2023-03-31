@@ -34,6 +34,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
 
     public DbSet<UserActivityLog> UserActivityLogs => Set<UserActivityLog>();
 
+    public DbSet<TableFilter> TableFilters => Set<TableFilter>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
