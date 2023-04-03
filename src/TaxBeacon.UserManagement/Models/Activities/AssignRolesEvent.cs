@@ -4,22 +4,22 @@ namespace TaxBeacon.UserManagement.Models.Activities;
 
 public class AssignRolesEvent
 {
-    public AssignRolesEvent(string roles, Guid assignedByUserId, string fullName, DateTime assignedDate)
+    public AssignRolesEvent(string assignedRoles, Guid assignedByUserId, string assignedByFullName, DateTime assignedDate)
     {
         AssignedDate = assignedDate;
-        AssignedRoles = roles;
+        AssignedAssignedRoles = assignedRoles;
         AssignedByUserId = assignedByUserId;
-        AssignedByFullName = fullName;
+        AssignedByAssignedByFullName = assignedByFullName;
     }
 
     public DateTime AssignedDate { get; set; }
 
     public Guid AssignedByUserId { get; set; }
 
-    public string AssignedByFullName { get; set; }
+    public string AssignedByAssignedByFullName { get; set; }
 
-    public string AssignedRoles { get; set; }
+    public string AssignedAssignedRoles { get; set; }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following roles: {AssignedRoles} by {AssignedByFullName} "
+    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following roles: {AssignedAssignedRoles} by {AssignedByAssignedByFullName} "
                                                                     + $"{dateTimeFormatter.FormatDate(AssignedDate)}";
 }
