@@ -278,8 +278,9 @@ public class UserService: IUserService
             .ProjectToType<RoleActivityDto>()
             .ToListAsync(cancellationToken);
 
-        _context.TenantUserRoles.RemoveRange(_context
-            .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId && x.TenantId == tenantId));
+        var removedRoles = _context
+            .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId && x.TenantId == tenantId);
+        _context.TenantUserRoles.RemoveRange(removedRoles);
 
         var rolesString = await _context
             .TenantUserRoles
@@ -303,11 +304,6 @@ public class UserService: IUserService
                            .FirstOrDefaultAsync(x => x.UserId == _currentUserService.UserId && x.TenantId == tenantId, cancellationToken))?
                        .User.FullName
                        ?? "";
-        var newRoles = await _context.TenantRoles
-            .Where(x => roleIds.Contains(x.RoleId) && x.TenantId == tenantId)
-            .Select(x => x.Role)
-            .ProjectToType<RoleActivityDto>()
-            .ToListAsync(cancellationToken);
 
         await _context.UserActivityLogs.AddAsync(new UserActivityLog
         {
@@ -320,8 +316,7 @@ public class UserService: IUserService
                     rolesString ?? "",
                     _currentUserService.UserId,
                     fullName,
-                    existingRoles,
-                    newRoles)),
+                    _dateTimeService.UtcNow)),
             EventType = EventType.UserRolesAssign
         }, cancellationToken);
 
