@@ -7,19 +7,19 @@ public class AssignRolesEvent
     public AssignRolesEvent(string assignedRoles, Guid assignedByUserId, string assignedByFullName, DateTime assignedDate)
     {
         AssignedDate = assignedDate;
-        AssignedAssignedRoles = assignedRoles;
+        AssignedRoles = assignedRoles;
         AssignedByUserId = assignedByUserId;
-        AssignedByAssignedByFullName = assignedByFullName;
+        AssignedByFullName = assignedByFullName;
     }
 
     public DateTime AssignedDate { get; set; }
 
     public Guid AssignedByUserId { get; set; }
 
-    public string AssignedByAssignedByFullName { get; set; }
+    public string AssignedByFullName { get; set; }
 
-    public string AssignedAssignedRoles { get; set; }
+    public string AssignedRoles { get; set; }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following roles: {AssignedAssignedRoles} by {AssignedByAssignedByFullName} "
+    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following roles: {AssignedRoles} by {AssignedByFullName} "
                                                                     + $"{dateTimeFormatter.FormatDate(AssignedDate)}";
 }

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
 using TaxBeacon.API.Controllers.Role;
-using TaxBeacon.API.Controllers.Roles;
 using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Services;
 

@@ -7,19 +7,19 @@ public class UnassignUsersEvent
     public UnassignUsersEvent(string unassignedRoles, Guid unassignedByUserId, string unassignedByFullName, DateTime unassignDate)
     {
         UnassignDate = unassignDate;
-        UnassignedUnassignedRoles = unassignedRoles;
+        UnassignedRoles = unassignedRoles;
         UnassignedByUserId = unassignedByUserId;
-        UnassignedByUnassignedByFullName = unassignedByFullName;
+        UnassignedByFullName = unassignedByFullName;
     }
 
     public DateTime UnassignDate { get; set; }
 
-    public string UnassignedByUnassignedByFullName { get; set; }
+    public string UnassignedByFullName { get; set; }
 
     public Guid UnassignedByUserId { get; set; }
 
-    public string UnassignedUnassignedRoles { get; set; }
+    public string UnassignedRoles { get; set; }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was unassigned from the following roles: {UnassignedUnassignedRoles} by {UnassignedByUnassignedByFullName} "
+    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was unassigned from the following roles: {UnassignedRoles} by {UnassignedByFullName} "
                                                                     + $"{dateTimeFormatter.FormatDate(UnassignDate)}";
 }

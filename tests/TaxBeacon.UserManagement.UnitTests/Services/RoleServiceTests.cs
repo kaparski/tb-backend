@@ -104,8 +104,6 @@ public class RoleServiceTests
 
         }
         await _dbContextMock.TenantUserRoles.AddRangeAsync(tenantUserRoles);
-        //await _dbContextMock.Tenants.AddAsync(tenant);
-        //await _dbContextMock.Users.AddRangeAsync(users);
         await _dbContextMock.SaveChangesAsync();
 
         //Act

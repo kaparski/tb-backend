@@ -3,7 +3,6 @@
     public enum Roles
     {
         Read,
-        ReadWrite,
         UsersWrite,
     }
 }
