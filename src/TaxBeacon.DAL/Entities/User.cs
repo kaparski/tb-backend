@@ -26,4 +26,6 @@ public class User: BaseEntity
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
 
     public ICollection<UserActivityLog> UserActivityLogs { get; set; } = new HashSet<UserActivityLog>();
+
+    public ICollection<TableFilter> TableFilters { get; set; } = new HashSet<TableFilter>();
 }

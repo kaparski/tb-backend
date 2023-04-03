@@ -19,6 +19,8 @@ VALUES ('Users.Read'),
        ('Users.RolesWrite'),
        ('Roles.Read'),
        ('Roles.UsersWrite')
+       ('TableFilters.Read'),
+       ('TableFilters.ReadWrite')
 
 INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 SELECT NEWID(),
