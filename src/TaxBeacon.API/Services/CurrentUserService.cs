@@ -14,4 +14,9 @@ public class CurrentUserService: ICurrentUserService
         Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(Claims.UserIdClaimName), null, out var id)
             ? id
             : Guid.Empty;
+
+    public Guid TenantId =>
+        Guid.TryParse(_httpContextAccessor.HttpContext!.User!.FindFirstValue(Claims.TenantId), null, out var id)
+            ? id
+            : Guid.Empty;
 }

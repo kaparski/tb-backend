@@ -11,5 +11,5 @@ public interface IRoleService
     Task<QueryablePaging<RoleDto>> GetRolesAsync(Guid tenantId, GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<Success, NotFound>> UnassignUsers(List<Guid> users, Guid tenantId, CancellationToken cancellationToken, Guid roleId);
+    Task<OneOf<Success, NotFound>> UnassignUsersAsync(List<Guid> users, Guid tenantId, Guid roleId, Guid currentUserId, CancellationToken cancellationToken);
 }

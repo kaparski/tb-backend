@@ -4,22 +4,22 @@ namespace TaxBeacon.UserManagement.Models.Activities;
 
 public class UnassignUsersEvent
 {
-    public UnassignUsersEvent(string roles, Guid unassignedByUserId, string fullName, DateTime unassignDate)
+    public UnassignUsersEvent(string unassignedRoles, Guid unassignedByUserId, string unassignedByFullName, DateTime unassignDate)
     {
         UnassignDate = unassignDate;
-        UnassignedRoles = roles;
+        UnassignedUnassignedRoles = unassignedRoles;
         UnassignedByUserId = unassignedByUserId;
-        UnassignedByFullName = fullName;
+        UnassignedByUnassignedByFullName = unassignedByFullName;
     }
 
     public DateTime UnassignDate { get; set; }
 
-    public string UnassignedByFullName { get; set; }
+    public string UnassignedByUnassignedByFullName { get; set; }
 
     public Guid UnassignedByUserId { get; set; }
 
-    public string UnassignedRoles { get; set; }
+    public string UnassignedUnassignedRoles { get; set; }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was unassigned from the following roles: {UnassignedRoles} by {UnassignedByFullName} "
+    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was unassigned from the following roles: {UnassignedUnassignedRoles} by {UnassignedByUnassignedByFullName} "
                                                                     + $"{dateTimeFormatter.FormatDate(UnassignDate)}";
 }

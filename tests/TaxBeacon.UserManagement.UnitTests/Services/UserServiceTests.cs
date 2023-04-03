@@ -63,6 +63,10 @@ public class UserServiceTests
 
         var currentUser = TestData.TestUser.Generate();
         _dbContextMock.Users.Add(currentUser);
+
+        _dateTimeServiceMock.SetupSequence(x => x.UtcNow)
+            .Returns(DateTime.UtcNow)
+            .Returns(DateTime.UtcNow);
         _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
 
         _userService = new UserService(

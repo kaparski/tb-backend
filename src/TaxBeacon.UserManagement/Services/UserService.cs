@@ -320,6 +320,21 @@ public class UserService: IUserService
             EventType = EventType.UserRolesAssign
         }, cancellationToken);
 
+        await _context.UserActivityLogs.AddAsync(new UserActivityLog
+        {
+            TenantId = tenantId,
+            UserId = userId,
+            Date = _dateTimeService.UtcNow,
+            Revision = 1,
+            Event = JsonSerializer.Serialize(
+                new UnassignUsersEvent(
+                    rolesString ?? "",
+                    _currentUserService.UserId,
+                    fullName,
+                    _dateTimeService.UtcNow)),
+            EventType = EventType.UserRolesUnassign
+        }, cancellationToken);
+
         await _context.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roles} roles by {@userId}",
             _dateTimeService.UtcNow,

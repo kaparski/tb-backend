@@ -46,11 +46,10 @@ public class RoleService: IRoleService
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
 
-    public async Task<OneOf<Success, NotFound>> UnassignUsers(List<Guid> users, Guid tenantId, CancellationToken cancellationToken, Guid roleId)
+    public async Task<OneOf<Success, NotFound>> UnassignUsersAsync(List<Guid> users, Guid tenantId, Guid roleId, Guid currentUserId, CancellationToken cancellationToken)
     {
         var tenant = await _context.Tenants.FirstAsync(cancellationToken);
 
-        var currentUserId = _currentUserService.UserId;
         var role = await _context.TenantRoles
             .Include(x => x.Role)
             .FirstOrDefaultAsync(x => x.RoleId == roleId && x.TenantId == tenant.Id, cancellationToken);

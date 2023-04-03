@@ -3,8 +3,10 @@ using FluentAssertions;
 using Gridify;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
@@ -22,6 +24,9 @@ public class RoleServiceTests
 
     public RoleServiceTests()
     {
+        var logger = new Mock<ILogger<RoleService>>();
+        var currentUserService = new Mock<ICurrentUserService>();
+        var dateTimeService = new Mock<IDateTimeService>();
         _entitySaveChangesInterceptorMock = new();
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -29,7 +34,7 @@ public class RoleServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
-        _roleService = new RoleService(_dbContextMock);
+        _roleService = new RoleService(_dbContextMock, logger.Object, currentUserService.Object, dateTimeService.Object);
     }
 
     [Fact]
@@ -69,6 +74,92 @@ public class RoleServiceTests
         pageOfRoles.Query.Count().Should().Be(0);
     }
 
+    [Fact]
+    public async Task UnassignUsersAsync_UnassignUsersFromRole_ShouldUnassignOnlyProvidedUsers()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var users = TestData.TestUser.Generate(3);
+        var role = TestData.TestRole.Generate();
+
+        var tenantRole = new TenantRole
+        {
+            Tenant = tenant,
+            Role = role
+        };
+
+        var tenantUserRoles = new List<TenantUserRole>();
+        foreach (var user in users)
+        {
+            var tenantUser = new TenantUser
+            {
+                Tenant = tenant,
+                User = user
+            };
+            tenantUserRoles.Add(new TenantUserRole()
+            {
+                TenantUser = tenantUser,
+                TenantRole = tenantRole
+            });
+
+        }
+        await _dbContextMock.TenantUserRoles.AddRangeAsync(tenantUserRoles);
+        //await _dbContextMock.Tenants.AddAsync(tenant);
+        //await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        await _roleService.UnassignUsersAsync(new List<Guid>
+            {
+                users[0].Id,
+                users[1].Id
+            }, tenant.Id,
+            role.Id, users[2].Id, default);
+
+        //Assert
+        _dbContextMock.TenantUserRoles.Count().Should().Be(1);
+    }
+
+    [Fact]
+    public async Task UnassignUsersAsync_UnassignUsersFromRole_ShouldUnassignNoOne()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var users = TestData.TestUser.Generate(3);
+        var role = TestData.TestRole.Generate();
+
+        var tenantRole = new TenantRole
+        {
+            Tenant = tenant,
+            Role = role
+        };
+
+        var tenantUserRoles = new List<TenantUserRole>();
+        foreach (var user in users)
+        {
+            var tenantUser = new TenantUser
+            {
+                Tenant = tenant,
+                User = user
+            };
+            tenantUserRoles.Add(new TenantUserRole()
+            {
+                TenantUser = tenantUser,
+                TenantRole = tenantRole
+            });
+
+        }
+        await _dbContextMock.TenantUserRoles.AddRangeAsync(tenantUserRoles);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        await _roleService.UnassignUsersAsync(new List<Guid>(), tenant.Id,
+            role.Id, users[2].Id, default);
+
+        //Assert
+        _dbContextMock.TenantUserRoles.Count().Should().Be(3);
+    }
+
     private static class TestData
     {
         public static async Task SeedTestDataAsync(ITaxBeaconDbContext dbContext)
@@ -106,13 +197,13 @@ public class RoleServiceTests
             await dbContext.SaveChangesAsync();
         }
 
-        private static readonly Faker<Tenant> TestTenant =
+        public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
-        private static readonly Faker<User> TestUser =
+        public static readonly Faker<User> TestUser =
             new Faker<User>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
@@ -121,7 +212,7 @@ public class RoleServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
-        private static readonly Faker<Role> TestRole =
+        public static readonly Faker<Role> TestRole =
             new Faker<Role>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.Name, f => f.Name.JobTitle());

@@ -2,8 +2,11 @@
 using Gridify;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using OneOf.Types;
+using TaxBeacon.API.Controllers.Role;
 using TaxBeacon.API.Controllers.Roles;
 using TaxBeacon.API.Controllers.Roles.Responses;
+using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -17,7 +20,6 @@ public class RolesControllerTest
     public RolesControllerTest()
     {
         _roleServiceMock = new();
-
         _controller = new RolesController(_roleServiceMock.Object);
     }
 

@@ -2,9 +2,11 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OneOf;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.API.Exceptions;
+using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Role;
@@ -14,8 +16,13 @@ namespace TaxBeacon.API.Controllers.Role;
 public class RoleController: BaseController
 {
     private readonly IRoleService _roleService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public RoleController(IRoleService roleService) => _roleService = roleService;
+    public RoleController(IRoleService roleService, ICurrentUserService currentUserService)
+    {
+        _roleService = roleService;
+        _currentUserService = currentUserService;
+    }
 
     /// <summary>
     /// Unassign Users
@@ -26,12 +33,14 @@ public class RoleController: BaseController
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<QueryablePaging<RoleResponse>>> UnassignUsers([FromRoute] Guid id,
+    public async Task<IActionResult> UnassignUsers([FromRoute] Guid id,
         [FromBody] List<Guid> userIds,
         CancellationToken cancellationToken)
     {
-        var tenantId = Guid.Parse(HttpContext!.User!.FindFirst(Claims.TenantId)!.Value);
-        var result = await _roleService.UnassignUsers(userIds, tenantId, cancellationToken, id);
+        var tenantId = _currentUserService.TenantId;
+        var currentUserId = _currentUserService.UserId;
+
+        var result = await _roleService.UnassignUsersAsync(userIds, tenantId, id, currentUserId, cancellationToken);
 
         if (result.IsT1)
         {
