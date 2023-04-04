@@ -1,10 +1,6 @@
-﻿using Gridify;
-using Mapster;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OneOf;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Services;
@@ -29,7 +25,7 @@ public class RoleController: BaseController
     /// </summary>
     /// <response code="200"></response>
     [HasPermissions(Common.Permissions.Roles.UsersWrite)]
-    [HttpPost(Name = "UnassignUsers")]
+    [HttpDelete(Name = "UnassignUsers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

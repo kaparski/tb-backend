@@ -18,14 +18,12 @@ public class RoleService: IRoleService
 {
     private readonly ITaxBeaconDbContext _context;
     private readonly ILogger<RoleService> _logger;
-    private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeService _dateTimeService;
 
-    public RoleService(ITaxBeaconDbContext context, ILogger<RoleService> logger, ICurrentUserService currentUserService, IDateTimeService dateTimeService)
+    public RoleService(ITaxBeaconDbContext context, ILogger<RoleService> logger, IDateTimeService dateTimeService)
     {
         _context = context;
         _logger = logger;
-        _currentUserService = currentUserService;
         _dateTimeService = dateTimeService;
     }
 
@@ -93,7 +91,7 @@ public class RoleService: IRoleService
             _dateTimeService.UtcNow,
             string.Join(",", users),
             roleId,
-            _currentUserService.UserId);
+            currentUserId);
 
         return new Success();
     }
