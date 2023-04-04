@@ -60,7 +60,7 @@ public class RoleService: IRoleService
 
         var currentUser = await _context.Users
             .Where(x => x.Id == currentUserId && x.TenantUsers.Select(x => x.TenantId).Contains(tenantId))
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstAsync(cancellationToken);
         var usersToRemove = _context.TenantUserRoles
             .Where(x => x.TenantId == tenantId && x.RoleId == roleId && users.Contains(x.UserId));
 
