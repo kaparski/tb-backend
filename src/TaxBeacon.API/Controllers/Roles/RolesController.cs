@@ -45,17 +45,17 @@ public class RolesController: BaseController
     /// Sample requests: <br/><br/>
     ///     ```GET api/roles/8da4f695-6d47-4ce8-da8f-08db0052f325/users?page=1&amp;pageSize=10&amp;orderBy=email%20asc&amp;filter=email%3DAdmin```<br/><br/>
     /// </remarks>
-    /// <response code="200">Returns roles</response>
+    /// <response code="200">Returns list of role assigned users</response>
     [HasPermissions(Common.Permissions.Roles.Read)]
     [HttpGet("{id:guid}/users", Name = "GetRoleUsers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<RoleUserResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<QueryablePaging<RoleUserResponse>>> GetRoleUsers([FromRoute] Guid id, [FromQuery] GridifyQuery query,
+    [ProducesResponseType(typeof(QueryablePaging<RoleAssignedUserResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<QueryablePaging<RoleAssignedUserResponse>>> GetRoleAssignedUsers([FromRoute] Guid id, [FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
-        var users = await _roleService.GetRoleUsersAsync(Guid.Empty, id, query, cancellationToken);
+        var users = await _roleService.GetRoleAssignedUsersAsync(Guid.Empty, id, query, cancellationToken);
 
-        var response = new QueryablePaging<RoleUserResponse>(users.Count, users.Query.ProjectToType<RoleUserResponse>());
+        var response = new QueryablePaging<RoleAssignedUserResponse>(users.Count, users.Query.ProjectToType<RoleAssignedUserResponse>());
 
         return Ok(response);
     }

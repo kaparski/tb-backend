@@ -29,7 +29,7 @@ public class RoleService: IRoleService
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
 
-    public async Task<QueryablePaging<UserDto>> GetRoleUsersAsync(Guid tenantId, Guid roleId, GridifyQuery gridifyQuery,
+    public async Task<QueryablePaging<UserDto>> GetRoleAssignedUsersAsync(Guid tenantId, Guid roleId, GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
         tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;

@@ -79,7 +79,7 @@ public class RoleServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "email asc", };
 
         //Act
-        var pageOfUsers = await _roleService.GetRoleUsersAsync(tenantId, role.Id, query);
+        var pageOfUsers = await _roleService.GetRoleAssignedUsersAsync(tenantId, role.Id, query);
 
         //Assert
         pageOfUsers.Count.Should().Be(5);
@@ -99,7 +99,7 @@ public class RoleServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "email asc", };
 
         //Act
-        var pageOfUsers = await _roleService.GetRoleUsersAsync(tenantId, role.Id, query);
+        var pageOfUsers = await _roleService.GetRoleAssignedUsersAsync(tenantId, role.Id, query);
 
         //Assert
         pageOfUsers.Count.Should().Be(5);
@@ -116,7 +116,7 @@ public class RoleServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email asc", };
 
         //Act
-        var pageOfUsers = await _roleService.GetRoleUsersAsync(tenantId, Guid.NewGuid(), query);
+        var pageOfUsers = await _roleService.GetRoleAssignedUsersAsync(tenantId, Guid.NewGuid(), query);
 
         //Assert
         pageOfUsers.Count.Should().Be(0);
