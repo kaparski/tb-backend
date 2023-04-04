@@ -157,8 +157,10 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
 
                     b.HasKey("Id");
 
