@@ -1,7 +1,11 @@
 ﻿using FluentAssertions;
+using FluentAssertions.Execution;
 using Gridify;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using OneOf.Types;
 using TaxBeacon.API.Controllers.Roles;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.UserManagement.Models;
@@ -26,7 +30,7 @@ public class RolesControllerTest
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name asc", };
-        _roleServiceMock.Setup(p => p.GetRolesAsync(It.IsAny<Guid>(), query, default))
+        _roleServiceMock.Setup(p => p.GetRolesAsync(query, default))
             .ReturnsAsync(new QueryablePaging<RoleDto>(0, Enumerable.Empty<RoleDto>().AsQueryable()));
 
         // Act
@@ -38,18 +42,45 @@ public class RolesControllerTest
     }
 
     [Fact]
-    public async Task GetRoleUsers_ValidQuery_ReturnsSuccessStatusCode()
+    public async Task GetRoleAssignedUsers_ValidQuery_ReturnsSuccessStatusCode()
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email asc", };
-        _roleServiceMock.Setup(p => p.GetRoleAssignedUsersAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), query, default))
+        _roleServiceMock.Setup(p => p.GetRoleAssignedUsersAsync(It.IsAny<Guid>(), query, default))
             .ReturnsAsync(new QueryablePaging<UserDto>(0, Enumerable.Empty<UserDto>().AsQueryable()));
 
         // Act
         var actualResponse = await _controller.GetRoleAssignedUsers(It.IsAny<Guid>(), query, default);
 
         // Assert
-        actualResponse.Should().BeOfType<ActionResult<QueryablePaging<RoleAssignedUserResponse>>>();
-        actualResponse.Should().NotBeNull();
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<QueryablePaging<RoleAssignedUserResponse>>();
+        }
+    }
+
+    [Fact]
+    public async Task GetRoleAssignedUsers_RoleDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email asc", };
+        _roleServiceMock.Setup(p => p.GetRoleAssignedUsersAsync(It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(new OneOf.Types.NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetRoleAssignedUsers(It.IsAny<Guid>(), query, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
     }
 }

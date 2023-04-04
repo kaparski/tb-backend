@@ -5,6 +5,7 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
@@ -19,6 +20,7 @@ public class RoleServiceTests
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly RoleService _roleService;
     private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
+    private readonly Mock<ICurrentUserService> _currentUserServiceMock;
 
     public RoleServiceTests()
     {
@@ -29,7 +31,9 @@ public class RoleServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
-        _roleService = new RoleService(_dbContextMock);
+        _currentUserServiceMock = new();
+
+        _roleService = new RoleService(_dbContextMock, _currentUserServiceMock.Object);
     }
 
     [Fact]
@@ -39,10 +43,12 @@ public class RoleServiceTests
         await TestData.SeedTestDataAsync(_dbContextMock);
         var tenantId = (await _dbContextMock.Tenants.FirstAsync()).Id;
 
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
+
         var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "name asc" };
 
         //Act
-        var pageOfUsers = await _roleService.GetRolesAsync(tenantId, query);
+        var pageOfUsers = await _roleService.GetRolesAsync(query);
 
         //Assert
         var listOfRoles = pageOfUsers.Query.ToList();
@@ -59,10 +65,12 @@ public class RoleServiceTests
         await TestData.SeedTestDataAsync(_dbContextMock);
         var tenantId = (await _dbContextMock.Tenants.FirstAsync()).Id;
 
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
+
         var query = new GridifyQuery { Page = 3, PageSize = 25, OrderBy = "name asc", };
 
         //Act
-        var pageOfRoles = await _roleService.GetRolesAsync(tenantId, query);
+        var pageOfRoles = await _roleService.GetRolesAsync(query);
 
         //Assert
         pageOfRoles.Count.Should().Be(3);
@@ -70,18 +78,21 @@ public class RoleServiceTests
     }
 
     [Fact]
-    public async Task GetRoleUsersAsync_FirstPageAndAscendingOrder_CorrentNumberOfUsersInAscendingOrder()
+    public async Task GetRoleAssignedUsersAsync_FirstPageAndAscendingOrder_CorrectNumberOfUsersInAscendingOrder()
     {
         //Arrange
         var role = await TestData.SeedTestDataForRoleAsync(_dbContextMock);
         var tenantId = (await _dbContextMock.Tenants.FirstAsync()).Id;
 
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
+
         var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "email asc", };
 
         //Act
-        var pageOfUsers = await _roleService.GetRoleAssignedUsersAsync(tenantId, role.Id, query);
+        var resultOneOf = await _roleService.GetRoleAssignedUsersAsync(role.Id, query);
 
         //Assert
+        resultOneOf.TryPickT0(out var pageOfUsers, out _).Should().BeTrue();
         pageOfUsers.Count.Should().Be(5);
         pageOfUsers.Query.Count().Should().Be(5);
         var users = pageOfUsers.Query.ToList();
@@ -90,39 +101,42 @@ public class RoleServiceTests
     }
 
     [Fact]
-    public async Task GetRoleUsersAsync_PageNumberOutsideOfTotalRange_UserListIsEmpty()
+    public async Task GetRoleAssignedUsersAsync_PageNumberOutsideOfTotalRange_NotFound()
     {
         //Arrange
         var role = await TestData.SeedTestDataForRoleAsync(_dbContextMock);
         var tenantId = (await _dbContextMock.Tenants.FirstAsync()).Id;
 
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
+
         var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "email asc", };
 
         //Act
-        var pageOfUsers = await _roleService.GetRoleAssignedUsersAsync(tenantId, role.Id, query);
+        var resultOneOf = await _roleService.GetRoleAssignedUsersAsync(role.Id, query);
 
         //Assert
-        pageOfUsers.Count.Should().Be(5);
-        pageOfUsers.Query.Count().Should().Be(0);
+        resultOneOf.TryPickT1(out var result, out _).Should().BeTrue();
     }
 
     [Fact]
-    public async Task GetRoleUsersAsync_RoleIdDoesNotExist_UserListIsEmpty()
+    public async Task GetRoleAssignedUsersAsync_RoleIdDoesNotExist_NotFound()
     {
         //Arrange
-        await TestData.SeedTestDataAsync(_dbContextMock);
+        await TestData.SeedTestDataForRoleAsync(_dbContextMock);
         var tenantId = (await _dbContextMock.Tenants.FirstAsync()).Id;
+
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email asc", };
 
         //Act
-        var pageOfUsers = await _roleService.GetRoleAssignedUsersAsync(tenantId, Guid.NewGuid(), query);
+        var resultOneOf = await _roleService.GetRoleAssignedUsersAsync(Guid.NewGuid(), query);
 
         //Assert
-        pageOfUsers.Count.Should().Be(0);
-        pageOfUsers.Query.Count().Should().Be(0);
+        resultOneOf.TryPickT1(out var result, out _).Should().BeTrue();
     }
 
+    //TODO Refactor test data seeds
     private static class TestData
     {
         public static async Task SeedTestDataAsync(ITaxBeaconDbContext dbContext)

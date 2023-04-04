@@ -31,7 +31,7 @@ public class RolesController: BaseController
     public async Task<ActionResult<QueryablePaging<RoleResponse>>> GetRoleList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
-        var roles = await _roleService.GetRolesAsync(Guid.Empty, query, cancellationToken);
+        var roles = await _roleService.GetRolesAsync(query, cancellationToken);
         var roleListResponse =
             new QueryablePaging<RoleResponse>(roles.Count, roles.Query.ProjectToType<RoleResponse>());
 
@@ -50,13 +50,14 @@ public class RolesController: BaseController
     [HttpGet("{id:guid}/users", Name = "GetRoleAssignedUsers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<RoleAssignedUserResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<QueryablePaging<RoleAssignedUserResponse>>> GetRoleAssignedUsers([FromRoute] Guid id, [FromQuery] GridifyQuery query,
+    public async Task<IActionResult> GetRoleAssignedUsers([FromRoute] Guid id, [FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
-        var users = await _roleService.GetRoleAssignedUsersAsync(Guid.Empty, id, query, cancellationToken);
+        var usersOneOf = await _roleService.GetRoleAssignedUsersAsync(id, query, cancellationToken);
 
-        var response = new QueryablePaging<RoleAssignedUserResponse>(users.Count, users.Query.ProjectToType<RoleAssignedUserResponse>());
-
-        return Ok(response);
+        return usersOneOf.Match<IActionResult>(
+            users => Ok(new QueryablePaging<RoleAssignedUserResponse>(users.Count,
+                users.Query.ProjectToType<RoleAssignedUserResponse>())),
+            notfound => NotFound());
     }
 }
