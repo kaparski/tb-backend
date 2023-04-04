@@ -37,6 +37,7 @@ public class UserServiceTests
     private readonly UserService _userService;
     private readonly Mock<IUserActivityFactory> _userCreatedActivityFactory;
     private readonly Mock<IEnumerable<IUserActivityFactory>> _activityFactories;
+    private readonly Guid _tenantId = Guid.NewGuid();
 
     public UserServiceTests()
     {
@@ -76,6 +77,7 @@ public class UserServiceTests
         var currentUser = TestData.TestUser.Generate();
         _dbContextMock.Users.Add(currentUser);
         _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(_tenantId);
 
         _userService = new UserService(
             _userServiceLoggerMock.Object,
@@ -553,6 +555,60 @@ public class UserServiceTests
 
         //Assert
         _dbContextMock.TenantUserRoles.Count().Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetActivitiesAsync_UserExists_ShouldCallAppropriateFactory()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        tenant.Id = _tenantId;
+        var user = TestData.TestUser.Generate();
+        var tenantUser = new TenantUser
+        {
+            Tenant = tenant,
+            User = user
+        };
+        var userActivity = new UserActivityLog
+        {
+            Date = DateTime.UtcNow,
+            TenantId = tenant.Id,
+            UserId = user.Id,
+            EventType = EventType.UserCreated,
+            Revision = 1
+        };
+
+        _dbContextMock.Tenants.Add(tenant);
+        _dbContextMock.Users.Add(user);
+        _dbContextMock.TenantUsers.Add(tenantUser);
+        _dbContextMock.UserActivityLogs.Add(userActivity);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        await _userService.GetActivitiesAsync(user.Id);
+
+        //Assert
+
+        _userCreatedActivityFactory.Verify(x => x.Create(It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetActivitiesAsync_UserDoesNotExistWithinTenant_ShouldReturnNotFount()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        tenant.Id = _tenantId;
+        var user = TestData.TestUser.Generate();
+
+        _dbContextMock.Tenants.Add(tenant);
+        _dbContextMock.Users.Add(user);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _userService.GetActivitiesAsync(user.Id);
+
+        //Assert
+        resultOneOf.TryPickT1(out var result, out _).Should().BeTrue();
     }
 
     private static class TestData
