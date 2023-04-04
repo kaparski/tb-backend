@@ -37,13 +37,23 @@ public class RoleService: IRoleService
     public async Task<OneOf<QueryablePaging<UserDto>, NotFound>> GetRoleAssignedUsersAsync(Guid roleId, GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
+        var roleExists = await _context.Roles
+            .AnyAsync(
+                r => r.Id == roleId && r.TenantRoles.Any(tr => tr.TenantId == _currentUserService.TenantId),
+                cancellationToken);
+
+        if (!roleExists)
+        {
+            return new NotFound();
+        }
+
         var users = await _context.TenantUserRoles
             .Where(tr => tr.TenantId == _currentUserService.TenantId && tr.RoleId == roleId)
             .Select(tr => tr.TenantUser.User)
             .ProjectToType<UserDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
-        return users.Count == 0 || gridifyQuery.Page != 1 && gridifyQuery.Page > Math.Ceiling((double)users.Count / gridifyQuery.PageSize)
+        return gridifyQuery.Page != 1 && gridifyQuery.Page > Math.Ceiling((double)users.Count / gridifyQuery.PageSize)
             ? new NotFound()
             : users;
     }
