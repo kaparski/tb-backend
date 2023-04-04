@@ -611,6 +611,63 @@ public class UserServiceTests
         resultOneOf.TryPickT1(out var result, out _).Should().BeTrue();
     }
 
+    [Fact]
+    public async Task GetActivitiesAsync_UserExists_ShouldReturnExpectedNumberOfItems()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        tenant.Id = _tenantId;
+        var user = TestData.TestUser.Generate();
+        var tenantUser = new TenantUser
+        {
+            Tenant = tenant,
+            User = user
+        };
+
+        var activities = new[]
+        {
+            new UserActivityLog
+            {
+                Date = DateTime.UtcNow,
+                TenantId = tenant.Id,
+                UserId = user.Id,
+                EventType = EventType.UserCreated,
+                Revision = 1
+            },
+            new UserActivityLog
+            {
+                Date = DateTime.UtcNow,
+                TenantId = tenant.Id,
+                UserId = user.Id,
+                EventType = EventType.UserCreated,
+                Revision = 1
+            },
+            new UserActivityLog
+            {
+                Date = DateTime.UtcNow,
+                TenantId = tenant.Id,
+                UserId = user.Id,
+                EventType = EventType.UserCreated,
+                Revision = 1
+            }
+        };
+
+        _dbContextMock.Tenants.Add(tenant);
+        _dbContextMock.Users.Add(user);
+        _dbContextMock.TenantUsers.Add(tenantUser);
+        _dbContextMock.UserActivityLogs.AddRange(activities);
+        await _dbContextMock.SaveChangesAsync();
+
+        const int pageSize = 2;
+
+        //Act
+        var resultOneOf = await _userService.GetActivitiesAsync(user.Id, 1, pageSize);
+
+        //Assert
+        resultOneOf.TryPickT0(out var activitiesResult, out _).Should().BeTrue();
+        activitiesResult.Count().Should().Be(pageSize);
+    }
+
     private static class TestData
     {
         public static readonly Faker<Tenant> TestTenant =

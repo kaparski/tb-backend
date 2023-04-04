@@ -21,6 +21,6 @@ namespace TaxBeacon.UserManagement.Models.Activities
         }
 
         public string ToString(IDateTimeFormatter dateTimeFormatter)
-            => $"User reactivated {dateTimeFormatter.FormatDate(ReactivatedDate)} by {FullName} {Roles}";
+            => $"{dateTimeFormatter.FormatDate(ReactivatedDate)} User reactivated  by {FullName} {Roles}";
     }
 }

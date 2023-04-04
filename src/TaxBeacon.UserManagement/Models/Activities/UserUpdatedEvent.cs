@@ -28,5 +28,5 @@ public class UserUpdatedEvent
     }
 
     public string ToString(IDateTimeFormatter dateTimeFormatter) =>
-        $"User updated {dateTimeFormatter.FormatDate(UpdatedDate)} by {FullName} {Roles}";
+        $"{dateTimeFormatter.FormatDate(UpdatedDate)} User details updated: {PreviousValues} to {CurrentValues} by {FullName} {Roles}";
 }

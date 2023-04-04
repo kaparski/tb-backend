@@ -23,6 +23,6 @@ namespace TaxBeacon.UserManagement.Models.Activities
             Roles = roles;
         }
 
-        public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User created {dateTimeFormatter.FormatDate(CreatedDate)} by {FullName} {Roles}";
+        public string ToString(IDateTimeFormatter dateTimeFormatter) => $"{dateTimeFormatter.FormatDate(CreatedDate)} User created by {FullName} {Roles}";
     }
 }

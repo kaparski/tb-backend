@@ -407,6 +407,7 @@ public class UserService: IUserService
 
         return userDto;
     }
+
     public async Task<OneOf<IEnumerable<UserActivityDto>, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1, uint pageSize = 10, CancellationToken cancellationToken = default)
     {
         page = page == 0 ? 1 : page;

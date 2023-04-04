@@ -1,6 +1,4 @@
-﻿
-using System.Diagnostics.CodeAnalysis;
-using TaxBeacon.Common.Services;
+﻿using TaxBeacon.Common.Services;
 
 namespace TaxBeacon.UserManagement.Models.Activities;
 
@@ -28,6 +26,6 @@ public class AssignRolesEvent
 
     public List<RoleActivityDto> CurrentUserRoles { get; }
 
-    [SuppressMessage("Style", "IDE0060:Remove unused parameter")]
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following roles: {Roles} by {FullName}";
+    public string ToString(IDateTimeFormatter dateTimeFormatter)
+        => $"{dateTimeFormatter.FormatDate(AssignDate)} User has been assigned to the following roles: {string.Join(", ", CurrentUserRoles.Select(x => x.Name))} by {FullName} {Roles}";
 }
