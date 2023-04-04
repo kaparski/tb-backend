@@ -15,7 +15,6 @@ using TaxBeacon.DAL.Entities;
 using TaxBeacon.Common.Converters;
 using System.Collections.Immutable;
 using System.Text.Json;
-using System.Net;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.Common.Enums.Activities;
 
@@ -400,6 +399,22 @@ public class UserService: IUserService
             _currentUserService.UserId);
 
         return userDto;
+    }
+
+    public async Task<OneOf<QueryablePaging<TenantDto>, NotFound>> GetTenantsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default)
+    {
+        var tenants = await _context
+            .Tenants
+            .ProjectToType<TenantDto>()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        if (gridifyQuery.Page == 1 || tenants.Query.Any())
+        {
+            return tenants;
+        }
+
+        return new NotFound();
     }
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>

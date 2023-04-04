@@ -33,4 +33,8 @@ public interface IUserService
 
     Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid tenantId, Guid userId, UpdateUserDto updateUserDto,
         CancellationToken cancellationToken = default);
+
+    Task<OneOf<QueryablePaging<TenantDto>, NotFound>> GetTenantsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default);
+
 }
