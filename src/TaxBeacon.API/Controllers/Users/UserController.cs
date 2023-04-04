@@ -117,10 +117,10 @@ public class UserController: BaseController
     [HasPermissions(Common.Permissions.Users.Read)]
     [HttpGet("activities", Name = "UserActivityHistory")]
     [ProducesResponseType(typeof(IEnumerable<UserActivityResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UserActivitiesHistory([FromRoute] Guid Id, [FromQuery] UserActivitiesRequest request,
+    public async Task<IActionResult> UserActivitiesHistory([FromRoute] Guid id, [FromQuery] UserActivitiesRequest request,
         CancellationToken cancellationToken)
     {
-        var activities = await _userService.GetActivitiesAsync(Id, request.Page, request.PageSize, cancellationToken);
+        var activities = await _userService.GetActivitiesAsync(id, request.Page, request.PageSize, cancellationToken);
 
         return activities.Match<IActionResult>(
             result => Ok(result.Adapt<IEnumerable<UserActivityResponse>>()),
