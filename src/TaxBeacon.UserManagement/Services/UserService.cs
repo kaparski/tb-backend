@@ -410,6 +410,7 @@ public class UserService: IUserService
     public async Task<OneOf<IEnumerable<UserActivityDto>, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1, uint pageSize = 10, CancellationToken cancellationToken = default)
     {
         page = page == 0 ? 1 : page;
+        pageSize = pageSize == 0 ? 10 : pageSize;
 
         var user = await _context.Users
             .Where(u => u.Id == userId && u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
