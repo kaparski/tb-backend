@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.DAL.Configurations;
 
@@ -24,5 +25,11 @@ public class TenantConfiguration: IEntityTypeConfiguration<Tenant>
         tenant
             .Property(t => t.CreatedDateTimeUtc)
             .HasDefaultValueSql("GETUTCDATE()");
+
+        tenant
+            .Property(u => u.Status)
+            .HasConversion<string>()
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
     }
 }

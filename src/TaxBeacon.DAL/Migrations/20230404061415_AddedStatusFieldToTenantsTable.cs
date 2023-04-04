@@ -10,12 +10,13 @@ namespace TaxBeacon.DAL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<string>(
                 name: "Status",
                 table: "Tenants",
-                type: "int",
+                type: "nvarchar(100)",
+                maxLength: 100,
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "Active");
         }
 
         /// <inheritdoc />
