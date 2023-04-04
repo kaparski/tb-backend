@@ -6,7 +6,7 @@ using TaxBeacon.UserManagement.Models;
 
 namespace TaxBeacon.UserManagement.Services.Activities
 {
-    public class UserReactivatedEventFactory: IUserActivityFactory
+    public sealed class UserReactivatedEventFactory: IUserActivityFactory
     {
         public uint Revision => 1;
 

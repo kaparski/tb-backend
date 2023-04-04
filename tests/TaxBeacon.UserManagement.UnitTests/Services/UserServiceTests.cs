@@ -18,6 +18,7 @@ using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -34,6 +35,8 @@ public class UserServiceTests
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
     private readonly UserService _userService;
+    private readonly Mock<IUserActivityFactory> _userCreatedActivityFactory;
+    private readonly Mock<IEnumerable<IUserActivityFactory>> _activityFactories;
 
     public UserServiceTests()
     {
@@ -46,14 +49,23 @@ public class UserServiceTests
         _csvMock = new();
         _xlsxMock = new();
         _dateTimeFormatterMock = new();
+        _userCreatedActivityFactory = new();
+        _activityFactories = new();
 
         _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
         _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
+
+        _userCreatedActivityFactory.Setup(x => x.EventType).Returns(EventType.UserCreated);
+        _userCreatedActivityFactory.Setup(x => x.Revision).Returns(1);
 
         _listToFileConverters
             .Setup(x => x.GetEnumerator())
             .Returns((IEnumerator<IListToFileConverter>)new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
                 .GetEnumerator());
+
+        _activityFactories
+            .Setup(x => x.GetEnumerator())
+            .Returns((IEnumerator<IUserActivityFactory>)new[] { _userCreatedActivityFactory.Object }.ToList().GetEnumerator());
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -72,7 +84,8 @@ public class UserServiceTests
             _currentUserServiceMock.Object,
             _listToFileConverters.Object,
             _userExternalStore.Object,
-            _dateTimeFormatterMock.Object);
+            _dateTimeFormatterMock.Object,
+            _activityFactories.Object);
 
         TypeAdapterConfig.GlobalSettings.Scan(typeof(UserMappingConfig).Assembly);
     }
