@@ -18,6 +18,7 @@ using System.Text.Json;
 using System.Net;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -30,6 +31,7 @@ public class UserService: IUserService
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
     private readonly IUserExternalStore _userExternalStore;
     private readonly IDateTimeFormatter _dateTimeFormatter;
+    private readonly IImmutableDictionary<(EventType, uint), IUserActivityFactory> _userActivityFactories;
 
     private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new string[]
     {
@@ -43,7 +45,8 @@ public class UserService: IUserService
         ICurrentUserService currentUserService,
         IEnumerable<IListToFileConverter> listToFileConverters,
         IUserExternalStore userExternalStore,
-        IDateTimeFormatter dateTimeFormatter)
+        IDateTimeFormatter dateTimeFormatter,
+        IEnumerable<IUserActivityFactory> userActivityFactories)
     {
         _logger = logger;
         _context = context;
@@ -53,6 +56,8 @@ public class UserService: IUserService
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
         _userExternalStore = userExternalStore;
         _dateTimeFormatter = dateTimeFormatter;
+        _userActivityFactories = userActivityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
+                                 ?? ImmutableDictionary<(EventType, uint), IUserActivityFactory>.Empty;
     }
 
     public async Task<UserDto> LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
@@ -321,7 +326,8 @@ public class UserService: IUserService
                     _currentUserService.UserId,
                     fullName,
                     existingRoles,
-                    newRoles)),
+                    newRoles,
+                    _dateTimeService.UtcNow)),
             EventType = EventType.UserRolesAssign
         }, cancellationToken);
 
@@ -400,6 +406,26 @@ public class UserService: IUserService
             _currentUserService.UserId);
 
         return userDto;
+    }
+    public async Task<OneOf<IEnumerable<UserActivityDto>, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1, uint pageSize = 10, CancellationToken cancellationToken = default)
+    {
+        page = page == 0 ? 1 : page;
+
+        var user = await _context.Users
+            .Where(u => u.Id == userId && u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (user is null)
+        {
+            return new NotFound();
+        }
+        var activities = await _context.UserActivityLogs
+            .OrderByDescending(x => x.Date)
+            .Skip((int)((page - 1) * pageSize))
+            .Take((int)pageSize)
+            .ToListAsync(cancellationToken);
+
+        return activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList();
     }
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
