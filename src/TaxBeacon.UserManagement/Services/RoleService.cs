@@ -19,12 +19,14 @@ public class RoleService: IRoleService
     private readonly ITaxBeaconDbContext _context;
     private readonly ILogger<RoleService> _logger;
     private readonly IDateTimeService _dateTimeService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public RoleService(ITaxBeaconDbContext context, ILogger<RoleService> logger, IDateTimeService dateTimeService)
+    public RoleService(ITaxBeaconDbContext context, ILogger<RoleService> logger, IDateTimeService dateTimeService, ICurrentUserService currentUserService)
     {
         _context = context;
         _logger = logger;
         _dateTimeService = dateTimeService;
+        _currentUserService = currentUserService;
     }
 
     public async Task<QueryablePaging<RoleDto>> GetRolesAsync(Guid tenantId, GridifyQuery gridifyQuery,
@@ -44,45 +46,42 @@ public class RoleService: IRoleService
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
 
-    public async Task<OneOf<Success, NotFound>> UnassignUsersAsync(List<Guid> users, Guid tenantId, Guid roleId, Guid currentUserId, CancellationToken cancellationToken)
+    public async Task<OneOf<Success, NotFound>> UnassignUsersAsync(Guid roleId, List<Guid> users, CancellationToken cancellationToken)
     {
-        var tenant = await _context.Tenants.FirstAsync(cancellationToken);
-
-        var role = await _context.TenantRoles
-            .Include(x => x.Role)
-            .FirstOrDefaultAsync(x => x.RoleId == roleId && x.TenantId == tenant.Id, cancellationToken);
+        var currentUserId = _currentUserService.UserId;
+        var tenantId = _currentUserService.TenantId;
+        var role = await _context.Roles
+            .Where(x => x.Id == roleId && x.TenantRoles.Select(x => x.TenantId).Contains(tenantId))
+            .FirstOrDefaultAsync(cancellationToken);
         if (role is null)
         {
             return new NotFound();
         }
 
-        var currentUser = await _context.TenantUsers
-            .Include(x => x.User)
-            .FirstAsync(x => x.UserId == currentUserId && x.TenantId == tenantId, cancellationToken);
+        var currentUser = await _context.Users
+            .Where(x => x.Id == currentUserId && x.TenantUsers.Select(x => x.TenantId).Contains(tenantId))
+            .FirstOrDefaultAsync(cancellationToken);
         var usersToRemove = _context.TenantUserRoles
-            .Where(x => x.TenantId == tenant.Id && x.RoleId == roleId && users.Contains(x.UserId));
+            .Where(x => x.TenantId == tenantId && x.RoleId == roleId && users.Contains(x.UserId));
 
         _context.TenantUserRoles.RemoveRange(usersToRemove);
 
-        var activityUserLogs = new List<UserActivityLog>();
-        foreach (var userId in users)
-        {
-            activityUserLogs.Add(new UserActivityLog
+        var activityUserLogs = users
+            .Select(x => new UserActivityLog
             {
-                TenantId = tenant.Id,
-                UserId = userId,
+                TenantId = tenantId,
+                UserId = x,
                 Date = _dateTimeService.UtcNow,
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
                     new UnassignUsersEvent(
-                        role.Role.Name,
+                        role.Name,
                         currentUserId,
-                        currentUser.User.FullName,
+                        currentUser.FullName,
                         _dateTimeService.UtcNow
                     )),
                 EventType = EventType.UserRolesUnassign
             });
-        }
         await _context.UserActivityLogs
             .AddRangeAsync(activityUserLogs, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);

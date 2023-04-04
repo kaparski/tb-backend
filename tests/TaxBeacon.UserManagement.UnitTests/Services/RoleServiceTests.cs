@@ -5,6 +5,7 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using OneOf.Types;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -21,9 +22,11 @@ public class RoleServiceTests
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly RoleService _roleService;
     private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
+    private readonly Mock<ICurrentUserService> _currentUserService;
 
     public RoleServiceTests()
     {
+        _currentUserService = new Mock<ICurrentUserService>();
         var logger = new Mock<ILogger<RoleService>>();
         var dateTimeService = new Mock<IDateTimeService>();
         _entitySaveChangesInterceptorMock = new();
@@ -33,7 +36,7 @@ public class RoleServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
-        _roleService = new RoleService(_dbContextMock, logger.Object, dateTimeService.Object);
+        _roleService = new RoleService(_dbContextMock, logger.Object, dateTimeService.Object, _currentUserService.Object);
     }
 
     [Fact]
@@ -82,14 +85,14 @@ public class RoleServiceTests
         var users = await _dbContextMock.Users.ToListAsync();
         var tenant = await _dbContextMock.Tenants.FirstAsync();
         var role = await _dbContextMock.Roles.FirstAsync();
-
+        _currentUserService.Setup(x => x.TenantId).Returns(tenant.Id);
+        _currentUserService.Setup(x => x.UserId).Returns(users[2].Id);
         //Act
-        await _roleService.UnassignUsersAsync(new List<Guid>
-            {
-                users[0].Id,
-                users[1].Id
-            }, tenant.Id,
-            role.Id, users[2].Id, default);
+        await _roleService.UnassignUsersAsync(role.Id, new List<Guid>
+        {
+            users[0].Id,
+            users[1].Id
+        }, default);
 
         //Assert
         _dbContextMock.TenantUserRoles.Count().Should().Be(1);
@@ -102,14 +105,30 @@ public class RoleServiceTests
         await TestData.SeedTestDataAsync(_dbContextMock, 3, 1);
 
         var tenant = await _dbContextMock.Tenants.FirstAsync();
+        _currentUserService.Setup(x => x.TenantId).Returns(tenant.Id);
         var role = await _dbContextMock.Roles.FirstAsync();
-
+        _currentUserService.Setup(x => x.UserId).Returns((await _dbContextMock.Users.LastAsync()).Id);
         //Act
-        await _roleService.UnassignUsersAsync(new List<Guid>(), tenant.Id,
-            role.Id, _dbContextMock.Users.Last().Id, default);
+        await _roleService.UnassignUsersAsync(role.Id, new List<Guid>(), default);
 
         //Assert
         _dbContextMock.TenantUserRoles.Count().Should().Be(3);
+    }
+
+    [Fact]
+    public async Task UnassignUsersAsync_IncorrectRoleId_ShouldReturnNotFound()
+    {
+        //Arrange
+        await TestData.SeedTestDataAsync(_dbContextMock, 3, 1);
+
+        var tenant = await _dbContextMock.Tenants.FirstAsync();
+        _currentUserService.Setup(x => x.TenantId).Returns(tenant.Id);
+        _currentUserService.Setup(x => x.UserId).Returns((await _dbContextMock.Users.LastAsync()).Id);
+        //Act
+        var result = await _roleService.UnassignUsersAsync(new Guid(), new List<Guid>(), default);
+
+        //Assert
+        result.IsT1.Should().BeTrue();
     }
 
     private static class TestData
@@ -149,13 +168,13 @@ public class RoleServiceTests
             await dbContext.SaveChangesAsync();
         }
 
-        public static readonly Faker<Tenant> TestTenant =
+        private static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
-        public static readonly Faker<User> TestUser =
+        private static readonly Faker<User> TestUser =
             new Faker<User>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
@@ -164,7 +183,7 @@ public class RoleServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
-        public static readonly Faker<Role> TestRole =
+        private static readonly Faker<Role> TestRole =
             new Faker<Role>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.Name, f => f.Name.JobTitle());
