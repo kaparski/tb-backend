@@ -47,7 +47,7 @@ public class RolesController: BaseController
     /// </remarks>
     /// <response code="200">Returns list of role assigned users</response>
     [HasPermissions(Common.Permissions.Roles.Read)]
-    [HttpGet("{id:guid}/users", Name = "GetRoleUsers")]
+    [HttpGet("{id:guid}/users", Name = "GetRoleAssignedUsers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<RoleAssignedUserResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<QueryablePaging<RoleAssignedUserResponse>>> GetRoleAssignedUsers([FromRoute] Guid id, [FromQuery] GridifyQuery query,
