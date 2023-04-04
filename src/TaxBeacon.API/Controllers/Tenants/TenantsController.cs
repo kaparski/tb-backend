@@ -26,8 +26,8 @@ public class TenantsController: BaseController
     ///     ```GET /tenants?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
     ///     ```GET /tenants?page=2&amp;pageSize=5&amp;orderBy=name```
     /// </remarks>
-    /// <response code="200">Returns users</response>
-    /// <returns>List of users</returns>
+    /// <response code="200">Returns tenants</response>
+    /// <returns>List of tenants</returns>
     [HasPermissions(
         Common.Permissions.Tenants.Read,
         Common.Permissions.Tenants.ReadWrite,

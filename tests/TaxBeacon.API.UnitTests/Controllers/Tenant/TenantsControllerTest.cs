@@ -40,7 +40,7 @@ public class TenantsControllerTest
     }
 
     [Fact]
-    public async Task GetUserList_ValidQuery_ReturnSuccessStatusCode()
+    public async Task GetTenantList_ValidQuery_ReturnSuccessStatusCode()
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
@@ -64,7 +64,7 @@ public class TenantsControllerTest
     }
 
     [Fact]
-    public async Task GetUserList_InvalidQuery_ReturnBadRequest()
+    public async Task GetTenantList_InvalidQuery_ReturnBadRequest()
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
