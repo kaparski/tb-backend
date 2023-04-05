@@ -1,6 +1,4 @@
-﻿using TaxBeacon.Common.Services;
-
-namespace TaxBeacon.UserManagement.Models.Activities;
+﻿namespace TaxBeacon.UserManagement.Models.Activities;
 
 public class UserUpdatedEvent
 {
@@ -27,6 +25,5 @@ public class UserUpdatedEvent
         CurrentValues = currentValues;
     }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) =>
-        $"{dateTimeFormatter.FormatDate(UpdatedDate)} User details updated: {PreviousValues} to {CurrentValues} by {FullName} {Roles}";
+    public override string ToString() => $"User details updated: {PreviousValues} to {CurrentValues}";
 }

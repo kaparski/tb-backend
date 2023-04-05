@@ -664,8 +664,12 @@ public class UserServiceTests
         var resultOneOf = await _userService.GetActivitiesAsync(user.Id, 1, pageSize);
 
         //Assert
-        resultOneOf.TryPickT0(out var activitiesResult, out _).Should().BeTrue();
-        activitiesResult.Count().Should().Be(pageSize);
+        using (new AssertionScope())
+        {
+            resultOneOf.TryPickT0(out var activitiesResult, out _).Should().BeTrue();
+            activitiesResult.Count.Should().Be(2);
+            activitiesResult.Query.Count().Should().Be(2);
+        }
     }
 
     private static class TestData

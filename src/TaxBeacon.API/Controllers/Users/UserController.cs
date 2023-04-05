@@ -123,7 +123,7 @@ public class UserController: BaseController
         var activities = await _userService.GetActivitiesAsync(id, request.Page, request.PageSize, cancellationToken);
 
         return activities.Match<IActionResult>(
-            result => Ok(result.Adapt<IEnumerable<UserActivityResponse>>()),
+            result => Ok(result.Adapt<UserActivityResponse>()),
             notFound => NotFound());
     }
 }

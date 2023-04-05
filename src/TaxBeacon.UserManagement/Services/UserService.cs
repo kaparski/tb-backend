@@ -408,7 +408,7 @@ public class UserService: IUserService
         return userDto;
     }
 
-    public async Task<OneOf<IEnumerable<UserActivityDto>, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1, uint pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<OneOf<UserActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1, uint pageSize = 10, CancellationToken cancellationToken = default)
     {
         page = page == 0 ? 1 : page;
         pageSize = pageSize == 0 ? 10 : pageSize;
@@ -421,13 +421,21 @@ public class UserService: IUserService
         {
             return new NotFound();
         }
-        var activities = await _context.UserActivityLogs
+
+        var userActivitiesQuery = _context.UserActivityLogs
+            .Where(ua => ua.UserId == userId && ua.TenantId == _currentUserService.TenantId);
+
+        var count = await userActivitiesQuery.CountAsync(cancellationToken: cancellationToken);
+
+        var pageCount = (uint)Math.Ceiling((double)count / pageSize);
+
+        var activities = await userActivitiesQuery
             .OrderByDescending(x => x.Date)
             .Skip((int)((page - 1) * pageSize))
             .Take((int)pageSize)
             .ToListAsync(cancellationToken);
 
-        return activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList();
+        return new UserActivityDto(pageCount, activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>

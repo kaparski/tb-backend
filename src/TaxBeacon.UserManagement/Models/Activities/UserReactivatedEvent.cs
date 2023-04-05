@@ -1,6 +1,4 @@
-﻿using TaxBeacon.Common.Services;
-
-namespace TaxBeacon.UserManagement.Models.Activities
+﻿namespace TaxBeacon.UserManagement.Models.Activities
 {
     public sealed class UserReactivatedEvent
     {
@@ -20,7 +18,6 @@ namespace TaxBeacon.UserManagement.Models.Activities
             Roles = roles;
         }
 
-        public string ToString(IDateTimeFormatter dateTimeFormatter)
-            => $"{dateTimeFormatter.FormatDate(ReactivatedDate)} User reactivated  by {FullName} {Roles}";
+        public override string ToString() => "User reactivated";
     }
 }

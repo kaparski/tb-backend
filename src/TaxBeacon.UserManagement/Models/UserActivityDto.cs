@@ -1,11 +1,6 @@
 ﻿namespace TaxBeacon.UserManagement.Models
 {
-    public class UserActivityDto
-    {
-        public string Message { get; set; } = string.Empty;
+    public record UserActivityDto(uint Count, IEnumerable<UserActivityItemDto> Query);
 
-        public string FullName { get; set; } = string.Empty;
-
-        public string Date { get; set; } = string.Empty;
-    }
+    public record UserActivityItemDto(string Message, DateTime Date, string FullName);
 }

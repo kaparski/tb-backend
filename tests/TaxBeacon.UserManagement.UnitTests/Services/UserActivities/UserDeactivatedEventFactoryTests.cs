@@ -1,8 +1,6 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
-using Moq;
 using System.Text.Json;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Services.Activities;
 
@@ -10,25 +8,17 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
 {
     public class UserDeactivatedEventFactoryTests
     {
-        private readonly Mock<IDateTimeFormatter> _dateTimeFormatter;
-
         private readonly IUserActivityFactory _sut;
 
-        public UserDeactivatedEventFactoryTests()
-        {
-            _dateTimeFormatter = new();
-
-            _dateTimeFormatter.Setup(x => x.FormatDate(It.IsAny<DateTime>())).Returns(string.Empty);
-
-            _sut = new UserDeactivatedEventFactory(_dateTimeFormatter.Object);
-        }
+        public UserDeactivatedEventFactoryTests() => _sut = new UserDeactivatedEventFactory();
 
         [Fact]
         public void Create_CheckMapping()
         {
             //Arrange
             var deactivatedById = Guid.NewGuid();
-            var userEvent = new UserDeactivatedEvent(deactivatedById, DateTime.UtcNow, "Test", "Admin");
+            var date = DateTime.UtcNow;
+            var userEvent = new UserDeactivatedEvent(deactivatedById, date, "Test", "Admin");
 
             //Act
             var result = _sut.Create(JsonSerializer.Serialize(userEvent));
@@ -36,9 +26,9 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
             //Arrange
             using (new AssertionScope())
             {
-                result.Date.Should().Be(string.Empty);
+                result.Date.Should().Be(date);
                 result.FullName.Should().Be("Test");
-                result.Message.Should().Be(" User deactivated by Test Admin");
+                result.Message.Should().Be("User deactivated");
             };
 
         }

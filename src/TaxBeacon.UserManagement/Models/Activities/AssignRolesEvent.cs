@@ -1,6 +1,4 @@
-﻿using TaxBeacon.Common.Services;
-
-namespace TaxBeacon.UserManagement.Models.Activities;
+﻿namespace TaxBeacon.UserManagement.Models.Activities;
 
 public class AssignRolesEvent
 {
@@ -26,6 +24,6 @@ public class AssignRolesEvent
 
     public List<RoleActivityDto> CurrentUserRoles { get; }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter)
-        => $"{dateTimeFormatter.FormatDate(AssignDate)} User has been assigned to the following roles: {string.Join(", ", CurrentUserRoles.Select(x => x.Name))} by {FullName} {Roles}";
+    public override string ToString()
+        => $"User has been assigned to the following role(s): {string.Join(", ", CurrentUserRoles.Select(x => x.Name))}";
 }

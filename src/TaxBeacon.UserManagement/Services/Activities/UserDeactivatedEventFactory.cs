@@ -12,20 +12,16 @@ namespace TaxBeacon.UserManagement.Services.Activities
 
         public EventType EventType => EventType.UserDeactivated;
 
-        private readonly IDateTimeFormatter _dateTimeFormatter;
-
-        public UserDeactivatedEventFactory(IDateTimeFormatter dateTimeFormatter) => _dateTimeFormatter = dateTimeFormatter;
-
-        public UserActivityDto Create(string userEvent)
+        public UserActivityItemDto Create(string userEvent)
         {
             var userDeactivatedEvent = JsonSerializer.Deserialize<UserDeactivatedEvent>(userEvent);
 
-            return new UserActivityDto
-            {
-                Date = _dateTimeFormatter.FormatDate(userDeactivatedEvent!.DectivatedDate),
-                FullName = userDeactivatedEvent.FullName,
-                Message = userDeactivatedEvent.ToString(_dateTimeFormatter)
-            };
+            return new UserActivityItemDto
+            (
+                Date: userDeactivatedEvent!.DeactivatedDate,
+                FullName: userDeactivatedEvent.FullName,
+                Message: userDeactivatedEvent.ToString()
+            );
         }
     }
 }

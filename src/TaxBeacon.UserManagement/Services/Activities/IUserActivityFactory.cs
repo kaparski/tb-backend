@@ -9,6 +9,6 @@ namespace TaxBeacon.UserManagement.Services.Activities
 
         public EventType EventType { get; }
 
-        public UserActivityDto Create(string userEvent);
+        public UserActivityItemDto Create(string userEvent);
     }
 }

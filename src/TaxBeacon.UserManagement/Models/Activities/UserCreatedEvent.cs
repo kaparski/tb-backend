@@ -1,6 +1,4 @@
-﻿using TaxBeacon.Common.Services;
-
-namespace TaxBeacon.UserManagement.Models.Activities
+﻿namespace TaxBeacon.UserManagement.Models.Activities
 {
     public sealed class UserCreatedEvent
     {
@@ -23,6 +21,7 @@ namespace TaxBeacon.UserManagement.Models.Activities
             Roles = roles;
         }
 
-        public string ToString(IDateTimeFormatter dateTimeFormatter) => $"{dateTimeFormatter.FormatDate(CreatedDate)} User created by {FullName} {Roles}";
+        public override string ToString()
+            => "User created";
     }
 }

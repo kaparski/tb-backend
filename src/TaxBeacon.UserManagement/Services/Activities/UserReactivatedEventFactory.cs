@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Models;
 
@@ -12,20 +11,16 @@ namespace TaxBeacon.UserManagement.Services.Activities
 
         public EventType EventType => EventType.UserReactivated;
 
-        private readonly IDateTimeFormatter _dateTimeFormatter;
-
-        public UserReactivatedEventFactory(IDateTimeFormatter dateTimeFormatter) => _dateTimeFormatter = dateTimeFormatter;
-
-        public UserActivityDto Create(string userEvent)
+        public UserActivityItemDto Create(string userEvent)
         {
             var userReactivatedEvent = JsonSerializer.Deserialize<UserReactivatedEvent>(userEvent);
 
-            return new UserActivityDto
-            {
-                Date = _dateTimeFormatter.FormatDate(userReactivatedEvent!.ReactivatedDate),
-                FullName = userReactivatedEvent.FullName,
-                Message = userReactivatedEvent.ToString(_dateTimeFormatter)
-            };
+            return new UserActivityItemDto
+            (
+                Date: userReactivatedEvent!.ReactivatedDate,
+                FullName: userReactivatedEvent.FullName,
+                Message: userReactivatedEvent.ToString()
+            );
         }
     }
 }
