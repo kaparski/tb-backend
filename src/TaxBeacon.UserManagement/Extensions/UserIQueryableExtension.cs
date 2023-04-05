@@ -7,36 +7,34 @@ namespace TaxBeacon.UserManagement.Extensions;
 
 public static class UserIQueryableExtension
 {
-    // TODO: Fix editor config to avoid pragma and create a materialized view for Roles
-#pragma warning disable IDE0055
     public static IQueryable<UserDto> MapToUserDto(this IQueryable<User> source, ITaxBeaconDbContext context,
         ICurrentUserService currentUserService) =>
-        source.Select(user => new
+        source
+            .GroupJoin(context.TenantUserRoles,
+                u => new { u.Id, currentUserService.TenantId },
+                tur => new { Id = tur.UserId, tur.TenantId },
+                (u, tur) => new { User = u, TenantUserRole = tur })
+            .SelectMany(q => q.TenantUserRole.DefaultIfEmpty(),
+                (u, tur) => new { u.User, tur.RoleId })
+            .GroupJoin(context.Roles,
+                a => new { a.RoleId },
+                y => new { RoleId = y.Id },
+                (a, y) => new { a, y })
+            .SelectMany(q => q.y.DefaultIfEmpty(),
+                (a, y) => new { a.a.User, y.Name })
+            .GroupBy(z => z.User)
+            .Select(group => new UserDto
             {
-                User = user,
-                Roles = context.TenantUserRoles
-                    .Where(tur => tur.UserId == user.Id && tur.TenantId == currentUserService.TenantId)
-                    .Join(context.Roles, tur => tur.RoleId, r => r.Id, (tur, r) => r.Name)
-                    .GroupBy(key => 1, name => name)
-                    .Select(group => string.Join(", ", group.Select(name => name)))
-                    .FirstOrDefault()
-            })
-            .Select(userWithRoles => new UserDto
-            {
-                Id = userWithRoles.User.Id,
-                FirstName = userWithRoles.User.FirstName,
-                LastName = userWithRoles.User.LastName,
-                CreatedDateTimeUtc = userWithRoles.User.CreatedDateTimeUtc,
-                Email = userWithRoles.User.Email,
-                Status = userWithRoles.User.Status,
-                LastLoginDateTimeUtc = userWithRoles.User.LastLoginDateTimeUtc,
-                FullName = userWithRoles.User.FullName,
-                DeactivationDateTimeUtc = userWithRoles.User.DeactivationDateTimeUtc,
-                ReactivationDateTimeUtc = userWithRoles.User.ReactivationDateTimeUtc,
-#pragma warning disable IDE0029
-                Roles = userWithRoles.Roles != null ? userWithRoles.Roles : string.Empty
-#pragma warning restore IDE0029
+                Id = group.Key.Id,
+                FirstName = group.Key.FirstName,
+                LastName = group.Key.LastName,
+                CreatedDateTimeUtc = group.Key.CreatedDateTimeUtc,
+                Email = group.Key.Email,
+                Status = group.Key.Status,
+                LastLoginDateTimeUtc = group.Key.LastLoginDateTimeUtc,
+                FullName = group.Key.FullName,
+                DeactivationDateTimeUtc = group.Key.DeactivationDateTimeUtc,
+                ReactivationDateTimeUtc = group.Key.ReactivationDateTimeUtc,
+                Roles = string.Join(", ", group.Select(c => c.Name))
             });
-#pragma warning restore IDE0055
-
 }

@@ -89,8 +89,8 @@ public class UserService: IUserService
     {
         var users = await _context
             .Users
-            .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
             .AsNoTracking()
+            .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
             .MapToUserDto(_context, _currentUserService)
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
@@ -102,7 +102,7 @@ public class UserService: IUserService
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .MapToUserDto(_context, _currentUserService)
+            .ProjectToType<UserDto>()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
         ?? throw new NotFoundException(nameof(User), id);
 
@@ -110,7 +110,7 @@ public class UserService: IUserService
         CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .MapToUserDto(_context, _currentUserService)
+            .ProjectToType<UserDto>()
             .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
         ?? throw new NotFoundException(nameof(User), mailAddress.Address);
 
@@ -411,7 +411,8 @@ public class UserService: IUserService
         return userDto;
     }
 
-    public async Task<OneOf<UserActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1, uint pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<OneOf<UserActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1,
+        uint pageSize = 10, CancellationToken cancellationToken = default)
     {
         page = page == 0 ? 1 : page;
         pageSize = pageSize == 0 ? 10 : pageSize;
@@ -438,7 +439,8 @@ public class UserService: IUserService
             .Take((int)pageSize)
             .ToListAsync(cancellationToken);
 
-        return new UserActivityDto(pageCount, activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
+        return new UserActivityDto(pageCount,
+            activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
