@@ -63,7 +63,7 @@ public class TenantsController: BaseController
     /// <response code="200">Returns file content</response>
     /// <response code="401">User is unauthorized</response>
     /// <returns>File content</returns>
-    [HasPermissions(Common.Permissions.Users.ReadExport)]
+    [HasPermissions(Common.Permissions.Tenants.ReadExport)]
     [HttpGet("export", Name = "ExportTenants")]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
     public async Task<IActionResult> ExportTenantsAsync([FromQuery] ExportTenantsRequest exportTenantsRequest,
