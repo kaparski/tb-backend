@@ -20,6 +20,5 @@ public class UnassignUsersEvent
 
     public string UnassignedRoles { get; set; }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was unassigned from the following roles: {UnassignedRoles} by {UnassignedByFullName} "
-                                                                    + $"{dateTimeFormatter.FormatDate(UnassignDate)}";
+    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was unassigned from the following role(s): {UnassignedRoles}";
 }

@@ -27,7 +27,7 @@ public class RolesControllerTest
         _currentServiceMock
             .Setup(x => x.TenantId)
             .Returns(new Guid());
-        _controller = new RolesController(_roleServiceMock.Object, _currentServiceMock.Object);
+        _controller = new RolesController(_roleServiceMock.Object);
     }
 
     [Fact]

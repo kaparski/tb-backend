@@ -20,6 +20,5 @@ public class AssignRolesEvent
 
     public string AssignedRoles { get; set; }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following roles: {AssignedRoles} by {AssignedByFullName} "
-                                                                    + $"{dateTimeFormatter.FormatDate(AssignedDate)}";
+    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following role(s): {AssignedRoles}";
 }
