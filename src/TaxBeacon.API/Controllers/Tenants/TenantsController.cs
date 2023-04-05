@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Responses;
+using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Exceptions;
+using TaxBeacon.Common.Converters;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -50,5 +53,26 @@ public class TenantsController: BaseController
         return tenantsOneOf.Match<IActionResult>(
             tenants => Ok(new QueryablePaging<TenantResponse>(tenants.Count, tenants.Query.ProjectToType<TenantResponse>())),
             notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Endpoint to export tenants
+    /// </summary>
+    /// <param name="exportTenantsRequest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns file content</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <returns>File content</returns>
+    [HasPermissions(Common.Permissions.Users.ReadExport)]
+    [HttpGet("export", Name = "ExportTenants")]
+    [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportTenantsAsync([FromQuery] ExportTenantsRequest exportTenantsRequest,
+        CancellationToken cancellationToken)
+    {
+        var mimeType = exportTenantsRequest.FileType.ToMimeType();
+
+        var users = await _userService.ExportTenantsAsync(exportTenantsRequest.FileType, cancellationToken);
+
+        return File(users, mimeType, $"tenants.{exportTenantsRequest.FileType.ToString().ToLowerInvariant()}");
     }
 }

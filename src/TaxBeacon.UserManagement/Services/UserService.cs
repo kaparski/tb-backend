@@ -417,6 +417,24 @@ public class UserService: IUserService
         return new NotFound();
     }
 
+    public async Task<byte[]> ExportTenantsAsync(FileType fileType,
+        CancellationToken cancellationToken)
+    {
+        var exportTenants = await _context
+            .Tenants
+            .ProjectToType<TenantExportModel>()
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        exportTenants.ForEach(u => u.CreatedDateView = _dateTimeFormatter.FormatDate(u.CreatedDateTimeUtc));
+
+        _logger.LogInformation("{dateTime} - Tenants export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(exportTenants);
+    }
+
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
         await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
 

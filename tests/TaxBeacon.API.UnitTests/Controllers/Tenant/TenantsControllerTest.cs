@@ -9,11 +9,8 @@ using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants;
 using TaxBeacon.API.Controllers.Tenants.Responses;
-using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Requests;
-using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -83,6 +80,38 @@ public class TenantsControllerTest
             actualResult.Should().NotBeNull();
             actualResponse.Should().BeOfType<BadRequestResult>();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        }
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportTenantsAsync_ValidQuery_ReturnsFileContent(FileType fileType)
+    {
+        // Arrange
+        var request = new ExportTenantsRequest(fileType, "America/New_York");
+        _userServiceMock
+            .Setup(x => x.ExportTenantsAsync(
+                It.IsAny<FileType>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<byte>());
+
+        // Act
+        var actualResponse = await _controller.ExportTenantsAsync(request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResponse.Should().NotBeNull();
+            var actualResult = actualResponse as FileContentResult;
+            actualResult.Should().NotBeNull();
+            actualResult!.FileDownloadName.Should().Be($"tenants.{fileType.ToString().ToLowerInvariant()}");
+            actualResult!.ContentType.Should().Be(fileType switch
+            {
+                FileType.Csv => "text/csv",
+                FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                _ => throw new InvalidOperationException()
+            });
         }
     }
 }

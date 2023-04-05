@@ -37,4 +37,5 @@ public interface IUserService
     Task<OneOf<QueryablePaging<TenantDto>, NotFound>> GetTenantsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
+    Task<byte[]> ExportTenantsAsync(FileType fileType, CancellationToken cancellationToken);
 }
