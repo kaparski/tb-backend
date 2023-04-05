@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants;
@@ -113,5 +114,31 @@ public class TenantsControllerTest
                 _ => throw new InvalidOperationException()
             });
         }
+    }
+
+    [Fact]
+    public void GetTenantList_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetTenantList).Method;
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        Assert.Equal("Tenants.Read;Tenants.ReadWrite;Tenants.ReadExport", hasPermissionsAttribute.Policy);
+    }
+
+    [Fact]
+    public void ExportTenantsAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<ExportTenantsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportTenantsAsync).Method;
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        Assert.Equal("Tenants.ReadExport", hasPermissionsAttribute.Policy);
     }
 }
