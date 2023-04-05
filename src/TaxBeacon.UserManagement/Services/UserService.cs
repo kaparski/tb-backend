@@ -272,24 +272,17 @@ public class UserService: IUserService
 
     public async Task AssignRoleAsync(Guid tenantId, Guid[] roleIds, Guid userId, CancellationToken cancellationToken)
     {
-        var existingRoles = await _context.TenantUserRoles
+        var existingRoleIds = await _context.TenantUserRoles
             .Where(e => e.UserId == userId && e.TenantId == tenantId)
-            .Select(x => x.TenantRole.Role)
-            .ProjectToType<RoleActivityDto>()
+            .Select(x => x.RoleId)
             .ToListAsync(cancellationToken);
 
         var removedRoles = _context
             .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId && x.TenantId == tenantId);
         _context.TenantUserRoles.RemoveRange(removedRoles);
 
-        var rolesString = await _context
-            .TenantUserRoles
-            .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == tenantId)
-            .GroupBy(r => 1, t => t.TenantRole.Role.Name)
-            .Select(group => string.Join(", ", group.Select(name => name)))
-            .FirstOrDefaultAsync(cancellationToken);
+        var roleIdsToAdd = roleIds.Except(existingRoleIds);
 
-        var roleIdsToAdd = roleIds.Except(existingRoles.Select(x => x.Id));
         var tenantUserRoles = roleIdsToAdd.Select(roleId =>
             new TenantUserRole()
             {
@@ -305,6 +298,19 @@ public class UserService: IUserService
                        .User.FullName
                        ?? "";
 
+        var removedRolesString = await removedRoles
+                                     .GroupBy(r => 1, t => t.TenantRole.Role.Name)
+                                     .Select(group => string.Join(", ", group.Select(name => name)))
+                                     .FirstOrDefaultAsync(cancellationToken)
+                                 ?? string.Empty;
+
+        var rolesToAddString = await _context
+            .Roles
+            .Where(x => roleIdsToAdd.Contains(x.Id))
+            .GroupBy(r => 1, t => t.Name)
+            .Select(group => string.Join(", ", group.Select(name => name)))
+            .FirstOrDefaultAsync(cancellationToken);
+
         await _context.UserActivityLogs.AddAsync(new UserActivityLog
         {
             TenantId = tenantId,
@@ -313,7 +319,7 @@ public class UserService: IUserService
             Revision = 1,
             Event = JsonSerializer.Serialize(
                 new AssignRolesEvent(
-                    rolesString ?? "",
+                    rolesToAddString ?? "",
                     _currentUserService.UserId,
                     fullName,
                     _dateTimeService.UtcNow)),
@@ -328,7 +334,7 @@ public class UserService: IUserService
             Revision = 1,
             Event = JsonSerializer.Serialize(
                 new UnassignUsersEvent(
-                    rolesString ?? "",
+                    removedRolesString,
                     _currentUserService.UserId,
                     fullName,
                     _dateTimeService.UtcNow)),
@@ -339,7 +345,12 @@ public class UserService: IUserService
         _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roles} roles by {@userId}",
             _dateTimeService.UtcNow,
             userId,
-            rolesString,
+            rolesToAddString,
+            _currentUserService.UserId);
+        _logger.LogInformation("{dateTime} - User ({userId}) was unassigned from {roles} roles by {@userId}",
+            _dateTimeService.UtcNow,
+            userId,
+            removedRolesString,
             _currentUserService.UserId);
     }
 

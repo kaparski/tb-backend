@@ -47,7 +47,7 @@ public class RolesControllerTest
     }
 
     [Fact]
-    public async Task GetRoleList_ValidParameters_ReturnSuccessStatusCode()
+    public async Task UnassignUsersAsync_ValidUserIds_ReturnSuccessStatusCode()
     {
         // Arrange
         _roleServiceMock.Setup(p => p.UnassignUsersAsync(It.IsAny<Guid>(), It.IsAny<List<Guid>>(), default))
@@ -61,7 +61,7 @@ public class RolesControllerTest
     }
 
     [Fact]
-    public async Task GetRoleList_InvalidRole_ReturnNotFoundCode()
+    public async Task UnassignUsersAsync_InvalidRole_ReturnNotFoundCode()
     {
         // Arrange
         _roleServiceMock.Setup(p => p.UnassignUsersAsync(It.IsAny<Guid>(), It.IsAny<List<Guid>>(), default))
