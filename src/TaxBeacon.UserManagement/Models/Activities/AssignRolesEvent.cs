@@ -1,30 +1,21 @@
-﻿
-using System.Diagnostics.CodeAnalysis;
-using TaxBeacon.Common.Services;
+﻿namespace TaxBeacon.UserManagement.Models.Activities;
 
-namespace TaxBeacon.UserManagement.Models.Activities;
-
-public class AssignRolesEvent
+public sealed class AssignRolesEvent: UserEventBase
 {
-    public AssignRolesEvent(string roles, Guid assignedByUserId, string fullName, List<RoleActivityDto> previousUserRoles, List<RoleActivityDto> currentUserRoles)
+    public AssignRolesEvent(string executorRoles, Guid executorId, string executorFullName, List<RoleActivityDto> previousUserRoles, List<RoleActivityDto> currentUserRoles, DateTime assignDate)
+        : base(executorId, executorRoles, executorFullName)
     {
-        Roles = roles;
-        AssignedByUserId = assignedByUserId;
-        FullName = fullName;
         PreviousUserRoles = previousUserRoles;
         CurrentUserRoles = currentUserRoles;
+        AssignDate = assignDate;
     }
 
-    public Guid AssignedByUserId { get; set; }
+    public DateTime AssignDate { get; }
 
-    public string FullName { get; set; }
+    public List<RoleActivityDto> PreviousUserRoles { get; }
 
-    public string Roles { get; set; }
+    public List<RoleActivityDto> CurrentUserRoles { get; }
 
-    public List<RoleActivityDto> PreviousUserRoles { get; set; }
-
-    public List<RoleActivityDto> CurrentUserRoles { get; set; }
-
-    [SuppressMessage("Style", "IDE0060:Remove unused parameter")]
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following roles: {Roles} by {FullName}";
+    public override string ToString()
+        => $"User has been assigned to the following role(s): {string.Join(", ", CurrentUserRoles.Select(x => x.Name))}";
 }

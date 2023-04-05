@@ -33,4 +33,7 @@ public interface IUserService
 
     Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid tenantId, Guid userId, UpdateUserDto updateUserDto,
         CancellationToken cancellationToken = default);
+
+    Task<OneOf<UserActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1, uint pageSize = 10,
+        CancellationToken cancellationToken = default);
 }
