@@ -2,16 +2,13 @@
 {
     public sealed class UserCreatedEvent: UserEventBase
     {
-        public Guid CreatedById { get; }
-
         public string CreatedUserEmail { get; }
 
         public DateTime CreatedDate { get; }
 
-        public UserCreatedEvent(Guid createdById, string createdUserEmail, DateTime createdDate, string executorFullName, string executorRoles)
-            : base(executorRoles, executorFullName)
+        public UserCreatedEvent(Guid executorId, string createdUserEmail, DateTime createdDate, string executorFullName, string executorRoles)
+            : base(executorId, executorRoles, executorFullName)
         {
-            CreatedById = createdById;
             CreatedUserEmail = createdUserEmail;
             CreatedDate = createdDate;
         }

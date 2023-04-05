@@ -2,16 +2,13 @@
 
 public sealed class AssignRolesEvent: UserEventBase
 {
-    public AssignRolesEvent(string executorRoles, Guid assignedByUserId, string executorFullName, List<RoleActivityDto> previousUserRoles, List<RoleActivityDto> currentUserRoles, DateTime assignDate)
-        : base(executorRoles, executorFullName)
+    public AssignRolesEvent(string executorRoles, Guid executorId, string executorFullName, List<RoleActivityDto> previousUserRoles, List<RoleActivityDto> currentUserRoles, DateTime assignDate)
+        : base(executorId, executorRoles, executorFullName)
     {
-        AssignedByUserId = assignedByUserId;
         PreviousUserRoles = previousUserRoles;
         CurrentUserRoles = currentUserRoles;
         AssignDate = assignDate;
     }
-
-    public Guid AssignedByUserId { get; }
 
     public DateTime AssignDate { get; }
 

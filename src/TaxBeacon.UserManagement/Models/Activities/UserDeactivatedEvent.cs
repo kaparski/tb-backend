@@ -2,17 +2,10 @@
 {
     public sealed class UserDeactivatedEvent: UserEventBase
     {
-        public Guid DeactivatedById { get; }
-
         public DateTime DeactivatedDate { get; }
 
-        public UserDeactivatedEvent(Guid deactivatedById, DateTime deactivatedDate, string executorFullName, string executorRoles)
-            : base(executorFullName, executorRoles)
-        {
-            DeactivatedById = deactivatedById;
-            DeactivatedDate = deactivatedDate;
-
-        }
+        public UserDeactivatedEvent(Guid executorId, DateTime deactivatedDate, string executorFullName, string executorRoles)
+            : base(executorId, executorFullName, executorRoles) => DeactivatedDate = deactivatedDate;
 
         public override string ToString() => $"User deactivated";
     }

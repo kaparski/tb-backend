@@ -2,19 +2,16 @@
 
 public class UserUpdatedEvent: UserEventBase
 {
-    public Guid UpdatedById { get; }
-
     public DateTime UpdatedDate { get; }
 
     public string PreviousValues { get; }
 
     public string CurrentValues { get; }
 
-    public UserUpdatedEvent(Guid updatedById, DateTime updatedDate, string executorFullName, string executorRoles,
+    public UserUpdatedEvent(Guid executorId, DateTime updatedDate, string executorFullName, string executorRoles,
         string previousValues, string currentValues)
-        : base(executorFullName, executorRoles)
+        : base(executorId, executorFullName, executorRoles)
     {
-        UpdatedById = updatedById;
         UpdatedDate = updatedDate;
         PreviousValues = previousValues;
         CurrentValues = currentValues;
