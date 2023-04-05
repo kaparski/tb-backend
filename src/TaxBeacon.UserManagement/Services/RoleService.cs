@@ -5,12 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
-using OneOf;
-using OneOf.Types;
 using TaxBeacon.Common.Services;
 using System.Text.Json;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
@@ -30,12 +27,6 @@ public class RoleService: IRoleService
         _context = context;
         _logger = logger;
         _dateTimeService = dateTimeService;
-        _currentUserService = currentUserService;
-    }
-
-    public RoleService(ITaxBeaconDbContext context, ICurrentUserService currentUserService)
-    {
-        _context = context;
         _currentUserService = currentUserService;
     }
 
