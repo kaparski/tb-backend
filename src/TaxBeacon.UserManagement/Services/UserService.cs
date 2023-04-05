@@ -244,8 +244,8 @@ public class UserService: IUserService
         var exportUsers = await _context.Users
             .Where(u => u.TenantUsers.Any(tu => tu.TenantId == tenantId))
             .OrderBy(u => u.Email)
-            .ProjectToType<UserExportModel>()
             .AsNoTracking()
+            .ProjectToType<UserExportModel>()
             .ToListAsync(cancellationToken);
 
         exportUsers.ForEach(u =>
@@ -422,8 +422,8 @@ public class UserService: IUserService
     {
         var exportTenants = await _context
             .Tenants
-            .ProjectToType<TenantExportModel>()
             .AsNoTracking()
+            .ProjectToType<TenantExportModel>()
             .ToListAsync(cancellationToken);
 
         exportTenants.ForEach(u => u.CreatedDateView = _dateTimeFormatter.FormatDate(u.CreatedDateTimeUtc));

@@ -11,6 +11,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Requests;
+using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
@@ -126,7 +127,11 @@ public class TenantsControllerTest
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
 
         // Assert
-        Assert.Equal("Tenants.Read;Tenants.ReadWrite;Tenants.ReadExport", hasPermissionsAttribute.Policy);
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be("Tenants.Read;Tenants.ReadWrite;Tenants.ReadExport");
+        }
     }
 
     [Fact]
@@ -139,6 +144,10 @@ public class TenantsControllerTest
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
 
         // Assert
-        Assert.Equal("Tenants.ReadExport", hasPermissionsAttribute.Policy);
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be("Tenants.ReadExport");
+        }
     }
 }

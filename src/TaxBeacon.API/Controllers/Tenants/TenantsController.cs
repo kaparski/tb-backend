@@ -37,8 +37,10 @@ public class TenantsController: BaseController
     [HttpGet(Name = "GetTenants")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<TenantResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(BadRequest), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> GetTenantList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -65,6 +67,9 @@ public class TenantsController: BaseController
     [HasPermissions(Common.Permissions.Tenants.ReadExport)]
     [HttpGet("export", Name = "ExportTenants")]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> ExportTenantsAsync([FromQuery] ExportTenantsRequest exportTenantsRequest,
         CancellationToken cancellationToken)
     {
