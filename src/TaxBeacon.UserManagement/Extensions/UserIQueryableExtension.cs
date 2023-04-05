@@ -15,13 +15,13 @@ public static class UserIQueryableExtension
                 tur => new { Id = tur.UserId, tur.TenantId },
                 (u, tur) => new { User = u, TenantUserRole = tur })
             .SelectMany(q => q.TenantUserRole.DefaultIfEmpty(),
-                (u, tur) => new { u.User, tur.RoleId })
+                (u, tur) => new { u.User, RoleId = (Guid?)tur.RoleId })
             .GroupJoin(context.Roles,
-                a => new { a.RoleId },
-                y => new { RoleId = y.Id },
-                (a, y) => new { a, y })
-            .SelectMany(q => q.y.DefaultIfEmpty(),
-                (a, y) => new { a.a.User, y.Name })
+                ur => new { ur.RoleId },
+                role => new { RoleId = (Guid?)role.Id },
+                (ur, roles) => new { ur.User, Roles = roles })
+            .SelectMany(ur => ur.Roles.DefaultIfEmpty(),
+                (ur, role) => new { ur.User, role.Name })
             .GroupBy(z => z.User)
             .Select(group => new UserDto
             {

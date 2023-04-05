@@ -102,7 +102,7 @@ public class UserService: IUserService
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .ProjectToType<UserDto>()
+            .MapToUserDto(_context, _currentUserService)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
         ?? throw new NotFoundException(nameof(User), id);
 
@@ -110,7 +110,7 @@ public class UserService: IUserService
         CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .ProjectToType<UserDto>()
+            .MapToUserDto(_context, _currentUserService)
             .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
         ?? throw new NotFoundException(nameof(User), mailAddress.Address);
 
