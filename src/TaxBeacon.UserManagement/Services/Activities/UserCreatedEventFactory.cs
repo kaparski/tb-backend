@@ -18,7 +18,7 @@ namespace TaxBeacon.UserManagement.Services.Activities
             return new UserActivityItemDto
             (
                 Date: userCreatedEvent!.CreatedDate,
-                FullName: userCreatedEvent.FullName,
+                FullName: userCreatedEvent.ExecutorFullName,
                 Message: userCreatedEvent.ToString()
             );
         }

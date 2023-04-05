@@ -1,26 +1,21 @@
 ﻿namespace TaxBeacon.UserManagement.Models.Activities;
 
-public class UserUpdatedEvent
+public class UserUpdatedEvent: UserEventBase
 {
     public Guid UpdatedById { get; }
 
     public DateTime UpdatedDate { get; }
 
-    public string FullName { get; }
-
-    public string Roles { get; }
-
     public string PreviousValues { get; }
 
     public string CurrentValues { get; }
 
-    public UserUpdatedEvent(Guid updatedById, DateTime updatedDate, string fullName, string roles,
+    public UserUpdatedEvent(Guid updatedById, DateTime updatedDate, string executorFullName, string executorRoles,
         string previousValues, string currentValues)
+        : base(executorFullName, executorRoles)
     {
         UpdatedById = updatedById;
         UpdatedDate = updatedDate;
-        FullName = fullName;
-        Roles = roles;
         PreviousValues = previousValues;
         CurrentValues = currentValues;
     }

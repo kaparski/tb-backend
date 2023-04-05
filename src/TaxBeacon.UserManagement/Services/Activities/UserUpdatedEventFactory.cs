@@ -18,7 +18,7 @@ namespace TaxBeacon.UserManagement.Services.Activities
             return new UserActivityItemDto
             (
                 Date: userUpdatedEvent!.UpdatedDate,
-                FullName: userUpdatedEvent.FullName,
+                FullName: userUpdatedEvent.ExecutorFullName,
                 Message: userUpdatedEvent.ToString()
             );
         }

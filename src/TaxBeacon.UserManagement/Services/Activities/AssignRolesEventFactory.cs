@@ -18,7 +18,7 @@ namespace TaxBeacon.UserManagement.Services.Activities
             return new UserActivityItemDto
             (
                 Date: assignRolesEventFactory!.AssignDate,
-                FullName: assignRolesEventFactory.FullName,
+                FullName: assignRolesEventFactory.ExecutorFullName,
                 Message: assignRolesEventFactory.ToString()
             );
         }

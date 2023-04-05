@@ -1,22 +1,17 @@
 ﻿namespace TaxBeacon.UserManagement.Models.Activities;
 
-public class AssignRolesEvent
+public sealed class AssignRolesEvent: UserEventBase
 {
-    public AssignRolesEvent(string roles, Guid assignedByUserId, string fullName, List<RoleActivityDto> previousUserRoles, List<RoleActivityDto> currentUserRoles, DateTime assignDate)
+    public AssignRolesEvent(string executorRoles, Guid assignedByUserId, string executorFullName, List<RoleActivityDto> previousUserRoles, List<RoleActivityDto> currentUserRoles, DateTime assignDate)
+        : base(executorRoles, executorFullName)
     {
-        Roles = roles;
         AssignedByUserId = assignedByUserId;
-        FullName = fullName;
         PreviousUserRoles = previousUserRoles;
         CurrentUserRoles = currentUserRoles;
         AssignDate = assignDate;
     }
 
     public Guid AssignedByUserId { get; }
-
-    public string FullName { get; }
-
-    public string Roles { get; }
 
     public DateTime AssignDate { get; }
 

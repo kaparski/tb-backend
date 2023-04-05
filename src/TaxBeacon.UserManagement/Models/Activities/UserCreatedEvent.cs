@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.UserManagement.Models.Activities
 {
-    public sealed class UserCreatedEvent
+    public sealed class UserCreatedEvent: UserEventBase
     {
         public Guid CreatedById { get; }
 
@@ -8,17 +8,12 @@
 
         public DateTime CreatedDate { get; }
 
-        public string FullName { get; }
-
-        public string Roles { get; }
-
-        public UserCreatedEvent(Guid createdById, string createdUserEmail, DateTime createdDate, string fullName, string roles)
+        public UserCreatedEvent(Guid createdById, string createdUserEmail, DateTime createdDate, string executorFullName, string executorRoles)
+            : base(executorRoles, executorFullName)
         {
             CreatedById = createdById;
             CreatedUserEmail = createdUserEmail;
             CreatedDate = createdDate;
-            FullName = fullName;
-            Roles = roles;
         }
 
         public override string ToString()
