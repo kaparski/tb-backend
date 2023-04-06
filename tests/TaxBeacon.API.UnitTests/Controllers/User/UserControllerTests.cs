@@ -16,12 +16,12 @@ using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.User;
 
-public class UserControllerTest
+public class UserControllerTests
 {
     private readonly Mock<IUserService> _userServiceMock;
     private readonly UserController _controller;
 
-    public UserControllerTest()
+    public UserControllerTests()
     {
         _userServiceMock = new();
         _controller = new UserController(_userServiceMock.Object)
@@ -45,10 +45,10 @@ public class UserControllerTest
     [Theory]
     [InlineData(Status.Deactivated)]
     [InlineData(Status.Active)]
-    public async Task UpdateUserStatusAsync_NewUserStatus_ReturnUpdatedUser(Status status)
+    public async Task UpdateUserStatusAsync_NewUserStatus_ReturnsUpdatedUser(Status status)
     {
         // Arrange
-        var userDto = TestData.TestUser.Generate();
+        var userDto = TestData.UserFaker.Generate();
         userDto.Status = Status.Deactivated;
         userDto.DeactivationDateTimeUtc = DateTime.UtcNow;
 
@@ -78,7 +78,7 @@ public class UserControllerTest
     }
 
     [Fact]
-    public async Task UpdateUserAsync_InvalidUserId_ReturnNotFoundResponse()
+    public async Task UpdateUserAsync_InvalidUserId_ReturnsNotFoundResponse()
     {
         // Arrange
         var request = TestData.UpdateUserFaker.Generate();
@@ -104,10 +104,10 @@ public class UserControllerTest
     }
 
     [Fact]
-    public async Task UpdateUserAsync_ValidUserId_ReturnUpdatedUser()
+    public async Task UpdateUserAsync_ValidUserId_ReturnsUpdatedUser()
     {
         // Arrange
-        var userDto = TestData.TestUser.Generate();
+        var userDto = TestData.UserFaker.Generate();
         var request = TestData.UpdateUserFaker.Generate();
         _userServiceMock
             .Setup(service => service.UpdateUserByIdAsync(
@@ -134,7 +134,7 @@ public class UserControllerTest
 
     private static class TestData
     {
-        public static readonly Faker<UserDto> TestUser =
+        public static readonly Faker<UserDto> UserFaker =
             new Faker<UserDto>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())

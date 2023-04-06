@@ -18,6 +18,7 @@ using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -34,6 +35,9 @@ public class UserServiceTests
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
     private readonly UserService _userService;
+    private readonly Mock<IUserActivityFactory> _userCreatedActivityFactory;
+    private readonly Mock<IEnumerable<IUserActivityFactory>> _activityFactories;
+    private readonly Guid _tenantId = Guid.NewGuid();
 
     public UserServiceTests()
     {
@@ -46,14 +50,23 @@ public class UserServiceTests
         _csvMock = new();
         _xlsxMock = new();
         _dateTimeFormatterMock = new();
+        _userCreatedActivityFactory = new();
+        _activityFactories = new();
 
         _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
         _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
+
+        _userCreatedActivityFactory.Setup(x => x.EventType).Returns(EventType.UserCreated);
+        _userCreatedActivityFactory.Setup(x => x.Revision).Returns(1);
 
         _listToFileConverters
             .Setup(x => x.GetEnumerator())
             .Returns((IEnumerator<IListToFileConverter>)new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
                 .GetEnumerator());
+
+        _activityFactories
+            .Setup(x => x.GetEnumerator())
+            .Returns((IEnumerator<IUserActivityFactory>)new[] { _userCreatedActivityFactory.Object }.ToList().GetEnumerator());
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -64,6 +77,7 @@ public class UserServiceTests
         var currentUser = TestData.TestUser.Generate();
         _dbContextMock.Users.Add(currentUser);
         _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(_tenantId);
 
         _userService = new UserService(
             _userServiceLoggerMock.Object,
@@ -72,7 +86,8 @@ public class UserServiceTests
             _currentUserServiceMock.Object,
             _listToFileConverters.Object,
             _userExternalStore.Object,
-            _dateTimeFormatterMock.Object);
+            _dateTimeFormatterMock.Object,
+            _activityFactories.Object);
 
         TypeAdapterConfig.GlobalSettings.Scan(typeof(UserMappingConfig).Assembly);
     }
@@ -540,6 +555,121 @@ public class UserServiceTests
 
         //Assert
         _dbContextMock.TenantUserRoles.Count().Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetActivitiesAsync_UserExists_ShouldCallAppropriateFactory()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        tenant.Id = _tenantId;
+        var user = TestData.TestUser.Generate();
+        var tenantUser = new TenantUser
+        {
+            Tenant = tenant,
+            User = user
+        };
+        var userActivity = new UserActivityLog
+        {
+            Date = DateTime.UtcNow,
+            TenantId = tenant.Id,
+            UserId = user.Id,
+            EventType = EventType.UserCreated,
+            Revision = 1
+        };
+
+        _dbContextMock.Tenants.Add(tenant);
+        _dbContextMock.Users.Add(user);
+        _dbContextMock.TenantUsers.Add(tenantUser);
+        _dbContextMock.UserActivityLogs.Add(userActivity);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        await _userService.GetActivitiesAsync(user.Id);
+
+        //Assert
+
+        _userCreatedActivityFactory.Verify(x => x.Create(It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetActivitiesAsync_UserDoesNotExistWithinTenant_ShouldReturnNotFount()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        tenant.Id = _tenantId;
+        var user = TestData.TestUser.Generate();
+
+        _dbContextMock.Tenants.Add(tenant);
+        _dbContextMock.Users.Add(user);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _userService.GetActivitiesAsync(user.Id);
+
+        //Assert
+        resultOneOf.TryPickT1(out var result, out _).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetActivitiesAsync_UserExists_ShouldReturnExpectedNumberOfItems()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        tenant.Id = _tenantId;
+        var user = TestData.TestUser.Generate();
+        var tenantUser = new TenantUser
+        {
+            Tenant = tenant,
+            User = user
+        };
+
+        var activities = new[]
+        {
+            new UserActivityLog
+            {
+                Date = DateTime.UtcNow,
+                TenantId = tenant.Id,
+                UserId = user.Id,
+                EventType = EventType.UserCreated,
+                Revision = 1
+            },
+            new UserActivityLog
+            {
+                Date = DateTime.UtcNow,
+                TenantId = tenant.Id,
+                UserId = user.Id,
+                EventType = EventType.UserCreated,
+                Revision = 1
+            },
+            new UserActivityLog
+            {
+                Date = DateTime.UtcNow,
+                TenantId = tenant.Id,
+                UserId = user.Id,
+                EventType = EventType.UserCreated,
+                Revision = 1
+            }
+        };
+
+        _dbContextMock.Tenants.Add(tenant);
+        _dbContextMock.Users.Add(user);
+        _dbContextMock.TenantUsers.Add(tenantUser);
+        _dbContextMock.UserActivityLogs.AddRange(activities);
+        await _dbContextMock.SaveChangesAsync();
+
+        const int pageSize = 2;
+
+        //Act
+        var resultOneOf = await _userService.GetActivitiesAsync(user.Id, 1, pageSize);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            resultOneOf.TryPickT0(out var activitiesResult, out _).Should().BeTrue();
+            activitiesResult.Count.Should().Be(2);
+            activitiesResult.Query.Count().Should().Be(2);
+        }
     }
 
     private static class TestData

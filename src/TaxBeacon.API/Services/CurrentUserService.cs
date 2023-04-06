@@ -11,7 +11,12 @@ public class CurrentUserService: ICurrentUserService
     public CurrentUserService(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
     public Guid UserId =>
-        Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(Claims.UserIdClaimName), null, out var id)
-            ? id
+        Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(Claims.UserIdClaimName), out var userId)
+            ? userId
+            : Guid.Empty;
+
+    public Guid TenantId =>
+        Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(Claims.TenantId), out var tenantId)
+            ? tenantId
             : Guid.Empty;
 }

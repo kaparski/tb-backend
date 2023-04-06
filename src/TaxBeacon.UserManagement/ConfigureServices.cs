@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement;
 
@@ -15,7 +16,12 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IPasswordGenerator, PasswordGenerator>();
         serviceCollection.AddScoped<IUserExternalStore, UserExternalStore>();
         serviceCollection.AddScoped<IPermissionsService, PermissionsService>();
-
+        serviceCollection.AddScoped<ITableFiltersService, TableFilterService>();
+        serviceCollection.AddScoped<IUserActivityFactory, UserCreatedEventFactory>();
+        serviceCollection.AddScoped<IUserActivityFactory, AssignRolesEventFactory>();
+        serviceCollection.AddScoped<IUserActivityFactory, UserDeactivatedEventFactory>();
+        serviceCollection.AddScoped<IUserActivityFactory, UserReactivatedEventFactory>();
+        serviceCollection.AddScoped<IUserActivityFactory, UserUpdatedEventFactory>();
         return serviceCollection;
     }
 }
