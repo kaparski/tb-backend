@@ -14,8 +14,6 @@ public class AssignRolesEvent
         AssignedByFullName = assignedByFullName;
     }
 
-    public List<ActivityLogRoleDto> ActivityLogRoleDtos { get; set; }
-
     public DateTime AssignedDate { get; set; }
 
     public Guid AssignedByUserId { get; set; }
@@ -23,6 +21,8 @@ public class AssignRolesEvent
     public string AssignedByFullName { get; set; }
 
     public string AssignedRoles { get; set; }
+
+    public List<ActivityLogRoleDto> ActivityLogRoleDtos { get; set; }
 
     public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following role(s): {AssignedRoles}";
 }
