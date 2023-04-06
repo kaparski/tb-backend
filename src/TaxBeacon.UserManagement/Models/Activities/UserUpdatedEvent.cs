@@ -19,10 +19,6 @@ public sealed class UserUpdatedEvent: UserEventBase
         CurrentValues = currentValues;
     }
 
-    public override string ToString()
-    {
-        var currentValues = JsonSerializer.Deserialize<UpdateUserDto>(CurrentValues) ?? new UpdateUserDto();
-        return $"User details updated: {currentValues}";
-    }
+    public override string ToString() => "User details updated";
 }
 

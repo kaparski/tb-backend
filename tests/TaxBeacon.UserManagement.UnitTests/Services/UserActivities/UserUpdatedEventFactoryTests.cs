@@ -28,7 +28,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
             {
                 result.Date.Should().Be(date);
                 result.FullName.Should().Be("Test");
-                result.Message.Should().Be("User details updated: First Name to test, Last Name to test");
+                result.Message.Should().Be("User details updated");
             };
 
         }
