@@ -21,10 +21,10 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
             var date = DateTime.UtcNow;
             var currentUserRoles = new List<RoleActivityDto> { new RoleActivityDto { Name = "Test" } };
             var userEvent = new AssignRolesEvent("Admin",
+                date,
                 assignedByUserId,
                 "Test",
-                date,
-                currentUserRoles);
+                "Test");
 
             //Act
             var result = _sut.Create(JsonSerializer.Serialize(userEvent));

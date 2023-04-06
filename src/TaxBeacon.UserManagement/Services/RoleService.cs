@@ -87,12 +87,12 @@ public class RoleService: IRoleService
         var usersToRemove = _context.TenantUserRoles
             .Where(x => x.TenantId == tenantId && x.RoleId == roleId && users.Contains(x.UserId));
 
-        var activityLogDtos = await _context
-            .TenantUserRoles
-            .Where(x => x.TenantId == tenantId && x.UserId == currentUserId)
-            .Select(x => x.TenantRole.Role)
-            .ProjectToType<RoleActivityDto>()
-            .ToListAsync(cancellationToken);
+        var currentUserRoles =
+            string.Join(", ", await _context
+                .TenantUserRoles
+                .Where(x => x.TenantId == tenantId && x.UserId == currentUserId)
+                .Select(x => x.TenantRole.Role.Name)
+                .ToListAsync(cancellationToken));
 
         _context.TenantUserRoles.RemoveRange(usersToRemove);
 
@@ -106,10 +106,10 @@ public class RoleService: IRoleService
                 Event = JsonSerializer.Serialize(
                     new UnassignUsersEvent(
                         role.Name,
+                        _dateTimeService.UtcNow,
                         currentUserId,
                         currentUser.FullName,
-                        _dateTimeService.UtcNow,
-                        activityLogDtos
+                        currentUserRoles
                     )),
                 EventType = EventType.UserRolesUnassign
             });

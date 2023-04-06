@@ -303,7 +303,7 @@ public class UserService: IUserService
             });
         await _context.TenantUserRoles.AddRangeAsync(tenantUserRoles, cancellationToken);
 
-        var fullName = (await _context.TenantUsers
+        var currentUserFullName = (await _context.TenantUsers
                            .Include(x => x.User)
                            .FirstOrDefaultAsync(x => x.UserId == _currentUserService.UserId && x.TenantId == tenantId,
                                cancellationToken))?
@@ -320,12 +320,12 @@ public class UserService: IUserService
             .Select(group => string.Join(", ", group.Select(name => name)))
             .FirstOrDefaultAsync(cancellationToken);
 
-        var activityLogDtos = await _context
+        var currentUserRoles =
+            string.Join(", ", await _context
             .TenantUserRoles
             .Where(x => x.TenantId == tenantId && x.UserId == currentUserId)
-            .Select(x => x.TenantRole.Role)
-            .ProjectToType<RoleActivityDto>()
-            .ToListAsync(cancellationToken);
+            .Select(x => x.TenantRole.Role.Name)
+            .ToListAsync(cancellationToken));
 
         if (addedRolesString.IsNullOrEmpty())
         {
@@ -338,10 +338,11 @@ public class UserService: IUserService
                 Event = JsonSerializer.Serialize(
                     new AssignRolesEvent(
                         addedRolesString ?? "",
-                        currentUserId,
-                        fullName,
                         _dateTimeService.UtcNow,
-                        activityLogDtos)),
+                        currentUserId,
+                        currentUserFullName,
+                        currentUserRoles
+                        )),
                 EventType = EventType.UserRolesAssign
             }, cancellationToken);
         }
@@ -357,10 +358,11 @@ public class UserService: IUserService
                 Event = JsonSerializer.Serialize(
                     new UnassignUsersEvent(
                         removedRolesString,
-                        _currentUserService.UserId,
-                        fullName,
                         _dateTimeService.UtcNow,
-                        activityLogDtos)),
+                        currentUserId,
+                        currentUserFullName,
+                        currentUserRoles)
+                    ),
                 EventType = EventType.UserRolesUnassign
             }, cancellationToken);
         }
