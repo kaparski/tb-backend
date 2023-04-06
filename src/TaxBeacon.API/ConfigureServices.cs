@@ -10,7 +10,6 @@ using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Extensions.SwaggerServices;
-using TaxBeacon.API.Filters;
 using TaxBeacon.API.Services;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;

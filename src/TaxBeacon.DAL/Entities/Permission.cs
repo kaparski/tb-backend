@@ -1,6 +1,4 @@
-﻿using TaxBeacon.Common.Enums;
-
-namespace TaxBeacon.DAL.Entities;
+﻿namespace TaxBeacon.DAL.Entities;
 
 public class Permission: BaseEntity
 {

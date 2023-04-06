@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using FluentAssertions;
 using Gridify;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using TaxBeacon.Common.Enums;
@@ -10,7 +9,6 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
