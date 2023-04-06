@@ -1,32 +1,24 @@
-﻿using TaxBeacon.Common.Services;
+﻿using System.Text.Json;
 
 namespace TaxBeacon.UserManagement.Models.Activities;
 
-public class UserUpdatedEvent
+public sealed class UserUpdatedEvent: UserEventBase
 {
-    public Guid UpdatedById { get; }
-
     public DateTime UpdatedDate { get; }
-
-    public string FullName { get; }
-
-    public string Roles { get; }
 
     public string PreviousValues { get; }
 
     public string CurrentValues { get; }
 
-    public UserUpdatedEvent(Guid updatedById, DateTime updatedDate, string fullName, string roles,
+    public UserUpdatedEvent(Guid executorId, DateTime updatedDate, string executorFullName, string executorRoles,
         string previousValues, string currentValues)
+        : base(executorId, executorFullName, executorRoles)
     {
-        UpdatedById = updatedById;
         UpdatedDate = updatedDate;
-        FullName = fullName;
-        Roles = roles;
         PreviousValues = previousValues;
         CurrentValues = currentValues;
     }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) =>
-        $"User updated {dateTimeFormatter.FormatDate(UpdatedDate)} by {FullName} {Roles}";
+    public override string ToString() => "User details updated";
 }
+

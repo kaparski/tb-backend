@@ -1,28 +1,19 @@
-﻿using TaxBeacon.Common.Services;
-
-namespace TaxBeacon.UserManagement.Models.Activities
+﻿namespace TaxBeacon.UserManagement.Models.Activities
 {
-    public sealed class UserCreatedEvent
+    public sealed class UserCreatedEvent: UserEventBase
     {
-        public Guid CreatedById { get; }
-
         public string CreatedUserEmail { get; }
 
         public DateTime CreatedDate { get; }
 
-        public string FullName { get; }
-
-        public string Roles { get; }
-
-        public UserCreatedEvent(Guid createdById, string createdUserEmail, DateTime createdDate, string fullName, string roles)
+        public UserCreatedEvent(Guid executorId, string createdUserEmail, DateTime createdDate, string executorFullName, string executorRoles)
+            : base(executorId, executorRoles, executorFullName)
         {
-            CreatedById = createdById;
             CreatedUserEmail = createdUserEmail;
             CreatedDate = createdDate;
-            FullName = fullName;
-            Roles = roles;
         }
 
-        public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User created {dateTimeFormatter.FormatDate(CreatedDate)} by {FullName} {Roles}";
+        public override string ToString()
+            => "User created";
     }
 }
