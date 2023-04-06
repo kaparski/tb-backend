@@ -2,6 +2,7 @@
 using FluentAssertions.Execution;
 using System.Text.Json;
 using TaxBeacon.UserManagement.Models.Activities;
+using TaxBeacon.UserManagement.Models.Activities.Dtos;
 using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
@@ -18,14 +19,12 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
             //Arrange
             var assignedByUserId = Guid.NewGuid();
             var date = DateTime.UtcNow;
-            var previousRoles = new List<RoleActivityDto> { new RoleActivityDto { Name = "Admin" } };
             var currentUserRoles = new List<RoleActivityDto> { new RoleActivityDto { Name = "Test" } };
             var userEvent = new AssignRolesEvent("Admin",
                 assignedByUserId,
                 "Test",
-                previousRoles,
-                currentUserRoles,
-                date);
+                date,
+                currentUserRoles);
 
             //Act
             var result = _sut.Create(JsonSerializer.Serialize(userEvent));
@@ -35,7 +34,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
             {
                 result.Date.Should().Be(date);
                 result.FullName.Should().Be("Test");
-                result.Message.Should().Be("User has been assigned to the following role(s): Test");
+                result.Message.Should().Be("User has been assigned to the following role(s): Admin");
             };
 
         }

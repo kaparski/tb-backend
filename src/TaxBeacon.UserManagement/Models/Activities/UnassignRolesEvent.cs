@@ -7,7 +7,7 @@ public class UnassignUsersEvent
 {
 
     public UnassignUsersEvent(string unassignedRoles, Guid unassignedByUserId, string unassignedByFullName, DateTime unassignDate,
-        List<ActivityLogRoleDto> activityLogRoleDtos)
+        List<RoleActivityDto> activityLogRoleDtos)
     {
         ActivityLogRoleDtos = activityLogRoleDtos;
         UnassignDate = unassignDate;
@@ -24,7 +24,7 @@ public class UnassignUsersEvent
 
     public string UnassignedRoles { get; set; }
 
-    public List<ActivityLogRoleDto> ActivityLogRoleDtos { get; set; }
+    public List<RoleActivityDto> ActivityLogRoleDtos { get; set; }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was unassigned from the following role(s): {UnassignedRoles}";
+    public override string ToString() => $"User has been unassigned to the following role(s): {UnassignedRoles}";
 }

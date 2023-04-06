@@ -320,7 +320,7 @@ public class UserService: IUserService
             .TenantUserRoles
             .Where(x => x.TenantId == tenantId && x.UserId == currentUserId)
             .Select(x => x.TenantRole.Role)
-            .ProjectToType<ActivityLogRoleDto>()
+            .ProjectToType<RoleActivityDto>()
             .ToListAsync(cancellationToken);
 
         if (addedRolesString.IsNullOrEmpty())

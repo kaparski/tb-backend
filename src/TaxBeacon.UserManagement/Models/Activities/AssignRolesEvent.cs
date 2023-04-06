@@ -5,24 +5,24 @@ namespace TaxBeacon.UserManagement.Models.Activities;
 
 public class AssignRolesEvent
 {
-    public AssignRolesEvent(string assignedRoles, Guid assignedByUserId, string assignedByFullName, DateTime assignedDate, List<ActivityLogRoleDto> activityLogRoleDtos)
+    public AssignRolesEvent(string assignedRoles, Guid assignedByUserId, string executorFullName, DateTime assignDate, List<RoleActivityDto> activityLogRoleDtos)
     {
-        AssignedDate = assignedDate;
+        AssignDate = assignDate;
         ActivityLogRoleDtos = activityLogRoleDtos;
         AssignedRoles = assignedRoles;
         AssignedByUserId = assignedByUserId;
-        AssignedByFullName = assignedByFullName;
+        ExecutorFullName = executorFullName;
     }
 
-    public DateTime AssignedDate { get; set; }
+    public DateTime AssignDate { get; set; }
 
     public Guid AssignedByUserId { get; set; }
 
-    public string AssignedByFullName { get; set; }
+    public string ExecutorFullName { get; set; }
 
     public string AssignedRoles { get; set; }
 
-    public List<ActivityLogRoleDto> ActivityLogRoleDtos { get; set; }
+    public List<RoleActivityDto> ActivityLogRoleDtos { get; set; }
 
-    public string ToString(IDateTimeFormatter dateTimeFormatter) => $"User was assigned to the following role(s): {AssignedRoles}";
+    public override string ToString() => $"User has been assigned to the following role(s): {AssignedRoles}";
 }
