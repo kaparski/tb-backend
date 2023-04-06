@@ -1,5 +1,4 @@
-﻿using Bogus;
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +10,6 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Requests;
-using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
@@ -20,13 +18,13 @@ namespace TaxBeacon.API.UnitTests.Controllers.Tenant;
 
 public class TenantsControllerTest
 {
-    private readonly Mock<IUserService> _userServiceMock;
+    private readonly Mock<ITenantService> _tenantServiceMock;
     private readonly TenantsController _controller;
 
     public TenantsControllerTest()
     {
-        _userServiceMock = new();
-        _controller = new TenantsController(_userServiceMock.Object)
+        _tenantServiceMock = new();
+        _controller = new TenantsController(_tenantServiceMock.Object)
         {
             ControllerContext = new ControllerContext()
             {
@@ -43,7 +41,7 @@ public class TenantsControllerTest
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _userServiceMock.Setup(p => p.GetTenantsAsync(query, default)).ReturnsAsync(
+        _tenantServiceMock.Setup(p => p.GetTenantsAsync(query, default)).ReturnsAsync(
             new QueryablePaging<TenantDto>(0,
                 Enumerable.Empty<TenantDto>().AsQueryable()));
 
@@ -67,7 +65,7 @@ public class TenantsControllerTest
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _userServiceMock.Setup(p => p.GetTenantsAsync(query, default)).ReturnsAsync(
+        _tenantServiceMock.Setup(p => p.GetTenantsAsync(query, default)).ReturnsAsync(
             new QueryablePaging<TenantDto>(0,
                 Enumerable.Empty<TenantDto>().AsQueryable()));
 
@@ -92,7 +90,7 @@ public class TenantsControllerTest
     {
         // Arrange
         var request = new ExportTenantsRequest(fileType, "America/New_York");
-        _userServiceMock
+        _tenantServiceMock
             .Setup(x => x.ExportTenantsAsync(
                 It.IsAny<FileType>(),
                 It.IsAny<CancellationToken>()))

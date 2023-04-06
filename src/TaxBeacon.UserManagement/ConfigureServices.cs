@@ -12,6 +12,7 @@ public static class ConfigureServices
     {
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
         serviceCollection.AddScoped<IUserService, UserService>();
+        serviceCollection.AddScoped<ITenantService, TenantService>();
         serviceCollection.AddScoped<IRoleService, RoleService>();
         serviceCollection.AddScoped<IPasswordGenerator, PasswordGenerator>();
         serviceCollection.AddScoped<IUserExternalStore, UserExternalStore>();

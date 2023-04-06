@@ -36,9 +36,4 @@ public interface IUserService
 
     Task<OneOf<UserActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1, uint pageSize = 10,
         CancellationToken cancellationToken = default);
-
-    Task<OneOf<QueryablePaging<TenantDto>, NotFound>> GetTenantsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
-
-    Task<byte[]> ExportTenantsAsync(FileType fileType, CancellationToken cancellationToken);
 }

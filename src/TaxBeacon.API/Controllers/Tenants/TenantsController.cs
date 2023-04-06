@@ -1,7 +1,6 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Responses;
@@ -16,9 +15,9 @@ namespace TaxBeacon.API.Controllers.Tenants;
 [Authorize]
 public class TenantsController: BaseController
 {
-    private readonly IUserService _userService;
+    private readonly ITenantService _tenantService;
 
-    public TenantsController(IUserService userService) => _userService = userService;
+    public TenantsController(ITenantService tenantService) => _tenantService = tenantService;
 
     /// <summary>
     /// List of tenants
@@ -50,7 +49,7 @@ public class TenantsController: BaseController
             return BadRequest();
         }
 
-        var tenantsOneOf = await _userService.GetTenantsAsync(query, cancellationToken);
+        var tenantsOneOf = await _tenantService.GetTenantsAsync(query, cancellationToken);
         return tenantsOneOf.Match<IActionResult>(
             tenants => Ok(new QueryablePaging<TenantResponse>(tenants.Count, tenants.Query.ProjectToType<TenantResponse>())),
             notFound => NotFound());
@@ -75,7 +74,7 @@ public class TenantsController: BaseController
     {
         var mimeType = exportTenantsRequest.FileType.ToMimeType();
 
-        var users = await _userService.ExportTenantsAsync(exportTenantsRequest.FileType, cancellationToken);
+        var users = await _tenantService.ExportTenantsAsync(exportTenantsRequest.FileType, cancellationToken);
 
         return File(users, mimeType, $"tenants.{exportTenantsRequest.FileType.ToString().ToLowerInvariant()}");
     }
