@@ -60,4 +60,27 @@ public class RolesController: BaseController
                 users.Query.ProjectToType<RoleAssignedUserResponse>())),
             notfound => NotFound());
     }
+
+    /// <summary>
+    /// Unassign Users
+    /// </summary>
+    /// <remarks>
+    /// Permission: Roles.ReadWrite
+    /// </remarks>
+    /// <response code="204"></response>
+    [HasPermissions(Common.Permissions.Roles.ReadWrite)]
+    [HttpDelete("{id:guid}/users", Name = "UnassignUsers")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UnassignUsers([FromRoute] Guid id,
+        [FromBody] List<Guid> userIds,
+        CancellationToken cancellationToken)
+    {
+        var result = await _roleService.UnassignUsersAsync(id, userIds, cancellationToken);
+
+        return result.Match<IActionResult>(
+            success => NoContent(),
+            notFound => NotFound());
+    }
 }
