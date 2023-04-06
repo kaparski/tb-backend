@@ -84,7 +84,8 @@ public class RolesController: BaseController
         var permissionsListResponse = await _permissionService.GetPermissionsByRoleIdAsync(roleId, cancellationToken);
 
         return Ok(permissionsListResponse.Adapt<List<PermissionResponse>>());
-        
+    }
+
     /// <summary>
     /// Unassign Users
     /// </summary>

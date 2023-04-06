@@ -23,7 +23,7 @@ public class RolesControllerTest
     public RolesControllerTest()
     {
         _roleServiceMock = new Mock<IRoleService>();
-        _permissionServiceMock = new(); 
+        _permissionServiceMock = new();
         _currentServiceMock = new Mock<ICurrentUserService>();
         _currentServiceMock
             .Setup(x => x.UserId)
