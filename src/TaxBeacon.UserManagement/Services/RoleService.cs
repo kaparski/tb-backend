@@ -73,7 +73,7 @@ public class RoleService: IRoleService
         var currentUserId = _currentUserService.UserId;
         var tenantId = _currentUserService.TenantId;
         var role = await _context.Roles
-            .Where(x => x.Id == roleId && x.TenantRoles.Select(x => x.TenantId).Contains(tenantId))
+            .Where(x => x.Id == roleId && x.TenantRoles.Any(x => x.TenantId == tenantId))
             .FirstOrDefaultAsync(cancellationToken);
         if (role is null)
         {
