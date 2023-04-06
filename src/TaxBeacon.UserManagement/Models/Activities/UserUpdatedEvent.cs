@@ -1,6 +1,8 @@
-﻿namespace TaxBeacon.UserManagement.Models.Activities;
+﻿using System.Text.Json;
 
-public class UserUpdatedEvent: UserEventBase
+namespace TaxBeacon.UserManagement.Models.Activities;
+
+public sealed class UserUpdatedEvent: UserEventBase
 {
     public DateTime UpdatedDate { get; }
 
@@ -17,5 +19,6 @@ public class UserUpdatedEvent: UserEventBase
         CurrentValues = currentValues;
     }
 
-    public override string ToString() => $"User details updated: {PreviousValues} to {CurrentValues}";
+    public override string ToString() => "User details updated";
 }
+

@@ -18,7 +18,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
             //Arrange
             var updatedById = Guid.NewGuid();
             var date = DateTime.UtcNow;
-            var userEvent = new UserUpdatedEvent(updatedById, date, "Test", "Admin", "previous", "current");
+            var userEvent = new UserUpdatedEvent(updatedById, date, "Test", "Admin", "previous", "{\"FirstName\": \"test\", \"LastName\": \"test\"}");
 
             //Act
             var result = _sut.Create(JsonSerializer.Serialize(userEvent));
@@ -28,7 +28,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
             {
                 result.Date.Should().Be(date);
                 result.FullName.Should().Be("Test");
-                result.Message.Should().Be("User details updated: previous to current");
+                result.Message.Should().Be("User details updated");
             };
 
         }
