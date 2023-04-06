@@ -12,7 +12,6 @@ using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities;
-using TaxBeacon.UserManagement.Models.Activities.Dtos;
 
 namespace TaxBeacon.UserManagement.Services;
 

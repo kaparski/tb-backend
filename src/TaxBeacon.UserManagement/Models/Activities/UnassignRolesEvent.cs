@@ -13,5 +13,5 @@ public class UnassignUsersEvent: UserEventBase
 
     public string UnassignedRoles { get; set; }
 
-    public override string ToString() => $"User has been unassigned to the following role(s): {UnassignedRoles}";
+    public override string ToString() => $"User has been unassigned from the following role(s): {UnassignedRoles}";
 }
