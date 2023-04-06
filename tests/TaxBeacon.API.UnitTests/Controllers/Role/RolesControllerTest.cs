@@ -2,10 +2,8 @@
 using FluentAssertions.Execution;
 using Gridify;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using OneOf.Types;
 using TaxBeacon.API.Controllers.Roles;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.UserManagement.Models;

@@ -15,7 +15,7 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: backend
     environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
 #    if: github.event_name == 'pull_request'
     steps:
@@ -33,7 +33,7 @@ jobs:
 
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: backend
     needs: tests
     environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
     #if: github.event_name == 'push'
@@ -61,7 +61,7 @@ jobs:
 
   deploy:
     name: Deployment job
-    runs-on: ubuntu-latest
+    runs-on: backend
     needs: build
     environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
 

@@ -15,9 +15,9 @@ using TaxBeacon.DAL.Entities;
 using TaxBeacon.Common.Converters;
 using System.Collections.Immutable;
 using System.Text.Json;
-using System.Net;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.UserManagement.Extensions;
 using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement.Services;
@@ -89,7 +89,9 @@ public class UserService: IUserService
     {
         var users = await _context
             .Users
-            .ProjectToType<UserDto>()
+            .AsNoTracking()
+            .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
+            .MapToUserDto(_context, _currentUserService)
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
         return gridifyQuery.Page != 1 && gridifyQuery.Page > Math.Ceiling((double)users.Count / gridifyQuery.PageSize)
@@ -100,7 +102,7 @@ public class UserService: IUserService
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .ProjectToType<UserDto>()
+            .MapToUserDto(_context, _currentUserService)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
         ?? throw new NotFoundException(nameof(User), id);
 
@@ -108,7 +110,7 @@ public class UserService: IUserService
         CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .ProjectToType<UserDto>()
+            .MapToUserDto(_context, _currentUserService)
             .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
         ?? throw new NotFoundException(nameof(User), mailAddress.Address);
 
@@ -150,9 +152,9 @@ public class UserService: IUserService
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
                     new UserReactivatedEvent(_currentUserService.UserId,
-                                            now,
-                                            currentUser.FullName,
-                                            currentUser.Roles)),
+                        now,
+                        currentUser.FullName,
+                        currentUser.Roles)),
                 EventType = EventType.UserReactivated
             },
             Status.Deactivated => new UserActivityLog
@@ -305,7 +307,8 @@ public class UserService: IUserService
 
         var fullName = (await _context.TenantUsers
                            .Include(x => x.User)
-                           .FirstOrDefaultAsync(x => x.UserId == _currentUserService.UserId && x.TenantId == tenantId, cancellationToken))?
+                           .FirstOrDefaultAsync(x => x.UserId == _currentUserService.UserId && x.TenantId == tenantId,
+                               cancellationToken))?
                        .User.FullName
                        ?? "";
         var newRoles = await _context.TenantRoles
@@ -408,7 +411,8 @@ public class UserService: IUserService
         return userDto;
     }
 
-    public async Task<OneOf<UserActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1, uint pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<OneOf<UserActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1,
+        uint pageSize = 10, CancellationToken cancellationToken = default)
     {
         page = page == 0 ? 1 : page;
         pageSize = pageSize == 0 ? 10 : pageSize;
@@ -435,7 +439,8 @@ public class UserService: IUserService
             .Take((int)pageSize)
             .ToListAsync(cancellationToken);
 
-        return new UserActivityDto(pageCount, activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
+        return new UserActivityDto(pageCount,
+            activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>

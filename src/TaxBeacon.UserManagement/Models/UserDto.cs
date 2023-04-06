@@ -18,7 +18,7 @@ public class UserDto
 
     public DateTime? LastLoginDateTimeUtc { get; set; }
 
-    public string FullName { get; private set; } = string.Empty;
+    public string FullName { get; init; } = string.Empty;
 
     public DateTime? DeactivationDateTimeUtc { get; set; }
 
