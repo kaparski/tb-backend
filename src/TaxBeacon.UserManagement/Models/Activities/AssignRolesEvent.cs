@@ -1,16 +1,20 @@
 ﻿using TaxBeacon.Common.Services;
+using TaxBeacon.UserManagement.Models.Activities.Dtos;
 
 namespace TaxBeacon.UserManagement.Models.Activities;
 
 public class AssignRolesEvent
 {
-    public AssignRolesEvent(string assignedRoles, Guid assignedByUserId, string assignedByFullName, DateTime assignedDate)
+    public AssignRolesEvent(string assignedRoles, Guid assignedByUserId, string assignedByFullName, DateTime assignedDate, List<ActivityLogRoleDto> activityLogRoleDtos)
     {
         AssignedDate = assignedDate;
+        ActivityLogRoleDtos = activityLogRoleDtos;
         AssignedRoles = assignedRoles;
         AssignedByUserId = assignedByUserId;
         AssignedByFullName = assignedByFullName;
     }
+
+    public List<ActivityLogRoleDto> ActivityLogRoleDtos { get; set; }
 
     public DateTime AssignedDate { get; set; }
 

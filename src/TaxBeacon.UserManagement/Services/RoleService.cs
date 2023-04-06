@@ -12,6 +12,7 @@ using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities;
+using TaxBeacon.UserManagement.Models.Activities.Dtos;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -80,10 +81,19 @@ public class RoleService: IRoleService
         }
 
         var currentUser = await _context.Users
-            .Where(x => x.Id == currentUserId && x.TenantUsers.Select(x => x.TenantId).Contains(tenantId))
+            .Where(x => x.Id == currentUserId && x.TenantUsers
+                .Select(x => x.TenantId)
+                .Contains(tenantId))
             .FirstAsync(cancellationToken);
         var usersToRemove = _context.TenantUserRoles
             .Where(x => x.TenantId == tenantId && x.RoleId == roleId && users.Contains(x.UserId));
+
+        var activityLogDtos = await _context
+            .TenantUserRoles
+            .Where(x => x.TenantId == tenantId && x.UserId == currentUserId)
+            .Select(x => x.TenantRole.Role)
+            .ProjectToType<ActivityLogRoleDto>()
+            .ToListAsync(cancellationToken);
 
         _context.TenantUserRoles.RemoveRange(usersToRemove);
 
@@ -99,7 +109,8 @@ public class RoleService: IRoleService
                         role.Name,
                         currentUserId,
                         currentUser.FullName,
-                        _dateTimeService.UtcNow
+                        _dateTimeService.UtcNow,
+                        activityLogDtos
                     )),
                 EventType = EventType.UserRolesUnassign
             });

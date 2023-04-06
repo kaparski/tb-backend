@@ -64,9 +64,6 @@ public class UserServiceTests
         var currentUser = TestData.TestUser.Generate();
         _dbContextMock.Users.Add(currentUser);
 
-        _dateTimeServiceMock.SetupSequence(x => x.UtcNow)
-            .Returns(DateTime.UtcNow)
-            .Returns(DateTime.UtcNow);
         _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
 
         _userService = new UserService(
@@ -487,6 +484,10 @@ public class UserServiceTests
     public async Task AssignRoleAsync_ValidRoleIds_ShouldAssignAllProvidedRoles()
     {
         //Arrange
+        _dateTimeServiceMock.SetupSequence(x => x.UtcNow)
+            .Returns(DateTime.UtcNow)
+            .Returns(DateTime.UtcNow);
+
         var tenant = TestData.TestTenant.Generate();
         var user = TestData.TestUser.Generate();
         var roles = TestData.TestRoles.Generate(2);
@@ -512,6 +513,10 @@ public class UserServiceTests
     public async Task AssignRoleAsync_ValidRoleIds_ShouldAssignAllProvidedRolesAndRemoveNotAssigned()
     {
         //Arrange
+        _dateTimeServiceMock.SetupSequence(x => x.UtcNow)
+            .Returns(DateTime.UtcNow)
+            .Returns(DateTime.UtcNow);
+
         var tenant = TestData.TestTenant.Generate();
         var user = TestData.TestUser.Generate();
         var roles = TestData.TestRoles.Generate(2);
