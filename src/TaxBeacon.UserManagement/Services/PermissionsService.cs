@@ -32,20 +32,18 @@ namespace TaxBeacon.UserManagement.Services
                 .ToListAsync();
 
         public async Task<IReadOnlyCollection<PermissionDto>> GetPermissionsByRoleIdAsync(
-            Guid tenantId,
             Guid roleId,
             CancellationToken cancellationToken = default)
         {
-            tenantId = _currentUserService.TenantId;
             var permissions = await _context.TenantRolePermissions
-                .Where(trp => trp.TenantId == tenantId && trp.RoleId == roleId)
+                .Where(trp => trp.TenantId == _currentUserService.TenantId && trp.RoleId == roleId)
                 .Join(_context.Permissions, trp => trp.PermissionId, p => p.Id, (trp, p) => new { p.Id, p.Name })
                 .ProjectToType<PermissionDto>()
                 .AsNoTracking()
                 .ToListAsync();
 
-            permissions.ForEach(p => p.Category = p.Name.Split('.')[0]);
-            return permissions;
+            var permissionsWithCategory = permissions.Select(p => p with { Category = p.Name.Split('.')[0] }).ToList();
+            return permissionsWithCategory;
         }
     }
 }

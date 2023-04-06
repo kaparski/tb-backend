@@ -81,7 +81,7 @@ public class RolesController: BaseController
     public async Task<ActionResult<IEnumerable<PermissionResponse>>> GetPermissionsByRoleId(Guid roleId,
         CancellationToken cancellationToken)
     {
-        var permissionsListResponse = await _permissionService.GetPermissionsByRoleIdAsync(Guid.Empty, roleId, cancellationToken);
+        var permissionsListResponse = await _permissionService.GetPermissionsByRoleIdAsync(roleId, cancellationToken);
 
         return Ok(permissionsListResponse.Adapt<List<PermissionResponse>>());
     }
