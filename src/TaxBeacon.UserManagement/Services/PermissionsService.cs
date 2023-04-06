@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NPOI.OpenXmlFormats.Wordprocessing;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.UserManagement.Models;
 
 namespace TaxBeacon.UserManagement.Services
 {
@@ -22,5 +25,22 @@ namespace TaxBeacon.UserManagement.Services
                 .Join(_context.Permissions, id => id, p => p.Id, (id, p) => p.Name)
                 .AsNoTracking()
                 .ToListAsync();
+
+        public async Task<IReadOnlyCollection<PermissionDto>> GetPermissionsByRoleIdAsync(
+            Guid tenantId,
+            Guid roleId,
+            CancellationToken cancellationToken = default)
+        {
+            tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;
+            var permissions = await _context.TenantRolePermissions
+                .Where(trp => trp.TenantId == tenantId && trp.RoleId == roleId)
+                .Join(_context.Permissions, trp => trp.PermissionId, p => p.Id, (trp, p) => new { p.Id, p.Name })
+                .ProjectToType<PermissionDto>()
+                .AsNoTracking()
+                .ToListAsync();
+
+            permissions.ForEach(p => p.Category = p.Name.Split('.')[0]);
+            return permissions;
+        }
     }
 }
