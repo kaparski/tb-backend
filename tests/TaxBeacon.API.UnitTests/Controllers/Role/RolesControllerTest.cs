@@ -16,13 +16,16 @@ namespace TaxBeacon.API.UnitTests.Controllers.Role;
 public class RolesControllerTest
 {
     private readonly Mock<IRoleService> _roleServiceMock;
+    private readonly Mock<IPermissionsService> _permissionServiceMock;
     private readonly RolesController _controller;
 
     public RolesControllerTest()
     {
         _roleServiceMock = new();
 
-        _controller = new RolesController(_roleServiceMock.Object);
+        _permissionServiceMock = new();
+
+        _controller = new RolesController(_roleServiceMock.Object, _permissionServiceMock.Object);
     }
 
     [Fact]
