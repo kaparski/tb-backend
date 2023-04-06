@@ -28,4 +28,6 @@ public class User: BaseEntity
     public ICollection<UserActivityLog> UserActivityLogs { get; set; } = new HashSet<UserActivityLog>();
 
     public ICollection<TableFilter> TableFilters { get; set; } = new HashSet<TableFilter>();
+
+    public ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
 }

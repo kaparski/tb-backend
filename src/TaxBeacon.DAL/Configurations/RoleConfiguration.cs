@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.DAL.Configurations;
 
@@ -24,5 +25,9 @@ public class RoleConfiguration: IEntityTypeConfiguration<Role>
         role
             .Property(r => r.CreatedDateTimeUtc)
             .HasDefaultValueSql("GETUTCDATE()");
+
+        role
+            .Property(r => r.Type)
+            .HasDefaultValue(SourceType.Tenant);
     }
 }
