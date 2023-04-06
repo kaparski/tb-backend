@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TaxBeacon.UserManagement.Models
+﻿namespace TaxBeacon.UserManagement.Models
 {
-    public class PermissionDto
+    public record PermissionDto
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
+        public Guid Id { get; init; }
+        public string Name { get; init; }
         public string Category { get; set; }
     }
 }

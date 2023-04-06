@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NPOI.OpenXmlFormats.Wordprocessing;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 
@@ -11,11 +12,15 @@ namespace TaxBeacon.UserManagement.Services
     {
         private readonly ILogger<PermissionsService> _logger;
         private readonly ITaxBeaconDbContext _context;
+        private readonly ICurrentUserService _currentUserService;
 
-        public PermissionsService(ITaxBeaconDbContext context, ILogger<PermissionsService> logger)
+        public PermissionsService(ITaxBeaconDbContext context,
+            ILogger<PermissionsService> logger,
+            ICurrentUserService currentUserService)
         {
             _context = context;
             _logger = logger;
+            _currentUserService = currentUserService;
         }
 
         public async Task<IReadOnlyCollection<string>> GetPermissionsAsync(Guid tenantId, Guid userId) =>
@@ -31,7 +36,7 @@ namespace TaxBeacon.UserManagement.Services
             Guid roleId,
             CancellationToken cancellationToken = default)
         {
-            tenantId = tenantId != default ? tenantId : (await _context.Tenants.FirstAsync(cancellationToken)).Id;
+            tenantId = _currentUserService.TenantId;
             var permissions = await _context.TenantRolePermissions
                 .Where(trp => trp.TenantId == tenantId && trp.RoleId == roleId)
                 .Join(_context.Permissions, trp => trp.PermissionId, p => p.Id, (trp, p) => new { p.Id, p.Name })
