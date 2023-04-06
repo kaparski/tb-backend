@@ -5,7 +5,6 @@ using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using OneOf;
 using OneOf.Types;
 using System.Net.Mail;
@@ -16,10 +15,8 @@ using TaxBeacon.DAL.Entities;
 using TaxBeacon.Common.Converters;
 using System.Collections.Immutable;
 using System.Text.Json;
-using System.Net;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Models.Activities.Dtos;
 using TaxBeacon.UserManagement.Extensions;
 using TaxBeacon.UserManagement.Services.Activities;
 
@@ -327,7 +324,7 @@ public class UserService: IUserService
             .Select(x => x.TenantRole.Role.Name)
             .ToListAsync(cancellationToken));
 
-        if (addedRolesString.IsNullOrEmpty())
+        if (!string.IsNullOrEmpty(addedRolesString))
         {
             await _context.UserActivityLogs.AddAsync(new UserActivityLog
             {
@@ -337,7 +334,7 @@ public class UserService: IUserService
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
                     new AssignRolesEvent(
-                        addedRolesString ?? "",
+                        addedRolesString,
                         _dateTimeService.UtcNow,
                         currentUserId,
                         currentUserFullName,
@@ -347,7 +344,7 @@ public class UserService: IUserService
             }, cancellationToken);
         }
 
-        if (removedRolesString.IsNullOrEmpty())
+        if (!string.IsNullOrEmpty(removedRolesString))
         {
             await _context.UserActivityLogs.AddAsync(new UserActivityLog
             {
@@ -368,7 +365,7 @@ public class UserService: IUserService
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-        if (string.IsNullOrEmpty(addedRolesString))
+        if (!string.IsNullOrEmpty(addedRolesString))
         {
             _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roles} roles by {@userId}",
                 _dateTimeService.UtcNow,
@@ -376,7 +373,7 @@ public class UserService: IUserService
                 addedRolesString,
                 _currentUserService.UserId);
         }
-        if (string.IsNullOrEmpty(removedRolesString))
+        if (!string.IsNullOrEmpty(removedRolesString))
         {
             _logger.LogInformation("{dateTime} - User ({userId}) was unassigned from {roles} roles by {@userId}",
                 _dateTimeService.UtcNow,

@@ -19,7 +19,6 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
             //Arrange
             var assignedByUserId = Guid.NewGuid();
             var date = DateTime.UtcNow;
-            var currentUserRoles = new List<RoleActivityDto> { new RoleActivityDto { Name = "Test" } };
             var userEvent = new AssignRolesEvent("Admin",
                 date,
                 assignedByUserId,
