@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
 using Microsoft.AspNetCore.Http;
@@ -17,11 +17,13 @@ public class RolesControllerTest
 {
     private readonly RolesController _controller;
     private readonly Mock<ICurrentUserService> _currentServiceMock;
+    private readonly Mock<IPermissionsService> _permissionServiceMock;
     private readonly Mock<IRoleService> _roleServiceMock;
 
     public RolesControllerTest()
     {
         _roleServiceMock = new Mock<IRoleService>();
+        _permissionServiceMock = new();
         _currentServiceMock = new Mock<ICurrentUserService>();
         _currentServiceMock
             .Setup(x => x.UserId)
@@ -29,7 +31,7 @@ public class RolesControllerTest
         _currentServiceMock
             .Setup(x => x.TenantId)
             .Returns(new Guid());
-        _controller = new RolesController(_roleServiceMock.Object);
+        _controller = new RolesController(_roleServiceMock.Object, _permissionServiceMock.Object);
     }
 
     [Fact]
