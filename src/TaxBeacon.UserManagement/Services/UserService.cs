@@ -33,7 +33,7 @@ public class UserService: IUserService
     private readonly IDateTimeFormatter _dateTimeFormatter;
     private readonly IImmutableDictionary<(EventType, uint), IUserActivityFactory> _userActivityFactories;
 
-    private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new string[]
+    private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new[]
     {
         "ctitaxbeacon.onmicrosoft.com"
     };
@@ -60,7 +60,8 @@ public class UserService: IUserService
                                  ?? ImmutableDictionary<(EventType, uint), IUserActivityFactory>.Empty;
     }
 
-    public async Task<UserDto> LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
+    public async Task<OneOf<UserDto, NotFound>> LoginAsync(MailAddress mailAddress,
+        CancellationToken cancellationToken = default)
     {
         var user = await _context
             .Users
@@ -68,14 +69,7 @@ public class UserService: IUserService
 
         if (user is null)
         {
-            return await CreateUserAsync(
-                new UserDto
-                {
-                    FirstName = string.Empty,
-                    LastName = string.Empty,
-                    Email = mailAddress.Address,
-                    LastLoginDateTimeUtc = _dateTimeService.UtcNow,
-                }, cancellationToken);
+            return new NotFound();
         }
 
         user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
@@ -110,7 +104,8 @@ public class UserService: IUserService
         CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .MapToUserDto(_context, _currentUserService)
+            .AsNoTracking()
+            .ProjectToType<UserDto>()
             .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
         ?? throw new NotFoundException(nameof(User), mailAddress.Address);
 

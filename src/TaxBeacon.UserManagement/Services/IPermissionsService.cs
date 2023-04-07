@@ -2,6 +2,6 @@
 {
     public interface IPermissionsService
     {
-        Task<IReadOnlyCollection<string>> GetPermissionsAsync(Guid tenantId, Guid userId);
+        Task<IReadOnlyCollection<string>> GetPermissionsAsync(Guid userId);
     }
 }

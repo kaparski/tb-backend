@@ -26,5 +26,9 @@ public interface ITaxBeaconDbContext
 
     DbSet<TableFilter> TableFilters { get; }
 
+    DbSet<UserRole> UserRoles { get; }
+
+    DbSet<RolePermission> RolePermissions { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

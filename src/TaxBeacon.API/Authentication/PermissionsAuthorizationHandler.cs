@@ -50,16 +50,7 @@ namespace TaxBeacon.API.Authentication
 
                 var permissionsService = scope.ServiceProvider.GetRequiredService<IPermissionsService>();
 
-                var tenantIdClaim = context.User.Claims
-                    .FirstOrDefault(claim => claim.Type.Equals(Claims.TenantId, StringComparison.OrdinalIgnoreCase))
-                    ?.Value;
-
-                if (!Guid.TryParse(tenantIdClaim, out var tenantId))
-                {
-                    return;
-                }
-
-                IEnumerable<string> permissions = await permissionsService.GetPermissionsAsync(tenantId, user.Id);
+                IEnumerable<string> permissions = await permissionsService.GetPermissionsAsync(user.Id);
 
                 if (permissions.Intersect(requirement.Permissions).Any())
                 {
