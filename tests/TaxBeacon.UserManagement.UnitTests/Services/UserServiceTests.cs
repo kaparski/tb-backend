@@ -147,6 +147,7 @@ public class UserServiceTests
             actualResult.Email.Should().Be(user.Email);
             actualResult.LastName.Should().BeEmpty();
             actualResult.FirstName.Should().BeEmpty();
+            actualResult.LegalName.Should().BeEmpty();
             actualResult.LastLoginDateTimeUtc.Should().Be(currentDate);
             _dateTimeServiceMock
                 .Verify(ds => ds.UtcNow, Times.Exactly(4));
@@ -507,8 +508,8 @@ public class UserServiceTests
             userDto.Id.Should().Be(user.Id);
             userDto.FirstName.Should().Be(updateUserDto.FirstName);
             userDto.FirstName.Should().NotBe(oldFirstName);
-            userDto.FirstName.Should().Be(updateUserDto.LegalName);
-            userDto.FirstName.Should().NotBe(oldFirstName);
+            userDto.LegalName.Should().Be(updateUserDto.LegalName);
+            userDto.LegalName.Should().NotBe(oldLegalName);
             userDto.LastName.Should().Be(updateUserDto.LastName);
             userDto.LastName.Should().NotBe(oldLastName);
 

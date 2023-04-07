@@ -292,6 +292,11 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
+                    b.Property<string>("LegalName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
                     b.Property<DateTime?>("ReactivationDateTimeUtc")
                         .HasColumnType("datetime2");
 
