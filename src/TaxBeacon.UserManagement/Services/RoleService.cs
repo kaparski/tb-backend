@@ -1,4 +1,4 @@
-﻿using Gridify;
+using Gridify;
 using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -121,6 +121,63 @@ public class RoleService: IRoleService
             string.Join(",", users),
             roleId,
             currentUserId);
+
+        return new Success();
+    }
+
+        public async Task<OneOf<Success, NotFound>> AssignUsersAsync(Guid roleId, List<Guid> userIds, CancellationToken cancellationToken = default)
+    {
+        var role = await _context.Roles
+            .Where(r => r.Id == roleId && r.TenantRoles.Any(tr => tr.TenantId == _currentUserService.TenantId))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (role is null)
+        {
+            return new NotFound();
+        }
+
+        var tenantUserRolesToAdd = userIds.Select(userId => new TenantUserRole
+        {
+            TenantId = _currentUserService.TenantId,
+            RoleId = roleId,
+            UserId = userId
+        });
+        await _context.TenantUserRoles.AddRangeAsync(tenantUserRolesToAdd, cancellationToken);
+
+        var assignedByFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
+        var assignedByUserRoles = await _context
+            .TenantUserRoles
+            .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == _currentUserService.TenantId)
+            .GroupBy(r => 1, t => t.TenantRole.Role.Name)
+            .Select(group => string.Join(", ", group.Select(name => name)))
+            .FirstOrDefaultAsync(cancellationToken);
+        var eventDateTime = _dateTimeService.UtcNow;
+
+        var activityLogs = userIds.Select(userId => new UserActivityLog
+        {
+            TenantId = _currentUserService.TenantId,
+            UserId = userId,
+            Date = eventDateTime,
+            Revision = 1,
+            Event = JsonSerializer.Serialize(
+                new AssignRolesEvent(
+                    _currentUserService.UserId,
+                    assignedByFullName,
+                    assignedByUserRoles ?? string.Empty,
+                    role.Name,
+                    eventDateTime)),
+            EventType = EventType.UserRolesAssign
+        });
+
+        await _context.UserActivityLogs.AddRangeAsync(activityLogs, cancellationToken);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Users({userIds}) have been assigned to the role({roleId}) by {assignedBy}",
+            _dateTimeService.UtcNow,
+            string.Join(',', userIds),
+            roleId,
+            assignedByFullName);
 
         return new Success();
     }

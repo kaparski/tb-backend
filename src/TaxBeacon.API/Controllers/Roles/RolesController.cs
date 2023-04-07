@@ -108,4 +108,19 @@ public class RolesController: BaseController
             success => NoContent(),
             notFound => NotFound());
     }
+
+    [HasPermissions(Common.Permissions.Roles.ReadWrite)]
+    [HttpPost("{id:guid}/users", Name = "AssignUsersToRole")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(Ok), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AssignUsersToRole([FromRoute] Guid id, [FromBody] List<Guid> userIds,
+        CancellationToken cancellationToken = default)
+    {
+        var resultOneOf = await _roleService.AssignUsersAsync(id, userIds, cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            success => Ok(),
+            notFound => NotFound());
+    }
 }

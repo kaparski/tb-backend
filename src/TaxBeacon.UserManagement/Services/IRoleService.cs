@@ -1,4 +1,4 @@
-﻿using Gridify;
+using Gridify;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.UserManagement.Models;
@@ -14,4 +14,7 @@ public interface IRoleService
         CancellationToken cancellationToken = default);
 
     Task<OneOf<Success, NotFound>> UnassignUsersAsync(Guid roleId, List<Guid> users, CancellationToken cancellationToken);
+
+    Task<OneOf<Success, NotFound>> AssignUsersAsync(Guid roleId, List<Guid> userIds,
+        CancellationToken cancellationToken = default);
 }
