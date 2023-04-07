@@ -10,7 +10,7 @@ public class UnassignRoleEventFactoryTests
 {
     private readonly IUserActivityFactory _sut;
 
-    public UnassignRoleEventFactoryTests() => _sut = new AssignRolesEventFactory();
+    public UnassignRoleEventFactoryTests() => _sut = new UnassignRolesEventFactory();
 
     [Fact]
     public void Create_CheckMapping()
@@ -21,8 +21,8 @@ public class UnassignRoleEventFactoryTests
         var unassignRolesEvent = new UnassignRolesEvent("Admin",
             date,
             unassignedByUserId,
-            "Test",
-            "Test");
+            "Test Full Name",
+            "TestRole");
 
         //Act
         var result = _sut.Create(JsonSerializer.Serialize(unassignRolesEvent));
@@ -31,7 +31,7 @@ public class UnassignRoleEventFactoryTests
         using (new AssertionScope())
         {
             result.Date.Should().Be(date);
-            result.FullName.Should().Be("Test");
+            result.FullName.Should().Be("Test Full Name");
             result.Message.Should().Be("User has been unassigned from the following role(s): Admin");
         };
 
