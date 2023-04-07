@@ -76,6 +76,7 @@ public class UserServiceTests
 
         var currentUser = TestData.TestUser.Generate();
         _dbContextMock.Users.Add(currentUser);
+
         _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(_tenantId);
 
@@ -157,9 +158,21 @@ public class UserServiceTests
     {
         // Arrange
         var users = TestData.TestUser.Generate(5);
+        var tenant = TestData.TestTenant.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.TenantUsers.AddRangeAsync(users.Select(u => new TenantUser
+        {
+            TenantId = tenant.Id,
+            UserId = u.Id
+        }));
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "email asc" };
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(tenant.Id);
 
         // Act
         var usersOneOf = await _userService.GetUsersAsync(query, default);
@@ -168,9 +181,9 @@ public class UserServiceTests
         usersOneOf.TryPickT0(out var pageOfUsers, out _);
         pageOfUsers.Should().NotBeNull();
         var listOfUsers = pageOfUsers.Query.ToList();
-        listOfUsers.Count.Should().Be(6);
+        listOfUsers.Count.Should().Be(5);
         listOfUsers.Select(x => x.Email).Should().BeInAscendingOrder();
-        pageOfUsers.Count.Should().Be(6);
+        pageOfUsers.Count.Should().Be(5);
     }
 
     [Fact]
@@ -178,9 +191,21 @@ public class UserServiceTests
     {
         // Arrange
         var users = TestData.TestUser.Generate(6);
+        var tenant = TestData.TestTenant.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.Users.AddRangeAsync(users);
+        await _dbContextMock.TenantUsers.AddRangeAsync(users.Select(u => new TenantUser
+        {
+            TenantId = tenant.Id,
+            UserId = u.Id
+        }));
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "email desc" };
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(tenant.Id);
 
         // Act
         var usersOneOf = await _userService.GetUsersAsync(query, default);
@@ -193,7 +218,7 @@ public class UserServiceTests
             var listOfUsers = pageOfUsers.Query.ToList();
             listOfUsers.Count.Should().Be(4);
             listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
-            pageOfUsers.Count.Should().Be(7);
+            pageOfUsers.Count.Should().Be(6);
         }
     }
 
@@ -498,6 +523,10 @@ public class UserServiceTests
     public async Task AssignRoleAsync_ValidRoleIds_ShouldAssignAllProvidedRoles()
     {
         //Arrange
+        _dateTimeServiceMock.SetupSequence(x => x.UtcNow)
+            .Returns(DateTime.UtcNow)
+            .Returns(DateTime.UtcNow);
+
         var tenant = TestData.TestTenant.Generate();
         var user = TestData.TestUser.Generate();
         var roles = TestData.TestRoles.Generate(2);
@@ -523,6 +552,10 @@ public class UserServiceTests
     public async Task AssignRoleAsync_ValidRoleIds_ShouldAssignAllProvidedRolesAndRemoveNotAssigned()
     {
         //Arrange
+        _dateTimeServiceMock.SetupSequence(x => x.UtcNow)
+            .Returns(DateTime.UtcNow)
+            .Returns(DateTime.UtcNow);
+
         var tenant = TestData.TestTenant.Generate();
         var user = TestData.TestUser.Generate();
         var roles = TestData.TestRoles.Generate(2);

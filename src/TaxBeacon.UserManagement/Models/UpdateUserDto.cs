@@ -1,8 +1,8 @@
 ﻿namespace TaxBeacon.UserManagement.Models;
 
-public class UpdateUserDto
+public sealed class UpdateUserDto
 {
-    public string FirstName { get; set; } = null!;
+    public string FirstName { get; set; } = string.Empty;
 
-    public string LastName { get; set; } = null!;
+    public string LastName { get; set; } = string.Empty;
 }

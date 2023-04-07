@@ -1,8 +1,8 @@
 ﻿using Bogus;
 using FluentAssertions;
 using Gridify;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
@@ -10,7 +10,6 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
@@ -24,6 +23,8 @@ public class RoleServiceTests
 
     public RoleServiceTests()
     {
+        var logger = new Mock<ILogger<RoleService>>();
+        var dateTimeService = new Mock<IDateTimeService>();
         _entitySaveChangesInterceptorMock = new();
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -33,19 +34,24 @@ public class RoleServiceTests
 
         _currentUserServiceMock = new();
 
-        _roleService = new RoleService(_dbContextMock, _currentUserServiceMock.Object);
+        _roleService = new RoleService(_dbContextMock, logger.Object, dateTimeService.Object, _currentUserServiceMock.Object);
     }
 
     [Fact]
     public async Task GetRolesAsync_AscendingOrderingAndPaginationWithSecondPage_CorrectNumberOfRolesInAscendingOrder()
     {
         //Arrange
-        await TestData.SeedTestDataAsync(_dbContextMock);
+        await TestData.SeedTestDataAsync(_dbContextMock, 2, 3);
         var tenantId = (await _dbContextMock.Tenants.FirstAsync()).Id;
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
-        var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "name asc" };
+        var query = new GridifyQuery
+        {
+            Page = 2,
+            PageSize = 2,
+            OrderBy = "name asc"
+        };
 
         //Act
         var pageOfUsers = await _roleService.GetRolesAsync(query);
@@ -62,12 +68,17 @@ public class RoleServiceTests
     public async Task GetRolesAsync_PageNumberOutsideOfTotalRange_RoleListIsEmpty()
     {
         //Arrange
-        await TestData.SeedTestDataAsync(_dbContextMock);
+        await TestData.SeedTestDataAsync(_dbContextMock, 2, 3);
         var tenantId = (await _dbContextMock.Tenants.FirstAsync()).Id;
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
-        var query = new GridifyQuery { Page = 3, PageSize = 25, OrderBy = "name asc", };
+        var query = new GridifyQuery
+        {
+            Page = 3,
+            PageSize = 25,
+            OrderBy = "name asc"
+        };
 
         //Act
         var pageOfRoles = await _roleService.GetRolesAsync(query);
@@ -86,7 +97,12 @@ public class RoleServiceTests
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "email asc", };
+        var query = new GridifyQuery
+        {
+            Page = 1,
+            PageSize = 5,
+            OrderBy = "email asc"
+        };
 
         //Act
         var resultOneOf = await _roleService.GetRoleAssignedUsersAsync(role.Id, query);
@@ -109,7 +125,12 @@ public class RoleServiceTests
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
-        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "email asc", };
+        var query = new GridifyQuery
+        {
+            Page = 2,
+            PageSize = 25,
+            OrderBy = "email asc"
+        };
 
         //Act
         var resultOneOf = await _roleService.GetRoleAssignedUsersAsync(role.Id, query);
@@ -127,7 +148,12 @@ public class RoleServiceTests
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email asc", };
+        var query = new GridifyQuery
+        {
+            Page = 1,
+            PageSize = 25,
+            OrderBy = "email asc"
+        };
 
         //Act
         var resultOneOf = await _roleService.GetRoleAssignedUsersAsync(Guid.NewGuid(), query);
@@ -136,20 +162,82 @@ public class RoleServiceTests
         resultOneOf.TryPickT1(out var result, out _).Should().BeTrue();
     }
 
+    [Fact]
+    public async Task UnassignUsersAsync_UnassignUsersFromRole_ShouldUnassignOnlyProvidedUsers()
+    {
+        //Arrange
+        await TestData.SeedTestDataAsync(_dbContextMock, 3, 1);
+
+        var users = await _dbContextMock.Users.ToListAsync();
+        var tenant = await _dbContextMock.Tenants.FirstAsync();
+        var role = await _dbContextMock.Roles.FirstAsync();
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
+        _currentUserServiceMock.Setup(x => x.UserId).Returns(users[2].Id);
+        //Act
+        await _roleService.UnassignUsersAsync(role.Id, new List<Guid>
+        {
+            users[0].Id, users[1].Id
+        }, default);
+
+        //Assert
+        _dbContextMock.TenantUserRoles.Count().Should().Be(1);
+    }
+
+    [Fact]
+    public async Task UnassignUsersAsync_UnassignUsersFromRole_ShouldUnassignNoOne()
+    {
+        //Arrange
+        await TestData.SeedTestDataAsync(_dbContextMock, 3, 1);
+
+        var tenant = await _dbContextMock.Tenants.FirstAsync();
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
+        var role = await _dbContextMock.Roles.FirstAsync();
+        _currentUserServiceMock.Setup(x => x.UserId).Returns((await _dbContextMock.Users.LastAsync()).Id);
+        //Act
+        await _roleService.UnassignUsersAsync(role.Id, new List<Guid>(), default);
+
+        //Assert
+        _dbContextMock.TenantUserRoles.Count().Should().Be(3);
+    }
+
+    [Fact]
+    public async Task UnassignUsersAsync_IncorrectRoleId_ShouldReturnNotFound()
+    {
+        //Arrange
+        await TestData.SeedTestDataAsync(_dbContextMock, 3, 1);
+
+        var tenant = await _dbContextMock.Tenants.FirstAsync();
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
+        _currentUserServiceMock.Setup(x => x.UserId).Returns((await _dbContextMock.Users.LastAsync()).Id);
+        //Act
+        var result = await _roleService.UnassignUsersAsync(new Guid(), new List<Guid>(), default);
+
+        //Assert
+        result.IsT1.Should().BeTrue();
+    }
+
     //TODO Refactor test data seeds
     private static class TestData
     {
-        public static async Task SeedTestDataAsync(ITaxBeaconDbContext dbContext)
+        public static async Task SeedTestDataAsync(ITaxBeaconDbContext dbContext, int numberOfUsers, int numberOfRoles)
         {
             var tenant = TestTenant.Generate();
-            var users = TestUser.Generate(2);
-            var roles = TestRole.Generate(3);
+            var users = TestUser.Generate(numberOfUsers);
+            var roles = TestRole.Generate(numberOfRoles);
 
             var listOfTenantUsers = new List<TenantUser>();
-            users.ForEach(x => listOfTenantUsers.Add(new TenantUser { Tenant = tenant, User = x }));
+            users.ForEach(x => listOfTenantUsers.Add(new TenantUser
+            {
+                Tenant = tenant,
+                User = x
+            }));
 
             var listOfTenantRoles = new List<TenantRole>();
-            roles.ForEach(x => listOfTenantRoles.Add(new TenantRole { Tenant = tenant, Role = x }));
+            roles.ForEach(x => listOfTenantRoles.Add(new TenantRole
+            {
+                Tenant = tenant,
+                Role = x
+            }));
 
             var listOfTenantUserRoles = new List<TenantUserRole>();
             foreach (var tenantUser in listOfTenantUsers)
@@ -181,9 +269,17 @@ public class RoleServiceTests
             var role = TestRole.Generate();
 
             var listOfTenantUsers = new List<TenantUser>();
-            users.ForEach(x => listOfTenantUsers.Add(new TenantUser { Tenant = tenant, User = x }));
+            users.ForEach(x => listOfTenantUsers.Add(new TenantUser
+            {
+                Tenant = tenant,
+                User = x
+            }));
 
-            var tenantRole = new TenantRole { Tenant = tenant, Role = role };
+            var tenantRole = new TenantRole
+            {
+                Tenant = tenant,
+                Role = role
+            };
 
             var listOfTenantUserRoles = new List<TenantUserRole>();
             foreach (var tenantUser in listOfTenantUsers)
