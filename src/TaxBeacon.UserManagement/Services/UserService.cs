@@ -252,8 +252,8 @@ public class UserService: IUserService
         var exportUsers = await _context.Users
             .Where(u => u.TenantUsers.Any(tu => tu.TenantId == tenantId))
             .OrderBy(u => u.Email)
-            .ProjectToType<UserExportModel>()
             .AsNoTracking()
+            .ProjectToType<UserExportModel>()
             .ToListAsync(cancellationToken);
 
         exportUsers.ForEach(u =>
