@@ -15,7 +15,7 @@ public class UpdateUserRequestValidatorTest
     {
         //Arrange
         var updateUserRequest = new Faker<UpdateUserRequest>()
-            .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), f.Name.LastName()))
+            .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), f.Name.FirstName(), f.Name.LastName()))
             .Generate();
 
         //Act
@@ -23,6 +23,7 @@ public class UpdateUserRequestValidatorTest
 
         //Assert
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
     }
 
@@ -33,7 +34,7 @@ public class UpdateUserRequestValidatorTest
     {
         //Arrange
         var updateUserRequest = new Faker<UpdateUserRequest>()
-            .CustomInstantiator(f => new UpdateUserRequest(firstName, f.Name.LastName()))
+            .CustomInstantiator(f => new UpdateUserRequest(firstName, f.Name.FirstName(), f.Name.LastName()))
             .Generate();
 
         //Act
@@ -41,6 +42,7 @@ public class UpdateUserRequestValidatorTest
 
         //Assert
         actualResult.ShouldHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
     }
 
@@ -50,7 +52,7 @@ public class UpdateUserRequestValidatorTest
         //Arrange
         var firstName = new Faker().Random.String2(115);
         var updateUserRequest = new Faker<UpdateUserRequest>()
-            .CustomInstantiator(f => new UpdateUserRequest(firstName, f.Name.LastName()))
+            .CustomInstantiator(f => new UpdateUserRequest(firstName, f.Name.FirstName(), f.Name.LastName()))
             .Generate();
 
         //Act
@@ -61,6 +63,46 @@ public class UpdateUserRequestValidatorTest
             .ShouldHaveValidationErrorFor(r => r.FirstName)
             .WithErrorMessage("The first name must contain no more than 100 characters");
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Validation_InvalidLegalName_ShouldHaveErrors(string legalName)
+    {
+        //Arrange
+        var updateUserRequest = new Faker<UpdateUserRequest>()
+            .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), legalName, f.Name.LastName()))
+            .Generate();
+
+        //Act
+        var actualResult = _updateUserRequestValidator.TestValidate(updateUserRequest);
+
+        //Assert
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldHaveValidationErrorFor(r => r.LegalName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+    }
+
+    [Fact]
+    public void Validation_LongLegalName_ShouldHaveMaxLengthError()
+    {
+        //Arrange
+        var legalName = new Faker().Random.String2(115);
+        var updateUserRequest = new Faker<UpdateUserRequest>()
+            .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), legalName, f.Name.LastName()))
+            .Generate();
+
+        //Act
+        var actualResult = _updateUserRequestValidator.TestValidate(updateUserRequest);
+
+        //Assert
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult
+            .ShouldHaveValidationErrorFor(r => r.LegalName)
+            .WithErrorMessage("Legal name must contain no more than 100 characters");
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
     }
 
     [Theory]
@@ -70,7 +112,7 @@ public class UpdateUserRequestValidatorTest
     {
         //Arrange
         var updateUserRequest = new Faker<UpdateUserRequest>()
-            .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), lastName))
+            .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), f.Name.FirstName(), lastName))
             .Generate();
 
         //Act
@@ -79,6 +121,7 @@ public class UpdateUserRequestValidatorTest
         //Assert
         actualResult.ShouldHaveValidationErrorFor(r => r.LastName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
     }
 
     [Fact]
@@ -87,7 +130,7 @@ public class UpdateUserRequestValidatorTest
         //Arrange
         var lastName = new Faker().Random.String2(115);
         var updateUserRequest = new Faker<UpdateUserRequest>()
-            .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), lastName))
+            .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), f.Name.FirstName(), lastName))
             .Generate();
 
         //Act
@@ -98,5 +141,6 @@ public class UpdateUserRequestValidatorTest
             .ShouldHaveValidationErrorFor(r => r.LastName)
             .WithErrorMessage("The last name must contain no more than 100 characters");
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
     }
 }

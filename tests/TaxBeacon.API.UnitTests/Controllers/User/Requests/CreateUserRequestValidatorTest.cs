@@ -15,7 +15,7 @@ public class CreateUserRequestValidatorTest
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.LastName(), f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), f.Name.LastName(), f.Internet.Email()))
             .Generate();
 
         //Act
@@ -24,6 +24,7 @@ public class CreateUserRequestValidatorTest
         //Assert
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
     }
 
@@ -35,7 +36,7 @@ public class CreateUserRequestValidatorTest
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.LastName(), email))
+            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), f.Name.LastName(), email))
             .Generate();
 
         //Act
@@ -44,6 +45,7 @@ public class CreateUserRequestValidatorTest
         //Assert
         actualResult.ShouldHaveValidationErrorFor(r => r.Email);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
     }
 
@@ -53,7 +55,7 @@ public class CreateUserRequestValidatorTest
         //Arrange
         var email = $"{new Faker().Random.String2(200)}@email.com";
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.LastName(), email))
+            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), f.Name.LastName(), email))
             .Generate();
 
         //Act
@@ -64,6 +66,7 @@ public class CreateUserRequestValidatorTest
             .ShouldHaveValidationErrorFor(r => r.Email)
             .WithErrorMessage("The email must contain no more than 64 characters");
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
     }
 
@@ -74,7 +77,7 @@ public class CreateUserRequestValidatorTest
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(firstName, f.Name.LastName(), f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(firstName, f.Name.FirstName(), f.Name.LastName(), f.Internet.Email()))
             .Generate();
 
         //Act
@@ -82,6 +85,7 @@ public class CreateUserRequestValidatorTest
 
         //Assert
         actualResult.ShouldHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
     }
@@ -92,7 +96,7 @@ public class CreateUserRequestValidatorTest
         //Arrange
         var firstName = new Faker().Random.String2(115);
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(firstName, f.Name.LastName(), f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(firstName, f.Name.FirstName(), f.Name.LastName(), f.Internet.Email()))
             .Generate();
 
         //Act
@@ -104,6 +108,48 @@ public class CreateUserRequestValidatorTest
             .WithErrorMessage("The first name must contain no more than 100 characters");
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Validation_InvalidLegalName_ShouldHaveErrors(string legalName)
+    {
+        //Arrange
+        var createUserRequest = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), legalName, f.Name.LastName(), f.Internet.Email()))
+            .Generate();
+
+        //Act
+        var actualResult = _createUserRequestValidator.TestValidate(createUserRequest);
+
+        //Assert
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldHaveValidationErrorFor(r => r.LegalName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+    }
+
+    [Fact]
+    public void Validation_LongLegalName_ShouldHaveMaxLengthError()
+    {
+        //Arrange
+        var legalName = new Faker().Random.String2(115);
+        var createUserRequest = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), legalName, f.Name.LastName(), f.Internet.Email()))
+            .Generate();
+
+        //Act
+        var actualResult = _createUserRequestValidator.TestValidate(createUserRequest);
+
+        //Assert
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult
+            .ShouldHaveValidationErrorFor(r => r.LegalName)
+            .WithErrorMessage("Legal name must contain no more than 100 characters");
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
     }
 
     [Theory]
@@ -113,7 +159,7 @@ public class CreateUserRequestValidatorTest
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), lastName, f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), lastName, f.Internet.Email()))
             .Generate();
 
         //Act
@@ -123,6 +169,7 @@ public class CreateUserRequestValidatorTest
         actualResult.ShouldHaveValidationErrorFor(r => r.LastName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
     }
 
     [Fact]
@@ -131,7 +178,7 @@ public class CreateUserRequestValidatorTest
         //Arrange
         var lastName = new Faker().Random.String2(115);
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), lastName, f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), lastName, f.Internet.Email()))
             .Generate();
 
         //Act
@@ -143,5 +190,6 @@ public class CreateUserRequestValidatorTest
             .WithErrorMessage("The last name must contain no more than 100 characters");
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
     }
 }
