@@ -213,6 +213,7 @@ public class TenantServiceTests
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
                 .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
+                .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
