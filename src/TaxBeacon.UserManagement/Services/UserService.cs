@@ -75,6 +75,10 @@ public class UserService: IUserService
         user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
 
+        _logger.LogInformation("{dateTime} - User ({createdUserId}) has logged in",
+            _dateTimeService.UtcNow,
+            user.Id);
+
         return user.Adapt<UserDto>();
     }
 
@@ -85,7 +89,7 @@ public class UserService: IUserService
             .Users
             .AsNoTracking()
             .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
-            .MapToUserDto(_context, _currentUserService)
+            .MapToUserDtoWithTenantRoles(_context, _currentUserService)
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
         return gridifyQuery.Page != 1 && gridifyQuery.Page > Math.Ceiling((double)users.Count / gridifyQuery.PageSize)
@@ -96,7 +100,7 @@ public class UserService: IUserService
     public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .MapToUserDto(_context, _currentUserService)
+            .MapToUserDtoWithTenantRoles(_context, _currentUserService)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
         ?? throw new NotFoundException(nameof(User), id);
 

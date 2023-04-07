@@ -37,12 +37,11 @@ namespace TaxBeacon.API.Controllers.Authorization
             var userOneOf = await _userService.LoginAsync(new MailAddress(loginRequest.Email), cancellationToken);
 
             return await userOneOf.Match<Task<IActionResult>>(
-                async user => Ok(new LoginResponse
-                {
-                    UserId = user.Id,
-                    Permissions = await _permissionsService.GetPermissionsAsync(user.Id),
-                    FullName = user.FullName
-                }),
+                async user => Ok(
+                    new LoginResponse(
+                        user.Id,
+                        user.FullName,
+                        await _permissionsService.GetPermissionsAsync(user.Id, cancellationToken))),
                 _ => Task.FromResult<IActionResult>(NotFound()));
         }
     }

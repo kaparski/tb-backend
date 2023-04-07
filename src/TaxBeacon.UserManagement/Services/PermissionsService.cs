@@ -20,12 +20,15 @@ namespace TaxBeacon.UserManagement.Services
             _currentUserService = currentUserService;
         }
 
-        public async Task<IReadOnlyCollection<string>> GetPermissionsAsync(Guid userId) =>
+        public async Task<IReadOnlyCollection<string>> GetPermissionsAsync(Guid userId,
+            CancellationToken cancellationToken = default) =>
             _currentUserService.TenantId == default
-                ? await GetPermissionsByUserIdAsync(userId)
-                : await GetTenantPermissionsByUserIdAsync(_currentUserService.TenantId, userId);
+                ? await GetPermissionsByUserIdAsync(userId, cancellationToken)
+                : await GetTenantPermissionsByUserIdAsync(_currentUserService.TenantId, userId, cancellationToken);
 
-        private async Task<IReadOnlyCollection<string>> GetTenantPermissionsByUserIdAsync(Guid tenantId, Guid userId) =>
+        private async Task<IReadOnlyCollection<string>> GetTenantPermissionsByUserIdAsync(Guid tenantId,
+            Guid userId,
+            CancellationToken cancellationToken = default) =>
             await _context.TenantUserRoles
                 .Where(tur => tur.TenantId == tenantId && tur.UserId == userId)
                 .Join(_context.TenantRolePermissions,
@@ -34,9 +37,10 @@ namespace TaxBeacon.UserManagement.Services
                     (tur, trp) => trp.PermissionId)
                 .Join(_context.Permissions, id => id, p => p.Id, (id, p) => p.Name)
                 .AsNoTracking()
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
-        private async Task<IReadOnlyCollection<string>> GetPermissionsByUserIdAsync(Guid userId) =>
+        private async Task<IReadOnlyCollection<string>> GetPermissionsByUserIdAsync(Guid userId,
+            CancellationToken cancellationToken = default) =>
             await _context.UserRoles
                 .AsNoTracking()
                 .Where(ur => ur.UserId == userId)
@@ -45,6 +49,6 @@ namespace TaxBeacon.UserManagement.Services
                     rp => new { rp.RoleId },
                     (ur, rp) => rp.PermissionId)
                 .Join(_context.Permissions, id => id, p => p.Id, (id, p) => p.Name)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
     }
 }

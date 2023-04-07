@@ -61,12 +61,12 @@ public class UserServiceTests
 
         _listToFileConverters
             .Setup(x => x.GetEnumerator())
-            .Returns((IEnumerator<IListToFileConverter>)new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
+            .Returns(new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
                 .GetEnumerator());
 
         _activityFactories
             .Setup(x => x.GetEnumerator())
-            .Returns((IEnumerator<IUserActivityFactory>)new[] { _userCreatedActivityFactory.Object }.ToList().GetEnumerator());
+            .Returns(new[] { _userCreatedActivityFactory.Object }.ToList().GetEnumerator());
 
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -111,44 +111,38 @@ public class UserServiceTests
             .Returns(DateTime.UtcNow);
 
         //Act
-        var actualResult = await _userService.LoginAsync(mailAddress);
+        var actualResultOneOf = await _userService.LoginAsync(mailAddress);
 
         //Assert
         (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-        actualResult.LastLoginDateTimeUtc.Should().BeAfter(currentDate);
+        actualResultOneOf.TryPickT0(out var userDto, out _).Should().BeTrue();
+        userDto.LastLoginDateTimeUtc.Should().BeAfter(currentDate);
+
         _dateTimeServiceMock
-            .Verify(ds => ds.UtcNow, Times.Once);
+            .Verify(ds => ds.UtcNow, Times.Exactly(2));
     }
 
     [Fact]
     public async Task LoginAsync_ValidEmailAndUserNotExist_NewUserCreated()
     {
         //Arrange
-        var tenant = TestData.TestTenant.Generate();
-        var user = TestData.TestUser.Generate();
-        var mailAddress = new MailAddress(user.Email);
+        var mailAddress = new MailAddress(new Faker().Internet.Email());
         var currentDate = DateTime.UtcNow;
-
-        _dbContextMock.Tenants.Add(tenant);
-        await _dbContextMock.SaveChangesAsync();
 
         _dateTimeServiceMock
             .Setup(s => s.UtcNow)
             .Returns(currentDate);
 
         //Act
-        var actualResult = await _userService.LoginAsync(mailAddress);
+        var actualResultOneOf = await _userService.LoginAsync(mailAddress);
 
         //Assert
         using (new AssertionScope())
         {
-            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-            actualResult.Email.Should().Be(user.Email);
-            actualResult.LastName.Should().BeEmpty();
-            actualResult.FirstName.Should().BeEmpty();
-            actualResult.LastLoginDateTimeUtc.Should().Be(currentDate);
+            actualResultOneOf.IsT0.Should().BeFalse();
+            actualResultOneOf.IsT1.Should().BeTrue();
             _dateTimeServiceMock
-                .Verify(ds => ds.UtcNow, Times.Exactly(4));
+                .Verify(ds => ds.UtcNow, Times.Never);
         }
     }
 
@@ -174,7 +168,7 @@ public class UserServiceTests
             .Returns(tenant.Id);
 
         // Act
-        var usersOneOf = await _userService.GetUsersAsync(query, default);
+        var usersOneOf = await _userService.GetUsersAsync(query);
 
         // Assert
         usersOneOf.TryPickT0(out var pageOfUsers, out _);
@@ -207,7 +201,7 @@ public class UserServiceTests
             .Returns(tenant.Id);
 
         // Act
-        var usersOneOf = await _userService.GetUsersAsync(query, default);
+        var usersOneOf = await _userService.GetUsersAsync(query);
 
         // Assert
         using (new AssertionScope())
@@ -231,7 +225,7 @@ public class UserServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "email asc", };
 
         // Act
-        var usersOneOf = await _userService.GetUsersAsync(query, default);
+        var usersOneOf = await _userService.GetUsersAsync(query);
 
         // Assert
         usersOneOf.TryPickT0(out var pageOfUsers, out _);
@@ -632,7 +626,7 @@ public class UserServiceTests
         var resultOneOf = await _userService.GetActivitiesAsync(user.Id);
 
         //Assert
-        resultOneOf.TryPickT1(out var result, out _).Should().BeTrue();
+        resultOneOf.TryPickT1(out _, out _).Should().BeTrue();
     }
 
     [Fact]
@@ -700,18 +694,18 @@ public class UserServiceTests
     {
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
-                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Id, _ => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+                .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
 
         public static readonly Faker<User> TestUser =
             new Faker<User>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
+                .RuleFor(u => u.Id, _ => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
                 .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
                 .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
+                .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
         public static readonly Faker<UpdateUserDto> UpdateUserDtoFaker =
@@ -728,7 +722,7 @@ public class UserServiceTests
 
         public static readonly Faker<Role> TestRoles =
             new Faker<Role>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
+                .RuleFor(u => u.Id, _ => Guid.NewGuid())
                 .RuleFor(u => u.Name, f => f.Name.JobTitle());
     }
 }

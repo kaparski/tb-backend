@@ -7,7 +7,18 @@ namespace TaxBeacon.UserManagement.Extensions;
 
 public static class UserIQueryableExtension
 {
-    public static IQueryable<UserDto> MapToUserDto(this IQueryable<User> source, ITaxBeaconDbContext context,
+    public static IQueryable<UserDto> MapToUserDtoWithRoles(this IQueryable<User> source, ITaxBeaconDbContext context) =>
+        source
+            .GroupJoin(context.UserRoles,
+            u => new { u.Id },
+            tur => new { Id = tur.UserId },
+            (u, tur) => new { User = u, UserRoles = tur })
+            .SelectMany(q => q.UserRoles.DefaultIfEmpty(),
+            (u, tur) => new UserWithRoleId { User = u.User, RoleId = tur!.RoleId })
+            .MapToUserDtoWithRoles(context);
+
+    public static IQueryable<UserDto> MapToUserDtoWithTenantRoles(this IQueryable<User> source,
+        ITaxBeaconDbContext context,
         ICurrentUserService currentUserService) =>
         source
             .GroupJoin(context.TenantUserRoles,
@@ -15,15 +26,19 @@ public static class UserIQueryableExtension
                 tur => new { Id = tur.UserId, tur.TenantId },
                 (u, tur) => new { User = u, TenantUserRole = tur })
             .SelectMany(q => q.TenantUserRole.DefaultIfEmpty(),
-                (u, tur) => new { u.User, RoleId = (Guid?)tur.RoleId })
+                (u, tur) => new UserWithRoleId { User = u.User, RoleId = tur!.RoleId })
+            .MapToUserDtoWithRoles(context);
+
+    private static IQueryable<UserDto> MapToUserDtoWithRoles(this IQueryable<UserWithRoleId> source,
+        ITaxBeaconDbContext context) =>
+        source
             .GroupJoin(context.Roles,
                 ur => new { ur.RoleId },
                 role => new { RoleId = (Guid?)role.Id },
                 (ur, roles) => new { ur.User, Roles = roles })
             .SelectMany(ur => ur.Roles.DefaultIfEmpty(),
-                (ur, role) => new { ur.User, role.Name })
-            .GroupBy(z => z.User)
-            .Select(group => new UserDto
+                (ur, role) => new { ur.User, role!.Name })
+            .GroupBy(z => z.User).Select(group => new UserDto
             {
                 Id = group.Key.Id,
                 FirstName = group.Key.FirstName,
@@ -37,4 +52,11 @@ public static class UserIQueryableExtension
                 ReactivationDateTimeUtc = group.Key.ReactivationDateTimeUtc,
                 Roles = string.Join(", ", group.Select(c => c.Name))
             });
+
+    private class UserWithRoleId
+    {
+        public User User { get; init; } = null!;
+
+        public Guid? RoleId { get; init; }
+    }
 }
