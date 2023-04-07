@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
 
@@ -23,6 +24,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IUserActivityFactory, UserDeactivatedEventFactory>();
         serviceCollection.AddScoped<IUserActivityFactory, UserReactivatedEventFactory>();
         serviceCollection.AddScoped<IUserActivityFactory, UserUpdatedEventFactory>();
+        serviceCollection.AddScoped<IUserActivityFactory, UnassignRolesEventFactory>();
         return serviceCollection;
     }
 }

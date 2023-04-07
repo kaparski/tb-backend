@@ -353,7 +353,7 @@ public class UserService: IUserService
                 Date = _dateTimeService.UtcNow,
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
-                    new UnassignUsersEvent(
+                    new UnassignRolesEvent(
                         removedRolesString,
                         _dateTimeService.UtcNow,
                         currentUserId,
