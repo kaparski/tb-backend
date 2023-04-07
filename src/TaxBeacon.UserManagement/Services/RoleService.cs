@@ -103,7 +103,7 @@ public class RoleService: IRoleService
                 Date = _dateTimeService.UtcNow,
                 Revision = 1,
                 Event = JsonSerializer.Serialize(
-                    new UnassignUsersEvent(
+                    new UnassignRolesEvent(
                         role.Name,
                         _dateTimeService.UtcNow,
                         currentUserId,

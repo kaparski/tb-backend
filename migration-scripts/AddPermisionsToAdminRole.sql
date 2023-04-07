@@ -18,7 +18,7 @@ VALUES ('Users.Read'),
        ('Users.ReadExport'),
        ('Users.RolesWrite'),
        ('Roles.Read'),
-       ('Roles.ReadWrite')
+       ('Roles.ReadWrite'),
        ('TableFilters.Read'),
        ('TableFilters.ReadWrite')
 
