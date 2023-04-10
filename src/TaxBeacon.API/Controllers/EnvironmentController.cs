@@ -9,6 +9,6 @@ namespace TaxBeacon.API.Controllers
         public EnvironmentController(IConfiguration configuration) => _configuration = configuration;
 
         [HttpGet]
-        public IActionResult Index() => Ok(_configuration["ConnectionStrings__DefaultConnection"]);
+        public IActionResult Index() => Ok(_configuration["ConnectionStrings:DefaultConnection"]);
     }
 }
