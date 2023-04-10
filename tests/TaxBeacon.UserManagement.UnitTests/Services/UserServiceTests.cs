@@ -834,6 +834,7 @@ public class UserServiceTests
                 .RuleFor(u => u.Id, _ => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
+                .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
                 .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
@@ -842,6 +843,7 @@ public class UserServiceTests
         public static readonly Faker<UpdateUserDto> UpdateUserDtoFaker =
             new Faker<UpdateUserDto>()
                 .RuleFor(dto => dto.FirstName, f => f.Name.FirstName())
+                .RuleFor(dto => dto.LegalName, f => f.Name.FirstName())
                 .RuleFor(dto => dto.LastName, f => f.Name.LastName());
 
         public static IEnumerable<object[]> UpdatedStatusInvalidData =>

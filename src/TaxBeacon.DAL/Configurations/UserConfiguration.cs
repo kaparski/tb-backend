@@ -14,6 +14,12 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
             .IsRequired();
 
         user
+           .Property(u => u.LegalName)
+           .HasColumnType("nvarchar")
+           .HasMaxLength(100)
+           .IsRequired();
+
+        user
             .Property(u => u.LastName)
             .HasColumnType("nvarchar")
             .HasMaxLength(100)
