@@ -125,7 +125,7 @@ public class RoleService: IRoleService
         return new Success();
     }
 
-        public async Task<OneOf<Success, NotFound>> AssignUsersAsync(Guid roleId, List<Guid> userIds, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success, NotFound>> AssignUsersAsync(Guid roleId, List<Guid> userIds, CancellationToken cancellationToken = default)
     {
         var role = await _context.Roles
             .Where(r => r.Id == roleId && r.TenantRoles.Any(tr => tr.TenantId == _currentUserService.TenantId))
@@ -144,8 +144,8 @@ public class RoleService: IRoleService
         });
         await _context.TenantUserRoles.AddRangeAsync(tenantUserRolesToAdd, cancellationToken);
 
-        var assignedByFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
-        var assignedByUserRoles = await _context
+        var currentUserFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
+        var currentUserRoles = await _context
             .TenantUserRoles
             .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == _currentUserService.TenantId)
             .GroupBy(r => 1, t => t.TenantRole.Role.Name)
@@ -161,11 +161,11 @@ public class RoleService: IRoleService
             Revision = 1,
             Event = JsonSerializer.Serialize(
                 new AssignRolesEvent(
-                    _currentUserService.UserId,
-                    assignedByFullName,
-                    assignedByUserRoles ?? string.Empty,
                     role.Name,
-                    eventDateTime)),
+                    eventDateTime,
+                    _currentUserService.UserId,
+                    currentUserFullName,
+                    currentUserRoles ?? string.Empty)),
             EventType = EventType.UserRolesAssign
         });
 
@@ -177,7 +177,7 @@ public class RoleService: IRoleService
             _dateTimeService.UtcNow,
             string.Join(',', userIds),
             roleId,
-            assignedByFullName);
+            currentUserFullName);
 
         return new Success();
     }
