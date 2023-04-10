@@ -263,8 +263,8 @@ public class UserService: IUserService
         var exportUsers = await _context.Users
             .Where(u => u.TenantUsers.Any(tu => tu.TenantId == tenantId))
             .OrderBy(u => u.Email)
-            .ProjectToType<UserExportModel>()
             .AsNoTracking()
+            .ProjectToType<UserExportModel>()
             .ToListAsync(cancellationToken);
 
         exportUsers.ForEach(u =>
@@ -290,23 +290,18 @@ public class UserService: IUserService
 
     public async Task AssignRoleAsync(Guid tenantId, Guid[] roleIds, Guid userId, CancellationToken cancellationToken)
     {
-        var existingRoles = await _context.TenantUserRoles
+        var existingRoleIds = await _context.TenantUserRoles
             .Where(e => e.UserId == userId && e.TenantId == tenantId)
-            .Select(x => x.TenantRole.Role)
-            .ProjectToType<RoleActivityDto>()
+            .Select(x => x.RoleId)
             .ToListAsync(cancellationToken);
 
-        _context.TenantUserRoles.RemoveRange(_context
-            .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId && x.TenantId == tenantId));
+        var currentUserId = _currentUserService.UserId;
+        var removedRoles = _context
+            .TenantUserRoles.Where(x => !roleIds.Contains(x.RoleId) && x.UserId == userId && x.TenantId == tenantId);
+        _context.TenantUserRoles.RemoveRange(removedRoles);
 
-        var rolesString = await _context
-            .TenantUserRoles
-            .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == tenantId)
-            .GroupBy(r => 1, t => t.TenantRole.Role.Name)
-            .Select(group => string.Join(", ", group.Select(name => name)))
-            .FirstOrDefaultAsync(cancellationToken);
+        var roleIdsToAdd = roleIds.Except(existingRoleIds);
 
-        var roleIdsToAdd = roleIds.Except(existingRoles.Select(x => x.Id));
         var tenantUserRoles = roleIdsToAdd.Select(roleId =>
             new TenantUserRole()
             {
@@ -316,41 +311,87 @@ public class UserService: IUserService
             });
         await _context.TenantUserRoles.AddRangeAsync(tenantUserRoles, cancellationToken);
 
-        var fullName = (await _context.TenantUsers
+        var currentUserFullName = (await _context.TenantUsers
                            .Include(x => x.User)
                            .FirstOrDefaultAsync(x => x.UserId == _currentUserService.UserId && x.TenantId == tenantId,
                                cancellationToken))?
                        .User.FullName
                        ?? "";
-        var newRoles = await _context.TenantRoles
-            .Where(x => roleIds.Contains(x.RoleId) && x.TenantId == tenantId)
-            .Select(x => x.Role)
-            .ProjectToType<RoleActivityDto>()
-            .ToListAsync(cancellationToken);
 
-        await _context.UserActivityLogs.AddAsync(new UserActivityLog
+        var removedRolesString = string.Join(", ", removedRoles
+            .Select(x => x.TenantRole.Role.Name));
+
+        var addedRolesString = await _context
+            .Roles
+            .Where(x => roleIdsToAdd.Contains(x.Id))
+            .GroupBy(r => 1, t => t.Name)
+            .Select(group => string.Join(", ", group.Select(name => name)))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var currentUserRoles =
+            string.Join(", ", await _context
+            .TenantUserRoles
+            .Where(x => x.TenantId == tenantId && x.UserId == currentUserId)
+            .Select(x => x.TenantRole.Role.Name)
+            .ToListAsync(cancellationToken));
+
+        if (!string.IsNullOrEmpty(addedRolesString))
         {
-            TenantId = tenantId,
-            UserId = userId,
-            Date = _dateTimeService.UtcNow,
-            Revision = 1,
-            Event = JsonSerializer.Serialize(
-                new AssignRolesEvent(
-                    rolesString ?? "",
-                    _currentUserService.UserId,
-                    fullName,
-                    existingRoles,
-                    newRoles,
-                    _dateTimeService.UtcNow)),
-            EventType = EventType.UserRolesAssign
-        }, cancellationToken);
+            await _context.UserActivityLogs.AddAsync(new UserActivityLog
+            {
+                TenantId = tenantId,
+                UserId = userId,
+                Date = _dateTimeService.UtcNow,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new AssignRolesEvent(
+                        addedRolesString,
+                        _dateTimeService.UtcNow,
+                        currentUserId,
+                        currentUserFullName,
+                        currentUserRoles
+                        )),
+                EventType = EventType.UserRolesAssign
+            }, cancellationToken);
+        }
+
+        if (!string.IsNullOrEmpty(removedRolesString))
+        {
+            await _context.UserActivityLogs.AddAsync(new UserActivityLog
+            {
+                TenantId = tenantId,
+                UserId = userId,
+                Date = _dateTimeService.UtcNow,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new UnassignRolesEvent(
+                        removedRolesString,
+                        _dateTimeService.UtcNow,
+                        currentUserId,
+                        currentUserFullName,
+                        currentUserRoles)
+                    ),
+                EventType = EventType.UserRolesUnassign
+            }, cancellationToken);
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roles} roles by {@userId}",
-            _dateTimeService.UtcNow,
-            userId,
-            rolesString,
-            _currentUserService.UserId);
+        if (!string.IsNullOrEmpty(addedRolesString))
+        {
+            _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roles} roles by {@userId}",
+                _dateTimeService.UtcNow,
+                userId,
+                addedRolesString,
+                _currentUserService.UserId);
+        }
+        if (!string.IsNullOrEmpty(removedRolesString))
+        {
+            _logger.LogInformation("{dateTime} - User ({userId}) was unassigned from {roles} roles by {@userId}",
+                _dateTimeService.UtcNow,
+                userId,
+                removedRolesString,
+                _currentUserService.UserId);
+        }
     }
 
     public async Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid tenantId,

@@ -12,4 +12,6 @@ public interface IRoleService
 
     Task<OneOf<QueryablePaging<UserDto>, NotFound>> GetRoleAssignedUsersAsync(Guid roleId, GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
+
+    Task<OneOf<Success, NotFound>> UnassignUsersAsync(Guid roleId, List<Guid> users, CancellationToken cancellationToken);
 }

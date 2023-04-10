@@ -13,8 +13,13 @@ namespace TaxBeacon.API.Controllers.Roles;
 public class RolesController: BaseController
 {
     private readonly IRoleService _roleService;
+    private readonly IPermissionsService _permissionService;
 
-    public RolesController(IRoleService roleService) => _roleService = roleService;
+    public RolesController(IRoleService roleService, IPermissionsService permissionService)
+    {
+        _permissionService = permissionService;
+        _roleService = roleService;
+    }
 
     /// <summary>
     /// List of roles
@@ -59,5 +64,48 @@ public class RolesController: BaseController
             users => Ok(new QueryablePaging<RoleAssignedUserResponse>(users.Count,
                 users.Query.ProjectToType<RoleAssignedUserResponse>())),
             notfound => NotFound());
+    }
+
+    /// <summary>
+    /// List of permissions for selected role
+    /// </summary>
+    /// <remarks>
+    /// Sample requests: <br/><br/>
+    ///     ```GET /api/roles/8da4f695-6d47-4ce8-da8f-08db0052f325/permissions```<br/><br/>
+    /// </remarks>
+    /// <response code="200">Returns role's permissions</response>
+    [HasPermissions(Common.Permissions.Roles.Read)]
+    [HttpGet("{roleId:guid}/permissions", Name = "GetPermissionsByRoleId")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(PermissionResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<PermissionResponse>>> GetPermissionsByRoleId(Guid roleId,
+        CancellationToken cancellationToken)
+    {
+        var permissionsListResponse = await _permissionService.GetPermissionsByRoleIdAsync(roleId, cancellationToken);
+
+        return Ok(permissionsListResponse.Adapt<List<PermissionResponse>>());
+    }
+
+    /// <summary>
+    /// Unassign Users
+    /// </summary>
+    /// <remarks>
+    /// Permission: Roles.ReadWrite
+    /// </remarks>
+    /// <response code="204"></response>
+    [HasPermissions(Common.Permissions.Roles.ReadWrite)]
+    [HttpDelete("{id:guid}/users", Name = "UnassignUsers")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UnassignUsers([FromRoute] Guid id,
+        [FromBody] List<Guid> userIds,
+        CancellationToken cancellationToken)
+    {
+        var result = await _roleService.UnassignUsersAsync(id, userIds, cancellationToken);
+
+        return result.Match<IActionResult>(
+            success => NoContent(),
+            notFound => NotFound());
     }
 }

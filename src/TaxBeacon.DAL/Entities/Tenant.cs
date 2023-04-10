@@ -1,10 +1,14 @@
-﻿namespace TaxBeacon.DAL.Entities;
+﻿using TaxBeacon.Common.Enums;
+
+namespace TaxBeacon.DAL.Entities;
 
 public class Tenant: BaseEntity
 {
     public Guid Id { get; set; }
 
     public string Name { get; set; } = null!;
+
+    public Status Status { get; set; }
 
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
 

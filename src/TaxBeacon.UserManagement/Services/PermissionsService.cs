@@ -1,15 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.UserManagement.Models;
 
 namespace TaxBeacon.UserManagement.Services
 {
     public class PermissionsService: IPermissionsService
     {
         private readonly ILogger<PermissionsService> _logger;
-        private readonly ICurrentUserService _currentUserService;
         private readonly ITaxBeaconDbContext _context;
+        private readonly ICurrentUserService _currentUserService;
 
         public PermissionsService(ITaxBeaconDbContext context,
             ILogger<PermissionsService> logger,
@@ -18,6 +20,21 @@ namespace TaxBeacon.UserManagement.Services
             _context = context;
             _logger = logger;
             _currentUserService = currentUserService;
+        }
+
+        public async Task<IReadOnlyCollection<PermissionDto>> GetPermissionsByRoleIdAsync(
+            Guid roleId,
+            CancellationToken cancellationToken = default)
+        {
+            var permissions = await _context.TenantRolePermissions
+                .Where(trp => trp.TenantId == _currentUserService.TenantId && trp.RoleId == roleId)
+                .Join(_context.Permissions, trp => trp.PermissionId, p => p.Id, (trp, p) => new { p.Id, p.Name })
+                .ProjectToType<PermissionDto>()
+                .AsNoTracking()
+                .ToListAsync();
+
+            var permissionsWithCategory = permissions.Select(p => p with { Category = p.Name.Split('.')[0] }).ToList();
+            return permissionsWithCategory;
         }
     }
 }

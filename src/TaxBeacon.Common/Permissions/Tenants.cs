@@ -1,8 +1,9 @@
 ﻿namespace TaxBeacon.Common.Permissions
 {
-    public enum Roles
+    public enum Tenants
     {
         Read,
         ReadWrite,
+        ReadExport
     }
 }

@@ -7,7 +7,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
-using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -97,13 +97,9 @@ public class UsersController: BaseController
     public async Task<IActionResult> ExportUsersAsync([FromQuery] ExportUsersRequest exportUsersRequest,
         CancellationToken cancellationToken)
     {
+        var mimeType = exportUsersRequest.FileType.ToMimeType();
+
         var users = await _userService.ExportUsersAsync(Guid.Empty, exportUsersRequest.FileType, cancellationToken);
-        var mimeType = exportUsersRequest.FileType switch
-        {
-            FileType.Csv => "text/csv",
-            FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            _ => throw new InvalidOperationException()
-        };
 
         return File(users, mimeType, $"users.{exportUsersRequest.FileType.ToString().ToLowerInvariant()}");
     }
