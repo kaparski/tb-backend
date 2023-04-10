@@ -79,11 +79,11 @@ public class UserService: IUserService
             _dateTimeService.UtcNow,
             user.Id);
 
+        // TODO: make a seeder for roles and use roleId instead of role name 
         return new LoginUserDto(
             user.Id,
             user.FullName,
             await GetUserPermissionsAsync(user.Id, cancellationToken),
-            // TODO: make a seeder for roles and use roleId instead of role name 
             await HasNoTenantRoleAsync(user.Id, "Super admin", cancellationToken));
     }
 
