@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.API.Controllers.Users.Requests;
 
-public record CreateUserRequest(string FirstName, string LastName, string Email);
+public record CreateUserRequest(string FirstName, string LegalName, string LastName, string Email);
 
 public class CreateUserRequestValidator: AbstractValidator<CreateUserRequest>
 {
@@ -18,6 +18,11 @@ public class CreateUserRequestValidator: AbstractValidator<CreateUserRequest>
             .NotEmpty()
             .MaximumLength(100)
             .WithMessage("The first name must contain no more than 100 characters");
+
+        RuleFor(x => x.LegalName)
+            .NotEmpty()
+            .MaximumLength(100)
+            .WithMessage("Legal name must contain no more than 100 characters");
 
         RuleFor(x => x.LastName)
             .NotEmpty()

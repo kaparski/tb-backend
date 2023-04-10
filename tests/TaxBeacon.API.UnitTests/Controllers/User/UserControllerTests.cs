@@ -138,6 +138,7 @@ public class UserControllerTests
             new Faker<UserDto>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+                .RuleFor(u => u.LegalName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
@@ -147,6 +148,6 @@ public class UserControllerTests
 
         public static readonly Faker<UpdateUserRequest> UpdateUserFaker =
             new Faker<UpdateUserRequest>()
-                .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), f.Name.LastName()));
+                .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), f.Name.FirstName(), f.Name.LastName()));
     }
 }

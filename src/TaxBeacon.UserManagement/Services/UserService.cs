@@ -73,6 +73,7 @@ public class UserService: IUserService
                 {
                     FirstName = string.Empty,
                     LastName = string.Empty,
+                    LegalName = string.Empty,
                     Email = mailAddress.Address,
                     LastLoginDateTimeUtc = _dateTimeService.UtcNow,
                 }, cancellationToken);
@@ -402,6 +403,7 @@ public class UserService: IUserService
         var previousUserValues = JsonSerializer.Serialize(user.Adapt<UpdateUserDto>());
         user.FirstName = updateUserDto.FirstName;
         user.LastName = updateUserDto.LastName;
+        user.LegalName = updateUserDto.LegalName;
 
         var currentUser = await GetUserByIdAsync(_currentUserService.UserId, cancellationToken);
         var now = _dateTimeService.UtcNow;

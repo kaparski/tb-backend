@@ -65,7 +65,8 @@ public class UsersController: BaseController
     ///     POST api/users
     ///     {
     ///        "email": "john@gmail.com",
-    ///        "firstName": "John",
+    ///        "firstName": "Johny",
+    ///        "legalName": "John",
     ///        "lastName": "White-Holland"
     ///     }
     /// </remarks>

@@ -147,6 +147,7 @@ public class UserServiceTests
             actualResult.Email.Should().Be(user.Email);
             actualResult.LastName.Should().BeEmpty();
             actualResult.FirstName.Should().BeEmpty();
+            actualResult.LegalName.Should().BeEmpty();
             actualResult.LastLoginDateTimeUtc.Should().Be(currentDate);
             _dateTimeServiceMock
                 .Verify(ds => ds.UtcNow, Times.Exactly(4));
@@ -248,6 +249,7 @@ public class UserServiceTests
         var user = new UserDto
         {
             FirstName = faker.Name.FirstName(),
+            LegalName = faker.Name.FirstName(),
             LastName = faker.Name.LastName(),
             Email = faker.Internet.Email()
         };
@@ -264,6 +266,7 @@ public class UserServiceTests
         {
             (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
             actualResult.Email.Should().Be(user.Email);
+            actualResult.LegalName.Should().Be(user.LegalName);
             actualResult.LastName.Should().Be(user.LastName);
             actualResult.FirstName.Should().Be(user.FirstName);
             actualResult.TenantUsers.Should()
@@ -474,6 +477,7 @@ public class UserServiceTests
         var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
         var user = TestData.TestUser.Generate();
         var oldFirstName = user.FirstName;
+        var oldLegalName = user.LegalName;
         var oldLastName = user.LastName;
         var tenant = TestData.TestTenant.Generate();
         var currentDate = DateTime.UtcNow;
@@ -504,6 +508,8 @@ public class UserServiceTests
             userDto.Id.Should().Be(user.Id);
             userDto.FirstName.Should().Be(updateUserDto.FirstName);
             userDto.FirstName.Should().NotBe(oldFirstName);
+            userDto.LegalName.Should().Be(updateUserDto.LegalName);
+            userDto.LegalName.Should().NotBe(oldLegalName);
             userDto.LastName.Should().Be(updateUserDto.LastName);
             userDto.LastName.Should().NotBe(oldLastName);
 
@@ -718,6 +724,7 @@ public class UserServiceTests
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
+                .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
                 .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
@@ -726,6 +733,7 @@ public class UserServiceTests
         public static readonly Faker<UpdateUserDto> UpdateUserDtoFaker =
             new Faker<UpdateUserDto>()
                 .RuleFor(dto => dto.FirstName, f => f.Name.FirstName())
+                .RuleFor(dto => dto.LegalName, f => f.Name.FirstName())
                 .RuleFor(dto => dto.LastName, f => f.Name.LastName());
 
         public static IEnumerable<object[]> UpdatedStatusInvalidData =>
