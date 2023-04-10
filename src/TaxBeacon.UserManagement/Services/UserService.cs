@@ -33,7 +33,7 @@ public class UserService: IUserService
     private readonly IDateTimeFormatter _dateTimeFormatter;
     private readonly IImmutableDictionary<(EventType, uint), IUserActivityFactory> _userActivityFactories;
 
-    private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new string[]
+    private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new[]
     {
         "ctitaxbeacon.onmicrosoft.com"
     };
@@ -60,7 +60,8 @@ public class UserService: IUserService
                                  ?? ImmutableDictionary<(EventType, uint), IUserActivityFactory>.Empty;
     }
 
-    public async Task<UserDto> LoginAsync(MailAddress mailAddress, CancellationToken cancellationToken = default)
+    public async Task<OneOf<LoginUserDto, NotFound>> LoginAsync(MailAddress mailAddress,
+        CancellationToken cancellationToken = default)
     {
         var user = await _context
             .Users
@@ -68,21 +69,22 @@ public class UserService: IUserService
 
         if (user is null)
         {
-            return await CreateUserAsync(
-                new UserDto
-                {
-                    FirstName = string.Empty,
-                    LastName = string.Empty,
-                    LegalName = string.Empty,
-                    Email = mailAddress.Address,
-                    LastLoginDateTimeUtc = _dateTimeService.UtcNow,
-                }, cancellationToken);
+            return new NotFound();
         }
 
         user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
 
-        return user.Adapt<UserDto>();
+        _logger.LogInformation("{dateTime} - User ({createdUserId}) has logged in",
+            _dateTimeService.UtcNow,
+            user.Id);
+
+        // TODO: make a seeder for roles and use roleId instead of role name 
+        return new LoginUserDto(
+            user.Id,
+            user.FullName,
+            await GetUserPermissionsAsync(user.Id, cancellationToken),
+            await HasNoTenantRoleAsync(user.Id, "Super admin", cancellationToken));
     }
 
     public async Task<OneOf<QueryablePaging<UserDto>, NotFound>> GetUsersAsync(GridifyQuery gridifyQuery,
@@ -92,7 +94,7 @@ public class UserService: IUserService
             .Users
             .AsNoTracking()
             .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
-            .MapToUserDto(_context, _currentUserService)
+            .MapToUserDtoWithTenantRoleNames(_context, _currentUserService)
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
         return gridifyQuery.Page != 1 && gridifyQuery.Page > Math.Ceiling((double)users.Count / gridifyQuery.PageSize)
@@ -100,18 +102,26 @@ public class UserService: IUserService
             : users;
     }
 
-    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
-        await _context
-            .Users
-            .MapToUserDto(_context, _currentUserService)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
-        ?? throw new NotFoundException(nameof(User), id);
+    public async Task<UserDto> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var users = _currentUserService.TenantId == default
+            ? _context
+                .Users
+                .MapToUserDtoWithNoTenantRoleNames(_context)
+            : _context
+                .Users
+                .MapToUserDtoWithTenantRoleNames(_context, _currentUserService);
+
+        return await users.FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+               ?? throw new NotFoundException(nameof(User), id);
+    }
 
     public async Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress,
         CancellationToken cancellationToken = default) =>
         await _context
             .Users
-            .MapToUserDto(_context, _currentUserService)
+            .AsNoTracking()
+            .ProjectToType<UserDto>()
             .FirstOrDefaultAsync(x => x.Email == mailAddress.Address, cancellationToken)
         ?? throw new NotFoundException(nameof(User), mailAddress.Address);
 
@@ -403,7 +413,6 @@ public class UserService: IUserService
         var previousUserValues = JsonSerializer.Serialize(user.Adapt<UpdateUserDto>());
         user.FirstName = updateUserDto.FirstName;
         user.LastName = updateUserDto.LastName;
-        user.LegalName = updateUserDto.LegalName;
 
         var currentUser = await GetUserByIdAsync(_currentUserService.UserId, cancellationToken);
         var now = _dateTimeService.UtcNow;
@@ -431,16 +440,8 @@ public class UserService: IUserService
             .TenantUserRoles
             .Where(tu => tu.TenantId == tenantId && tu.UserId == userId)
             .Join(_context.TenantRoles,
-                tur => new
-                {
-                    tur.TenantId,
-                    tur.RoleId
-                },
-                tr => new
-                {
-                    tr.TenantId,
-                    tr.RoleId
-                },
+                tur => new { tur.TenantId, tur.RoleId },
+                tr => new { tr.TenantId, tr.RoleId },
                 (tur, tr) => tr.RoleId)
             .Join(_context.Roles, id => id, r => r.Id, (id, r) => r.Name)
             .AsNoTracking()
@@ -486,11 +487,44 @@ public class UserService: IUserService
             activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
+    public async Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Guid userId,
+        CancellationToken cancellationToken = default) =>
+        _currentUserService.TenantId == default
+            ? await GetNoTenantUserPermissionsAsync(userId, cancellationToken)
+            : await GetTenantUserPermissionsAsync(_currentUserService.TenantId, userId, cancellationToken);
+
+    private async Task<IReadOnlyCollection<string>> GetTenantUserPermissionsAsync(Guid tenantId,
+        Guid userId,
+        CancellationToken cancellationToken = default) =>
+        await _context.TenantUserRoles
+            .AsNoTracking()
+            .Where(tur => tur.TenantId == tenantId && tur.UserId == userId)
+            .Join(_context.TenantRolePermissions,
+                tur => new { tur.TenantId, tur.RoleId },
+                trp => new { trp.TenantId, trp.RoleId },
+                (tur, trp) => trp.PermissionId)
+            .Join(_context.Permissions, id => id, p => p.Id, (id, p) => p.Name)
+            .ToListAsync(cancellationToken);
+
+    private async Task<IReadOnlyCollection<string>> GetNoTenantUserPermissionsAsync(Guid userId,
+        CancellationToken cancellationToken = default) =>
+        await _context.UserRoles
+            .AsNoTracking()
+            .Where(ur => ur.UserId == userId)
+            .Join(_context.RolePermissions,
+                ur => new { ur.RoleId },
+                rp => new { rp.RoleId },
+                (ur, rp) => rp.PermissionId)
+            .Join(_context.Permissions, id => id, p => p.Id, (id, p) => p.Name)
+            .ToListAsync(cancellationToken);
+
     private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
         await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
 
-    private async Task<IEnumerable<string>> GetUserRolesAsync(Guid tenantId, Guid userId) =>
-        await _context.TenantUserRoles.Where(ur => ur.TenantId == tenantId && ur.UserId == userId)
-            .Select(ur => ur.TenantRole.Role.Name)
-            .ToListAsync();
+    private async Task<bool> HasNoTenantRoleAsync(Guid id,
+        string roleName,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .UserRoles
+            .AnyAsync(ur => ur.UserId == id && ur.Role.Name == roleName, cancellationToken);
 }

@@ -7,4 +7,6 @@ public class Permission: BaseEntity
     public string Name { get; init; } = null!;
 
     public ICollection<TenantPermission> TenantPermissions { get; set; } = new HashSet<TenantPermission>();
+
+    public ICollection<RolePermission> RolePermissions { get; set; } = new HashSet<RolePermission>();
 }

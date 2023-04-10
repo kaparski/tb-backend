@@ -15,11 +15,9 @@ namespace TaxBeacon.API.Authentication
         {
             var policy = await base.GetPolicyAsync(policyName);
 
-            return policy is not null
-                ? policy
-                : new AuthorizationPolicyBuilder()
-                    .AddRequirements(new PermissionsRequirement(policyName))
-                    .Build();
+            return policy ?? new AuthorizationPolicyBuilder()
+                .AddRequirements(new PermissionsRequirement(policyName))
+                .Build();
 
         }
     }

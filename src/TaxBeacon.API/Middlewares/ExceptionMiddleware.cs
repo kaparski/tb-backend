@@ -1,14 +1,19 @@
-﻿using TaxBeacon.API.Exceptions;
+﻿using System.Text.Json;
+using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Exceptions;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace TaxBeacon.API.Middlewares;
 
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionMiddleware> _logger;
 
-    public ExceptionMiddleware(RequestDelegate next) => _next = next;
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
 
     public async Task InvokeAsync(HttpContext httpContext)
     {
@@ -43,5 +48,7 @@ public class ExceptionMiddleware
         response.ContentType = "application/json";
         response.StatusCode = problemDetails.Status!.Value;
         await response.WriteAsync(JsonSerializer.Serialize(problemDetails));
+
+        _logger.LogError(exception, "Unhandled exception");
     }
 }

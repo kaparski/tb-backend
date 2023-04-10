@@ -1,7 +1,6 @@
 ﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NPOI.OpenXmlFormats.Wordprocessing;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
@@ -23,24 +22,16 @@ namespace TaxBeacon.UserManagement.Services
             _currentUserService = currentUserService;
         }
 
-        public async Task<IReadOnlyCollection<string>> GetPermissionsAsync(Guid tenantId, Guid userId) =>
-            await _context.TenantUserRoles
-                .Where(tur => tur.TenantId == tenantId && tur.UserId == userId)
-                .Join(_context.TenantRolePermissions, tur => new { tur.TenantId, tur.RoleId }, trp => new { trp.TenantId, trp.RoleId }, (tur, trp) => trp.PermissionId)
-                .Join(_context.Permissions, id => id, p => p.Id, (id, p) => p.Name)
-                .AsNoTracking()
-                .ToListAsync();
-
         public async Task<IReadOnlyCollection<PermissionDto>> GetPermissionsByRoleIdAsync(
             Guid roleId,
             CancellationToken cancellationToken = default)
         {
             var permissions = await _context.TenantRolePermissions
+                .AsNoTracking()
                 .Where(trp => trp.TenantId == _currentUserService.TenantId && trp.RoleId == roleId)
                 .Join(_context.Permissions, trp => trp.PermissionId, p => p.Id, (trp, p) => new { p.Id, p.Name })
                 .ProjectToType<PermissionDto>()
-                .AsNoTracking()
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             var permissionsWithCategory = permissions.Select(p => p with { Category = p.Name.Split('.')[0] }).ToList();
             return permissionsWithCategory;
