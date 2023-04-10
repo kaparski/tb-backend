@@ -27,11 +27,11 @@ namespace TaxBeacon.UserManagement.Services
             CancellationToken cancellationToken = default)
         {
             var permissions = await _context.TenantRolePermissions
+                .AsNoTracking()
                 .Where(trp => trp.TenantId == _currentUserService.TenantId && trp.RoleId == roleId)
                 .Join(_context.Permissions, trp => trp.PermissionId, p => p.Id, (trp, p) => new { p.Id, p.Name })
                 .ProjectToType<PermissionDto>()
-                .AsNoTracking()
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             var permissionsWithCategory = permissions.Select(p => p with { Category = p.Name.Split('.')[0] }).ToList();
             return permissionsWithCategory;
