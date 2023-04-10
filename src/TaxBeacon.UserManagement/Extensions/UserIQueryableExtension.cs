@@ -27,6 +27,7 @@ public static class UserIQueryableExtension
             {
                 Id = group.Key.Id,
                 FirstName = group.Key.FirstName,
+                LegalName = group.Key.LegalName,
                 LastName = group.Key.LastName,
                 CreatedDateTimeUtc = group.Key.CreatedDateTimeUtc,
                 Email = group.Key.Email,
