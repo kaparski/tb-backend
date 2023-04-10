@@ -48,9 +48,7 @@ namespace TaxBeacon.API.Authentication
                     return;
                 }
 
-                var permissionsService = scope.ServiceProvider.GetRequiredService<IPermissionsService>();
-
-                IEnumerable<string> permissions = await permissionsService.GetPermissionsAsync(user.Id);
+                IEnumerable<string> permissions = await userService.GetUserPermissionsAsync(user.Id);
 
                 if (permissions.Intersect(requirement.Permissions).Any())
                 {

@@ -7,7 +7,8 @@ namespace TaxBeacon.UserManagement.Extensions;
 
 public static class UserIQueryableExtension
 {
-    public static IQueryable<UserDto> MapToUserDtoWithRoles(this IQueryable<User> source, ITaxBeaconDbContext context) =>
+    public static IQueryable<UserDto> MapToUserDtoWithNoTenantRoleNames(this IQueryable<User> source,
+        ITaxBeaconDbContext context) =>
         source
             .GroupJoin(context.UserRoles,
             u => new { u.Id },
@@ -15,9 +16,9 @@ public static class UserIQueryableExtension
             (u, tur) => new { User = u, UserRoles = tur })
             .SelectMany(q => q.UserRoles.DefaultIfEmpty(),
             (u, tur) => new UserWithRoleId { User = u.User, RoleId = tur!.RoleId })
-            .MapToUserDtoWithRoles(context);
+            .MapToUserDtoWithRoleNames(context);
 
-    public static IQueryable<UserDto> MapToUserDtoWithTenantRoles(this IQueryable<User> source,
+    public static IQueryable<UserDto> MapToUserDtoWithTenantRoleNames(this IQueryable<User> source,
         ITaxBeaconDbContext context,
         ICurrentUserService currentUserService) =>
         source
@@ -27,9 +28,9 @@ public static class UserIQueryableExtension
                 (u, tur) => new { User = u, TenantUserRole = tur })
             .SelectMany(q => q.TenantUserRole.DefaultIfEmpty(),
                 (u, tur) => new UserWithRoleId { User = u.User, RoleId = tur!.RoleId })
-            .MapToUserDtoWithRoles(context);
+            .MapToUserDtoWithRoleNames(context);
 
-    private static IQueryable<UserDto> MapToUserDtoWithRoles(this IQueryable<UserWithRoleId> source,
+    private static IQueryable<UserDto> MapToUserDtoWithRoleNames(this IQueryable<UserWithRoleId> source,
         ITaxBeaconDbContext context) =>
         source
             .GroupJoin(context.Roles,

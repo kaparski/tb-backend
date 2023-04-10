@@ -19,35 +19,26 @@ public class AuthorizationControllerTests
 {
     private readonly Mock<IUserService> _userServiceMock;
     private readonly AuthorizationController _controller;
-    private readonly Mock<IPermissionsService> _permissionsServiceMock;
 
     public AuthorizationControllerTests()
     {
         _userServiceMock = new();
-        _permissionsServiceMock = new();
 
-        _controller = new AuthorizationController(_userServiceMock.Object, _permissionsServiceMock.Object);
+        _controller = new AuthorizationController(_userServiceMock.Object);
     }
 
     [Fact]
     public async Task LoginAsync_ValidLoginRequest_ReturnSuccessStatusCode()
     {
         //Arrange
-        var userDto = TestData.UserFaker.Generate();
-        var loginRequest = new LoginRequest(userDto.Email);
-        var permissions = new Faker().Random.WordsArray(4).AsReadOnly();
+        var loginUserDto = TestData.LoginUserDtoFaker.Generate();
+        var loginRequest = new LoginRequest(new Faker().Internet.Email());
 
         _userServiceMock
             .Setup(service => service.LoginAsync(
                 It.Is<MailAddress>(mailAddress => mailAddress.Address == loginRequest.Email),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userDto);
-
-        _permissionsServiceMock
-            .Setup(service => service.GetPermissionsAsync(
-                It.Is<Guid>(id => id == userDto.Id),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(permissions);
+            .ReturnsAsync(loginUserDto);
 
         //Act
         var actualResponse = await _controller.LoginAsync(loginRequest, default);
@@ -63,9 +54,7 @@ public class AuthorizationControllerTests
 
             var responseValue = actualResult?.Value as LoginResponse;
             actualResult?.Value.Should().BeOfType<LoginResponse>();
-            responseValue?.UerId.Should().Be(userDto.Id);
-            responseValue?.FullName.Should().Be(userDto.FullName);
-            responseValue?.Permissions.Should().BeEquivalentTo(permissions);
+            responseValue?.Should().BeEquivalentTo(loginUserDto);
         }
     }
 
@@ -95,15 +84,13 @@ public class AuthorizationControllerTests
 
     private static class TestData
     {
-        public static readonly Faker<UserDto> UserFaker =
-            new Faker<UserDto>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
-                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
-                .RuleFor(u => u.LastName, f => f.Name.LastName())
-                .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
-                .RuleFor(u => u.ReactivationDateTimeUtc, f => null)
-                .RuleFor(u => u.DeactivationDateTimeUtc, f => null)
-                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
+        public static readonly Faker<LoginUserDto> LoginUserDtoFaker =
+            new Faker<LoginUserDto>()
+                .CustomInstantiator(f => new LoginUserDto(
+                    Guid.NewGuid(),
+                    f.Name.FullName(),
+                    f.Random.WordsArray(4).AsReadOnly(),
+                    f.Random.Bool()));
     }
 }
+

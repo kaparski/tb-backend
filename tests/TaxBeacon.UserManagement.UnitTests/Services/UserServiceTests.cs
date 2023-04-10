@@ -93,37 +93,82 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task LoginAsync_ValidEmailAndUserExist_LastLoginDateUpdated()
+    public async Task LoginAsync_ValidEmailAndUserExist_ReturnsLoginUserDto()
     {
         //Arrange
-        var tenant = TestData.TestTenant.Generate();
         var user = TestData.TestUser.Generate();
         var mailAddress = new MailAddress(user.Email);
         var currentDate = DateTime.UtcNow;
 
-        user.TenantUsers.Add(new TenantUser { Tenant = tenant });
-        await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
 
         _dateTimeServiceMock
             .Setup(ds => ds.UtcNow)
-            .Returns(DateTime.UtcNow);
+            .Returns(currentDate);
 
         //Act
         var actualResultOneOf = await _userService.LoginAsync(mailAddress);
 
         //Assert
         (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-        actualResultOneOf.TryPickT0(out var userDto, out _).Should().BeTrue();
-        userDto.LastLoginDateTimeUtc.Should().BeAfter(currentDate);
+        var actualUser = await _dbContextMock.Users.LastAsync();
+        actualUser.LastLoginDateTimeUtc.Should().Be(currentDate);
+
+        actualResultOneOf.TryPickT0(out var loginUserDto, out _).Should().BeTrue();
+        loginUserDto.UerId.Should().Be(user.Id);
+        loginUserDto.FullName.Should().Be(user.FullName);
+        loginUserDto.Permissions.Should().BeEquivalentTo(Enumerable.Empty<string>());
+        loginUserDto.IsSuperAdmin.Should().BeFalse();
 
         _dateTimeServiceMock
             .Verify(ds => ds.UtcNow, Times.Exactly(2));
     }
 
     [Fact]
-    public async Task LoginAsync_ValidEmailAndUserNotExist_NewUserCreated()
+    public async Task LoginAsync_ValidEmailAndUserExist_ReturnsSuperAdminLoginUserDto()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var user = TestData.TestUser.Generate();
+        var supeAdminRole = new Role
+        {
+            Id = Guid.NewGuid(),
+            Name = "Super admin"
+        };
+        var mailAddress = new MailAddress(user.Email);
+        var currentDate = DateTime.UtcNow;
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.Roles.AddAsync(supeAdminRole);
+        await _dbContextMock.UserRoles.AddAsync(new UserRole { UserId = user.Id, RoleId = supeAdminRole.Id });
+        await _dbContextMock.SaveChangesAsync();
+
+        _dateTimeServiceMock
+            .Setup(ds => ds.UtcNow)
+            .Returns(currentDate);
+
+        //Act
+        var actualResultOneOf = await _userService.LoginAsync(mailAddress);
+
+        //Assert
+        (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+        var actualUser = await _dbContextMock.Users.LastAsync();
+        actualUser.LastLoginDateTimeUtc.Should().Be(currentDate);
+
+        actualResultOneOf.TryPickT0(out var loginUserDto, out _).Should().BeTrue();
+        loginUserDto.UerId.Should().Be(user.Id);
+        loginUserDto.FullName.Should().Be(user.FullName);
+        loginUserDto.Permissions.Should().BeEquivalentTo(Enumerable.Empty<string>());
+        loginUserDto.IsSuperAdmin.Should().BeTrue();
+
+        _dateTimeServiceMock
+            .Verify(ds => ds.UtcNow, Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task LoginAsync_ValidEmailAndUserNotExist_ReturnsNotFound()
     {
         //Arrange
         var mailAddress = new MailAddress(new Faker().Internet.Email());
@@ -688,6 +733,83 @@ public class UserServiceTests
             activitiesResult.Count.Should().Be(2);
             activitiesResult.Query.Count().Should().Be(2);
         }
+    }
+
+    [Fact]
+    public async Task GetUserPermissions_UserIdAndCurrentUserWithoutTenant_ReturnsNoTenantPermissions()
+    {
+        // Arrange
+        var user = TestData.TestUser.Generate();
+        var permissions = new Faker().Random
+            .WordsArray(4)
+            .Select(word => new Permission { Id = Guid.NewGuid(), Name = word })
+            .ToList();
+        var role = new Role { Id = Guid.NewGuid(), Name = new Faker().Random.Word() };
+
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.Roles.AddAsync(role);
+        await _dbContextMock.Permissions.AddRangeAsync(permissions);
+        await _dbContextMock.UserRoles.AddAsync(new UserRole { User = user, Role = role });
+        await _dbContextMock.RolePermissions.AddRangeAsync(permissions
+            .Select(permission => new RolePermission { Role = role, Permission = permission }));
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(Guid.Empty);
+
+        // Act
+        var actualResult = await _userService.GetUserPermissionsAsync(user.Id);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(permissions.Select(permission => permission.Name));
+    }
+
+    [Fact]
+    public async Task GetUserPermissions_UserIdAndCurrentUserWithTenant_ReturnsTenantPermissions()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var user = TestData.TestUser.Generate();
+        var permissions = new Faker().Random
+            .WordsArray(4)
+            .Select(word => new Permission
+            {
+                Id = Guid.NewGuid(),
+                Name = word
+            })
+            .ToList();
+        var role = new Role { Id = Guid.NewGuid(), Name = new Faker().Random.Word() };
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser { Tenant = tenant, User = user });
+        await _dbContextMock.TenantRoles.AddAsync(new TenantRole { Tenant = tenant, Role = role });
+        await _dbContextMock.TenantPermissions.AddRangeAsync(permissions
+            .Select(permission => new TenantPermission { Tenant = tenant, Permission = permission }));
+        await _dbContextMock.TenantUserRoles.AddAsync(new TenantUserRole
+        {
+            TenantId = tenant.Id,
+            UserId = user.Id,
+            RoleId = role.Id
+        });
+        await _dbContextMock.TenantRolePermissions.AddRangeAsync(permissions
+            .Select(permission => new TenantRolePermission
+            {
+                TenantId = tenant.Id,
+                RoleId = role.Id,
+                PermissionId = permission.Id
+            }));
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(tenant.Id);
+
+        // Act
+        var actualResult = await _userService.GetUserPermissionsAsync(user.Id);
+
+        // Assert
+        actualResult.Should().BeEquivalentTo(permissions.Select(perm => perm.Name));
     }
 
     private static class TestData
