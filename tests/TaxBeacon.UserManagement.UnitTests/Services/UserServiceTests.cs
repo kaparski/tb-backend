@@ -667,7 +667,7 @@ public class UserServiceTests
         {
             new UserActivityLog
             {
-                Date = DateTime.UtcNow,
+                Date = new DateTime(2000, 01, 1),
                 TenantId = tenant.Id,
                 UserId = user.Id,
                 EventType = EventType.UserCreated,
@@ -675,7 +675,7 @@ public class UserServiceTests
             },
             new UserActivityLog
             {
-                Date = DateTime.UtcNow,
+                Date = new DateTime(2000, 01, 2),
                 TenantId = tenant.Id,
                 UserId = user.Id,
                 EventType = EventType.UserCreated,
@@ -683,7 +683,7 @@ public class UserServiceTests
             },
             new UserActivityLog
             {
-                Date = DateTime.UtcNow,
+                Date = new DateTime(2000, 01, 3),
                 TenantId = tenant.Id,
                 UserId = user.Id,
                 EventType = EventType.UserCreated,

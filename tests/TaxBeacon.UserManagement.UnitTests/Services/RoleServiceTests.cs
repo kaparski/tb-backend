@@ -216,6 +216,96 @@ public class RoleServiceTests
         result.IsT1.Should().BeTrue();
     }
 
+    [Fact]
+    public async Task AssignUsersAsync_ExistingRoleIdAndNewUsers_ShouldReturnSuccess()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var role = TestData.TestRole.Generate();
+        var usersToAssign = TestData.TestUser.Generate(3);
+        var currentUser = TestData.TestUser.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddRangeAsync(usersToAssign);
+        await _dbContextMock.Users.AddAsync(currentUser);
+        await _dbContextMock.Roles.AddAsync(role);
+        await _dbContextMock.TenantRoles.AddAsync(new TenantRole
+        {
+            TenantId = tenant.Id,
+            RoleId = role.Id
+        });
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser
+        {
+            TenantId = tenant.Id,
+            UserId = currentUser.Id
+        });
+        await _dbContextMock.TenantUserRoles.AddAsync(new TenantUserRole
+        {
+            TenantId = tenant.Id,
+            UserId = currentUser.Id,
+            RoleId = role.Id
+        });
+
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
+
+        // Act
+        var result = await _roleService.AssignUsersAsync(
+            role.Id, usersToAssign.Select(x => x.Id).ToList(), default);
+
+        // Assert
+        result.IsT0.Should().BeTrue();
+        _dbContextMock.TenantUserRoles.Count().Should().Be(4);
+        _dbContextMock.UserActivityLogs.Count().Should().Be(3);
+    }
+
+    [Fact]
+    public async Task AssignUsersAsync_NonExistingRoleId_ShouldReturnNotFound()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var role = TestData.TestRole.Generate();
+        var usersToAssign = TestData.TestUser.Generate(3);
+        var currentUser = TestData.TestUser.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddRangeAsync(usersToAssign);
+        await _dbContextMock.Users.AddAsync(currentUser);
+        await _dbContextMock.Roles.AddAsync(role);
+        await _dbContextMock.TenantRoles.AddAsync(new TenantRole
+        {
+            TenantId = tenant.Id,
+            RoleId = role.Id
+        });
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser
+        {
+            TenantId = tenant.Id,
+            UserId = currentUser.Id
+        });
+        await _dbContextMock.TenantUserRoles.AddAsync(new TenantUserRole
+        {
+            TenantId = tenant.Id,
+            UserId = currentUser.Id,
+            RoleId = role.Id
+        });
+
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
+
+        // Act
+        var result = await _roleService.AssignUsersAsync(
+            Guid.NewGuid(), usersToAssign.Select(x => x.Id).ToList(), default);
+
+        // Assert
+        result.IsT1.Should().BeTrue();
+        _dbContextMock.TenantUserRoles.Count().Should().Be(1);
+        _dbContextMock.UserActivityLogs.Count().Should().Be(0);
+    }
+
     //TODO Refactor test data seeds
     private static class TestData
     {
@@ -303,13 +393,13 @@ public class RoleServiceTests
             return role;
         }
 
-        private static readonly Faker<Tenant> TestTenant =
+        public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
-        private static readonly Faker<User> TestUser =
+        public static readonly Faker<User> TestUser =
             new Faker<User>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
@@ -319,7 +409,7 @@ public class RoleServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
-        private static readonly Faker<Role> TestRole =
+        public static readonly Faker<Role> TestRole =
             new Faker<Role>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.Name, f => f.Name.JobTitle());
