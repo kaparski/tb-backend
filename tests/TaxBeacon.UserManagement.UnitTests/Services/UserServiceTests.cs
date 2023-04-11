@@ -117,7 +117,7 @@ public class UserServiceTests
         actualUser.LastLoginDateTimeUtc.Should().Be(currentDate);
 
         actualResultOneOf.TryPickT0(out var loginUserDto, out _).Should().BeTrue();
-        loginUserDto.UerId.Should().Be(user.Id);
+        loginUserDto.UserId.Should().Be(user.Id);
         loginUserDto.FullName.Should().Be(user.FullName);
         loginUserDto.Permissions.Should().BeEquivalentTo(Enumerable.Empty<string>());
         loginUserDto.IsSuperAdmin.Should().BeFalse();
@@ -159,7 +159,7 @@ public class UserServiceTests
         actualUser.LastLoginDateTimeUtc.Should().Be(currentDate);
 
         actualResultOneOf.TryPickT0(out var loginUserDto, out _).Should().BeTrue();
-        loginUserDto.UerId.Should().Be(user.Id);
+        loginUserDto.UserId.Should().Be(user.Id);
         loginUserDto.FullName.Should().Be(user.FullName);
         loginUserDto.Permissions.Should().BeEquivalentTo(Enumerable.Empty<string>());
         loginUserDto.IsSuperAdmin.Should().BeTrue();
@@ -664,7 +664,7 @@ public class UserServiceTests
         {
             new UserActivityLog
             {
-                Date = DateTime.UtcNow,
+                Date = new DateTime(2000, 01, 1),
                 TenantId = tenant.Id,
                 UserId = user.Id,
                 EventType = EventType.UserCreated,
@@ -672,7 +672,7 @@ public class UserServiceTests
             },
             new UserActivityLog
             {
-                Date = DateTime.UtcNow,
+                Date = new DateTime(2000, 01, 2),
                 TenantId = tenant.Id,
                 UserId = user.Id,
                 EventType = EventType.UserCreated,
@@ -680,7 +680,7 @@ public class UserServiceTests
             },
             new UserActivityLog
             {
-                Date = DateTime.UtcNow,
+                Date = new DateTime(2000, 01, 3),
                 TenantId = tenant.Id,
                 UserId = user.Id,
                 EventType = EventType.UserCreated,

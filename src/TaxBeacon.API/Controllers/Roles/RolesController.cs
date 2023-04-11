@@ -1,6 +1,7 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Roles.Responses;
@@ -106,6 +107,21 @@ public class RolesController: BaseController
 
         return result.Match<IActionResult>(
             success => NoContent(),
+            notFound => NotFound());
+    }
+
+    [HasPermissions(Common.Permissions.Roles.ReadWrite)]
+    [HttpPost("{id:guid}/users", Name = "AssignUsersToRole")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(Ok), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AssignUsersToRole([FromRoute] Guid id, [FromBody] List<Guid> userIds,
+        CancellationToken cancellationToken = default)
+    {
+        var resultOneOf = await _roleService.AssignUsersAsync(id, userIds, cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            success => Ok(),
             notFound => NotFound());
     }
 }
