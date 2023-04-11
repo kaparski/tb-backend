@@ -478,6 +478,7 @@ public class UserServiceTests
         var user = TestData.TestUser.Generate();
         var oldFirstName = user.FirstName;
         var oldLastName = user.LastName;
+        var oldLegalName = user.LegalName;
         var tenant = TestData.TestTenant.Generate();
         var currentDate = DateTime.UtcNow;
 
@@ -507,6 +508,8 @@ public class UserServiceTests
             userDto.Id.Should().Be(user.Id);
             userDto.FirstName.Should().Be(updateUserDto.FirstName);
             userDto.FirstName.Should().NotBe(oldFirstName);
+            userDto.LegalName.Should().Be(updateUserDto.LegalName);
+            userDto.LegalName.Should().NotBe(oldLegalName);
             userDto.LastName.Should().Be(updateUserDto.LastName);
             userDto.LastName.Should().NotBe(oldLastName);
 
