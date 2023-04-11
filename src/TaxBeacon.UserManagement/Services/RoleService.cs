@@ -127,8 +127,9 @@ public class RoleService: IRoleService
 
     public async Task<OneOf<Success, NotFound>> AssignUsersAsync(Guid roleId, List<Guid> userIds, CancellationToken cancellationToken = default)
     {
-        var role = await _context.Roles
-            .Where(r => r.Id == roleId && r.TenantRoles.Any(tr => tr.TenantId == _currentUserService.TenantId))
+        var role = await _context.TenantRoles
+            .Where(tr => tr.TenantId == _currentUserService.TenantId && tr.RoleId == roleId)
+            .Select(tr => tr.Role)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (role is null)
