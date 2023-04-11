@@ -117,7 +117,7 @@ public class UserServiceTests
         actualUser.LastLoginDateTimeUtc.Should().Be(currentDate);
 
         actualResultOneOf.TryPickT0(out var loginUserDto, out _).Should().BeTrue();
-        loginUserDto.UerId.Should().Be(user.Id);
+        loginUserDto.UserId.Should().Be(user.Id);
         loginUserDto.FullName.Should().Be(user.FullName);
         loginUserDto.Permissions.Should().BeEquivalentTo(Enumerable.Empty<string>());
         loginUserDto.IsSuperAdmin.Should().BeFalse();
@@ -159,7 +159,7 @@ public class UserServiceTests
         actualUser.LastLoginDateTimeUtc.Should().Be(currentDate);
 
         actualResultOneOf.TryPickT0(out var loginUserDto, out _).Should().BeTrue();
-        loginUserDto.UerId.Should().Be(user.Id);
+        loginUserDto.UserId.Should().Be(user.Id);
         loginUserDto.FullName.Should().Be(user.FullName);
         loginUserDto.Permissions.Should().BeEquivalentTo(Enumerable.Empty<string>());
         loginUserDto.IsSuperAdmin.Should().BeTrue();
