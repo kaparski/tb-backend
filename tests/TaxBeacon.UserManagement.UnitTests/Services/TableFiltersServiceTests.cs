@@ -48,6 +48,7 @@ public class TableFiltersServiceTests
     [Theory]
     [InlineData(EntityType.User)]
     [InlineData(EntityType.Role)]
+    [InlineData(EntityType.Tenant)]
     public async Task GetFiltersAsync_TableType_ReturnsCollectionOfTableFilters(EntityType tableType)
     {
         // Arrange
