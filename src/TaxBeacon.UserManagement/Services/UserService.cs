@@ -412,6 +412,7 @@ public class UserService: IUserService
 
         var previousUserValues = JsonSerializer.Serialize(user.Adapt<UpdateUserDto>());
         user.FirstName = updateUserDto.FirstName;
+        user.LegalName = updateUserDto.LegalName;
         user.LastName = updateUserDto.LastName;
 
         var currentUser = await GetUserByIdAsync(_currentUserService.UserId, cancellationToken);
