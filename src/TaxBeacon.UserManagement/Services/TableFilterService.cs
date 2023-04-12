@@ -40,6 +40,7 @@ public class TableFilterService: ITableFiltersService
 
         if (await _context.TableFilters
                 .AnyAsync(tf => tf.TenantId == tenantId
+                                && tf.TableType == createTableFilterDto.TableType
                                 && tf.UserId == _currentUserService.UserId
                                 && tf.Name == createTableFilterDto.Name, cancellationToken))
         {
