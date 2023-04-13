@@ -24,6 +24,22 @@ public class User: BaseEntity
 
     public DateTime? ReactivationDateTimeUtc { get; set; }
 
+    public Guid? DivisionId { get; set; }
+
+    public Division? Division { get; set; }
+
+    public Guid? DepartmentId { get; set; }
+
+    public Department? Department { get; set; }
+
+    public Guid? ServiceAreaId { get; set; }
+
+    public ServiceArea? ServiceArea { get; set; }
+
+    public Guid? TeamId { get; set; }
+
+    public Team? Team { get; set; }
+
     // TODO: Add department, roles and Job title in the future
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
 
