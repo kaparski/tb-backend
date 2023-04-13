@@ -23,14 +23,15 @@ public class TeamService: ITeamService
     private readonly IDateTimeService _dateTimeService;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
 
-    public TeamService(ICurrentUserService currentUserService, ILogger<UserService> logger, ITaxBeaconDbContext context, IDateTimeFormatter dateTimeFormatter, IDateTimeService dateTimeService, IImmutableDictionary<FileType, IListToFileConverter> listToFileConverters)
+    public TeamService(ICurrentUserService currentUserService, ILogger<UserService> logger, ITaxBeaconDbContext context, IDateTimeFormatter dateTimeFormatter, IDateTimeService dateTimeService, IEnumerable<IListToFileConverter> listToFileConverters)
     {
         _currentUserService = currentUserService;
         _logger = logger;
         _context = context;
         _dateTimeFormatter = dateTimeFormatter;
         _dateTimeService = dateTimeService;
-        _listToFileConverters = listToFileConverters;
+        _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
+                                ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
     }
 
     public Task<OneOf<QueryablePaging<TeamDto>, NotFound>> GetTeamsAsync(GridifyQuery gridifyQuery,
