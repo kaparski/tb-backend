@@ -24,6 +24,11 @@ namespace TaxBeacon.DAL.Configurations
             jobTitle
                 .HasIndex(jt => new { jt.TenantId, jt.Name })
                 .IsUnique();
+
+            jobTitle
+                .HasMany(d => d.Users)
+                .WithOne(u => u.JobTitle)
+                .HasForeignKey(u => u.JobTitleId);
         }
     }
 }

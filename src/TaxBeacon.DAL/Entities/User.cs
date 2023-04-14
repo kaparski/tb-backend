@@ -40,6 +40,10 @@ public class User: BaseEntity
 
     public Team? Team { get; set; }
 
+    public Guid? JobTitleId { get; set; }
+
+    public JobTitle? JobTitle { get; set; }
+
     // TODO: Add department, roles and Job title in the future
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
 
