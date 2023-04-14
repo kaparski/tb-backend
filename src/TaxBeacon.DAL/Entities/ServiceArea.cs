@@ -14,8 +14,8 @@
 
         public ICollection<User> Users { get; set; } = new HashSet<User>();
 
-        public Guid DepartmentId { get; set; }
+        public Guid? DepartmentId { get; set; }
 
-        public Department Department { get; set; } = null!;
+        public Department? Department { get; set; }
     }
 }

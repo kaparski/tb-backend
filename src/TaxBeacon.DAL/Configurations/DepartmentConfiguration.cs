@@ -45,12 +45,14 @@ namespace TaxBeacon.DAL.Configurations
             department
                 .HasMany(d => d.JobTitles)
                 .WithOne(jt => jt.Department)
-                .HasForeignKey(jt => jt.DepartmentId);
+                .HasForeignKey(jt => jt.DepartmentId)
+                .IsRequired(false);
 
             department
                 .HasMany(d => d.ServiceAreas)
                 .WithOne(s => s.Department)
-                .HasForeignKey(s => s.DepartmentId);
+                .HasForeignKey(s => s.DepartmentId)
+                .IsRequired(false);
         }
     }
 }

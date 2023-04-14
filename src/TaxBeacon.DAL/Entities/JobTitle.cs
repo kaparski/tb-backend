@@ -8,9 +8,9 @@
 
         public string Name { get; set; } = string.Empty;
 
-        public Guid DepartmentId { get; set; }
+        public Guid? DepartmentId { get; set; }
 
-        public Department Department { get; set; } = null!;
+        public Department? Department { get; set; }
 
         public Tenant Tenant { get; set; } = null!;
 

@@ -44,7 +44,8 @@ namespace TaxBeacon.DAL.Configurations
             division
                 .HasMany(d => d.Departments)
                 .WithOne(dep => dep.Division)
-                .HasForeignKey(dep => dep.DivisionId);
+                .HasForeignKey(dep => dep.DivisionId)
+                .IsRequired(false);
         }
     }
 }
