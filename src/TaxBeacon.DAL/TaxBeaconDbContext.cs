@@ -40,6 +40,16 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
 
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
+    public DbSet<Division> Divisions => Set<Division>();
+
+    public DbSet<Department> Departments => Set<Department>();
+
+    public DbSet<ServiceArea> ServiceAreas => Set<ServiceArea>();
+
+    public DbSet<Team> Teams => Set<Team>();
+
+    public DbSet<JobTitle> JobTitles => Set<JobTitle>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

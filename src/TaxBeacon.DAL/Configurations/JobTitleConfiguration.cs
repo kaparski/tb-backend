@@ -18,7 +18,7 @@ namespace TaxBeacon.DAL.Configurations
                 .IsClustered(false);
 
             jobTitle
-                .HasIndex(jt => new { jt.TenantId, jt.Id })
+                .HasIndex(jt => new { jt.TenantId, jt.DepartmentId, jt.Id })
                 .IsClustered();
 
             jobTitle

@@ -24,7 +24,7 @@ namespace TaxBeacon.DAL.Configurations
                 .IsClustered(false);
 
             serviceArea
-                .HasIndex(sa => new { sa.TenantId, sa.Id })
+                .HasIndex(sa => new { sa.TenantId, sa.DepartmentId, sa.Id })
                 .IsClustered();
 
             serviceArea
@@ -34,7 +34,8 @@ namespace TaxBeacon.DAL.Configurations
             serviceArea
                 .HasOne(sa => sa.Tenant)
                 .WithMany(t => t.ServiceAreas)
-                .HasForeignKey(sa => sa.TenantId);
+                .HasForeignKey(sa => sa.TenantId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             serviceArea
                 .HasMany(sa => sa.Users)

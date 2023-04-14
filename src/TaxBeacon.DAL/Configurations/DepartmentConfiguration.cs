@@ -24,7 +24,7 @@ namespace TaxBeacon.DAL.Configurations
                 .IsClustered(false);
 
             department
-                .HasIndex(d => new { d.TenantId, d.Id })
+                .HasIndex(d => new { d.TenantId, d.DivisionId, d.Id })
                 .IsClustered();
 
             department
@@ -34,7 +34,8 @@ namespace TaxBeacon.DAL.Configurations
             department
                 .HasOne(d => d.Tenant)
                 .WithMany(t => t.Departments)
-                .HasForeignKey(d => d.TenantId);
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             department
                 .HasMany(d => d.Users)
