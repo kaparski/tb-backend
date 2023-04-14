@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230414071557_AddedOrgStructure")]
+    partial class AddedOrgStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,7 +41,7 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar");
 
-                    b.Property<Guid?>("DivisionId")
+                    b.Property<Guid>("DivisionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool?>("IsDeleted")
@@ -127,7 +130,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("DeletedDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("DepartmentId")
+                    b.Property<Guid>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool?>("IsDeleted")
@@ -260,7 +263,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("DeletedDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("DepartmentId")
+                    b.Property<Guid>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -539,9 +542,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("JobTitleId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("LastLoginDateTimeUtc")
                         .HasColumnType("datetime2");
 
@@ -580,8 +580,6 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("JobTitleId");
 
                     b.HasIndex("ServiceAreaId");
 
@@ -637,7 +635,9 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.Division", "Division")
                         .WithMany("Departments")
-                        .HasForeignKey("DivisionId");
+                        .HasForeignKey("DivisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
                         .WithMany("Departments")
@@ -665,17 +665,11 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.Department", "Department")
                         .WithMany("JobTitles")
-                        .HasForeignKey("DepartmentId");
-
-                    b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
-                        .WithMany("JobTitles")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Department");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.RolePermission", b =>
@@ -701,7 +695,9 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.Department", "Department")
                         .WithMany("ServiceAreas")
-                        .HasForeignKey("DepartmentId");
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
                         .WithMany("ServiceAreas")
@@ -847,10 +843,6 @@ namespace TaxBeacon.DAL.Migrations
                         .WithMany("Users")
                         .HasForeignKey("DivisionId");
 
-                    b.HasOne("TaxBeacon.DAL.Entities.JobTitle", "JobTitle")
-                        .WithMany("Users")
-                        .HasForeignKey("JobTitleId");
-
                     b.HasOne("TaxBeacon.DAL.Entities.ServiceArea", "ServiceArea")
                         .WithMany("Users")
                         .HasForeignKey("ServiceAreaId");
@@ -862,8 +854,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Division");
-
-                    b.Navigation("JobTitle");
 
                     b.Navigation("ServiceArea");
 
@@ -916,11 +906,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.JobTitle", b =>
-                {
-                    b.Navigation("Users");
-                });
-
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
@@ -952,8 +937,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("Departments");
 
                     b.Navigation("Divisions");
-
-                    b.Navigation("JobTitles");
 
                     b.Navigation("ServiceAreas");
 
