@@ -24,6 +24,8 @@ public class Tenant: BaseEntity
 
     public ICollection<ServiceArea> ServiceAreas { get; set; } = new HashSet<ServiceArea>();
 
+    public ICollection<JobTitle> JobTitles { get; set; } = new HashSet<JobTitle>();
+
     public ICollection<Team> Teams { get; set; } = new HashSet<Team>();
 
 }

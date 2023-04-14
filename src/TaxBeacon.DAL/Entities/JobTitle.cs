@@ -12,6 +12,8 @@
 
         public Department Department { get; set; } = null!;
 
+        public Tenant Tenant { get; set; } = null!;
+
         public ICollection<User> Users { get; set; } = new HashSet<User>();
 
     }

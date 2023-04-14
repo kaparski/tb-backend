@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.DAL.Configurations
 {
@@ -26,9 +27,15 @@ namespace TaxBeacon.DAL.Configurations
                 .IsUnique();
 
             jobTitle
-                .HasMany(d => d.Users)
+                .HasMany(jt => jt.Users)
                 .WithOne(u => u.JobTitle)
                 .HasForeignKey(u => u.JobTitleId);
+
+            jobTitle
+                .HasOne(d => d.Tenant)
+                .WithMany(t => t.JobTitles)
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
