@@ -73,4 +73,56 @@ public class TenantService: ITenantService
 
         return _listToFileConverters[fileType].Convert(exportTenants);
     }
+
+    public async Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(Guid tenantId,
+        GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default)
+    {
+        var departments = await _context
+            .Departments
+            .Where(d => d.TenantId == tenantId)
+            .Select(d => new DepartmentDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                AssignedUsersCount = d.Users.Count()
+            })
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        if (gridifyQuery.Page == 1 || departments.Query.Any())
+        {
+            return departments;
+        }
+
+        return new NotFound();
+    }
+
+    public async Task<byte[]> ExportDepartmentsAsync(Guid tenantId,
+        FileType fileType,
+        CancellationToken cancellationToken)
+    {
+        var exportDepartments = await _context
+            .Departments
+            .AsNoTracking()
+            .Where(d => d.TenantId == tenantId)
+            .Select(d => new DepartmentExportModel
+            {
+                Name = d.Name,
+                Description = d.Description,
+                Division = d.Division == null ? null : d.Division.Name,
+                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                AssignedUsersCount = d.Users.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+
+        _logger.LogInformation("{dateTime} - Departments export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(exportDepartments);
+    }
 }

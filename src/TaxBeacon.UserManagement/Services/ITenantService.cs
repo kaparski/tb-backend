@@ -12,4 +12,12 @@ public interface ITenantService
         CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportTenantsAsync(FileType fileType, CancellationToken cancellationToken);
+
+    Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(Guid tenantId,
+        GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default);
+
+    Task<byte[]> ExportDepartmentsAsync(Guid tenantId,
+        FileType fileType,
+        CancellationToken cancellationToken);
 }
