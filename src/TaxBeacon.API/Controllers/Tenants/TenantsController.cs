@@ -78,4 +78,21 @@ public class TenantsController: BaseController
 
         return File(users, mimeType, $"tenants.{exportTenantsRequest.FileType.ToString().ToLowerInvariant()}");
     }
+
+    /// <summary>
+    /// Get tenant by ID
+    /// </summary>
+    /// <response code="200">Returns tenant with specified ID</response>
+    /// <response code="401">Tenant is not found</response>
+    /// <returns>Tenant with specified ID</returns>
+    [HasPermissions(Common.Permissions.Tenants.Read)]
+    [HttpGet("{id:guid}", Name = "GetTenant")]
+    [ProducesResponseType(typeof(TenantResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetTenantAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _tenantService.GetTenantByIdAsync(id, cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(tenant => Ok(tenant.Adapt<TenantResponse>()), notFound => NotFound());
+    }
 }
