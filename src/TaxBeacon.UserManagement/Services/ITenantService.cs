@@ -12,4 +12,6 @@ public interface ITenantService
         CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportTenantsAsync(FileType fileType, CancellationToken cancellationToken);
+
+    Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id, CancellationToken cancellationToken);
 }
