@@ -50,7 +50,6 @@ public class TeamService: ITeamService
                 CreatedDateTimeUtc = t.CreatedDateTimeUtc,
                 Description = t.Description
             })
-            .ProjectToType<TeamDto>()
             .AsNoTracking()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 

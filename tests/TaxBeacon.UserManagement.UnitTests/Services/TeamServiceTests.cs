@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Security.Cryptography;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Permissions;
@@ -132,7 +133,7 @@ public class TeamServiceTests
     }
 
     [Fact]
-    public async Task GetTeamsAsync_NoTenants_CorrectNumberOfTeams()
+    public async Task GetTeamsAsync_NoTeams_NumberOfTeamsEmpty()
     {
         // Arrange
         var query = new GridifyQuery
@@ -156,17 +157,19 @@ public class TeamServiceTests
         }
     }
 
-    [Fact]
-    public async Task GetTeamsAsync_PageNumberOutsideOfTotalRange_TeamListIsEmpty()
+    [Theory]
+    [InlineData(7, 25, 2)]
+    [InlineData(10, 5, 3)]
+    public async Task GetTeamsAsync_PageNumberOutsideOfTotalRange_TeamListIsEmpty(int numberOfTeams, int pageSize, int pageNumber)
     {
         // Arrange
-        var teams = TestData.TestTeam.Generate(7);
+        var teams = TestData.TestTeam.Generate(numberOfTeams);
         await _dbContextMock.Teams.AddRangeAsync(teams);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery
         {
-            Page = 2,
-            PageSize = 25,
+            Page = pageNumber,
+            PageSize = pageSize,
             OrderBy = "name asc",
         };
 
@@ -176,28 +179,6 @@ public class TeamServiceTests
         // Assert
         teamsOneOf.TryPickT0(out var pageOfTeams, out _);
         pageOfTeams.Should().BeNull();
-    }
-
-    [Fact]
-    public async Task GetTeamsAsync_PageNumberRightOutsideOfTotalRange_TeamListIsEmpty()
-    {
-        // Arrange
-        var teams = TestData.TestTeam.Generate(10);
-        await _dbContextMock.Teams.AddRangeAsync(teams);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery
-        {
-            Page = 3,
-            PageSize = 5,
-            OrderBy = "name asc",
-        };
-
-        // Act
-        var teamsOneOf = await _teamService.GetTeamsAsync(query, default);
-
-        // Assert
-        teamsOneOf.TryPickT0(out var pageOfTenants, out _);
-        pageOfTenants.Should().BeNull();
     }
 
     [Theory]

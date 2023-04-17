@@ -25,8 +25,8 @@ public class TeamsController: BaseController
     /// </summary>
     /// <remarks>
     /// Sample requests: <br/><br/>
-    ///     ```GET /users?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DPeter```<br/><br/>
-    ///     ```GET /users?page=2&amp;pageSize=5&amp;orderBy=name```
+    ///     ```GET /teams?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DPeter```<br/><br/>
+    ///     ```GET /teams?page=2&amp;pageSize=5&amp;orderBy=name```
     /// </remarks>
     /// <response code="200">Returns teams</response>
     /// <returns>List of teams</returns>
