@@ -38,7 +38,7 @@ public static class UserIQueryableExtension
                 role => new { RoleId = (Guid?)role.Id },
                 (ur, roles) => new { ur.User, Roles = roles })
             .SelectMany(ur => ur.Roles.DefaultIfEmpty(),
-                (ur, role) => new { ur.User, role!.Name })
+                (ur, role) => new { ur.User, Name = "|" + role!.Name! + "|" })
             .GroupBy(z => z.User).Select(group => new UserDto
             {
                 Id = group.Key.Id,
