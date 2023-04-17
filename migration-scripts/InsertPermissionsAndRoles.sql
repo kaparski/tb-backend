@@ -4,7 +4,7 @@
 
 DECLARE @TenantId AS UNIQUEIDENTIFIER
 SELECT TOP 1 @TenantId = Id FROM Tenants
-DECLARE @RoleId AS UNIQUEIDENTIFIER = 'C3AF0580-43F3-4FBF-B56C-25AA886C675F'
+DECLARE @RoleId AS UNIQUEIDENTIFIER = NEWID()
 DECLARE @RoleName AS NVARCHAR(100) = N'Admin'
 
 BEGIN TRANSACTION [Tran1];
@@ -26,7 +26,7 @@ BEGIN TRY
                      FROM TenantUsers
                      WHERE UserId = u.Id
                      AND TenantId = @TenantId);
-DECLARE @RoleId AS UNIQUEIDENTIFIER = 'C3AF0580-43F3-4FBF-B56C-25AA886C675F'
+
   INSERT INTO TenantUserRoles
     SELECT TenantId, @RoleId, UserId
     FROM TenantUsers AS tu

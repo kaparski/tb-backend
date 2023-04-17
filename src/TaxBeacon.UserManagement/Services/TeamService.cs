@@ -9,7 +9,6 @@ using System.Collections.Immutable;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Export;
@@ -19,13 +18,13 @@ namespace TaxBeacon.UserManagement.Services;
 public class TeamService: ITeamService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly ILogger<UserService> _logger;
+    private readonly ILogger<TeamService> _logger;
     private readonly ITaxBeaconDbContext _context;
     private readonly IDateTimeFormatter _dateTimeFormatter;
     private readonly IDateTimeService _dateTimeService;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
 
-    public TeamService(ICurrentUserService currentUserService, ILogger<UserService> logger, ITaxBeaconDbContext context, IDateTimeFormatter dateTimeFormatter, IDateTimeService dateTimeService, IEnumerable<IListToFileConverter> listToFileConverters)
+    public TeamService(ICurrentUserService currentUserService, ILogger<TeamService> logger, ITaxBeaconDbContext context, IDateTimeFormatter dateTimeFormatter, IDateTimeService dateTimeService, IEnumerable<IListToFileConverter> listToFileConverters)
     {
         _currentUserService = currentUserService;
         _logger = logger;

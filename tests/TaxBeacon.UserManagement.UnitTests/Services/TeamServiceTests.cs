@@ -26,7 +26,7 @@ public class TeamServiceTests
     private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
     private readonly Mock<IListToFileConverter> _csvMock;
     private readonly Mock<IListToFileConverter> _xlsxMock;
-    private readonly Mock<ILogger<UserService>> _teamServiceLoggerMock;
+    private readonly Mock<ILogger<TeamService>> _teamServiceLoggerMock;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
     private readonly Mock<IEnumerable<IListToFileConverter>> _listToFileConverters;
