@@ -87,6 +87,10 @@ public class TenantsController: BaseController
     /// </remarks>
     /// <response code="200">Returns departments in a given tenant</response>
     /// <returns>List of departments</returns>
+    [HasPermissions(
+        Common.Permissions.Tenants.Read,
+        Common.Permissions.Tenants.ReadWrite,
+        Common.Permissions.Tenants.ReadExport)]
     [HttpGet("{tenantId:guid}/departments", Name = "GetDepartments")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<DepartmentResponse>), StatusCodes.Status200OK)]
