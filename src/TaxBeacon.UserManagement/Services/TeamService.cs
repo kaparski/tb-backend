@@ -1,4 +1,5 @@
 ﻿using Gridify;
+using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ using System.Collections.Immutable;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Export;
@@ -34,18 +36,42 @@ public class TeamService: ITeamService
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
     }
 
-    public Task<OneOf<QueryablePaging<TeamDto>, NotFound>> GetTeamsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public async Task<OneOf<QueryablePaging<TeamDto>, NotFound>> GetTeamsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default)
+    {
+        var currentTenantId = _currentUserService.TenantId;
+        var teams = await _context
+            .Teams
+            .Where(x => x.TenantId == currentTenantId)
+            .Select(t => new TeamDto()
+            {
+                Id = t.Id,
+                Name = t.Name,
+                NumberOfUsers = t.Users.Count,
+                CreatedDateTimeUtc = t.CreatedDateTimeUtc,
+                Description = t.Description
+            })
+            .ProjectToType<TeamDto>()
+            .AsNoTracking()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        if (gridifyQuery.Page == 1 || teams.Query.Any())
+        {
+            return teams;
+        }
+
+        return new NotFound();
+    }
 
     public async Task<byte[]> ExportTeamsAsync(FileType fileType, CancellationToken cancellationToken)
     {
         var tenantId = _currentUserService.TenantId;
 
-        var exportTeams = await _context.Users
-            .Where(u => u.TenantUsers.Any(tu => tu.TenantId == tenantId))
-            .OrderBy(u => u.Email)
-            .AsNoTracking()
+        var exportTeams = await _context.Teams
+            .Where(t => t.TenantId == tenantId)
+            .OrderBy(u => u.Name)
             .ProjectToType<TeamExportModel>()
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
 
         exportTeams.ForEach(x => x.CreatedDateView = _dateTimeFormatter.FormatDate(x.CreatedDateTimeUtc));
