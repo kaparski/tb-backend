@@ -4,6 +4,7 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using OneOf.Types;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
@@ -195,6 +196,64 @@ public class TenantsControllerTest
         {
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be("Tenants.ReadExport");
+        }
+    }
+
+    [Fact]
+    public async Task GetTenantAsync_TenantExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock.Setup(x => x.GetTenantByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync(new TenantDto());
+
+        // Act
+        var actualResponse = await _controller.GetTenantAsync(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<TenantResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task GetTenantAsync_TenantDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock.Setup(x => x.GetTenantByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetTenantAsync(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+
+        }
+    }
+
+    [Fact]
+    public void GetTenantAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetTenantAsync).Method;
+        var permissions = new object[] { Common.Permissions.Tenants.Read };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 

@@ -47,7 +47,7 @@ public class TenantServiceTests
 
         _listToFileConverters
             .Setup(x => x.GetEnumerator())
-            .Returns((IEnumerator<IListToFileConverter>)new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
+            .Returns(new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
                 .GetEnumerator());
 
         _dbContextMock = new TaxBeaconDbContext(
@@ -143,7 +143,7 @@ public class TenantServiceTests
         var tenants = TestData.TestTenant.Generate(7);
         await _dbContextMock.Tenants.AddRangeAsync(tenants);
         await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc", };
+        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc" };
 
         // Act
         var tenantsOneOf = await _tenantService.GetTenantsAsync(query, default);
@@ -160,7 +160,7 @@ public class TenantServiceTests
         var tenants = TestData.TestTenant.Generate(10);
         await _dbContextMock.Tenants.AddRangeAsync(tenants);
         await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
+        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc" };
 
         // Act
         var tenantsOneOf = await _tenantService.GetTenantsAsync(query, default);
@@ -197,6 +197,40 @@ public class TenantServiceTests
         {
             throw new InvalidOperationException();
         }
+    }
+
+    [Fact]
+    public async Task GetTenantByIdAsync_ExistingTenantId_ReturnsTenantDto()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _tenantService.GetTenantByIdAsync(tenant.Id, default);
+
+        // Assert
+        actualResult.TryPickT0(out var tenantDto, out _);
+        tenantDto.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetTenantByIdAsync_NonExistingTenantId_ReturnsNotFound()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _tenantService.GetTenantByIdAsync(Guid.NewGuid(), default);
+
+        // Assert
+        actualResult.TryPickT0(out var _, out var notFound);
+        notFound.Should().NotBeNull();
     }
 
     [Fact]

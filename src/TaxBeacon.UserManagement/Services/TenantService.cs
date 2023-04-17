@@ -74,6 +74,13 @@ public class TenantService: ITenantService
         return _listToFileConverters[fileType].Convert(exportTenants);
     }
 
+    public async Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+        return tenant is null ? new NotFound() : tenant.Adapt<TenantDto>();
+    }
+
     public async Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(Guid tenantId,
         GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
