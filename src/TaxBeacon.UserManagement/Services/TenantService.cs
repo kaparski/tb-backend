@@ -94,7 +94,15 @@ public class TenantService: ITenantService
                 Name = d.Name,
                 Description = d.Description,
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count()
+                AssignedUsersCount = d.Users.Count(),
+                Division = d.Division == null ? string.Empty : d.Division.Name,
+                ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
+                ServiceArea = d.ServiceAreas
+                    .Select(sa => sa.Name)
+                    // The below is a hack to make Gridify's filtering by array fields work
+                    .GroupBy(sa => 1)
+                    .Select(g => string.Join(string.Empty, g.Select(s => "|" + s + "|")))
+                    .FirstOrDefault() ?? string.Empty
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
@@ -119,6 +127,7 @@ public class TenantService: ITenantService
                 Name = d.Name,
                 Description = d.Description,
                 Division = d.Division == null ? null : d.Division.Name,
+                ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
                 AssignedUsersCount = d.Users.Count()
             })

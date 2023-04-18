@@ -9,6 +9,10 @@ public class DepartmentResponse
 
     public string Description { get; set; } = null!;
 
+    public string Division { get; set; } = null!;
+
+    public string ServiceAreas { get; set; } = null!;
+
     public DateTime CreatedDateTimeUtc { get; set; }
 
     public int AssignedUsersCount { get; set; }

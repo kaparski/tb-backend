@@ -11,4 +11,10 @@ public class DepartmentDto
     public DateTime CreatedDateTimeUtc { get; set; }
 
     public int AssignedUsersCount { get; set; }
+
+    public string ServiceArea { get; set; } = null!;
+
+    public string ServiceAreas { get; set; } = null!;
+
+    public string Division { get; set; } = null!;
 }

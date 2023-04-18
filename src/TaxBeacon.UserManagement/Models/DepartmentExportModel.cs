@@ -13,6 +13,9 @@ namespace TaxBeacon.UserManagement.Models
 
         public string? Division { get; set; }
 
+        [Column("Service Area")]
+        public string? ServiceAreas { get; set; }
+
         [Ignore]
         public DateTime CreatedDateTimeUtc { get; set; }
 
