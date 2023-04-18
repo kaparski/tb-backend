@@ -11,6 +11,8 @@ public class DepartmentResponse
 
     public string Division { get; set; } = null!;
 
+    public string ServiceArea { get; set; } = null!;
+
     public string ServiceAreas { get; set; } = null!;
 
     public DateTime CreatedDateTimeUtc { get; set; }
