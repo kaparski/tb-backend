@@ -84,55 +84,6 @@ public class TenantsControllerTest
         }
     }
 
-    [Fact]
-    public async Task GetDepartmentList_ValidQuery_ReturnSuccessStatusCode()
-    {
-        // Arrange
-        var tenantId = Guid.NewGuid();
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _tenantServiceMock.Setup(p => p.GetDepartmentsAsync(tenantId, query, default)).ReturnsAsync(
-            new QueryablePaging<DepartmentDto>(0,
-                Enumerable.Empty<DepartmentDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetDepartmentList(tenantId, query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<DepartmentResponse>>();
-        }
-    }
-
-    [Fact]
-    public async Task GetDepartmentList_InvalidQuery_ReturnBadRequest()
-    {
-        // Arrange
-        var tenantId = Guid.NewGuid();
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _tenantServiceMock.Setup(p => p.GetDepartmentsAsync(tenantId, query, default)).ReturnsAsync(
-            new QueryablePaging<DepartmentDto>(0,
-                Enumerable.Empty<DepartmentDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetDepartmentList(tenantId, query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as BadRequestResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<BadRequestResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
-    }
-
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
@@ -254,74 +205,6 @@ public class TenantsControllerTest
         {
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
-        }
-    }
-
-    [Theory]
-    [InlineData(FileType.Csv)]
-    [InlineData(FileType.Xlsx)]
-    public async Task ExportDepartmentsAsync_ValidQuery_ReturnsFileContent(FileType fileType)
-    {
-        // Arrange
-        var tenantId = Guid.NewGuid();
-        var request = new ExportDepartmentsRequest(fileType, "America/New_York");
-        _tenantServiceMock
-            .Setup(x => x.ExportDepartmentsAsync(
-                tenantId,
-                It.IsAny<FileType>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Array.Empty<byte>());
-
-        // Act
-        var actualResponse = await _controller.ExportDepartmentsAsync(tenantId, request, default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            actualResponse.Should().NotBeNull();
-            var actualResult = actualResponse as FileContentResult;
-            actualResult.Should().NotBeNull();
-            actualResult!.FileDownloadName.Should().Be($"departments.{fileType.ToString().ToLowerInvariant()}");
-            actualResult!.ContentType.Should().Be(fileType switch
-            {
-                FileType.Csv => "text/csv",
-                FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                _ => throw new InvalidOperationException()
-            });
-        }
-    }
-
-    [Fact]
-    public void GetDepartmentList_MarkedWithCorrectHasPermissionsAttribute()
-    {
-        // Arrange
-        var methodInfo = ((Func<Guid, GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetDepartmentList).Method;
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Tenants.Read;Tenants.ReadWrite;Tenants.ReadExport");
-        }
-    }
-
-    [Fact]
-    public void ExportDepartmentAsync_MarkedWithCorrectHasPermissionsAttribute()
-    {
-        // Arrange
-        var methodInfo = ((Func<Guid, ExportDepartmentsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportDepartmentsAsync).Method;
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Tenants.ReadExport");
         }
     }
 }

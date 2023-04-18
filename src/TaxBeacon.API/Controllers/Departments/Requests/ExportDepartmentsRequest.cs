@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.API.Controllers.Users.Requests
+namespace TaxBeacon.API.Controllers.Departments.Requests
 {
     public record ExportDepartmentsRequest(FileType FileType, string IanaTimeZone);
 

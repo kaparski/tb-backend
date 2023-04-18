@@ -79,65 +79,6 @@ public class TenantsController: BaseController
     }
 
     /// <summary>
-    /// List of tenant's departments
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /tenants/10000001-2002-3003-4004-500000000005/departments?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
-    /// </remarks>
-    /// <response code="200">Returns departments in a given tenant</response>
-    /// <returns>List of departments</returns>
-    [HasPermissions(
-        Common.Permissions.Tenants.Read,
-        Common.Permissions.Tenants.ReadWrite,
-        Common.Permissions.Tenants.ReadExport)]
-    [HttpGet("{tenantId:guid}/departments", Name = "GetDepartments")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<DepartmentResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetDepartmentList([FromRoute] Guid tenantId, [FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<DepartmentDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var departmentsOneOf = await _tenantService.GetDepartmentsAsync(tenantId, query, cancellationToken);
-        return departmentsOneOf.Match<IActionResult>(
-            departments => Ok(new QueryablePaging<DepartmentResponse>(departments.Count, departments.Query.ProjectToType<DepartmentResponse>())),
-            notFound => NotFound());
-    }
-
-    /// <summary>
-    /// Endpoint to export tenant's departments
-    /// </summary>
-    /// <param name="tenantId"></param>
-    /// <param name="exportDepartmentsRequest"></param>
-    /// <param name="cancellationToken"></param>
-    /// <response code="200">Returns file content</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <returns>File content</returns>
-    [HasPermissions(Common.Permissions.Tenants.ReadExport)]
-    [HttpGet("{tenantId:guid}/departments/export", Name = "ExportDepartments")]
-    [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> ExportDepartmentsAsync([FromRoute] Guid tenantId, [FromQuery] ExportDepartmentsRequest exportDepartmentsRequest,
-        CancellationToken cancellationToken)
-    {
-        var mimeType = exportDepartmentsRequest.FileType.ToMimeType();
-
-        var departments = await _tenantService.ExportDepartmentsAsync(tenantId, exportDepartmentsRequest.FileType, cancellationToken);
-
-        return File(departments, mimeType, $"departments.{exportDepartmentsRequest.FileType.ToString().ToLowerInvariant()}");
-    }
-
-    /// <summary>
     /// Get tenant by ID
     /// </summary>
     /// <response code="200">Returns tenant with specified ID</response>
