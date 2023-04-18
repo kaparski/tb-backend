@@ -8,6 +8,8 @@
 
         public string Name { get; set; } = string.Empty;
 
+        public string? Description { get; set; }
+
         public Tenant Tenant { get; set; } = null!;
 
         public ICollection<User> Users { get; set; } = new HashSet<User>();

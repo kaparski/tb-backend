@@ -26,6 +26,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IUserActivityFactory, UserReactivatedEventFactory>();
         serviceCollection.AddScoped<IUserActivityFactory, UserUpdatedEventFactory>();
         serviceCollection.AddScoped<IUserActivityFactory, UnassignRolesEventFactory>();
+        serviceCollection.AddScoped<ITeamService, TeamService>();
         return serviceCollection;
     }
 }

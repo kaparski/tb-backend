@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.DAL.Entities;
 

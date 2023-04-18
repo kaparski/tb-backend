@@ -34,6 +34,12 @@ namespace TaxBeacon.DAL.Configurations
                 .HasMany(t => t.Users)
                 .WithOne(u => u.Team)
                 .HasForeignKey(u => u.TeamId);
+
+            team
+                .Property(t => t.Description)
+                .HasColumnType("nvarchar")
+                .HasMaxLength(200)
+                .IsRequired(false);
         }
     }
 }
