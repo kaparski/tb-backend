@@ -126,7 +126,7 @@ public class TenantService: ITenantService
             {
                 Name = d.Name,
                 Description = d.Description,
-                Division = d.Division == null ? null : d.Division.Name,
+                Division = d.Division == null ? string.Empty : d.Division.Name,
                 ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
                 AssignedUsersCount = d.Users.Count()
