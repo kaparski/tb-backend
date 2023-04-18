@@ -5,9 +5,14 @@ namespace TaxBeacon.UserManagement.Models
 {
     public sealed class DivisionExportModel
     {
+
         public string Name { get; set; } = string.Empty;
 
-        [Display(Name = "Status")]
+        public string Description { get; set; } = string.Empty;
+
+        public string Departments { get; set; } = string.Empty;
+
+        public int NumberOfUsers { get; set; }
 
         [Ignore]
         public DateTime CreatedDateTimeUtc { get; set; }

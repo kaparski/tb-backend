@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TaxBeacon.UserManagement.Models
+﻿namespace TaxBeacon.UserManagement.Models
 {
     public class DivisionDto
     {
@@ -17,5 +11,7 @@ namespace TaxBeacon.UserManagement.Models
         public DateTime CreatedDateTimeUtc { get; set; }
 
         public int NumberOfUsers { get; set; }
+
+        public string Departments { get; set; } = string.Empty;
     }
 }

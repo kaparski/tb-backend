@@ -3,8 +3,8 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
-using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
@@ -13,7 +13,7 @@ using TaxBeacon.UserManagement.Services;
 namespace TaxBeacon.API.Controllers.Tenants
 {
 
-    // [Authorize]
+    [Authorize]
     public class TenantDivisionsController: BaseController
     {
         private readonly ITenantDivisionsService _tenantDivisionsService;
@@ -28,10 +28,10 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// </remarks>
         /// <response code="200">Returns tenant divisions</response>
         /// <returns>List of tenant divisions</returns>
-        //[HasPermissions(
-        //    Common.Permissions.Tenants.Read,
-        //    Common.Permissions.Tenants.ReadWrite,
-        //    Common.Permissions.Tenants.ReadExport)]
+        [HasPermissions(
+            Common.Permissions.Tenants.Read,
+            Common.Permissions.Tenants.ReadWrite,
+            Common.Permissions.Tenants.ReadExport)]
         [HttpGet(Name = "GetTenantDivisions")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(QueryablePaging<TenantResponse>), StatusCodes.Status200OK)]
@@ -48,8 +48,8 @@ namespace TaxBeacon.API.Controllers.Tenants
                 return BadRequest();
             }
 
-            var tenantsOneOf = await _tenantDivisionsService.GetTenantDivisionsAsync(query, cancellationToken);
-            return tenantsOneOf.Match<IActionResult>(
+            var divisionsOneOf = await _tenantDivisionsService.GetTenantDivisionsAsync(query, cancellationToken);
+            return divisionsOneOf.Match<IActionResult>(
                 tenantDivisions => Ok(new QueryablePaging<DivisionResponse>(tenantDivisions.Count, tenantDivisions.Query.ProjectToType<DivisionResponse>())),
                 notFound => NotFound());
         }
@@ -68,7 +68,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> ExportTenantsAsync([FromQuery] ExportTenantsRequest exportTenantDivisionsRequest,
+        public async Task<IActionResult> ExportTenantsAsync([FromQuery] ExportTenantDivisionsRequest exportTenantDivisionsRequest,
             CancellationToken cancellationToken)
         {
             var mimeType = exportTenantDivisionsRequest.FileType.ToMimeType();
