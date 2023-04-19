@@ -9,4 +9,6 @@ public enum EntityType
     Tenant = 3,
 
     Team = 4,
+
+    Department = 5,
 }
