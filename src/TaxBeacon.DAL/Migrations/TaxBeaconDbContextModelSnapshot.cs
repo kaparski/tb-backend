@@ -68,7 +68,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "DivisionId", "Id"));
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Division", b =>
@@ -112,35 +112,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.HasIndex("TenantId", "Name")
                         .IsUnique();
 
-                    b.ToTable("Divisions");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.DivisionActivityLog", b =>
-                {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("DivisionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Event")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("EventType")
-                        .HasColumnType("int");
-
-                    b.Property<long>("Revision")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("TenantId", "DivisionId", "Date");
-
-                    b.HasIndex("DivisionId");
-
-                    b.ToTable("DivisionActivityLogs");
+                    b.ToTable("Divisions", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.JobTitle", b =>
@@ -185,7 +157,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "DepartmentId", "Id"));
 
-                    b.ToTable("JobTitles");
+                    b.ToTable("JobTitles", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Permission", b =>
@@ -219,7 +191,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Permissions");
+                    b.ToTable("Permissions", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Role", b =>
@@ -258,7 +230,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.RolePermission", b =>
@@ -273,7 +245,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("RolePermissions");
+                    b.ToTable("RolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.ServiceArea", b =>
@@ -322,7 +294,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "DepartmentId", "Id"));
 
-                    b.ToTable("ServiceAreas");
+                    b.ToTable("ServiceAreas", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TableFilter", b =>
@@ -360,7 +332,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "TableType", "UserId"));
 
-                    b.ToTable("TableFilters");
+                    b.ToTable("TableFilters", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Team", b =>
@@ -404,7 +376,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.HasIndex("TenantId", "Name")
                         .IsUnique();
 
-                    b.ToTable("Teams");
+                    b.ToTable("Teams", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Tenant", b =>
@@ -443,7 +415,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tenants");
+                    b.ToTable("Tenants", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantPermission", b =>
@@ -458,7 +430,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("TenantPermissions");
+                    b.ToTable("TenantPermissions", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantRole", b =>
@@ -473,7 +445,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("TenantRoles");
+                    b.ToTable("TenantRoles", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantRolePermission", b =>
@@ -491,7 +463,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("TenantId", "PermissionId");
 
-                    b.ToTable("TenantRolePermissions");
+                    b.ToTable("TenantRolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantUser", b =>
@@ -506,7 +478,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TenantUsers");
+                    b.ToTable("TenantUsers", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantUserRole", b =>
@@ -524,7 +496,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("TenantId", "UserId");
 
-                    b.ToTable("TenantUserRoles");
+                    b.ToTable("TenantUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.User", b =>
@@ -619,7 +591,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.UserActivityLog", b =>
@@ -647,7 +619,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserActivityLogs");
+                    b.ToTable("UserActivityLogs", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.UserRole", b =>
@@ -662,7 +634,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles");
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Department", b =>
@@ -691,17 +663,6 @@ namespace TaxBeacon.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.DivisionActivityLog", b =>
-                {
-                    b.HasOne("TaxBeacon.DAL.Entities.Division", "Division")
-                        .WithMany("DivisionActivityLogs")
-                        .HasForeignKey("DivisionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Division");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.JobTitle", b =>
@@ -955,8 +916,6 @@ namespace TaxBeacon.DAL.Migrations
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Division", b =>
                 {
                     b.Navigation("Departments");
-
-                    b.Navigation("DivisionActivityLogs");
 
                     b.Navigation("Users");
                 });
