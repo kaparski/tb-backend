@@ -62,7 +62,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <response code="200">Returns file content</response>
         /// <response code="401">User is unauthorized</response>
         /// <returns>File content</returns>
-        [HasPermissions(Common.Permissions.Tenants.ReadExport)]
+        [HasPermissions(Common.Permissions.Divisions.ReadExport)]
         [HttpGet("export", Name = "ExportTenantDivisions")]
         [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
