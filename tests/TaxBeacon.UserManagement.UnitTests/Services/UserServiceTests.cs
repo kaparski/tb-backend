@@ -56,7 +56,7 @@ public class UserServiceTests
         _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
         _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
 
-        _userCreatedActivityFactory.Setup(x => x.EventType).Returns(EventType.UserCreated);
+        _userCreatedActivityFactory.Setup(x => x.UserEventType).Returns(UserEventType.UserCreated);
         _userCreatedActivityFactory.Setup(x => x.Revision).Returns(1);
 
         _listToFileConverters
@@ -516,7 +516,7 @@ public class UserServiceTests
             var actualActivityLog = await _dbContextMock.UserActivityLogs.LastOrDefaultAsync();
             actualActivityLog.Should().NotBeNull();
             actualActivityLog?.Date.Should().Be(currentDate);
-            actualActivityLog?.EventType.Should().Be(EventType.UserUpdated);
+            actualActivityLog?.EventType.Should().Be(UserEventType.UserUpdated);
             actualActivityLog?.UserId.Should().Be(user.Id);
             actualActivityLog?.TenantId.Should().Be(tenant.Id);
 
@@ -613,7 +613,7 @@ public class UserServiceTests
             Date = DateTime.UtcNow,
             TenantId = tenant.Id,
             UserId = user.Id,
-            EventType = EventType.UserCreated,
+            EventType = UserEventType.UserCreated,
             Revision = 1
         };
 
@@ -670,7 +670,7 @@ public class UserServiceTests
                 Date = new DateTime(2000, 01, 1),
                 TenantId = tenant.Id,
                 UserId = user.Id,
-                EventType = EventType.UserCreated,
+                EventType = UserEventType.UserCreated,
                 Revision = 1
             },
             new UserActivityLog
@@ -678,7 +678,7 @@ public class UserServiceTests
                 Date = new DateTime(2000, 01, 2),
                 TenantId = tenant.Id,
                 UserId = user.Id,
-                EventType = EventType.UserCreated,
+                EventType = UserEventType.UserCreated,
                 Revision = 1
             },
             new UserActivityLog
@@ -686,7 +686,7 @@ public class UserServiceTests
                 Date = new DateTime(2000, 01, 3),
                 TenantId = tenant.Id,
                 UserId = user.Id,
-                EventType = EventType.UserCreated,
+                EventType = UserEventType.UserCreated,
                 Revision = 1
             }
         };
