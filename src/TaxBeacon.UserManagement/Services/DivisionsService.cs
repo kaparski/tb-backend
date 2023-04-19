@@ -45,14 +45,19 @@ namespace TaxBeacon.UserManagement.Services
             var tenantId = _currentUserService.TenantId;
             var divisions = await _context
                 .Divisions
-                .Where(d => d.TenantId == tenantId)
-                .Select(d => new DivisionDto
+                .Where(div => div.TenantId == tenantId)
+                .Select(div => new DivisionDto
                 {
-                    Id = d.Id,
-                    Name = d.Name,
-                    Description = d.Description,
-                    CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                    NumberOfUsers = d.Users.Count
+                    Id = div.Id,
+                    Name = div.Name,
+                    Description = div.Description,
+                    CreatedDateTimeUtc = div.CreatedDateTimeUtc,
+                    NumberOfUsers = div.Users.Count(),
+                    Departments = string.Join(", ", div.Departments.Select(dep => dep.Name)),
+                    Department = div.Departments.Select(dep => dep.Name)
+                    .GroupBy(dep => 1)
+                    .Select(g => string.Join(string.Empty, g.Select(s => "|" + s + "|")))
+                    .FirstOrDefault() ?? string.Empty
                 })
                 .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
