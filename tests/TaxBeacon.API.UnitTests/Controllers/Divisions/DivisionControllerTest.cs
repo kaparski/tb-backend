@@ -144,7 +144,7 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
             using (new AssertionScope())
             {
                 hasPermissionsAttribute.Should().NotBeNull();
-                hasPermissionsAttribute?.Policy.Should().Be("Tenants.ReadExport");
+                hasPermissionsAttribute?.Policy.Should().Be("Divisions.ReadExport");
             }
         }
     }
