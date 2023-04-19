@@ -10,5 +10,8 @@ public enum EntityType
 
     Team = 4,
 
-    Department = 5,
+    TenantDivision = 5,
+
+    Department = 6,
+
 }
