@@ -17,9 +17,9 @@ using TaxBeacon.UserManagement.Services.Activities.DivisionActivityHistory;
 
 namespace TaxBeacon.UserManagement.Services
 {
-    public class TenantDivisionsService: ITenantDivisionsService
+    public class DivisionsService: IDivisionsService
     {
-        private readonly ILogger<TenantDivisionsService> _logger;
+        private readonly ILogger<DivisionsService> _logger;
         private readonly ITaxBeaconDbContext _context;
         private readonly IDateTimeService _dateTimeService;
         private readonly ICurrentUserService _currentUserService;
@@ -27,7 +27,7 @@ namespace TaxBeacon.UserManagement.Services
         private readonly IDateTimeFormatter _dateTimeFormatter;
         private readonly IImmutableDictionary<(DivisionEventType, uint), IDivisionActivityFactory> _divisionActivityFactories;
 
-        public TenantDivisionsService(ILogger<TenantDivisionsService> logger,
+        public DivisionsService(ILogger<DivisionsService> logger,
             ITaxBeaconDbContext context,
             IDateTimeService dateTimeService,
             ICurrentUserService currentUserService,
@@ -46,20 +46,25 @@ namespace TaxBeacon.UserManagement.Services
                                          ?? ImmutableDictionary<(DivisionEventType, uint), IDivisionActivityFactory>.Empty;
         }
 
-        public async Task<OneOf<QueryablePaging<DivisionDto>, NotFound>> GetTenantDivisionsAsync(GridifyQuery gridifyQuery,
+        public async Task<OneOf<QueryablePaging<DivisionDto>, NotFound>> GetDivisionsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
         {
             var tenantId = _currentUserService.TenantId;
             var divisions = await _context
                 .Divisions
-                .Where(d => d.TenantId == tenantId)
-                .Select(d => new DivisionDto
+                .Where(div => div.TenantId == tenantId)
+                .Select(div => new DivisionDto
                 {
-                    Id = d.Id,
-                    Name = d.Name,
-                    Description = d.Description,
-                    CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                    NumberOfUsers = d.Users.Count
+                    Id = div.Id,
+                    Name = div.Name,
+                    Description = div.Description,
+                    CreatedDateTimeUtc = div.CreatedDateTimeUtc,
+                    NumberOfUsers = div.Users.Count(),
+                    Departments = string.Join(", ", div.Departments.Select(dep => dep.Name)),
+                    Department = div.Departments.Select(dep => dep.Name)
+                    .GroupBy(dep => 1)
+                    .Select(g => string.Join(string.Empty, g.Select(s => "|" + s + "|")))
+                    .FirstOrDefault() ?? string.Empty
                 })
                 .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
@@ -71,13 +76,22 @@ namespace TaxBeacon.UserManagement.Services
             return new NotFound();
         }
 
-        public async Task<byte[]> ExportTenantDivisionsAsync(FileType fileType,
+        public async Task<byte[]> ExportDivisionsAsync(FileType fileType,
         CancellationToken cancellationToken)
         {
             var tenantId = _currentUserService.TenantId;
             var exportTenants = await _context
                 .Divisions
                 .Where(d => d.TenantId == tenantId)
+                .Select(div => new DivisionDto
+                {
+                    Id = div.Id,
+                    Name = div.Name,
+                    Description = div.Description,
+                    CreatedDateTimeUtc = div.CreatedDateTimeUtc,
+                    NumberOfUsers = div.Users.Count(),
+                    Departments = string.Join(", ", div.Departments.Select(dep => dep.Name)),
+                })
                 .AsNoTracking()
                 .ProjectToType<DivisionExportModel>()
                 .ToListAsync(cancellationToken);

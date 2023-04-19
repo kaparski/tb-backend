@@ -16,24 +16,24 @@ namespace TaxBeacon.API.Controllers.Tenants
 {
 
     [Authorize]
-    public class TenantDivisionsController: BaseController
+    public class DivisionsController: BaseController
     {
-        private readonly ITenantDivisionsService _tenantDivisionsService;
-        public TenantDivisionsController(ITenantDivisionsService tenantDivisionsService) => _tenantDivisionsService = tenantDivisionsService;
+        private readonly IDivisionsService _divisionsService;
+        public DivisionsController(IDivisionsService divisionsService) => _divisionsService = divisionsService;
         /// <summary>
         /// List of tenant divisions
         /// </summary>
         /// <remarks>
         /// Sample requests: <br/><br/>
-        ///     ```GET /tenantDivisions?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
-        ///     ```GET /tenantDivisons?page=2&amp;pageSize=5&amp;orderBy=name```
+        ///     ```GET /divisions?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
+        ///     ```GET /divisons?page=2&amp;pageSize=5&amp;orderBy=name```
         /// </remarks>
         /// <response code="200">Returns tenant divisions</response>
         /// <returns>List of tenant divisions</returns>
         [HasPermissions(
-            Common.Permissions.Tenants.Read,
-            Common.Permissions.Tenants.ReadWrite,
-            Common.Permissions.Tenants.ReadExport)]
+            Common.Permissions.Divisions.Read,
+            Common.Permissions.Divisions.ReadWrite,
+            Common.Permissions.Divisions.ReadExport)]
         [HttpGet(Name = "GetTenantDivisions")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(QueryablePaging<TenantResponse>), StatusCodes.Status200OK)]
@@ -41,7 +41,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> GetTenantDivisionsList([FromQuery] GridifyQuery query,
+        public async Task<IActionResult> GetDivisionsList([FromQuery] GridifyQuery query,
             CancellationToken cancellationToken)
         {
             if (!query.IsValid<DivisionDto>())
@@ -50,34 +50,34 @@ namespace TaxBeacon.API.Controllers.Tenants
                 return BadRequest();
             }
 
-            var divisionsOneOf = await _tenantDivisionsService.GetTenantDivisionsAsync(query, cancellationToken);
+            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, cancellationToken);
             return divisionsOneOf.Match<IActionResult>(
-                tenantDivisions => Ok(new QueryablePaging<DivisionResponse>(tenantDivisions.Count, tenantDivisions.Query.ProjectToType<DivisionResponse>())),
+                divisions => Ok(new QueryablePaging<DivisionResponse>(divisions.Count, divisions.Query.ProjectToType<DivisionResponse>())),
                 notFound => NotFound());
         }
 
         /// <summary>
         /// Endpoint to export tenant divisions
         /// </summary>
-        /// <param name="exportTenantDivisionsRequest"></param>
+        /// <param name="exportDivisionsRequest"></param>
         /// <param name="cancellationToken"></param>
         /// <response code="200">Returns file content</response>
         /// <response code="401">User is unauthorized</response>
         /// <returns>File content</returns>
-        [HasPermissions(Common.Permissions.Tenants.ReadExport)]
+        [HasPermissions(Common.Permissions.Divisions.ReadExport)]
         [HttpGet("export", Name = "ExportTenantDivisions")]
         [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> ExportTenantsAsync([FromQuery] ExportTenantDivisionsRequest exportTenantDivisionsRequest,
+        public async Task<IActionResult> ExportDivisionsAsync([FromQuery] ExportDivisionsRequest exportDivisionsRequest,
             CancellationToken cancellationToken)
         {
-            var mimeType = exportTenantDivisionsRequest.FileType.ToMimeType();
+            var mimeType = exportDivisionsRequest.FileType.ToMimeType();
 
-            var users = await _tenantDivisionsService.ExportTenantDivisionsAsync(exportTenantDivisionsRequest.FileType, cancellationToken);
+            var users = await _divisionsService.ExportDivisionsAsync(exportDivisionsRequest.FileType, cancellationToken);
 
-            return File(users, mimeType, $"tenantDivisions.{exportTenantDivisionsRequest.FileType.ToString().ToLowerInvariant()}");
+            return File(users, mimeType, $"tenantDivisions.{exportDivisionsRequest.FileType.ToString().ToLowerInvariant()}");
         }
 
         /// <summary>

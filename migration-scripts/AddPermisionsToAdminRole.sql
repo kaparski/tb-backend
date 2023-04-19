@@ -29,7 +29,10 @@ VALUES ('Users.Read'),
        ('Teams.ReadExport'),
        ('Departments.Read'),
        ('Departments.ReadWrite'),
-       ('Departments.ReadExport')
+       ('Departments.ReadExport'),
+       ('Divisions.Read'),
+       ('Divisions.ReadWrite'),
+       ('Divisions.ReadExport')
 
 INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 SELECT NEWID(),

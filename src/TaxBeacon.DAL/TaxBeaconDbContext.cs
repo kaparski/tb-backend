@@ -51,6 +51,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
     public DbSet<JobTitle> JobTitles => Set<JobTitle>();
 
     public DbSet<DivisionActivityLog> DivisionActivityLogs => Set<DivisionActivityLog>();
+    
+    public DbSet<TenantActivityLog> TenantActivityLogs => Set<TenantActivityLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

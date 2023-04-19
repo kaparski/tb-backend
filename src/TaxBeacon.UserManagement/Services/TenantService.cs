@@ -11,6 +11,9 @@ using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.Common.Converters;
 using System.Collections.Immutable;
+using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.UserManagement.Services.Activities;
+using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -22,6 +25,7 @@ public class TenantService: ITenantService
     private readonly ICurrentUserService _currentUserService;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
     private readonly IDateTimeFormatter _dateTimeFormatter;
+    private readonly IImmutableDictionary<(TenantEventType, uint), ITenantActivityFactory> _tenantActivityFactories;
 
     public TenantService(
         ILogger<TenantService> logger,
@@ -29,7 +33,8 @@ public class TenantService: ITenantService
         IDateTimeService dateTimeService,
         ICurrentUserService currentUserService,
         IEnumerable<IListToFileConverter> listToFileConverters,
-        IDateTimeFormatter dateTimeFormatter)
+        IDateTimeFormatter dateTimeFormatter,
+        IEnumerable<ITenantActivityFactory> tenantActivityFactories)
     {
         _logger = logger;
         _context = context;
@@ -38,6 +43,8 @@ public class TenantService: ITenantService
         _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
         _dateTimeFormatter = dateTimeFormatter;
+        _tenantActivityFactories = tenantActivityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
+                                   ?? ImmutableDictionary<(TenantEventType, uint), ITenantActivityFactory>.Empty;
     }
 
     public async Task<OneOf<QueryablePaging<TenantDto>, NotFound>> GetTenantsAsync(GridifyQuery gridifyQuery,
@@ -74,7 +81,7 @@ public class TenantService: ITenantService
         return _listToFileConverters[fileType].Convert(exportTenants);
     }
 
-    public async Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
@@ -149,5 +156,31 @@ public class TenantService: ITenantService
             .ToListAsync(cancellationToken);
 
         return items;
+    }
+
+    public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+        if (tenant is null)
+        {
+            return new NotFound();
+        }
+
+        var tenantActivityLogsQuery = _context.TenantActivityLogs.Where(log => log.TenantId == id);
+
+        var count = await tenantActivityLogsQuery.CountAsync(cancellationToken);
+
+        var pageCount = (uint)Math.Ceiling((double)count / pageSize);
+
+        var activities = await tenantActivityLogsQuery
+            .OrderByDescending(log => log.Date)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new ActivityDto(pageCount,
+            activities.Select(x => _tenantActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 }

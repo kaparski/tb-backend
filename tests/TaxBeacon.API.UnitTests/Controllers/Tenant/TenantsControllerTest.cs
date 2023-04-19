@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants;
+using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.Common.Enums;
@@ -195,7 +196,69 @@ public class TenantsControllerTest
     {
         // Arrange
         var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetTenantAsync).Method;
-        var permissions = new object[] { Common.Permissions.Tenants.Read };
+        var permissions = new object[] { Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public async Task GetActivityHistoryAsync_TenantExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock.Setup(x =>
+                x.GetActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+            .ReturnsAsync(new ActivityDto(0, new ActivityItemDto[] { }));
+
+        // Act
+        var actualResponse = await _controller.GetActivityHistoryAsync(Guid.NewGuid(), new TenantActivityHistoryRequest(1, 1), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<TenantActivityHistoryResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task GetActivityHistoryAsync_TenantDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock.Setup(x =>
+                x.GetActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse =
+            await _controller.GetActivityHistoryAsync(Guid.NewGuid(), new TenantActivityHistoryRequest(1, 1), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void GetActivityHistoryAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, TenantActivityHistoryRequest, CancellationToken, Task<IActionResult>>)_controller.GetActivityHistoryAsync).Method;
+        var permissions = new object[] { Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
