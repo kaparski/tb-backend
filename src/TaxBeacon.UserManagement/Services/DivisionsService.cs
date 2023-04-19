@@ -76,6 +76,15 @@ namespace TaxBeacon.UserManagement.Services
             var exportTenants = await _context
                 .Divisions
                 .Where(d => d.TenantId == tenantId)
+                .Select(div => new DivisionDto
+                {
+                    Id = div.Id,
+                    Name = div.Name,
+                    Description = div.Description,
+                    CreatedDateTimeUtc = div.CreatedDateTimeUtc,
+                    NumberOfUsers = div.Users.Count(),
+                    Departments = string.Join(", ", div.Departments.Select(dep => dep.Name)),
+                })
                 .AsNoTracking()
                 .ProjectToType<DivisionExportModel>()
                 .ToListAsync(cancellationToken);
