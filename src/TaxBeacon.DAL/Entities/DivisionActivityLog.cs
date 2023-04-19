@@ -6,7 +6,7 @@ public class DivisionActivityLog
 {
     public Guid TenantId { get; set; }
 
-    public Guid UserId { get; set; }
+    public Guid DivisionId { get; set; }
 
     public DateTime Date { get; set; }
 
@@ -15,4 +15,6 @@ public class DivisionActivityLog
     public uint Revision { get; set; }
 
     public string Event { get; set; } = string.Empty;
+
+    public Division Division { get; set; } = null!;
 }

@@ -9,6 +9,7 @@ using Org.BouncyCastle.Ocsp;
 using System.Security.Cryptography;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -17,6 +18,8 @@ using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Activities.DivisionActivityHistory;
+using Division = TaxBeacon.DAL.Entities.Division;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services
 {
@@ -32,6 +35,9 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
         private readonly Mock<ICurrentUserService> _currentUserServiceMock;
         private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
         private readonly Mock<IEnumerable<IListToFileConverter>> _listToFileConverters;
+        private readonly Mock<IDivisionActivityFactory> _divisionActivityFactory;
+        private readonly Mock<IEnumerable<IDivisionActivityFactory>> _activityFactories;
+
         private readonly User _currentUser = TestData.TestUser.Generate();
         public static readonly Guid TenantId = Guid.NewGuid();
         public TenantDivisionsServiceTests()
@@ -68,12 +74,22 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             });
             _dbContextMock.SaveChangesAsync();
             _currentUserServiceMock.Setup(x => x.TenantId).Returns(TenantId);
+
+            _divisionActivityFactory = new();
+            _divisionActivityFactory.Setup(x => x.EventType).Returns(DivisionEventType.None);
+            _divisionActivityFactory.Setup(x => x.Revision).Returns(1);
+
+            _activityFactories = new();
+            _activityFactories
+                .Setup(x => x.GetEnumerator())
+                .Returns(new[] { _divisionActivityFactory.Object }.ToList().GetEnumerator());
             _tenantDivisionsService = new TenantDivisionsService(_tenantDivisionsServiceLoggerMock.Object,
                 _dbContextMock,
                 _dateTimeServiceMock.Object,
                 _currentUserServiceMock.Object,
                 _listToFileConverters.Object,
-                _dateTimeFormatterMock.Object);
+                _dateTimeFormatterMock.Object,
+                _activityFactories.Object);
         }
         [Fact]
         public async Task GetTenantDivisionsAsync_AscOrderingAndPaginationOfLastPage_AscOrderOfDivisionsAndCorrectPage()
@@ -212,6 +228,105 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             }
         }
 
+        [Fact]
+        public async Task GetActivitiesAsync_DivisionExists_ShouldCallAppropriateFactory()
+        {
+            //Arrange
+            var tenant = TestData.TestTenant.Generate();
+            tenant.Id = TenantId;
+            var user = TestData.TestUser.Generate();
+            var tenantUser = new TenantUser
+            {
+                Tenant = tenant,
+                User = user
+            };
+            var userActivity = new UserActivityLog
+            {
+                Date = DateTime.UtcNow,
+                TenantId = tenant.Id,
+                UserId = user.Id,
+                EventType = EventType.UserCreated,
+                Revision = 1
+            };
+
+            _dbContextMock.Tenants.Add(tenant);
+            _dbContextMock.Users.Add(user);
+            _dbContextMock.TenantUsers.Add(tenantUser);
+            _dbContextMock.UserActivityLogs.Add(userActivity);
+            await _dbContextMock.SaveChangesAsync();
+
+            //Act
+            await _tenantDivisionsService.GetActivitiesAsync(user.Id);
+
+            //Assert
+
+            _divisionActivityFactory.Verify(x => x.Create(It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetActivitiesAsync_DivisionDoesNotExistWithinTenant_ShouldReturnNotFount()
+        {
+            //Arrange
+            var tenant = TestData.TestTenant.Generate();
+            tenant.Id = TenantId;
+            var user = TestData.TestUser.Generate();
+
+            _dbContextMock.Tenants.Add(tenant);
+            _dbContextMock.Users.Add(user);
+            await _dbContextMock.SaveChangesAsync();
+
+            //Act
+            var resultOneOf = await _tenantDivisionsService.GetActivitiesAsync(user.Id);
+
+            //Assert
+            resultOneOf.TryPickT1(out _, out _).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GetActivitiesAsync_DivisionExists_ShouldReturnExpectedNumberOfItems()
+        {
+            //Arrange
+            var tenant = TestData.TestTenant.Generate();
+            tenant.Id = TenantId;
+            var user = TestData.TestUser.Generate();
+            var tenantUser = new TenantUser
+            {
+                Tenant = tenant,
+                User = user
+            };
+
+            var activities = new[]
+            {
+                new DivisionActivityLog()
+                {
+                    Date = new DateTime(2000, 01, 1),
+                    TenantId = tenant.Id,
+                    DivisionId = user.Id,
+                    EventType = DivisionEventType.None,
+                    Revision = 1
+                },
+            };
+
+            _dbContextMock.Tenants.Add(tenant);
+            _dbContextMock.Users.Add(user);
+            _dbContextMock.TenantUsers.Add(tenantUser);
+            _dbContextMock.DivisionActivityLogs.AddRange(activities);
+            await _dbContextMock.SaveChangesAsync();
+
+            const int pageSize = 2;
+
+            //Act
+            var resultOneOf = await _tenantDivisionsService.GetActivitiesAsync(user.Id, 1, pageSize);
+
+            //Assert
+            using (new AssertionScope())
+            {
+                resultOneOf.TryPickT0(out var activitiesResult, out _).Should().BeTrue();
+                activitiesResult.Count.Should().Be(1);
+                activitiesResult.Query.Count().Should().Be(1);
+            }
+        }
+
         private static class TestData
         {
             public static readonly Faker<User> TestUser =
@@ -232,6 +347,12 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                     .RuleFor(d => d.CreatedDateTimeUtc, _ => DateTime.UtcNow)
                     .RuleFor(d => d.Description, f => f.Lorem.Sentence(2))
                     .RuleFor(d => d.TenantId, _ => TenantDivisionsServiceTests.TenantId);
+
+            public static readonly Faker<Tenant> TestTenant =
+                new Faker<Tenant>()
+                    .RuleFor(t => t.Id, _ => Guid.NewGuid())
+                    .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                    .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
         }
     }
 }

@@ -48,7 +48,7 @@ public class DivisionService: IDivisionSerivce
         }
 
         var userActivitiesQuery = _context.DivisionActivityLogs
-            .Where(ua => ua.UserId == userId && ua.TenantId == _currentUserService.TenantId);
+            .Where(ua => ua.DivisionId == userId && ua.TenantId == _currentUserService.TenantId);
 
         var count = await userActivitiesQuery.CountAsync(cancellationToken: cancellationToken);
 

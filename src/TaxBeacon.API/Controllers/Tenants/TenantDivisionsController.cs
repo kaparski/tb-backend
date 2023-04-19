@@ -8,7 +8,9 @@ using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Models.Activities.DivisionsActivities;
 using TaxBeacon.UserManagement.Services;
+using DivisionActivityDto = TaxBeacon.UserManagement.Models.Activities.DivisionsActivities.DivisionActivityDto;
 
 namespace TaxBeacon.API.Controllers.Tenants
 {
@@ -76,6 +78,38 @@ namespace TaxBeacon.API.Controllers.Tenants
             var users = await _tenantDivisionsService.ExportTenantDivisionsAsync(exportTenantDivisionsRequest.FileType, cancellationToken);
 
             return File(users, mimeType, $"tenantDivisions.{exportTenantDivisionsRequest.FileType.ToString().ToLowerInvariant()}");
+        }
+
+        /// <summary>
+        /// Get Divisions Activity History
+        /// </summary>
+        [HasPermissions(Common.Permissions.Division.Read)]
+        [HttpGet("{id:guid}/activities", Name = "DivisionActivityHistory")]
+        [ProducesResponseType(typeof(IEnumerable<DivisionActivityResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DivisionActivitiesHistory([FromRoute] Guid id, [FromQuery] DivisionActivityRequest request,
+            CancellationToken cancellationToken)
+        {
+            var activities = await _tenantDivisionsService.GetActivitiesAsync(id, request.Page, request.PageSize, cancellationToken);
+
+            return activities.Match<IActionResult>(
+                result => Ok(result.Adapt<DivisionActivityResponse>()),
+                notFound => NotFound());
+        }
+
+        /// <summary>
+        /// Get Divisions By Id
+        /// </summary>
+        [HasPermissions(Common.Permissions.Division.Read, Common.Permissions.Division.ReadWrite)]
+        [HttpGet("{id:guid}", Name = "DivisionDetails")]
+        [ProducesResponseType(typeof(IEnumerable<DivisionActivityResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDivisionDetails([FromRoute] Guid id,
+            CancellationToken cancellationToken)
+        {
+            var oneOfDivisionDetails = await _tenantDivisionsService.GetDivisionDetails(id, cancellationToken);
+
+            return oneOfDivisionDetails.Match<IActionResult>(
+                result => Ok(result.Adapt<DivisionDetailsResponse>()),
+                _ => NotFound());
         }
     }
 }
