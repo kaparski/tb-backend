@@ -22,4 +22,6 @@ public interface ITenantService
     Task<byte[]> ExportDepartmentsAsync(Guid tenantId,
         FileType fileType,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<ServiceAreaDto>> GetServiceAreasAsync(CancellationToken cancellationToken = default);
 }

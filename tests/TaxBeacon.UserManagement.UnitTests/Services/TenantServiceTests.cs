@@ -361,9 +361,31 @@ public class TenantServiceTests
         }
     }
 
+    [Fact]
+    public async Task GetServiceAreasAsync_ReturnsServiceAreas()
+    {
+        // Arrange
+        var items = TestData.TestServiceArea.Generate(5);
+        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var result = await _tenantService.GetServiceAreasAsync(default);
+
+        // Assert
+
+        result.Should().HaveCount(5);
+    }
+
     private static class TestData
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();
+
+        public static readonly Faker<ServiceArea> TestServiceArea =
+            new Faker<ServiceArea>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
         public static readonly Faker<Department> TestDepartment =
             new Faker<Department>()

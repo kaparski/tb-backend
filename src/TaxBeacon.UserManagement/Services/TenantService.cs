@@ -139,4 +139,15 @@ public class TenantService: ITenantService
 
         return _listToFileConverters[fileType].Convert(exportDepartments);
     }
+
+    public async Task<IReadOnlyCollection<ServiceAreaDto>> GetServiceAreasAsync(CancellationToken cancellationToken = default)
+    {
+        var items = await _context
+            .ServiceAreas
+            .AsNoTracking()
+            .ProjectToType<ServiceAreaDto>()
+            .ToListAsync(cancellationToken);
+
+        return items;
+    }
 }
