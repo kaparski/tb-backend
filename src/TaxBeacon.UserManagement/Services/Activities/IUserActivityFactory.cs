@@ -7,8 +7,8 @@ namespace TaxBeacon.UserManagement.Services.Activities
     {
         public uint Revision { get; }
 
-        public EventType EventType { get; }
+        public UserEventType UserEventType { get; }
 
-        public UserActivityItemDto Create(string userEvent);
+        public ActivityItemDto Create(string userEvent);
     }
 }

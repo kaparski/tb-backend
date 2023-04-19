@@ -9,13 +9,13 @@ namespace TaxBeacon.UserManagement.Services.Activities
     {
         public uint Revision => 1;
 
-        public EventType EventType => EventType.UserCreated;
+        public UserEventType UserEventType => UserEventType.UserCreated;
 
-        public UserActivityItemDto Create(string userEvent)
+        public ActivityItemDto Create(string userEvent)
         {
             var userCreatedEvent = JsonSerializer.Deserialize<UserCreatedEvent>(userEvent);
 
-            return new UserActivityItemDto
+            return new ActivityItemDto
             (
                 Date: userCreatedEvent!.CreatedDate,
                 FullName: userCreatedEvent.ExecutorFullName,

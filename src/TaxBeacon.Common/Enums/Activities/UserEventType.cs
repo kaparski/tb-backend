@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.Common.Enums.Activities
 {
-    public enum EventType
+    public enum UserEventType
     {
         None = 0,
         UserCreated = 1,

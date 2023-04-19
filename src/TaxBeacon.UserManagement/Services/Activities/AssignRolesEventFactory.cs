@@ -9,13 +9,13 @@ namespace TaxBeacon.UserManagement.Services.Activities
     {
         public uint Revision => 1;
 
-        public EventType EventType => EventType.UserRolesAssign;
+        public UserEventType UserEventType => UserEventType.UserRolesAssign;
 
-        public UserActivityItemDto Create(string userEvent)
+        public ActivityItemDto Create(string userEvent)
         {
             var assignRolesEventFactory = JsonSerializer.Deserialize<AssignRolesEvent>(userEvent);
 
-            return new UserActivityItemDto
+            return new ActivityItemDto
             (
                 Date: assignRolesEventFactory!.AssignDate,
                 FullName: assignRolesEventFactory.ExecutorFullName,
