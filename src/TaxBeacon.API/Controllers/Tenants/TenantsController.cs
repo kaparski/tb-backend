@@ -39,7 +39,6 @@ public class TenantsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> GetTenantList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -74,9 +73,9 @@ public class TenantsController: BaseController
     {
         var mimeType = exportTenantsRequest.FileType.ToMimeType();
 
-        var users = await _tenantService.ExportTenantsAsync(exportTenantsRequest.FileType, cancellationToken);
+        var tenants = await _tenantService.ExportTenantsAsync(exportTenantsRequest.FileType, cancellationToken);
 
-        return File(users, mimeType, $"tenants.{exportTenantsRequest.FileType.ToString().ToLowerInvariant()}");
+        return File(tenants, mimeType, $"tenants.{exportTenantsRequest.FileType.ToString().ToLowerInvariant()}");
     }
 
     /// <summary>

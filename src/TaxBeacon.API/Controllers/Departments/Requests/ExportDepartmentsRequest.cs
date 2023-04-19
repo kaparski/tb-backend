@@ -1,13 +1,13 @@
 ﻿using FluentValidation;
 using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.API.Controllers.Users.Requests
+namespace TaxBeacon.API.Controllers.Departments.Requests
 {
-    public record ExportTenantsRequest(FileType FileType, string IanaTimeZone);
+    public record ExportDepartmentsRequest(FileType FileType, string IanaTimeZone);
 
-    public class ExportTenantsRequestValidator: AbstractValidator<ExportTenantsRequest>
+    public class ExportDepartmentsRequestValidator: AbstractValidator<ExportDepartmentsRequest>
     {
-        public ExportTenantsRequestValidator()
+        public ExportDepartmentsRequestValidator()
         {
             RuleFor(x => x.FileType)
                 .IsInEnum();

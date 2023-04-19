@@ -51,6 +51,8 @@ public class TableFiltersServiceTests
     [InlineData(EntityType.Tenant)]
     [InlineData(EntityType.Team)]
     [InlineData(EntityType.TenantDivision)]
+    [InlineData(EntityType.Department)]
+
     public async Task GetFiltersAsync_TableType_ReturnsCollectionOfTableFilters(EntityType tableType)
     {
         // Arrange
