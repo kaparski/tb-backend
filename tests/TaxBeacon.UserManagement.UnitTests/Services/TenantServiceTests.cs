@@ -233,8 +233,167 @@ public class TenantServiceTests
         notFound.Should().NotBeNull();
     }
 
+    [Fact]
+    public async Task GetDepartmentsAsync_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfDepartmentsAndCorrectPage()
+    {
+        // Arrange
+        var items = TestData.TestDepartment.Generate(5);
+        await _dbContextMock.Departments.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "name asc" };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+        pageOfDepartments.Should().NotBeNull();
+        var listOfDepartments = pageOfDepartments.Query.ToList();
+        listOfDepartments.Count.Should().Be(5);
+        listOfDepartments.Select(x => x.Name).Should().BeInAscendingOrder();
+        pageOfDepartments.Count.Should().Be(5);
+    }
+
+    [Fact]
+    public async Task GetDepartmentsAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfDepartmentsInDescendingOrder()
+    {
+        // Arrange
+        var items = TestData.TestDepartment.Generate(7);
+        await _dbContextMock.Departments.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "name desc" };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+            pageOfDepartments.Should().NotBeNull();
+            var listOfDepartments = pageOfDepartments.Query.ToList();
+            listOfDepartments.Count.Should().Be(4);
+            listOfDepartments.Select(x => x.Name).Should().BeInDescendingOrder();
+            pageOfDepartments.Count.Should().Be(7);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentsAsync_NoDepartments_CorrectNumberOfDepartments()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 123, OrderBy = "name desc" };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+            pageOfDepartments.Should().NotBeNull();
+            var listOfDepartments = pageOfDepartments.Query.ToList();
+            listOfDepartments.Count.Should().Be(0);
+            pageOfDepartments.Count.Should().Be(0);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentsAsync_PageNumberOutsideOfTotalRange_DepartmentListIsEmpty()
+    {
+        // Arrange
+        var items = TestData.TestDepartment.Generate(7);
+        await _dbContextMock.Departments.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc", };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+        pageOfDepartments.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetDepartmentsAsync_PageNumberRightOutsideOfTotalRange_DepartmentListIsEmpty()
+    {
+        // Arrange
+        var items = TestData.TestDepartment.Generate(10);
+        await _dbContextMock.Departments.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+        pageOfDepartments.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportDepartmentsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
+    {
+        //Arrange
+        var departments = TestData.TestDepartment.Generate(5);
+
+        await _dbContextMock.Departments.AddRangeAsync(departments);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        _ = await _tenantService.ExportDepartmentsAsync(TestData.TestTenantId, fileType, default);
+
+        //Assert
+        if (fileType == FileType.Csv)
+        {
+            _csvMock.Verify(x => x.Convert(It.IsAny<List<DepartmentExportModel>>()), Times.Once());
+        }
+        else if (fileType == FileType.Xlsx)
+        {
+            _xlsxMock.Verify(x => x.Convert(It.IsAny<List<DepartmentExportModel>>()), Times.Once());
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    [Fact]
+    public async Task GetServiceAreasAsync_ReturnsServiceAreas()
+    {
+        // Arrange
+        var items = TestData.TestServiceArea.Generate(5);
+        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var result = await _tenantService.GetServiceAreasAsync(default);
+
+        // Assert
+
+        result.Should().HaveCount(5);
+    }
+
     private static class TestData
     {
+        public static readonly Guid TestTenantId = Guid.NewGuid();
+
+        public static readonly Faker<ServiceArea> TestServiceArea =
+            new Faker<ServiceArea>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+
+        public static readonly Faker<Department> TestDepartment =
+            new Faker<Department>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.TenantId, f => TestTenantId)
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
