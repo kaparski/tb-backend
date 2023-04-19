@@ -7,9 +7,6 @@ using Moq;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Teams;
-using TaxBeacon.API.Controllers.Teams.Requests;
-using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Controllers.Tenants;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
@@ -19,15 +16,15 @@ using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Divisions
 {
-    public class TenantDivisionControllerTest
+    public class DivisionControllerTest
     {
-        private readonly Mock<ITenantDivisionsService> _tenantDivisionsServiceMock;
-        private readonly TenantDivisionsController _controller;
+        private readonly Mock<IDivisionsService> _divisionsServiceMock;
+        private readonly DivisionsController _controller;
 
-        public TenantDivisionControllerTest()
+        public DivisionControllerTest()
         {
-            _tenantDivisionsServiceMock = new();
-            _controller = new TenantDivisionsController(_tenantDivisionsServiceMock.Object)
+            _divisionsServiceMock = new();
+            _controller = new DivisionsController(_divisionsServiceMock.Object)
             {
                 ControllerContext = new ControllerContext()
                 {
@@ -39,16 +36,16 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
             };
         }
         [Fact]
-        public async Task GetTenantDivisionsList_ValidQuery_ReturnSuccessStatusCode()
+        public async Task GetDivisionsList_ValidQuery_ReturnSuccessStatusCode()
         {
             // Arrange
             var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-            _tenantDivisionsServiceMock.Setup(p => p.GetTenantDivisionsAsync(query, default)).ReturnsAsync(
+            _divisionsServiceMock.Setup(p => p.GetDivisionsAsync(query, default)).ReturnsAsync(
                 new QueryablePaging<DivisionDto>(0,
                     Enumerable.Empty<DivisionDto>().AsQueryable()));
 
             // Act
-            var actualResponse = await _controller.GetTenantDivisionsList(query, default);
+            var actualResponse = await _controller.GetDivisionsList(query, default);
 
             // Arrange
             using (new AssertionScope())
@@ -63,16 +60,16 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
         }
 
         [Fact]
-        public async Task GetTenantDivisionsList_InvalidQuery_ReturnBadRequest()
+        public async Task GetDivisionsList_InvalidQuery_ReturnBadRequest()
         {
             // Arrange
             var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-            _tenantDivisionsServiceMock.Setup(p => p.GetTenantDivisionsAsync(query, default)).ReturnsAsync(
+            _divisionsServiceMock.Setup(p => p.GetDivisionsAsync(query, default)).ReturnsAsync(
                 new QueryablePaging<DivisionDto>(0,
                     Enumerable.Empty<DivisionDto>().AsQueryable()));
 
             // Act
-            var actualResponse = await _controller.GetTenantDivisionsList(query, default);
+            var actualResponse = await _controller.GetDivisionsList(query, default);
 
             // Arrange
             using (new AssertionScope())
@@ -88,18 +85,18 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
         [Theory]
         [InlineData(FileType.Csv)]
         [InlineData(FileType.Xlsx)]
-        public async Task ExportTeamsAsync_ValidQuery_ReturnsFileContent(FileType fileType)
+        public async Task ExportDivisionsAsync_ValidQuery_ReturnsFileContent(FileType fileType)
         {
             // Arrange
-            var request = new ExportTenantDivisionsRequest(fileType, "America/New_York");
-            _tenantDivisionsServiceMock
-                .Setup(x => x.ExportTenantDivisionsAsync(
+            var request = new ExportDivisionsRequest(fileType, "America/New_York");
+            _divisionsServiceMock
+                .Setup(x => x.ExportDivisionsAsync(
                     It.IsAny<FileType>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Array.Empty<byte>());
 
             // Act
-            var actualResponse = await _controller.ExportTenantsAsync(request, default);
+            var actualResponse = await _controller.ExportDivisionsAsync(request, default);
 
             // Assert
             using (new AssertionScope())
@@ -118,10 +115,10 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
         }
 
         [Fact]
-        public void GetTenantDivisionsList_MarkedWithCorrectHasPermissionsAttribute()
+        public void GetDivisionsList_MarkedWithCorrectHasPermissionsAttribute()
         {
             // Arrange
-            var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetTenantDivisionsList).Method;
+            var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetDivisionsList).Method;
 
             // Act
             var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -130,15 +127,15 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
             using (new AssertionScope())
             {
                 hasPermissionsAttribute.Should().NotBeNull();
-                hasPermissionsAttribute?.Policy.Should().Be("Tenants.Read;Tenants.ReadWrite;Tenants.ReadExport");
+                hasPermissionsAttribute?.Policy.Should().Be("Divisions.Read;Divisions.ReadWrite;Divisions.ReadExport");
             }
         }
 
         [Fact]
-        public void ExportTenantDivisionsAsync_MarkedWithCorrectHasPermissionsAttribute()
+        public void ExportDivisionsAsync_MarkedWithCorrectHasPermissionsAttribute()
         {
             // Arrange
-            var methodInfo = ((Func<ExportTenantDivisionsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportTenantsAsync).Method;
+            var methodInfo = ((Func<ExportDivisionsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportDivisionsAsync).Method;
 
             // Act
             var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();

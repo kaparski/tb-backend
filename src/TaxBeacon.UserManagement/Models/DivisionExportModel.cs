@@ -12,6 +12,7 @@ namespace TaxBeacon.UserManagement.Models
 
         public string Departments { get; set; } = string.Empty;
 
+        [Column("Number of users")]
         public int NumberOfUsers { get; set; }
 
         [Ignore]

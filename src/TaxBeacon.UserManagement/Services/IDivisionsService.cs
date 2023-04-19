@@ -6,12 +6,12 @@ using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.UserManagement.Services
 {
-    public interface ITenantDivisionsService
+    public interface IDivisionsService
     {
-        Task<OneOf<QueryablePaging<DivisionDto>, NotFound>> GetTenantDivisionsAsync(GridifyQuery gridifyQuery,
+        Task<OneOf<QueryablePaging<DivisionDto>, NotFound>> GetDivisionsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
-        Task<byte[]> ExportTenantDivisionsAsync(FileType fileType,
+        Task<byte[]> ExportDivisionsAsync(FileType fileType,
         CancellationToken cancellationToken);
     }
 }

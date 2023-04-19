@@ -5,11 +5,8 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Org.BouncyCastle.Ocsp;
-using System.Security.Cryptography;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
@@ -20,21 +17,21 @@ using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services
 {
-    public class TenantDivisionsServiceTests
+    public class DivisionsServiceTests
     {
-        private readonly TenantDivisionsService _tenantDivisionsService;
+        private readonly DivisionsService _divisionsService;
         private readonly ITaxBeaconDbContext _dbContextMock;
         private readonly Mock<IDateTimeService> _dateTimeServiceMock;
         private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
         private readonly Mock<IListToFileConverter> _csvMock;
         private readonly Mock<IListToFileConverter> _xlsxMock;
-        private readonly Mock<ILogger<TenantDivisionsService>> _tenantDivisionsServiceLoggerMock;
+        private readonly Mock<ILogger<DivisionsService>> _divisionsServiceLoggerMock;
         private readonly Mock<ICurrentUserService> _currentUserServiceMock;
         private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
         private readonly Mock<IEnumerable<IListToFileConverter>> _listToFileConverters;
         private readonly User _currentUser = TestData.TestUser.Generate();
         public static readonly Guid TenantId = Guid.NewGuid();
-        public TenantDivisionsServiceTests()
+        public DivisionsServiceTests()
         {
             _entitySaveChangesInterceptorMock = new();
             _dbContextMock = new TaxBeaconDbContext(
@@ -43,7 +40,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                     .Options,
                 _entitySaveChangesInterceptorMock.Object);
 
-            _tenantDivisionsServiceLoggerMock = new();
+            _divisionsServiceLoggerMock = new();
             _dateTimeServiceMock = new();
             _csvMock = new();
             _xlsxMock = new();
@@ -68,7 +65,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             });
             _dbContextMock.SaveChangesAsync();
             _currentUserServiceMock.Setup(x => x.TenantId).Returns(TenantId);
-            _tenantDivisionsService = new TenantDivisionsService(_tenantDivisionsServiceLoggerMock.Object,
+            _divisionsService = new DivisionsService(_divisionsServiceLoggerMock.Object,
                 _dbContextMock,
                 _dateTimeServiceMock.Object,
                 _currentUserServiceMock.Object,
@@ -76,7 +73,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                 _dateTimeFormatterMock.Object);
         }
         [Fact]
-        public async Task GetTenantDivisionsAsync_AscOrderingAndPaginationOfLastPage_AscOrderOfDivisionsAndCorrectPage()
+        public async Task GetDivisionsAsync_AscOrderingAndPaginationOfLastPage_AscOrderOfDivisionsAndCorrectPage()
         {
             // Arrange
             var divisions = TestData.TestDivision.Generate(5);
@@ -91,7 +88,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _tenantDivisionsService.GetTenantDivisionsAsync(query, default);
+            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
@@ -120,7 +117,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _tenantDivisionsService.GetTenantDivisionsAsync(query, default);
+            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
@@ -146,7 +143,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _tenantDivisionsService.GetTenantDivisionsAsync(query, default);
+            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
@@ -162,7 +159,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
         [Theory]
         [InlineData(7, 25, 2)]
         [InlineData(10, 5, 3)]
-        public async Task GetTenantDivisionsAsync_PageNumberOutsideOfTotalRange_DivisionListIsEmpty(int numberOfDivisions, int pageSize, int pageNumber)
+        public async Task GetDivisionsAsync_PageNumberOutsideOfTotalRange_DivisionListIsEmpty(int numberOfDivisions, int pageSize, int pageNumber)
         {
             // Arrange
             var divisions = TestData.TestDivision.Generate(numberOfDivisions);
@@ -176,7 +173,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _tenantDivisionsService.GetTenantDivisionsAsync(query, default);
+            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             divisionsOneOf.TryPickT0(out var pageOfDivisions, out _);
@@ -186,7 +183,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
         [Theory]
         [InlineData(FileType.Csv)]
         [InlineData(FileType.Xlsx)]
-        public async Task ExportTenantDivisionsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
+        public async Task ExportDivisionsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
         {
             //Arrange
             var teams = TestData.TestDivision.Generate(5);
@@ -195,7 +192,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             await _dbContextMock.SaveChangesAsync();
 
             //Act
-            _ = await _tenantDivisionsService.ExportTenantDivisionsAsync(fileType, default);
+            _ = await _divisionsService.ExportDivisionsAsync(fileType, default);
 
             //Assert
             if (fileType == FileType.Csv)
@@ -231,7 +228,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                     .RuleFor(d => d.Name, f => f.Name.JobType())
                     .RuleFor(d => d.CreatedDateTimeUtc, _ => DateTime.UtcNow)
                     .RuleFor(d => d.Description, f => f.Lorem.Sentence(2))
-                    .RuleFor(d => d.TenantId, _ => TenantDivisionsServiceTests.TenantId);
+                    .RuleFor(d => d.TenantId, _ => DivisionsServiceTests.TenantId);
         }
     }
 }

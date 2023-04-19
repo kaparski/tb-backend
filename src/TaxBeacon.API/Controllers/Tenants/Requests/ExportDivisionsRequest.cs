@@ -3,9 +3,9 @@ using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Tenants.Requests
 {
-    public record ExportTenantDivisionsRequest(FileType FileType, string IanaTimeZone);
+    public record ExportDivisionsRequest(FileType FileType, string IanaTimeZone);
 
-    public class ExportTenantDivisionsRequestValidator: AbstractValidator<ExportTenantDivisionsRequest>
+    public class ExportTenantDivisionsRequestValidator: AbstractValidator<ExportDivisionsRequest>
     {
         public ExportTenantDivisionsRequestValidator()
         {

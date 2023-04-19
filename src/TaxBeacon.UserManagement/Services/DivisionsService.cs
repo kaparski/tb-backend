@@ -14,16 +14,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TaxBeacon.UserManagement.Services
 {
-    public class TenantDivisionsService: ITenantDivisionsService
+    public class DivisionsService: IDivisionsService
     {
-        private readonly ILogger<TenantDivisionsService> _logger;
+        private readonly ILogger<DivisionsService> _logger;
         private readonly ITaxBeaconDbContext _context;
         private readonly IDateTimeService _dateTimeService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
         private readonly IDateTimeFormatter _dateTimeFormatter;
 
-        public TenantDivisionsService(ILogger<TenantDivisionsService> logger,
+        public DivisionsService(ILogger<DivisionsService> logger,
         ITaxBeaconDbContext context,
         IDateTimeService dateTimeService,
         ICurrentUserService currentUserService,
@@ -39,7 +39,7 @@ namespace TaxBeacon.UserManagement.Services
             _dateTimeFormatter = dateTimeFormatter;
         }
 
-        public async Task<OneOf<QueryablePaging<DivisionDto>, NotFound>> GetTenantDivisionsAsync(GridifyQuery gridifyQuery,
+        public async Task<OneOf<QueryablePaging<DivisionDto>, NotFound>> GetDivisionsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
         {
             var tenantId = _currentUserService.TenantId;
@@ -64,7 +64,7 @@ namespace TaxBeacon.UserManagement.Services
             return new NotFound();
         }
 
-        public async Task<byte[]> ExportTenantDivisionsAsync(FileType fileType,
+        public async Task<byte[]> ExportDivisionsAsync(FileType fileType,
         CancellationToken cancellationToken)
         {
             var tenantId = _currentUserService.TenantId;
