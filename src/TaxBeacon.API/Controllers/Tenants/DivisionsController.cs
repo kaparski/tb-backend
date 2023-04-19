@@ -89,7 +89,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         public async Task<IActionResult> DivisionActivitiesHistory([FromRoute] Guid id, [FromQuery] DivisionActivityRequest request,
             CancellationToken cancellationToken)
         {
-            var activities = await _tenantDivisionsService.GetActivitiesAsync(id, request.Page, request.PageSize, cancellationToken);
+            var activities = await _divisionsService.GetActivitiesAsync(id, request.Page, request.PageSize, cancellationToken);
 
             return activities.Match<IActionResult>(
                 result => Ok(result.Adapt<DivisionActivityResponse>()),
@@ -105,7 +105,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         public async Task<IActionResult> GetDivisionDetails([FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var oneOfDivisionDetails = await _tenantDivisionsService.GetDivisionDetails(id, cancellationToken);
+            var oneOfDivisionDetails = await _divisionsService.GetDivisionDetails(id, cancellationToken);
 
             return oneOfDivisionDetails.Match<IActionResult>(
                 result => Ok(result.Adapt<DivisionDetailsResponse>()),

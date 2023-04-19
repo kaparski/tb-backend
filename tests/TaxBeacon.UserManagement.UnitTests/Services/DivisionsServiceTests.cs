@@ -80,7 +80,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             _activityFactories
                 .Setup(x => x.GetEnumerator())
                 .Returns(new[] { _divisionActivityFactory.Object }.ToList().GetEnumerator());
-            _divisionsService = new TenantDivisionsService(_tenantDivisionsServiceLoggerMock.Object,
+            _divisionsService = new DivisionsService(_divisionsServiceLoggerMock.Object,
                 _dbContextMock,
                 _dateTimeServiceMock.Object,
                 _currentUserServiceMock.Object,
@@ -242,7 +242,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                 Date = DateTime.UtcNow,
                 TenantId = tenant.Id,
                 UserId = user.Id,
-                EventType = EventType.UserCreated,
+                EventType = UserEventType.UserCreated,
                 Revision = 1
             };
 
@@ -253,7 +253,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             await _dbContextMock.SaveChangesAsync();
 
             //Act
-            await _tenantDivisionsService.GetActivitiesAsync(user.Id);
+            await _divisionsService.GetActivitiesAsync(user.Id);
 
             //Assert
 
@@ -273,7 +273,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             await _dbContextMock.SaveChangesAsync();
 
             //Act
-            var resultOneOf = await _tenantDivisionsService.GetActivitiesAsync(user.Id);
+            var resultOneOf = await _divisionsService.GetActivitiesAsync(user.Id);
 
             //Assert
             resultOneOf.TryPickT1(out _, out _).Should().BeTrue();
@@ -313,7 +313,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             const int pageSize = 2;
 
             //Act
-            var resultOneOf = await _tenantDivisionsService.GetActivitiesAsync(user.Id, 1, pageSize);
+            var resultOneOf = await _divisionsService.GetActivitiesAsync(user.Id, 1, pageSize);
 
             //Assert
             using (new AssertionScope())
