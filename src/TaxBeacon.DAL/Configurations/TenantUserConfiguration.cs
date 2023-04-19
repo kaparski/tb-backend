@@ -19,5 +19,7 @@ public class TenantUserConfiguration: IEntityTypeConfiguration<TenantUser>
 
         tenantUser
             .HasKey(tu => new { tu.TenantId, tu.UserId });
+
+        tenantUser.HasQueryFilter(tu => tu.User.IsDeleted == null || !tu.User.IsDeleted.Value);
     }
 }
