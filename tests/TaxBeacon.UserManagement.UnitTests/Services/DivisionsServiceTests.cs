@@ -252,7 +252,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
         }
 
         [Fact]
-        public async Task GetActivitiesAsync_DivisionDoesNotExistWithinTenant_ShouldReturnNotFount()
+        public async Task GetActivitiesAsync_DivisionDoesNotExistWithinCurrentTenant_ShouldReturnNotFound()
         {
             //Arrange
             var tenant = TestData.TestTenant.Generate();

@@ -1,6 +1,7 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Requests;
@@ -79,11 +80,15 @@ namespace TaxBeacon.API.Controllers.Tenants
         }
 
         /// <summary>
-        /// Get Divisions Activity History
+        /// Get activity history log by tenant ID
         /// </summary>
-        [HasPermissions(Common.Permissions.Divisions.Read)]
+        /// <response code="200">Returns activity logs</response>
+        /// <response code="404">Division is not found</response>
+        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
         [HttpGet("{id:guid}/activities", Name = "DivisionActivityHistory")]
+        [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(IEnumerable<DivisionActivityResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DivisionActivitiesHistory([FromRoute] Guid id, [FromQuery] DivisionActivityRequest request,
             CancellationToken cancellationToken)
         {
@@ -97,9 +102,13 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <summary>
         /// Get Divisions By Id
         /// </summary>
+        /// <response code="200">Returns Division Details</response>
+        /// <response code="404">Division is not found</response>
         [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
         [HttpGet("{id:guid}", Name = "DivisionDetails")]
+        [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(IEnumerable<DivisionDetailsResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDivisionDetails([FromRoute] Guid id,
             CancellationToken cancellationToken)
         {

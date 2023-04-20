@@ -3,7 +3,6 @@ using OneOf.Types;
 using OneOf;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models.Activities.DivisionsActivities;
 
 namespace TaxBeacon.UserManagement.Services
 {
