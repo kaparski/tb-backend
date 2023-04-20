@@ -2,16 +2,13 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Asn1.Utilities;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.Activities.DivisionsActivities;
 using TaxBeacon.UserManagement.Services;
-using DivisionActivityDto = TaxBeacon.UserManagement.Models.Activities.DivisionsActivities.DivisionActivityDto;
 
 namespace TaxBeacon.API.Controllers.Tenants
 {

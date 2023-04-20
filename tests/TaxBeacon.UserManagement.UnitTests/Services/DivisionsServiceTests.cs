@@ -16,7 +16,6 @@ using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities.Divisions;
-using Division = TaxBeacon.DAL.Entities.Division;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services
 {
