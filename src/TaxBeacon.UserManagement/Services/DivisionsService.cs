@@ -12,7 +12,6 @@ using TaxBeacon.UserManagement.Models;
 using Gridify.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Models.Activities.DivisionsActivities;
 using TaxBeacon.UserManagement.Services.Activities.Divisions;
 
 namespace TaxBeacon.UserManagement.Services
