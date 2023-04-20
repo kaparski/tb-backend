@@ -17,4 +17,6 @@ public class DivisionActivityLog
     public string Event { get; set; } = string.Empty;
 
     public Division Division { get; set; } = null!;
+
+    public Tenant Tenant { get; set; } = null!;
 }

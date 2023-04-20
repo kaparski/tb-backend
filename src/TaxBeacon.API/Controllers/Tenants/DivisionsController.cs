@@ -2,6 +2,7 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Utilities;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
@@ -34,9 +35,9 @@ namespace TaxBeacon.API.Controllers.Tenants
             Common.Permissions.Divisions.Read,
             Common.Permissions.Divisions.ReadWrite,
             Common.Permissions.Divisions.ReadExport)]
-        [HttpGet(Name = "GetTenantDivisions")]
+        [HttpGet(Name = "GetDivisions")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-        [ProducesResponseType(typeof(QueryablePaging<TenantResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(QueryablePaging<DivisionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -83,7 +84,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <summary>
         /// Get Divisions Activity History
         /// </summary>
-        [HasPermissions(Common.Permissions.Division.Read)]
+        [HasPermissions(Common.Permissions.Divisions.Read)]
         [HttpGet("{id:guid}/activities", Name = "DivisionActivityHistory")]
         [ProducesResponseType(typeof(IEnumerable<DivisionActivityResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> DivisionActivitiesHistory([FromRoute] Guid id, [FromQuery] DivisionActivityRequest request,
@@ -99,13 +100,13 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <summary>
         /// Get Divisions By Id
         /// </summary>
-        [HasPermissions(Common.Permissions.Division.Read, Common.Permissions.Division.ReadWrite)]
+        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
         [HttpGet("{id:guid}", Name = "DivisionDetails")]
-        [ProducesResponseType(typeof(IEnumerable<DivisionActivityResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<DivisionDetailsResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetDivisionDetails([FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var oneOfDivisionDetails = await _divisionsService.GetDivisionDetails(id, cancellationToken);
+            var oneOfDivisionDetails = await _divisionsService.GetDivisionDetailsAsync(id, cancellationToken);
 
             return oneOfDivisionDetails.Match<IActionResult>(
                 result => Ok(result.Adapt<DivisionDetailsResponse>()),

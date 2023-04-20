@@ -15,9 +15,9 @@ namespace TaxBeacon.UserManagement.Services
         Task<byte[]> ExportDivisionsAsync(FileType fileType,
         CancellationToken cancellationToken);
 
-        Task<OneOf<DivisionActivityDto, NotFound>> GetActivitiesAsync(Guid divisionId, uint page = 1,
+        Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid divisionId, uint page = 1,
             uint pageSize = 10, CancellationToken cancellationToken = default);
 
-        Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetails(Guid divisionId, CancellationToken cancellationToken = default);
+        Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId, CancellationToken cancellationToken = default);
     }
 }

@@ -13,6 +13,12 @@ namespace TaxBeacon.DAL.Configurations
                 .HasForeignKey(x => x.DivisionId);
 
             builder
+                .HasOne<Tenant>(x => x.Tenant)
+                .WithMany(x => x.DivisionActivityLogs)
+                .HasForeignKey(x => x.TenantId)
+                .OnDelete(DeleteBehavior.ClientNoAction);
+
+            builder
                 .HasKey(ual => new { ual.TenantId, ual.DivisionId, ual.Date });
 
             builder

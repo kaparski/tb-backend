@@ -15,7 +15,7 @@ using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
-using TaxBeacon.UserManagement.Services.Activities.DivisionActivityHistory;
+using TaxBeacon.UserManagement.Services.Activities.Divisions;
 using Division = TaxBeacon.DAL.Entities.Division;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services
@@ -229,31 +229,23 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
         public async Task GetActivitiesAsync_DivisionExists_ShouldCallAppropriateFactory()
         {
             //Arrange
-            var tenant = TestData.TestTenant.Generate();
-            tenant.Id = TenantId;
-            var user = TestData.TestUser.Generate();
-            var tenantUser = new TenantUser
-            {
-                Tenant = tenant,
-                User = user
-            };
-            var userActivity = new UserActivityLog
+            var division = TestData.TestDivision.Generate();
+            division.TenantId = TenantId;
+
+            var divisionActivity = new DivisionActivityLog()
             {
                 Date = DateTime.UtcNow,
-                TenantId = tenant.Id,
-                UserId = user.Id,
-                EventType = UserEventType.UserCreated,
+                TenantId = TenantId,
+                Division = division,
+                EventType = DivisionEventType.None,
                 Revision = 1
             };
 
-            _dbContextMock.Tenants.Add(tenant);
-            _dbContextMock.Users.Add(user);
-            _dbContextMock.TenantUsers.Add(tenantUser);
-            _dbContextMock.UserActivityLogs.Add(userActivity);
+            _dbContextMock.DivisionActivityLogs.Add(divisionActivity);
             await _dbContextMock.SaveChangesAsync();
 
             //Act
-            await _divisionsService.GetActivitiesAsync(user.Id);
+            await _divisionsService.GetActivitiesAsync(division.Id);
 
             //Assert
 
@@ -265,15 +257,14 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
         {
             //Arrange
             var tenant = TestData.TestTenant.Generate();
-            tenant.Id = TenantId;
-            var user = TestData.TestUser.Generate();
-
+            var division = TestData.TestDivision.Generate();
+            division.Tenant = tenant;
             _dbContextMock.Tenants.Add(tenant);
-            _dbContextMock.Users.Add(user);
+            _dbContextMock.Divisions.Add(division);
             await _dbContextMock.SaveChangesAsync();
 
             //Act
-            var resultOneOf = await _divisionsService.GetActivitiesAsync(user.Id);
+            var resultOneOf = await _divisionsService.GetActivitiesAsync(division.Id);
 
             //Assert
             resultOneOf.TryPickT1(out _, out _).Should().BeTrue();
@@ -283,37 +274,28 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
         public async Task GetActivitiesAsync_DivisionExists_ShouldReturnExpectedNumberOfItems()
         {
             //Arrange
-            var tenant = TestData.TestTenant.Generate();
-            tenant.Id = TenantId;
-            var user = TestData.TestUser.Generate();
-            var tenantUser = new TenantUser
-            {
-                Tenant = tenant,
-                User = user
-            };
+            var division = TestData.TestDivision.Generate();
+            division.TenantId = TenantId;
 
             var activities = new[]
             {
                 new DivisionActivityLog()
                 {
                     Date = new DateTime(2000, 01, 1),
-                    TenantId = tenant.Id,
-                    DivisionId = user.Id,
+                    TenantId = TenantId,
+                    Division = division,
                     EventType = DivisionEventType.None,
                     Revision = 1
                 },
             };
 
-            _dbContextMock.Tenants.Add(tenant);
-            _dbContextMock.Users.Add(user);
-            _dbContextMock.TenantUsers.Add(tenantUser);
             _dbContextMock.DivisionActivityLogs.AddRange(activities);
             await _dbContextMock.SaveChangesAsync();
 
             const int pageSize = 2;
 
             //Act
-            var resultOneOf = await _divisionsService.GetActivitiesAsync(user.Id, 1, pageSize);
+            var resultOneOf = await _divisionsService.GetActivitiesAsync(division.Id, 1, pageSize);
 
             //Assert
             using (new AssertionScope())
@@ -322,6 +304,46 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                 activitiesResult.Count.Should().Be(1);
                 activitiesResult.Query.Count().Should().Be(1);
             }
+        }
+
+        [Fact]
+        public async Task GetDivisionDetailsAsync_ValidId_ReturnsDivision()
+        {
+            //Arrange
+            TestData.TestDivision.RuleFor(
+                x => x.TenantId, _ => TenantId);
+            var divisions = TestData.TestDivision.Generate(5);
+
+            await _dbContextMock.Divisions.AddRangeAsync(divisions);
+            await _dbContextMock.SaveChangesAsync();
+
+            //Act
+            var result = await _divisionsService.GetDivisionDetailsAsync(divisions[0].Id);
+
+            //Assert
+            using (new AssertionScope())
+            {
+                result.TryPickT0(out var divisionDetails, out _).Should().BeTrue();
+                divisionDetails.Id.Should().Be(divisions[0].Id);
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionDetailsAsync_IdNotInDb_ReturnsNotFound()
+        {
+            //Arrange
+            TestData.TestDivision.RuleFor(
+                x => x.TenantId, _ => TenantId);
+            var divisions = TestData.TestDivision.Generate(5);
+
+            await _dbContextMock.Divisions.AddRangeAsync(divisions);
+            await _dbContextMock.SaveChangesAsync();
+
+            //Act
+            var result = await _divisionsService.GetDivisionDetailsAsync(new Guid());
+
+            //Assert
+            result.TryPickT1(out _, out _).Should().BeTrue();
         }
 
         private static class TestData

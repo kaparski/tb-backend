@@ -13,7 +13,7 @@ using Gridify.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Models.Activities.DivisionsActivities;
-using TaxBeacon.UserManagement.Services.Activities.DivisionActivityHistory;
+using TaxBeacon.UserManagement.Services.Activities.Divisions;
 
 namespace TaxBeacon.UserManagement.Services
 {
@@ -105,49 +105,49 @@ namespace TaxBeacon.UserManagement.Services
             return _listToFileConverters[fileType].Convert(exportTenants);
         }
 
-        public async Task<OneOf<DivisionActivityDto, NotFound>> GetActivitiesAsync(Guid divisionId, uint page = 1,
+        public async Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid divisionId, uint page = 1,
             uint pageSize = 10, CancellationToken cancellationToken = default)
         {
             page = page == 0 ? 1 : page;
             pageSize = pageSize == 0 ? 10 : pageSize;
 
-            var user = await _context.Users
-                .Where(u => u.Id == divisionId && u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
+            var division = await _context.Divisions
+                .Where(d => d.Id == divisionId && d.TenantId == _currentUserService.TenantId)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (user is null)
+            if (division is null)
             {
                 return new NotFound();
             }
 
-            var userActivitiesQuery = _context.DivisionActivityLogs
+            var divisionActivityLogs = _context.DivisionActivityLogs
                 .Where(ua => ua.DivisionId == divisionId && ua.TenantId == _currentUserService.TenantId);
 
-            var count = await userActivitiesQuery.CountAsync(cancellationToken: cancellationToken);
+            var count = await divisionActivityLogs.CountAsync(cancellationToken: cancellationToken);
 
             var pageCount = (uint)Math.Ceiling((double)count / pageSize);
 
-            var activities = await userActivitiesQuery
+            var activities = await divisionActivityLogs
                 .OrderByDescending(x => x.Date)
                 .Skip((int)((page - 1) * pageSize))
                 .Take((int)pageSize)
                 .ToListAsync(cancellationToken);
 
-            return new DivisionActivityDto(pageCount,
+            return new ActivityDto(pageCount,
                 activities.Select(x => _divisionActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
         }
 
-        public async Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetails(Guid divisionId, CancellationToken cancellationToken = default)
+        public async Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId, CancellationToken cancellationToken = default)
         {
-            var divisions = await _context
+            var division = await _context
                 .Divisions
                 .Include(x => x.Departments)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == divisionId, cancellationToken);
 
-            return divisions is null
+            return division is null
                 ? new NotFound()
-                : divisions.Adapt<DivisionDetailsDto>();
+                : division.Adapt<DivisionDetailsDto>();
         }
     }
 }
