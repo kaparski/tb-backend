@@ -375,6 +375,7 @@ public class TenantServiceTests
         }
     }
 
+    [Fact]
     public async Task GetActivityHistoryAsync_TenantExists_ReturnListOfActivityLogsInDescendingOrderByDate()
     {
         var tenant = TestData.TestTenant.Generate();
@@ -460,6 +461,7 @@ public class TenantServiceTests
         result.Should().HaveCount(5);
     }
 
+    [Fact]
     public async Task GetActivityHistoryAsync_TenantDoesNotExist_ReturnsNotFound()
     {
         var tenant = TestData.TestTenant.Generate();

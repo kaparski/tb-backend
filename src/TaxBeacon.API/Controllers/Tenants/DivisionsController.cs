@@ -1,6 +1,7 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Requests;
@@ -32,9 +33,9 @@ namespace TaxBeacon.API.Controllers.Tenants
             Common.Permissions.Divisions.Read,
             Common.Permissions.Divisions.ReadWrite,
             Common.Permissions.Divisions.ReadExport)]
-        [HttpGet(Name = "GetTenantDivisions")]
+        [HttpGet(Name = "GetDivisions")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-        [ProducesResponseType(typeof(QueryablePaging<TenantResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(QueryablePaging<DivisionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -76,6 +77,46 @@ namespace TaxBeacon.API.Controllers.Tenants
             var users = await _divisionsService.ExportDivisionsAsync(exportDivisionsRequest.FileType, cancellationToken);
 
             return File(users, mimeType, $"tenantDivisions.{exportDivisionsRequest.FileType.ToString().ToLowerInvariant()}");
+        }
+
+        /// <summary>
+        /// Get Divisions Activity History
+        /// </summary>
+        /// <response code="200">Returns activity logs</response>
+        /// <response code="404">Division is not found</response>
+        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
+        [HttpGet("{id:guid}/activities", Name = "DivisionActivityHistory")]
+        [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+        [ProducesResponseType(typeof(IEnumerable<DivisionActivityResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DivisionActivitiesHistory([FromRoute] Guid id, [FromQuery] DivisionActivityRequest request,
+            CancellationToken cancellationToken)
+        {
+            var activities = await _divisionsService.GetActivitiesAsync(id, request.Page, request.PageSize, cancellationToken);
+
+            return activities.Match<IActionResult>(
+                result => Ok(result.Adapt<DivisionActivityResponse>()),
+                notFound => NotFound());
+        }
+
+        /// <summary>
+        /// Get Divisions By Id
+        /// </summary>
+        /// <response code="200">Returns Division Details</response>
+        /// <response code="404">Division is not found</response>
+        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
+        [HttpGet("{id:guid}", Name = "DivisionDetails")]
+        [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+        [ProducesResponseType(typeof(IEnumerable<DivisionDetailsResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDivisionDetails([FromRoute] Guid id,
+            CancellationToken cancellationToken)
+        {
+            var oneOfDivisionDetails = await _divisionsService.GetDivisionDetailsAsync(id, cancellationToken);
+
+            return oneOfDivisionDetails.Match<IActionResult>(
+                result => Ok(result.Adapt<DivisionDetailsResponse>()),
+                _ => NotFound());
         }
     }
 }

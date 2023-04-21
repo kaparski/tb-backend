@@ -4,6 +4,7 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using OneOf.Types;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
@@ -145,6 +146,46 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
             {
                 hasPermissionsAttribute.Should().NotBeNull();
                 hasPermissionsAttribute?.Policy.Should().Be("Divisions.ReadExport");
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionDetailsAsync_DivisionExists_ShouldReturnSuccessfulStatusCode()
+        {
+            // Arrange
+            _divisionsServiceMock.Setup(x => x.GetDivisionDetailsAsync(It.IsAny<Guid>(), default)).ReturnsAsync(new DivisionDetailsDto());
+
+            // Act
+            var actualResponse = await _controller.GetDivisionDetails(Guid.NewGuid(), default);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                var actualResult = actualResponse as OkObjectResult;
+                actualResponse.Should().NotBeNull();
+                actualResult.Should().NotBeNull();
+                actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+                actualResult?.Value.Should().BeOfType<DivisionDetailsResponse>();
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionDetailsAsync_DivisionDoesNotExist_ShouldReturnNotFoundStatusCode()
+        {
+            // Arrange
+            _divisionsServiceMock.Setup(x => x.GetDivisionDetailsAsync(It.IsAny<Guid>(), default)).ReturnsAsync(new NotFound());
+
+            // Act
+            var actualResponse = await _controller.GetDivisionDetails(Guid.NewGuid(), default);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                var actualResult = actualResponse as NotFoundResult;
+                actualResponse.Should().NotBeNull();
+                actualResult.Should().NotBeNull();
+                actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+
             }
         }
     }
