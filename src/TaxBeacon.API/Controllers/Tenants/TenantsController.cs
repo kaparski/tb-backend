@@ -117,4 +117,24 @@ public class TenantsController: BaseController
             result => Ok(result.Adapt<TenantActivityHistoryResponse>()),
             notFound => NotFound());
     }
+
+    /// <summary>
+    /// Update tenant details
+    /// </summary>
+    /// <response code="200">Returns updated tenant</response>
+    /// <response code="404">Tenant is not found</response>
+    /// <returns>Updated tenant</returns>
+    [HasPermissions(Common.Permissions.Tenants.ReadWrite)]
+    [HttpPatch("{id:guid}", Name = "UpdateTenant")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(TenantResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateTenantAsync([FromRoute] Guid id, [FromBody] UpdateTenantRequest request, CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _tenantService.UpdateTenantAsync(id, request.Adapt<UpdateTenantDto>(), cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            result => Ok(result.Adapt<TenantResponse>()),
+            notFound => NotFound());
+    }
 }

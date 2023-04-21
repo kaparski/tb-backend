@@ -27,4 +27,7 @@ public interface ITenantService
     Task<IReadOnlyCollection<ServiceAreaDto>> GetServiceAreasAsync(CancellationToken cancellationToken = default);
 
     Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken);
+
+    Task<OneOf<TenantDto, NotFound>> UpdateTenantAsync(Guid id, UpdateTenantDto updateTenantDto,
+        CancellationToken cancellationToken);
 }
