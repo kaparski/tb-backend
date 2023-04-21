@@ -30,15 +30,19 @@ public interface ITaxBeaconDbContext
 
     DbSet<RolePermission> RolePermissions { get; }
 
-    public DbSet<Division> Divisions { get; }
+    DbSet<Division> Divisions { get; }
 
-    public DbSet<Department> Departments { get; }
+    DbSet<Department> Departments { get; }
 
-    public DbSet<ServiceArea> ServiceAreas { get; }
+    DbSet<ServiceArea> ServiceAreas { get; }
 
-    public DbSet<Team> Teams { get; }
+    DbSet<Team> Teams { get; }
 
-    public DbSet<JobTitle> JobTitles { get; }
+    DbSet<JobTitle> JobTitles { get; }
+
+    DbSet<TenantActivityLog> TenantActivityLogs { get; }
+
+    DbSet<DivisionActivityLog> DivisionActivityLogs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

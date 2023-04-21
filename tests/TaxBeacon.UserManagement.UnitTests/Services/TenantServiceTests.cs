@@ -6,15 +6,19 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Models.Activities.Tenant;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -30,6 +34,7 @@ public class TenantServiceTests
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
     private readonly TenantService _tenantService;
+    private readonly Mock<IEnumerable<ITenantActivityFactory>> _activityFactoriesMock;
 
     public TenantServiceTests()
     {
@@ -41,6 +46,7 @@ public class TenantServiceTests
         _csvMock = new();
         _xlsxMock = new();
         _dateTimeFormatterMock = new();
+        _activityFactoriesMock = new();
 
         _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
         _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
@@ -60,13 +66,21 @@ public class TenantServiceTests
         _dbContextMock.Users.Add(currentUser);
         _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
 
+        _activityFactoriesMock
+            .Setup(x => x.GetEnumerator())
+            .Returns(new ITenantActivityFactory[]
+            {
+                new TenantEnteredEventFactory(), new TenantExitedEventFactory(), new TenantUpdatedEventFactory()
+            }.ToList().GetEnumerator());
+
         _tenantService = new TenantService(
             _tenantServiceLoggerMock.Object,
             _dbContextMock,
             _dateTimeServiceMock.Object,
             _currentUserServiceMock.Object,
             _listToFileConverters.Object,
-            _dateTimeFormatterMock.Object);
+            _dateTimeFormatterMock.Object,
+            _activityFactoriesMock.Object);
 
         TypeAdapterConfig.GlobalSettings.Scan(typeof(UserMappingConfig).Assembly);
     }
@@ -362,6 +376,76 @@ public class TenantServiceTests
     }
 
     [Fact]
+    public async Task GetActivityHistoryAsync_TenantExists_ReturnListOfActivityLogsInDescendingOrderByDate()
+    {
+        var tenant = TestData.TestTenant.Generate();
+        var user = TestData.TestUser.Generate();
+        var activities = new[]
+        {
+            new TenantActivityLog
+            {
+                Date = new DateTime(2000, 01, 1),
+                TenantId = tenant.Id,
+                EventType = TenantEventType.TenantEnteredEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new TenantEnteredEvent(
+                        user.Id,
+                        "Super Admin",
+                        user.FullName,
+                        DateTime.UtcNow
+                    )
+                )
+            },
+            new TenantActivityLog
+            {
+                Date = new DateTime(2000, 01, 2),
+                TenantId = tenant.Id,
+                EventType = TenantEventType.TenantUpdatedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new TenantUpdatedEvent(
+                        user.Id,
+                        "Super Admin",
+                        user.FullName,
+                        DateTime.UtcNow,
+                        "",
+                        ""
+                    )
+                )
+            },
+            new TenantActivityLog
+            {
+                Date = new DateTime(2000, 01, 3),
+                TenantId = tenant.Id,
+                EventType = TenantEventType.TenantExitedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new TenantExitedEvent(
+                        user.Id,
+                        "Super Admin",
+                        user.FullName,
+                        DateTime.UtcNow
+                    )
+                )
+            }
+        };
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.TenantActivityLogs.AddRangeAsync(activities);
+        await _dbContextMock.SaveChangesAsync();
+
+        var actualResult = await _tenantService.GetActivityHistoryAsync(tenant.Id);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var activitiesResult, out _).Should().BeTrue();
+            activitiesResult.Count.Should().Be(1);
+            activitiesResult.Query.Count().Should().Be(3);
+            activitiesResult.Query.Should().BeInDescendingOrder(x => x.Date);
+        }
+    }
+
+    [Fact]
+
     public async Task GetServiceAreasAsync_ReturnsServiceAreas()
     {
         // Arrange
@@ -375,6 +459,24 @@ public class TenantServiceTests
         // Assert
 
         result.Should().HaveCount(5);
+    }
+
+    [Fact]
+    public async Task GetActivityHistoryAsync_TenantDoesNotExist_ReturnsNotFound()
+    {
+        var tenant = TestData.TestTenant.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        var actualResult = await _tenantService.GetActivityHistoryAsync(Guid.NewGuid());
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var _, out var notFound);
+            notFound.Should().NotBeNull();
+        }
     }
 
     private static class TestData

@@ -110,7 +110,7 @@ public class RoleService: IRoleService
                         currentUser.FullName,
                         currentUserRoles
                     )),
-                EventType = EventType.UserRolesUnassign
+                EventType = UserEventType.UserRolesUnassign
             });
         await _context.UserActivityLogs
             .AddRangeAsync(activityUserLogs, cancellationToken);
@@ -167,7 +167,7 @@ public class RoleService: IRoleService
                     _currentUserService.UserId,
                     currentUserFullName,
                     currentUserRoles ?? string.Empty)),
-            EventType = EventType.UserRolesAssign
+            EventType = UserEventType.UserRolesAssign
         });
 
         await _context.UserActivityLogs.AddRangeAsync(activityLogs, cancellationToken);

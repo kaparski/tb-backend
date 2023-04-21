@@ -16,5 +16,7 @@
 
         public ICollection<Department> Departments { get; set; } = new HashSet<Department>();
 
+        public ICollection<DivisionActivityLog> DivisionActivityLogs { get; set; } = new HashSet<DivisionActivityLog>();
+
     }
 }

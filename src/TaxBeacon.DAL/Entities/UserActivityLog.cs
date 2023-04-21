@@ -10,7 +10,7 @@ namespace TaxBeacon.DAL.Entities
 
         public DateTime Date { get; set; }
 
-        public EventType EventType { get; set; }
+        public UserEventType EventType { get; set; }
 
         public uint Revision { get; set; }
 
