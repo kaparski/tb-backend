@@ -80,7 +80,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         }
 
         /// <summary>
-        /// Get activity history log by tenant ID
+        /// Get Divisions Activity History
         /// </summary>
         /// <response code="200">Returns activity logs</response>
         /// <response code="404">Division is not found</response>
