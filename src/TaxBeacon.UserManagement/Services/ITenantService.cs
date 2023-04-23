@@ -3,7 +3,6 @@ using OneOf;
 using OneOf.Types;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -27,4 +26,6 @@ public interface ITenantService
     Task<IReadOnlyCollection<ServiceAreaDto>> GetServiceAreasAsync(CancellationToken cancellationToken = default);
 
     Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken);
+
+    Task SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId, CancellationToken cancellationToken = default);
 }

@@ -12,8 +12,11 @@ using TaxBeacon.Common.Services;
 using TaxBeacon.Common.Converters;
 using System.Collections.Immutable;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Services.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Tenant;
+using TaxBeacon.DAL.Entities;
+using System.Text.Json;
+using TaxBeacon.UserManagement.Models.Activities.Tenant;
+using Microsoft.Graph;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -182,5 +185,70 @@ public class TenantService: ITenantService
 
         return new ActivityDto(pageCount,
             activities.Select(x => _tenantActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
+    }
+
+    public async Task SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId, CancellationToken cancellationToken = default)
+    {
+        var currentUserId = _currentUserService.UserId;
+
+        // TODO: use roleId instead of role name for SuperAdmin role
+        var currentUser = await _context
+            .Users
+            .Where(u => u.Id == currentUserId && u.UserRoles.Any(ur => ur.Role.Name == "Super admin"))
+            .Select(u => new
+            {
+                u.FullName,
+                Roles = string.Join(", ", u.UserRoles.Select(r => r.Role.Name))
+            })
+            .SingleAsync();
+
+        var now = _dateTimeService.UtcNow;
+
+        if (oldTenantId != null)
+        {
+            var item = new TenantActivityLog
+            {
+                EventType = TenantEventType.TenantExitedEvent,
+                Event = JsonSerializer.Serialize(
+                    new TenantExitedEvent(currentUserId,
+                        currentUser.Roles,
+                        currentUser.FullName,
+                        now)),
+                TenantId = oldTenantId.Value,
+                Date = now,
+                Revision = 1,
+            };
+
+            await _context.TenantActivityLogs.AddAsync(item, cancellationToken);
+        }
+
+        if (newTenantId != null)
+        {
+            // Ensuring that events appear in correct order (since we currently don't have an autoincrement field in the table
+            now += TimeSpan.FromMilliseconds(1);
+
+            var item = new TenantActivityLog
+            {
+                EventType = TenantEventType.TenantEnteredEvent,
+                Event = JsonSerializer.Serialize(
+                    new TenantEnteredEvent(currentUserId,
+                        currentUser.Roles,
+                        currentUser.FullName,
+                        now)),
+                TenantId = newTenantId.Value,
+                Date = now,
+                Revision = 1,
+            };
+
+            await _context.TenantActivityLogs.AddAsync(item, cancellationToken);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - User ({userId}) has switched from tenant ({oldTenantId}) to tenant ({newTenantId})",
+            now,
+            currentUserId,
+            oldTenantId,
+            newTenantId);
     }
 }
