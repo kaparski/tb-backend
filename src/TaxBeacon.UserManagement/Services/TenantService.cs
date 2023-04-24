@@ -15,9 +15,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Tenant;
 using TaxBeacon.DAL.Entities;
-using System.Text.Json;
 using TaxBeacon.UserManagement.Models.Activities.Tenant;
-using Microsoft.Graph;
 
 namespace TaxBeacon.UserManagement.Services;
 

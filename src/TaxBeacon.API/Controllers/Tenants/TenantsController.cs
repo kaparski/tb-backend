@@ -145,7 +145,7 @@ public class TenantsController: BaseController
     /// <returns>Returns success response</returns>
     /// <response code="200">Log record successfully added</response>
     /// <response code="401">User is unauthorized</response>
-    [HttpPost("switchto", Name = "SwitchToTenant")]
+    [HttpPost("switch", Name = "SwitchToTenant")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> SwitchToTenantAsync([FromBody] Guid? newTenantId,
