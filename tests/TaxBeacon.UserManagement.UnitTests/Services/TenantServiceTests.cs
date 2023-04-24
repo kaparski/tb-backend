@@ -6,15 +6,19 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Models.Activities.Tenant;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -30,6 +34,7 @@ public class TenantServiceTests
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
     private readonly TenantService _tenantService;
+    private readonly Mock<IEnumerable<ITenantActivityFactory>> _activityFactoriesMock;
 
     public TenantServiceTests()
     {
@@ -41,13 +46,14 @@ public class TenantServiceTests
         _csvMock = new();
         _xlsxMock = new();
         _dateTimeFormatterMock = new();
+        _activityFactoriesMock = new();
 
         _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
         _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
 
         _listToFileConverters
             .Setup(x => x.GetEnumerator())
-            .Returns((IEnumerator<IListToFileConverter>)new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
+            .Returns(new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
                 .GetEnumerator());
 
         _dbContextMock = new TaxBeaconDbContext(
@@ -60,13 +66,21 @@ public class TenantServiceTests
         _dbContextMock.Users.Add(currentUser);
         _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
 
+        _activityFactoriesMock
+            .Setup(x => x.GetEnumerator())
+            .Returns(new ITenantActivityFactory[]
+            {
+                new TenantEnteredEventFactory(), new TenantExitedEventFactory(), new TenantUpdatedEventFactory()
+            }.ToList().GetEnumerator());
+
         _tenantService = new TenantService(
             _tenantServiceLoggerMock.Object,
             _dbContextMock,
             _dateTimeServiceMock.Object,
             _currentUserServiceMock.Object,
             _listToFileConverters.Object,
-            _dateTimeFormatterMock.Object);
+            _dateTimeFormatterMock.Object,
+            _activityFactoriesMock.Object);
 
         TypeAdapterConfig.GlobalSettings.Scan(typeof(UserMappingConfig).Assembly);
     }
@@ -143,7 +157,7 @@ public class TenantServiceTests
         var tenants = TestData.TestTenant.Generate(7);
         await _dbContextMock.Tenants.AddRangeAsync(tenants);
         await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc", };
+        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc" };
 
         // Act
         var tenantsOneOf = await _tenantService.GetTenantsAsync(query, default);
@@ -160,7 +174,7 @@ public class TenantServiceTests
         var tenants = TestData.TestTenant.Generate(10);
         await _dbContextMock.Tenants.AddRangeAsync(tenants);
         await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
+        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc" };
 
         // Act
         var tenantsOneOf = await _tenantService.GetTenantsAsync(query, default);
@@ -199,8 +213,346 @@ public class TenantServiceTests
         }
     }
 
+    [Fact]
+    public async Task GetTenantByIdAsync_ExistingTenantId_ReturnsTenantDto()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _tenantService.GetTenantByIdAsync(tenant.Id, default);
+
+        // Assert
+        actualResult.TryPickT0(out var tenantDto, out _);
+        tenantDto.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetTenantByIdAsync_NonExistingTenantId_ReturnsNotFound()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _tenantService.GetTenantByIdAsync(Guid.NewGuid(), default);
+
+        // Assert
+        actualResult.TryPickT0(out var _, out var notFound);
+        notFound.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetDepartmentsAsync_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfDepartmentsAndCorrectPage()
+    {
+        // Arrange
+        var items = TestData.TestDepartment.Generate(5);
+        await _dbContextMock.Departments.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "name asc" };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+        pageOfDepartments.Should().NotBeNull();
+        var listOfDepartments = pageOfDepartments.Query.ToList();
+        listOfDepartments.Count.Should().Be(5);
+        listOfDepartments.Select(x => x.Name).Should().BeInAscendingOrder();
+        pageOfDepartments.Count.Should().Be(5);
+    }
+
+    [Fact]
+    public async Task GetDepartmentsAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfDepartmentsInDescendingOrder()
+    {
+        // Arrange
+        var items = TestData.TestDepartment.Generate(7);
+        await _dbContextMock.Departments.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "name desc" };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+            pageOfDepartments.Should().NotBeNull();
+            var listOfDepartments = pageOfDepartments.Query.ToList();
+            listOfDepartments.Count.Should().Be(4);
+            listOfDepartments.Select(x => x.Name).Should().BeInDescendingOrder();
+            pageOfDepartments.Count.Should().Be(7);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentsAsync_NoDepartments_CorrectNumberOfDepartments()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 123, OrderBy = "name desc" };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+            pageOfDepartments.Should().NotBeNull();
+            var listOfDepartments = pageOfDepartments.Query.ToList();
+            listOfDepartments.Count.Should().Be(0);
+            pageOfDepartments.Count.Should().Be(0);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentsAsync_PageNumberOutsideOfTotalRange_DepartmentListIsEmpty()
+    {
+        // Arrange
+        var items = TestData.TestDepartment.Generate(7);
+        await _dbContextMock.Departments.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc", };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+        pageOfDepartments.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetDepartmentsAsync_PageNumberRightOutsideOfTotalRange_DepartmentListIsEmpty()
+    {
+        // Arrange
+        var items = TestData.TestDepartment.Generate(10);
+        await _dbContextMock.Departments.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
+
+        // Act
+        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+
+        // Assert
+        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
+        pageOfDepartments.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportDepartmentsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
+    {
+        //Arrange
+        var departments = TestData.TestDepartment.Generate(5);
+
+        await _dbContextMock.Departments.AddRangeAsync(departments);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        _ = await _tenantService.ExportDepartmentsAsync(TestData.TestTenantId, fileType, default);
+
+        //Assert
+        if (fileType == FileType.Csv)
+        {
+            _csvMock.Verify(x => x.Convert(It.IsAny<List<DepartmentExportModel>>()), Times.Once());
+        }
+        else if (fileType == FileType.Xlsx)
+        {
+            _xlsxMock.Verify(x => x.Convert(It.IsAny<List<DepartmentExportModel>>()), Times.Once());
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    [Fact]
+    public async Task GetActivityHistoryAsync_TenantExists_ReturnListOfActivityLogsInDescendingOrderByDate()
+    {
+        var tenant = TestData.TestTenant.Generate();
+        var user = TestData.TestUser.Generate();
+        var activities = new[]
+        {
+            new TenantActivityLog
+            {
+                Date = new DateTime(2000, 01, 1),
+                TenantId = tenant.Id,
+                EventType = TenantEventType.TenantEnteredEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new TenantEnteredEvent(
+                        user.Id,
+                        "Super Admin",
+                        user.FullName,
+                        DateTime.UtcNow
+                    )
+                )
+            },
+            new TenantActivityLog
+            {
+                Date = new DateTime(2000, 01, 2),
+                TenantId = tenant.Id,
+                EventType = TenantEventType.TenantUpdatedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new TenantUpdatedEvent(
+                        user.Id,
+                        "Super Admin",
+                        user.FullName,
+                        DateTime.UtcNow,
+                        "",
+                        ""
+                    )
+                )
+            },
+            new TenantActivityLog
+            {
+                Date = new DateTime(2000, 01, 3),
+                TenantId = tenant.Id,
+                EventType = TenantEventType.TenantExitedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new TenantExitedEvent(
+                        user.Id,
+                        "Super Admin",
+                        user.FullName,
+                        DateTime.UtcNow
+                    )
+                )
+            }
+        };
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.TenantActivityLogs.AddRangeAsync(activities);
+        await _dbContextMock.SaveChangesAsync();
+
+        var actualResult = await _tenantService.GetActivityHistoryAsync(tenant.Id);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var activitiesResult, out _).Should().BeTrue();
+            activitiesResult.Count.Should().Be(1);
+            activitiesResult.Query.Count().Should().Be(3);
+            activitiesResult.Query.Should().BeInDescendingOrder(x => x.Date);
+        }
+    }
+
+    [Fact]
+
+    public async Task GetServiceAreasAsync_ReturnsServiceAreas()
+    {
+        // Arrange
+        var items = TestData.TestServiceArea.Generate(5);
+        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var result = await _tenantService.GetServiceAreasAsync(default);
+
+        // Assert
+
+        result.Should().HaveCount(5);
+    }
+
+    [Fact]
+    public async Task GetActivityHistoryAsync_TenantDoesNotExist_ReturnsNotFound()
+    {
+        var tenant = TestData.TestTenant.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        var actualResult = await _tenantService.GetActivityHistoryAsync(Guid.NewGuid());
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var _, out var notFound);
+            notFound.Should().NotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateTenantAsync_TenantExists_ReturnsUpdatedTenantAndCapturesActivityLog()
+    {
+        // Arrange
+        var updateTenantDto = TestData.UpdateTenantDtoFaker.Generate();
+        var tenant = TestData.TestTenant.Generate();
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        var currentDate = DateTime.UtcNow;
+        _dateTimeServiceMock
+            .Setup(service => service.UtcNow)
+            .Returns(currentDate);
+
+        // Act
+        var actualResult = await _tenantService.UpdateTenantAsync(tenant.Id, updateTenantDto, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out var tenantDto, out _);
+            tenantDto.Should().NotBeNull();
+            tenantDto.Id.Should().Be(tenant.Id);
+            tenantDto.Name.Should().Be(updateTenantDto.Name);
+
+            var actualActivityLog = await _dbContextMock.TenantActivityLogs.LastOrDefaultAsync();
+            actualActivityLog.Should().NotBeNull();
+            actualActivityLog?.Date.Should().Be(currentDate);
+            actualActivityLog?.EventType.Should().Be(TenantEventType.TenantUpdatedEvent);
+            actualActivityLog?.TenantId.Should().Be(tenant.Id);
+
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Once);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateTenantAsync_TenantDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var updateTenantDto = TestData.UpdateTenantDtoFaker.Generate();
+        var tenant = TestData.TestTenant.Generate();
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _tenantService.UpdateTenantAsync(tenant.Id, updateTenantDto, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT1(out var tenantDto, out _);
+            tenantDto.Should().NotBeNull();
+        }
+    }
+
     private static class TestData
     {
+        public static readonly Guid TestTenantId = Guid.NewGuid();
+
+        public static readonly Faker<ServiceArea> TestServiceArea =
+            new Faker<ServiceArea>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+
+        public static readonly Faker<Department> TestDepartment =
+            new Faker<Department>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.TenantId, f => TestTenantId)
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
@@ -218,21 +570,8 @@ public class TenantServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
-        public static readonly Faker<UpdateUserDto> UpdateUserDtoFaker =
-            new Faker<UpdateUserDto>()
-                .RuleFor(dto => dto.FirstName, f => f.Name.FirstName())
-                .RuleFor(dto => dto.LastName, f => f.Name.LastName());
-
-        public static IEnumerable<object[]> UpdatedStatusInvalidData =>
-            new List<object[]>
-            {
-                new object[] { Status.Active, Guid.NewGuid() },
-                new object[] { Status.Deactivated, Guid.Empty }
-            };
-
-        public static readonly Faker<Role> TestRoles =
-            new Faker<Role>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
-                .RuleFor(u => u.Name, f => f.Name.JobTitle());
+        public static readonly Faker<UpdateTenantDto> UpdateTenantDtoFaker =
+            new Faker<UpdateTenantDto>()
+                .RuleFor(dto => dto.Name, f => f.Company.CompanyName());
     }
 }

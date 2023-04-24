@@ -31,7 +31,7 @@ public class UserService: IUserService
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
     private readonly IUserExternalStore _userExternalStore;
     private readonly IDateTimeFormatter _dateTimeFormatter;
-    private readonly IImmutableDictionary<(EventType, uint), IUserActivityFactory> _userActivityFactories;
+    private readonly IImmutableDictionary<(UserEventType, uint), IUserActivityFactory> _userActivityFactories;
 
     private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new[]
     {
@@ -56,8 +56,8 @@ public class UserService: IUserService
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
         _userExternalStore = userExternalStore;
         _dateTimeFormatter = dateTimeFormatter;
-        _userActivityFactories = userActivityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
-                                 ?? ImmutableDictionary<(EventType, uint), IUserActivityFactory>.Empty;
+        _userActivityFactories = userActivityFactories?.ToImmutableDictionary(x => (EventType: x.UserEventType, x.Revision))
+                                 ?? ImmutableDictionary<(UserEventType, uint), IUserActivityFactory>.Empty;
     }
 
     public async Task<OneOf<LoginUserDto, NotFound>> LoginAsync(MailAddress mailAddress,
@@ -166,7 +166,7 @@ public class UserService: IUserService
                         now,
                         currentUser.FullName,
                         currentUser.Roles)),
-                EventType = EventType.UserReactivated
+                EventType = UserEventType.UserReactivated
             },
             Status.Deactivated => new UserActivityLog
             {
@@ -179,7 +179,7 @@ public class UserService: IUserService
                         now,
                         currentUser.FullName,
                         currentUser.Roles)),
-                EventType = EventType.UserDeactivated
+                EventType = UserEventType.UserDeactivated
             },
             _ => throw new InvalidOperationException()
         };
@@ -243,7 +243,7 @@ public class UserService: IUserService
                     now,
                     currentUser.FullName,
                     currentUser.Roles)),
-            EventType = EventType.UserCreated
+            EventType = UserEventType.UserCreated
         }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -351,7 +351,7 @@ public class UserService: IUserService
                         currentUserFullName,
                         currentUserRoles
                         )),
-                EventType = EventType.UserRolesAssign
+                EventType = UserEventType.UserRolesAssign
             }, cancellationToken);
         }
 
@@ -371,7 +371,7 @@ public class UserService: IUserService
                         currentUserFullName,
                         currentUserRoles)
                     ),
-                EventType = EventType.UserRolesUnassign
+                EventType = UserEventType.UserRolesUnassign
             }, cancellationToken);
         }
 
@@ -431,7 +431,7 @@ public class UserService: IUserService
                     currentUser.Roles,
                     previousUserValues,
                     JsonSerializer.Serialize(updateUserDto))),
-            EventType = EventType.UserUpdated
+            EventType = UserEventType.UserUpdated
         }, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -456,7 +456,7 @@ public class UserService: IUserService
         return userDto;
     }
 
-    public async Task<OneOf<UserActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1,
+    public async Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1,
         uint pageSize = 10, CancellationToken cancellationToken = default)
     {
         page = page == 0 ? 1 : page;
@@ -484,7 +484,7 @@ public class UserService: IUserService
             .Take((int)pageSize)
             .ToListAsync(cancellationToken);
 
-        return new UserActivityDto(pageCount,
+        return new ActivityDto(pageCount,
             activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 

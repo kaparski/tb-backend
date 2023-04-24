@@ -30,5 +30,19 @@ public interface ITaxBeaconDbContext
 
     DbSet<RolePermission> RolePermissions { get; }
 
+    DbSet<Division> Divisions { get; }
+
+    DbSet<Department> Departments { get; }
+
+    DbSet<ServiceArea> ServiceAreas { get; }
+
+    DbSet<Team> Teams { get; }
+
+    DbSet<JobTitle> JobTitles { get; }
+
+    DbSet<TenantActivityLog> TenantActivityLogs { get; }
+
+    DbSet<DivisionActivityLog> DivisionActivityLogs { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

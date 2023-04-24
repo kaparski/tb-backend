@@ -6,5 +6,12 @@ public enum EntityType
 
     Role = 2,
 
-    Tenant = 3
+    Tenant = 3,
+
+    Team = 4,
+
+    TenantDivision = 5,
+
+    Department = 6,
+
 }

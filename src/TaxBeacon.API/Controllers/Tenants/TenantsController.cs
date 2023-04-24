@@ -1,10 +1,13 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Requests;
+using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
@@ -39,7 +42,6 @@ public class TenantsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> GetTenantList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -74,8 +76,65 @@ public class TenantsController: BaseController
     {
         var mimeType = exportTenantsRequest.FileType.ToMimeType();
 
-        var users = await _tenantService.ExportTenantsAsync(exportTenantsRequest.FileType, cancellationToken);
+        var tenants = await _tenantService.ExportTenantsAsync(exportTenantsRequest.FileType, cancellationToken);
 
-        return File(users, mimeType, $"tenants.{exportTenantsRequest.FileType.ToString().ToLowerInvariant()}");
+        return File(tenants, mimeType, $"tenants.{exportTenantsRequest.FileType.ToString().ToLowerInvariant()}");
+    }
+
+    /// <summary>
+    /// Get tenant by ID
+    /// </summary>
+    /// <response code="200">Returns tenant with specified ID</response>
+    /// <response code="404">Tenant is not found</response>
+    /// <returns>Tenant with specified ID</returns>
+    [HasPermissions(Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite)]
+    [HttpGet("{id:guid}", Name = "GetTenant")]
+    [ProducesResponseType(typeof(TenantResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetTenantAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _tenantService.GetTenantByIdAsync(id, cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(tenant => Ok(tenant.Adapt<TenantResponse>()), notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Get activity history log by tenant ID
+    /// </summary>
+    /// <response code="200">Returns activity logs</response>
+    /// <response code="404">Tenant is not found</response>
+    /// <returns>Tenant with specified ID</returns>
+    [HasPermissions(Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite)]
+    [HttpGet("{id:guid}/activities", Name = "GetTenantActivityHistoryLog")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(TenantActivityHistoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetActivityHistoryAsync([FromRoute] Guid id, [FromQuery] TenantActivityHistoryRequest request, CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _tenantService.GetActivityHistoryAsync(id, request.Page, request.PageSize, cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            result => Ok(result.Adapt<TenantActivityHistoryResponse>()),
+            notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Update tenant details
+    /// </summary>
+    /// <response code="200">Returns updated tenant</response>
+    /// <response code="404">Tenant is not found</response>
+    /// <returns>Updated tenant</returns>
+    [HasPermissions(Common.Permissions.Tenants.ReadWrite)]
+    [HttpPatch("{id:guid}", Name = "UpdateTenant")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(TenantResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateTenantAsync([FromRoute] Guid id, [FromBody] UpdateTenantRequest request, CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _tenantService.UpdateTenantAsync(id, request.Adapt<UpdateTenantDto>(), cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            result => Ok(result.Adapt<TenantResponse>()),
+            notFound => NotFound());
     }
 }

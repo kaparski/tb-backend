@@ -7,24 +7,28 @@ using Moq;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Tenants;
-using TaxBeacon.API.Controllers.Tenants.Responses;
-using TaxBeacon.API.Controllers.Users.Requests;
+using TaxBeacon.API.Controllers.Departments;
+using TaxBeacon.API.Controllers.Departments.Requests;
+using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Tenant;
 
-public class TenantsControllerTest
+public class DepartmentsControllerTest
 {
     private readonly Mock<ITenantService> _tenantServiceMock;
-    private readonly TenantsController _controller;
+    private readonly Mock<ICurrentUserService> _currentServiceMock;
+    private readonly DepartmentsController _controller;
 
-    public TenantsControllerTest()
+    public DepartmentsControllerTest()
     {
         _tenantServiceMock = new();
-        _controller = new TenantsController(_tenantServiceMock.Object)
+        _currentServiceMock = new();
+
+        _controller = new DepartmentsController(_tenantServiceMock.Object, _currentServiceMock.Object)
         {
             ControllerContext = new ControllerContext()
             {
@@ -37,16 +41,22 @@ public class TenantsControllerTest
     }
 
     [Fact]
-    public async Task GetTenantList_ValidQuery_ReturnSuccessStatusCode()
+    public async Task GetDepartmentList_ValidQuery_ReturnSuccessStatusCode()
     {
         // Arrange
+
+        Guid tenantId = new();
+        _currentServiceMock
+            .Setup(x => x.TenantId)
+            .Returns(tenantId);
+
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _tenantServiceMock.Setup(p => p.GetTenantsAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<TenantDto>(0,
-                Enumerable.Empty<TenantDto>().AsQueryable()));
+        _tenantServiceMock.Setup(p => p.GetDepartmentsAsync(tenantId, query, default)).ReturnsAsync(
+            new QueryablePaging<DepartmentDto>(0,
+                Enumerable.Empty<DepartmentDto>().AsQueryable()));
 
         // Act
-        var actualResponse = await _controller.GetTenantList(query, default);
+        var actualResponse = await _controller.GetDepartmentList(query, default);
 
         // Arrange
         using (new AssertionScope())
@@ -56,21 +66,18 @@ public class TenantsControllerTest
             actualResult.Should().NotBeNull();
             actualResponse.Should().BeOfType<OkObjectResult>();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<TenantResponse>>();
+            actualResult?.Value.Should().BeOfType<QueryablePaging<DepartmentResponse>>();
         }
     }
 
     [Fact]
-    public async Task GetTenantList_InvalidQuery_ReturnBadRequest()
+    public async Task GetDepartmentList_InvalidQuery_ReturnBadRequest()
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _tenantServiceMock.Setup(p => p.GetTenantsAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<TenantDto>(0,
-                Enumerable.Empty<TenantDto>().AsQueryable()));
 
         // Act
-        var actualResponse = await _controller.GetTenantList(query, default);
+        var actualResponse = await _controller.GetDepartmentList(query, default);
 
         // Arrange
         using (new AssertionScope())
@@ -86,18 +93,25 @@ public class TenantsControllerTest
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
-    public async Task ExportTenantsAsync_ValidQuery_ReturnsFileContent(FileType fileType)
+    public async Task ExportDepartmentsAsync_ValidQuery_ReturnsFileContent(FileType fileType)
     {
         // Arrange
-        var request = new ExportTenantsRequest(fileType, "America/New_York");
+
+        Guid tenantId = new();
+        _currentServiceMock
+            .Setup(x => x.TenantId)
+            .Returns(tenantId);
+
+        var request = new ExportDepartmentsRequest(fileType, "America/New_York");
         _tenantServiceMock
-            .Setup(x => x.ExportTenantsAsync(
+            .Setup(x => x.ExportDepartmentsAsync(
+                tenantId,
                 It.IsAny<FileType>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<byte>());
 
         // Act
-        var actualResponse = await _controller.ExportTenantsAsync(request, default);
+        var actualResponse = await _controller.ExportDepartmentsAsync(request, default);
 
         // Assert
         using (new AssertionScope())
@@ -105,7 +119,7 @@ public class TenantsControllerTest
             actualResponse.Should().NotBeNull();
             var actualResult = actualResponse as FileContentResult;
             actualResult.Should().NotBeNull();
-            actualResult!.FileDownloadName.Should().Be($"tenants.{fileType.ToString().ToLowerInvariant()}");
+            actualResult!.FileDownloadName.Should().Be($"departments.{fileType.ToString().ToLowerInvariant()}");
             actualResult!.ContentType.Should().Be(fileType switch
             {
                 FileType.Csv => "text/csv",
@@ -116,10 +130,10 @@ public class TenantsControllerTest
     }
 
     [Fact]
-    public void GetTenantList_MarkedWithCorrectHasPermissionsAttribute()
+    public void GetDepartmentList_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetTenantList).Method;
+        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetDepartmentList).Method;
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -128,15 +142,15 @@ public class TenantsControllerTest
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Tenants.Read;Tenants.ReadWrite;Tenants.ReadExport");
+            hasPermissionsAttribute?.Policy.Should().Be("Departments.Read;Departments.ReadWrite;Departments.ReadExport");
         }
     }
 
     [Fact]
-    public void ExportTenantsAsync_MarkedWithCorrectHasPermissionsAttribute()
+    public void ExportDepartmentAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<ExportTenantsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportTenantsAsync).Method;
+        var methodInfo = ((Func<ExportDepartmentsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportDepartmentsAsync).Method;
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -145,7 +159,7 @@ public class TenantsControllerTest
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Tenants.ReadExport");
+            hasPermissionsAttribute?.Policy.Should().Be("Departments.ReadExport");
         }
     }
 }

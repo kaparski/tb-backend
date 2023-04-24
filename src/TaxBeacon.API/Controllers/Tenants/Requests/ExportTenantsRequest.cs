@@ -5,7 +5,7 @@ namespace TaxBeacon.API.Controllers.Users.Requests
 {
     public record ExportTenantsRequest(FileType FileType, string IanaTimeZone);
 
-    public class ExportTenantsRequestValidator: AbstractValidator<ExportUsersRequest>
+    public class ExportTenantsRequestValidator: AbstractValidator<ExportTenantsRequest>
     {
         public ExportTenantsRequestValidator()
         {

@@ -17,4 +17,18 @@ public class Tenant: BaseEntity
     public ICollection<TenantRole> TenantRoles { get; set; } = new HashSet<TenantRole>();
 
     public ICollection<TableFilter> TableFilters { get; set; } = new HashSet<TableFilter>();
+
+    public ICollection<Division> Divisions { get; set; } = new HashSet<Division>();
+
+    public ICollection<Department> Departments { get; set; } = new HashSet<Department>();
+
+    public ICollection<ServiceArea> ServiceAreas { get; set; } = new HashSet<ServiceArea>();
+
+    public ICollection<JobTitle> JobTitles { get; set; } = new HashSet<JobTitle>();
+
+    public ICollection<Team> Teams { get; set; } = new HashSet<Team>();
+
+    public ICollection<TenantActivityLog> TenantActivityLogs { get; set; } = new HashSet<TenantActivityLog>();
+
+    public ICollection<DivisionActivityLog> DivisionActivityLogs { get; set; } = new HashSet<DivisionActivityLog>();
 }
