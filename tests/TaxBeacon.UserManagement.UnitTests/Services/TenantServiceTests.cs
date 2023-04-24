@@ -481,6 +481,63 @@ public class TenantServiceTests
     }
 
     [Fact]
+    public async Task UpdateTenantAsync_TenantExists_ReturnsUpdatedTenantAndCapturesActivityLog()
+    {
+        // Arrange
+        var updateTenantDto = TestData.UpdateTenantDtoFaker.Generate();
+        var tenant = TestData.TestTenant.Generate();
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        var currentDate = DateTime.UtcNow;
+        _dateTimeServiceMock
+            .Setup(service => service.UtcNow)
+            .Returns(currentDate);
+
+        // Act
+        var actualResult = await _tenantService.UpdateTenantAsync(tenant.Id, updateTenantDto, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out var tenantDto, out _);
+            tenantDto.Should().NotBeNull();
+            tenantDto.Id.Should().Be(tenant.Id);
+            tenantDto.Name.Should().Be(updateTenantDto.Name);
+
+            var actualActivityLog = await _dbContextMock.TenantActivityLogs.LastOrDefaultAsync();
+            actualActivityLog.Should().NotBeNull();
+            actualActivityLog?.Date.Should().Be(currentDate);
+            actualActivityLog?.EventType.Should().Be(TenantEventType.TenantUpdatedEvent);
+            actualActivityLog?.TenantId.Should().Be(tenant.Id);
+
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Once);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateTenantAsync_TenantDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var updateTenantDto = TestData.UpdateTenantDtoFaker.Generate();
+        var tenant = TestData.TestTenant.Generate();
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _tenantService.UpdateTenantAsync(tenant.Id, updateTenantDto, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT1(out var tenantDto, out _);
+            tenantDto.Should().NotBeNull();
+        }
+    }
+
+    [Fact]
     public async Task SwitchToTenantAsync_UserIsNotSuperAdmin_Throws()
     {
         //Arrange
@@ -619,21 +676,8 @@ public class TenantServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
-        public static readonly Faker<UpdateUserDto> UpdateUserDtoFaker =
-            new Faker<UpdateUserDto>()
-                .RuleFor(dto => dto.FirstName, f => f.Name.FirstName())
-                .RuleFor(dto => dto.LastName, f => f.Name.LastName());
-
-        public static IEnumerable<object[]> UpdatedStatusInvalidData =>
-            new List<object[]>
-            {
-                new object[] { Status.Active, Guid.NewGuid() },
-                new object[] { Status.Deactivated, Guid.Empty }
-            };
-
-        public static readonly Faker<Role> TestRoles =
-            new Faker<Role>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
-                .RuleFor(u => u.Name, f => f.Name.JobTitle());
+        public static readonly Faker<UpdateTenantDto> UpdateTenantDtoFaker =
+            new Faker<UpdateTenantDto>()
+                .RuleFor(dto => dto.Name, f => f.Company.CompanyName());
     }
 }
