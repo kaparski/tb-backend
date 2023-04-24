@@ -7,7 +7,6 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Requests;
-using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
@@ -136,5 +135,33 @@ public class TenantsController: BaseController
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<TenantResponse>()),
             notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Log the fact that superAdmin has switched to a tenant
+    /// </summary>
+    /// <param name="newTenantId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>Returns success response</returns>
+    /// <response code="200">Log record successfully added</response>
+    /// <response code="401">User is unauthorized</response>
+    [HttpPost("switch", Name = "SwitchToTenant")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> SwitchToTenantAsync([FromBody] Guid? newTenantId,
+        CancellationToken cancellationToken)
+    {
+        Guid? oldTenantId = null;
+        if (Guid.TryParse(Request.Headers[Headers.SuperAdminTenantId], out var headerValue))
+        {
+            oldTenantId = headerValue;
+        }
+
+        if (oldTenantId != null || newTenantId != null)
+        {
+            await _tenantService.SwitchToTenantAsync(oldTenantId, newTenantId, cancellationToken);
+        }
+
+        return Ok();
     }
 }
