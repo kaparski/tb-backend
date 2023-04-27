@@ -13,6 +13,10 @@ using Gridify.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Divisions;
+using System.Text.Json;
+using TaxBeacon.DAL.Entities;
+using TaxBeacon.UserManagement.Models.Activities.Tenant;
+using TaxBeacon.UserManagement.Models.Activities;
 
 namespace TaxBeacon.UserManagement.Services
 {
@@ -147,6 +151,53 @@ namespace TaxBeacon.UserManagement.Services
             return division is null
                 ? new NotFound()
                 : division.Adapt<DivisionDetailsDto>();
+        }
+
+        public async Task<OneOf<DivisionDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto,
+    CancellationToken cancellationToken = default)
+        {
+            var division = await _context.Divisions.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+            if (division is null)
+            {
+                return new NotFound();
+            }
+
+            var previousValues = JsonSerializer.Serialize(division.Adapt<UpdateDivisionDto>());
+            var currentUserFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
+            var currentUserRoles = await _context
+                .TenantUserRoles
+                .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == _currentUserService.TenantId)
+                .GroupBy(r => 1, t => t.TenantRole.Role.Name)
+                .Select(group => string.Join(", ", group.Select(name => name)))
+                .FirstOrDefaultAsync(cancellationToken);
+            var eventDateTime = _dateTimeService.UtcNow;
+
+            await _context.DivisionActivityLogs.AddAsync(new DivisionActivityLog
+            {
+                DivisionId = id,
+                Date = eventDateTime,
+                Revision = 1,
+                EventType = DivisionEventType.DivisionUpdateEvent,
+                Event = JsonSerializer.Serialize(new DivisionUpdatedEvent(
+                    _currentUserService.UserId,
+                    currentUserRoles ?? string.Empty,
+                    currentUserFullName,
+                    eventDateTime,
+                    previousValues,
+                    JsonSerializer.Serialize(updateDivisionDto)))
+            }, cancellationToken);
+
+            updateDivisionDto.Adapt(division);
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("{dateTime} - Division ({divisionId}) was updated by {@userId}",
+                eventDateTime,
+                id,
+                _currentUserService.UserId);
+
+            return division.Adapt<DivisionDto>();
         }
     }
 }

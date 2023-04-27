@@ -18,5 +18,7 @@ namespace TaxBeacon.UserManagement.Services
             uint pageSize = 10, CancellationToken cancellationToken = default);
 
         Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId, CancellationToken cancellationToken = default);
+
+        Task<OneOf<DivisionDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default);
     }
 }

@@ -118,5 +118,25 @@ namespace TaxBeacon.API.Controllers.Tenants
                 result => Ok(result.Adapt<DivisionDetailsResponse>()),
                 _ => NotFound());
         }
+
+        /// <summary>
+        /// Update division details
+        /// </summary>
+        /// <response code="200">Returns updated division</response>
+        /// <response code="404">Division is not found</response>
+        /// <returns>Updated division</returns>
+        [HasPermissions(Common.Permissions.Divisions.ReadWrite)]
+        [HttpPatch("{id:guid}", Name = "UpdateDivision")]
+        [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+        [ProducesResponseType(typeof(DivisionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateTenantAsync([FromRoute] Guid id, [FromBody] UpdateDivisionRequest request, CancellationToken cancellationToken)
+        {
+            var resultOneOf = await _divisionsService.UpdateDivisionAsync(id, request.Adapt<UpdateDivisionDto>(), cancellationToken);
+
+            return resultOneOf.Match<IActionResult>(
+                result => Ok(result.Adapt<DivisionResponse>()),
+                notFound => NotFound());
+        }
     }
 }
