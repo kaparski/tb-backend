@@ -59,7 +59,7 @@ public class RoleServiceTests
         //Assert
         var listOfRoles = pageOfUsers.Query.ToList();
         listOfRoles.Count.Should().Be(1);
-        listOfRoles.Select(x => x.Name).Should().BeInAscendingOrder();
+        listOfRoles.Select(x => x.Name).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
         listOfRoles[0].AssignedUsersCount.Should().Be(2);
         pageOfUsers.Count.Should().Be(3);
     }

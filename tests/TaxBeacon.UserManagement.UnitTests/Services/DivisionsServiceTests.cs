@@ -112,7 +112,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                 pageOfDivisions.Should().NotBeNull();
                 var listOfDivisions = pageOfDivisions.Query.ToList();
                 listOfDivisions.Count.Should().Be(5);
-                listOfDivisions.Select(x => x.Name).Should().BeInAscendingOrder();
+                listOfDivisions.Select(x => x.Name).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
                 pageOfDivisions.Count.Should().Be(5);
             }
         }
@@ -371,7 +371,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                 divisionUsers.Count.Should().Be(5);
                 divisionUsers.Query.Count().Should().Be(1);
                 var users = divisionUsers.Query.ToList();
-                users.Should().BeInAscendingOrder(x => x.Email);
+                users.Should().BeInAscendingOrder((o1, o2) => string.Compare(o1.Email, o2.Email, StringComparison.InvariantCultureIgnoreCase));
                 users.Should().AllSatisfy(u => u.Department.Should().NotBeNullOrEmpty());
                 users.Should().AllSatisfy(u => u.JobTitle.Should().NotBeNullOrEmpty());
             }
@@ -405,7 +405,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                 divisionUsers.Count.Should().BeGreaterThan(0);
                 divisionUsers.Query.Count().Should().BeGreaterThan(0);
                 var users = divisionUsers.Query.ToList();
-                users.Should().BeInAscendingOrder(x => x.Department);
+                users.Should().BeInAscendingOrder((o1, o2) => string.Compare(o1.Department, o2.Department, StringComparison.InvariantCultureIgnoreCase));
                 users.Should().AllSatisfy(u => u.Department.Should().Be(users.First().Department));
             }
         }
