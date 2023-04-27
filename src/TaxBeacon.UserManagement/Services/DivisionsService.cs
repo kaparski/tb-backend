@@ -148,5 +148,26 @@ namespace TaxBeacon.UserManagement.Services
                 ? new NotFound()
                 : division.Adapt<DivisionDetailsDto>();
         }
+
+        public async Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
+        {
+            var tenantId = _currentUserService.TenantId;
+
+            var division = await _context.Divisions
+                .FirstOrDefaultAsync(d => d.Id == divisionId && d.TenantId == tenantId, cancellationToken);
+
+            if (division is null)
+            {
+                return new NotFound();
+            }
+
+            var users = await _context
+                .Users
+                .Where(u => u.DivisionId == divisionId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
+                .ProjectToType<DivisionUserDto>()
+                .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+            return users;
+        }
     }
 }

@@ -107,7 +107,9 @@ namespace TaxBeacon.API.Controllers.Tenants
         [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
         [HttpGet("{id:guid}", Name = "DivisionDetails")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-        [ProducesResponseType(typeof(IEnumerable<DivisionDetailsResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(QueryablePaging<DivisionDetailsResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDivisionDetails([FromRoute] Guid id,
             CancellationToken cancellationToken)
@@ -116,6 +118,35 @@ namespace TaxBeacon.API.Controllers.Tenants
 
             return oneOfDivisionDetails.Match<IActionResult>(
                 result => Ok(result.Adapt<DivisionDetailsResponse>()),
+                _ => NotFound());
+        }
+
+        /// <summary>
+        /// Get Users of Division
+        /// </summary>
+        /// <response code="200">Returns Division Users</response>
+        /// <response code="404">Division is not found</response>
+        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
+        [HttpGet("{id:guid}/users", Name = "DivisionUsers")]
+        [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(QueryablePaging<DivisionDetailsResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDivisionUsers([FromQuery] GridifyQuery query, [FromRoute] Guid id,
+            CancellationToken cancellationToken)
+        {
+            if (!query.IsValid<DivisionUserDto>())
+            {
+                // TODO: Add an object with errors that we can use to detail the answers
+                return BadRequest();
+            }
+
+            var oneOfDivisionUsers = await _divisionsService.GetDivisionUsersAsync(id, query, cancellationToken);
+
+            return oneOfDivisionUsers.Match<IActionResult>(
+                result => Ok(new QueryablePaging<DivisionUserResponse>(result.Count, result.Query.ProjectToType<DivisionUserResponse>())),
                 _ => NotFound());
         }
     }
