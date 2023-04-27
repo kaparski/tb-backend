@@ -59,7 +59,7 @@ public class RoleServiceTests
         //Assert
         var listOfRoles = pageOfUsers.Query.ToList();
         listOfRoles.Count.Should().Be(1);
-        listOfRoles.Select(x => x.Name).Should().BeInAscendingOrder();
+        listOfRoles.Select(x => x.Name).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
         listOfRoles[0].AssignedUsersCount.Should().Be(2);
         pageOfUsers.Count.Should().Be(3);
     }
@@ -113,7 +113,7 @@ public class RoleServiceTests
         pageOfUsers.Query.Count().Should().Be(5);
         var users = pageOfUsers.Query.ToList();
         users.Count.Should().Be(5);
-        users.Select(x => x.Email).Should().BeInAscendingOrder();
+        users.Select(x => x.Email).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
     }
 
     [Fact]

@@ -221,7 +221,7 @@ public class UserServiceTests
         pageOfUsers.Should().NotBeNull();
         var listOfUsers = pageOfUsers.Query.ToList();
         listOfUsers.Count.Should().Be(5);
-        listOfUsers.Select(x => x.Email).Should().BeInAscendingOrder();
+        listOfUsers.Select(x => x.Email).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
         pageOfUsers.Count.Should().Be(5);
     }
 

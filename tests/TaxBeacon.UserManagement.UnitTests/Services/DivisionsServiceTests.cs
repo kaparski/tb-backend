@@ -112,7 +112,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                 pageOfDivisions.Should().NotBeNull();
                 var listOfDivisions = pageOfDivisions.Query.ToList();
                 listOfDivisions.Count.Should().Be(5);
-                listOfDivisions.Select(x => x.Name).Should().BeInAscendingOrder();
+                listOfDivisions.Select(x => x.Name).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
                 pageOfDivisions.Count.Should().Be(5);
             }
         }
@@ -345,6 +345,93 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             result.TryPickT1(out _, out _).Should().BeTrue();
         }
 
+        [Fact]
+        public async Task GetDivisionUsersAsync_DivisionExists_ShouldReturnAscOrderOfUsersAndCorrectPage()
+        {
+            //Arrange
+            var division = TestData.TestDivision.Generate();
+            division.TenantId = TenantId;
+            division.Users = TestData.TestUser.Generate(5);
+            await _dbContextMock.Divisions.AddRangeAsync(division);
+            await _dbContextMock.SaveChangesAsync();
+            var query = new GridifyQuery
+            {
+                Page = 3,
+                PageSize = 2,
+                OrderBy = "email asc"
+            };
+
+            //Act
+            var resultOneOf = await _divisionsService.GetDivisionUsersAsync(division.Id, query);
+
+            //Assert
+            using (new AssertionScope())
+            {
+                resultOneOf.TryPickT0(out var divisionUsers, out _).Should().BeTrue();
+                divisionUsers.Count.Should().Be(5);
+                divisionUsers.Query.Count().Should().Be(1);
+                var users = divisionUsers.Query.ToList();
+                users.Should().BeInAscendingOrder((o1, o2) => string.Compare(o1.Email, o2.Email, StringComparison.InvariantCultureIgnoreCase));
+                users.Should().AllSatisfy(u => u.Department.Should().NotBeNullOrEmpty());
+                users.Should().AllSatisfy(u => u.JobTitle.Should().NotBeNullOrEmpty());
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionUsersAsync_DivisionExistsAndFilterApplied_ShouldReturnUsersWithSpecificDepartment()
+        {
+            //Arrange
+            var division = TestData.TestDivision.Generate();
+            division.TenantId = TenantId;
+            var listOfUsers = TestData.TestUser.Generate(5);
+            division.Users = listOfUsers;
+            await _dbContextMock.Divisions.AddRangeAsync(division);
+            await _dbContextMock.SaveChangesAsync();
+            var query = new GridifyQuery
+            {
+                Page = 1,
+                PageSize = 5,
+                OrderBy = "department asc",
+                Filter = "department=" + listOfUsers.First().Department!.Name
+            };
+
+            //Act
+            var resultOneOf = await _divisionsService.GetDivisionUsersAsync(division.Id, query);
+
+            //Assert
+            using (new AssertionScope())
+            {
+                resultOneOf.TryPickT0(out var divisionUsers, out _).Should().BeTrue();
+                divisionUsers.Count.Should().BeGreaterThan(0);
+                divisionUsers.Query.Count().Should().BeGreaterThan(0);
+                var users = divisionUsers.Query.ToList();
+                users.Should().BeInAscendingOrder((o1, o2) => string.Compare(o1.Department, o2.Department, StringComparison.InvariantCultureIgnoreCase));
+                users.Should().AllSatisfy(u => u.Department.Should().Be(users.First().Department));
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionUsersAsync_DivisionDoesNotExist_ShouldReturnNotFound()
+        {
+            //Arrange
+            var division = TestData.TestDivision.Generate();
+            division.TenantId = TenantId;
+            await _dbContextMock.Divisions.AddRangeAsync(division);
+            await _dbContextMock.SaveChangesAsync();
+            var query = new GridifyQuery
+            {
+                Page = 3,
+                PageSize = 2,
+                OrderBy = "email asc"
+            };
+
+            //Act
+            var resultOneOf = await _divisionsService.GetDivisionUsersAsync(new Guid(), query);
+
+            //Assert
+            resultOneOf.TryPickT1(out _, out _).Should().BeTrue();
+        }
+
         private static class TestData
         {
             public static readonly Faker<User> TestUser =
@@ -356,7 +443,26 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                     .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
                     .RuleFor(u => u.Email, f => f.Internet.Email())
                     .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
-                    .RuleFor(u => u.Status, f => f.PickRandom<Status>());
+                    .RuleFor(u => u.Status, f => f.PickRandom<Status>())
+                    .RuleFor(u => u.JobTitle, f =>
+                        new JobTitle
+                        {
+                            Name = f.Name.FirstName()
+                        })
+                    .RuleFor(u => u.Department, f =>
+                        new Department
+                        {
+                            Name = f.Name.FirstName()
+                        })
+                    .RuleFor(u => u.TenantUsers, (f, u) =>
+                        new List<TenantUser>()
+                        {
+                            new TenantUser()
+                            {
+                                UserId = u.Id,
+                                TenantId = TenantId
+                            }
+                        });
 
             public static readonly Faker<Division> TestDivision =
                 new Faker<Division>()

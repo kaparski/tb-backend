@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Bogus;
+using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
 using Microsoft.AspNetCore.Http;
@@ -18,12 +19,12 @@ using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Tenant;
 
-public class TenantsControllerTest
+public class TenantsControllerTests
 {
     private readonly Mock<ITenantService> _tenantServiceMock;
     private readonly TenantsController _controller;
 
-    public TenantsControllerTest()
+    public TenantsControllerTests()
     {
         _tenantServiceMock = new();
         _controller = new TenantsController(_tenantServiceMock.Object)
@@ -269,5 +270,79 @@ public class TenantsControllerTest
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
+    }
+
+    [Fact]
+    public async Task UpdateTenantAsync_TenantExistsAndRequestIsValid_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        var request = TestData.TestUpdateTenantRequest.Generate();
+        var tenantDto = TestData.TestTenant.Generate();
+        _tenantServiceMock.Setup(x => x.UpdateTenantAsync(It.Is<Guid>(id => id == tenantDto.Id), It.IsAny<UpdateTenantDto>(), default))
+            .ReturnsAsync(tenantDto);
+
+        // Act
+        var actualResponse = await _controller.UpdateTenantAsync(tenantDto.Id, request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<TenantResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateTenantAsync_TenantDoesNotExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        var request = TestData.TestUpdateTenantRequest.Generate();
+        _tenantServiceMock.Setup(x => x.UpdateTenantAsync(It.IsAny<Guid>(), It.IsAny<UpdateTenantDto>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.UpdateTenantAsync(Guid.NewGuid(), request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void UpdateTenantAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, UpdateTenantRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateTenantAsync).Method;
+        var permissions = new object[] { Common.Permissions.Tenants.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    private static class TestData
+    {
+        public static readonly Faker<TenantDto> TestTenant =
+            new Faker<TenantDto>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+
+        public static readonly Faker<UpdateTenantRequest> TestUpdateTenantRequest =
+            new Faker<UpdateTenantRequest>().CustomInstantiator(f => new UpdateTenantRequest(f.Company.CompanyName()));
     }
 }
