@@ -416,7 +416,6 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             //Arrange
             var division = TestData.TestDivision.Generate();
             division.TenantId = TenantId;
-            division.Users = TestData.TestUser.Generate(5);
             await _dbContextMock.Divisions.AddRangeAsync(division);
             await _dbContextMock.SaveChangesAsync();
             var query = new GridifyQuery
@@ -445,16 +444,25 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                     .RuleFor(u => u.Email, f => f.Internet.Email())
                     .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
                     .RuleFor(u => u.Status, f => f.PickRandom<Status>())
-                    .RuleFor(u => u.JobTitle, f => new JobTitle { Name = f.Name.FirstName() })
-                    .RuleFor(u => u.Department, f => new Department { Name = f.Name.FirstName() })
-                    .RuleFor(u => u.TenantUsers, (f, u) => new List<TenantUser>()
-                    {
-                        new TenantUser()
+                    .RuleFor(u => u.JobTitle, f =>
+                        new JobTitle
                         {
-                            UserId = u.Id,
-                            TenantId = TenantId
-                        }
-                    });
+                            Name = f.Name.FirstName()
+                        })
+                    .RuleFor(u => u.Department, f =>
+                        new Department
+                        {
+                            Name = f.Name.FirstName()
+                        })
+                    .RuleFor(u => u.TenantUsers, (f, u) =>
+                        new List<TenantUser>()
+                        {
+                            new TenantUser()
+                            {
+                                UserId = u.Id,
+                                TenantId = TenantId
+                            }
+                        });
 
             public static readonly Faker<Division> TestDivision =
                 new Faker<Division>()
