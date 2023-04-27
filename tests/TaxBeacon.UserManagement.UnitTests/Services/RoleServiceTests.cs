@@ -113,7 +113,7 @@ public class RoleServiceTests
         pageOfUsers.Query.Count().Should().Be(5);
         var users = pageOfUsers.Query.ToList();
         users.Count.Should().Be(5);
-        users.Select(x => x.Email).Should().BeInAscendingOrder();
+        users.Select(x => x.Email).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
     }
 
     [Fact]
