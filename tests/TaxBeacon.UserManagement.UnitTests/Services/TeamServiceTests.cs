@@ -98,7 +98,7 @@ public class TeamServiceTests
             pageOfTeams.Should().NotBeNull();
             var listOfTeams = pageOfTeams.Query.ToList();
             listOfTeams.Count.Should().Be(5);
-            listOfTeams.Select(x => x.Name).Should().BeInAscendingOrder();
+            listOfTeams.Select(x => x.Name).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
             pageOfTeams.Count.Should().Be(5);
         }
     }

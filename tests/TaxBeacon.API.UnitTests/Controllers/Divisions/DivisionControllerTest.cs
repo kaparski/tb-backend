@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
+using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -13,6 +14,7 @@ using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Models.MappingConfigs;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Divisions
@@ -35,6 +37,7 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
                     }
                 }
             };
+            TypeAdapterConfig.GlobalSettings.Scan(typeof(DivisionMappingConfig).Assembly);
         }
         [Fact]
         public async Task GetDivisionsList_ValidQuery_ReturnSuccessStatusCode()
@@ -186,6 +189,77 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
                 actualResult.Should().NotBeNull();
                 actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
 
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionUsers_ValidQuery_ShouldReturnSuccessStatusCode()
+        {
+            // Arrange
+            var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+            _divisionsServiceMock.Setup(p => p.GetDivisionUsersAsync(It.IsAny<Guid>(), query, default))
+                .ReturnsAsync(
+                new QueryablePaging<DivisionUserDto>(0,
+                    Enumerable.Empty<DivisionUserDto>().AsQueryable()));
+
+            // Act
+            var actualResponse = await _controller.GetDivisionUsers(query, new Guid(), default);
+
+            // Arrange
+            using (new AssertionScope())
+            {
+                var actualResult = actualResponse as OkObjectResult;
+                actualResponse.Should().NotBeNull();
+                actualResult.Should().NotBeNull();
+                actualResponse.Should().BeOfType<OkObjectResult>();
+                actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+                actualResult?.Value.Should().BeOfType<QueryablePaging<DivisionUserResponse>>();
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionUsers_InvalidQuery_ShouldReturnBadRequest()
+        {
+            // Arrange
+            var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
+            _divisionsServiceMock.Setup(p => p.GetDivisionUsersAsync(It.IsAny<Guid>(), query, default))
+                .ReturnsAsync(
+                new QueryablePaging<DivisionUserDto>(0,
+                    Enumerable.Empty<DivisionUserDto>().AsQueryable()));
+
+            // Act
+            var actualResponse = await _controller.GetDivisionUsers(query, new Guid(), default);
+
+            // Arrange
+            using (new AssertionScope())
+            {
+                var actualResult = actualResponse as BadRequestResult;
+                actualResponse.Should().NotBeNull();
+                actualResult.Should().NotBeNull();
+                actualResponse.Should().BeOfType<BadRequestResult>();
+                actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionUsers_DivisionDoesNotExist_ShouldReturnNotFoundStatusCode()
+        {
+            // Arrange
+            var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+            _divisionsServiceMock
+                .Setup(x => x.GetDivisionUsersAsync(It.IsAny<Guid>(), query, default))
+                .ReturnsAsync(new NotFound());
+
+            // Act
+            var actualResponse = await _controller.GetDivisionUsers(query, Guid.NewGuid(), default);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                var actualResult = actualResponse as NotFoundResult;
+                actualResponse.Should().NotBeNull();
+                actualResult.Should().NotBeNull();
+                actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
             }
         }
     }
