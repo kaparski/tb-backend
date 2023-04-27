@@ -10,7 +10,7 @@ namespace TaxBeacon.DAL.Configurations
             department
                 .Property(d => d.Name)
                 .HasColumnType("nvarchar")
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .IsRequired();
 
             department
