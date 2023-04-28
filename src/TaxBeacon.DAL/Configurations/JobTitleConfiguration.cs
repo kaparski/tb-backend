@@ -11,7 +11,7 @@ namespace TaxBeacon.DAL.Configurations
             jobTitle
                 .Property(jt => jt.Name)
                 .HasColumnType("nvarchar")
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .IsRequired();
 
             jobTitle
