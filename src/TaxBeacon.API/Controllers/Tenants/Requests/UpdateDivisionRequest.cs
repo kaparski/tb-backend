@@ -14,8 +14,8 @@ namespace TaxBeacon.API.Controllers.Tenants.Requests
                 .WithMessage("The division name must contain no more than 100 characters");
 
             RuleFor(x => x.Description)
-                .MaximumLength(256)
-                .WithMessage("The division description must contain no more than 256 characters");
+                .MaximumLength(200)
+                .WithMessage("The division description must contain no more than 200 characters");
         }
     }
 }

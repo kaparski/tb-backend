@@ -527,7 +527,7 @@ public class TenantServiceTests
         await _dbContextMock.SaveChangesAsync();
 
         // Act
-        var actualResult = await _tenantService.UpdateTenantAsync(tenant.Id, updateTenantDto, default);
+        var actualResult = await _tenantService.UpdateTenantAsync(Guid.NewGuid(), updateTenantDto, default);
 
         // Assert
         using (new AssertionScope())

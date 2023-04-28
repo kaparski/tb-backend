@@ -77,7 +77,7 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions.Requests
             //Assert
             actualResult
                 .ShouldHaveValidationErrorFor(r => r.Description)
-                .WithErrorMessage("The division description must contain no more than 256 characters");
+                .WithErrorMessage("The division description must contain no more than 200 characters");
             actualResult.ShouldNotHaveValidationErrorFor(r => r.Name);
         }
     }

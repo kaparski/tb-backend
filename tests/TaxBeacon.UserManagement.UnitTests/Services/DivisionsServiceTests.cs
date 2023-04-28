@@ -466,16 +466,17 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             using (new AssertionScope())
             {
                 (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-                actualResult.TryPickT0(out var tenantDto, out _);
-                tenantDto.Should().NotBeNull();
-                tenantDto.Id.Should().Be(division.Id);
-                tenantDto.Name.Should().Be(updateDivisionDto.Name);
+                actualResult.TryPickT0(out var divisionDto, out _);
+                divisionDto.Should().NotBeNull();
+                divisionDto.Id.Should().Be(division.Id);
+                divisionDto.Name.Should().Be(updateDivisionDto.Name);
 
                 var actualActivityLog = await _dbContextMock.DivisionActivityLogs.LastOrDefaultAsync();
                 actualActivityLog.Should().NotBeNull();
                 actualActivityLog?.Date.Should().Be(currentDate);
                 actualActivityLog?.EventType.Should().Be(DivisionEventType.DivisionUpdatedEvent);
                 actualActivityLog?.TenantId.Should().Be(TenantId);
+                actualActivityLog?.DivisionId.Should().Be(division.Id);
 
                 _dateTimeServiceMock
                     .Verify(ds => ds.UtcNow, Times.Once);
@@ -492,7 +493,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             await _dbContextMock.SaveChangesAsync();
 
             // Act
-            var actualResult = await _divisionsService.UpdateDivisionAsync(division.Id, updateDivisionDto, default);
+            var actualResult = await _divisionsService.UpdateDivisionAsync(Guid.NewGuid(), updateDivisionDto, default);
 
             // Assert
             using (new AssertionScope())
