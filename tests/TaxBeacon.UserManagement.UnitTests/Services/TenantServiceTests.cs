@@ -446,20 +446,83 @@ public class TenantServiceTests
     }
 
     [Fact]
-
-    public async Task GetServiceAreasAsync_ReturnsServiceAreas()
+    public async Task GetServiceAreasAsync_TenantIdExistsAndQueryIsValidOrderByNameAscending_ReturnsServiceAreas()
     {
         // Arrange
         var items = TestData.TestServiceArea.Generate(5);
         await _dbContextMock.ServiceAreas.AddRangeAsync(items);
         await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name asc", };
 
         // Act
-        var result = await _tenantService.GetServiceAreasAsync(default);
+        var actualResult = await _tenantService.GetServiceAreasAsync(TestData.TestTenantId, query, default);
 
-        // Assert
+        // Arrange
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
+            pageOfServiceAreas.Should().NotBeNull();
+            pageOfServiceAreas.Count.Should().Be(5);
+            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
+            listOfServiceAreas.Count.Should().Be(5);
+            listOfServiceAreas.Select(x => x.Name).Should().BeInAscendingOrder();
+        }
+    }
 
-        result.Should().HaveCount(5);
+    [Fact]
+    public async Task GetServiceAreasAsync_TenantIdExistsAndQueryIsValidOrderByNameDescending_ReturnsServiceAreas()
+    {
+        // Arrange
+        var items = TestData.TestServiceArea.Generate(5);
+        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name desc", };
+
+        // Act
+        var actualResult = await _tenantService.GetServiceAreasAsync(TestData.TestTenantId, query, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
+            pageOfServiceAreas.Should().NotBeNull();
+            pageOfServiceAreas.Count.Should().Be(5);
+            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
+            listOfServiceAreas.Count.Should().Be(5);
+            listOfServiceAreas.Select(x => x.Name).Should().BeInDescendingOrder();
+        }
+    }
+
+    [Fact]
+    public async Task GetServiceAreasAsync_TenantIdExistsAndPageNumberIsOutOfRange_ReturnsNotFound()
+    {
+        // Arrange
+        var items = TestData.TestServiceArea.Generate(5);
+        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 2, PageSize = 5, OrderBy = "name asc", };
+
+        // Act
+        var actualResult = await _tenantService.GetServiceAreasAsync(TestData.TestTenantId, query, default);
+
+        // Arrange
+        actualResult.TryPickT1(out var _, out var _).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetServiceAreasAsync_TenantIdDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var items = TestData.TestServiceArea.Generate(5);
+        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 2, PageSize = 5, OrderBy = "name asc", };
+
+        // Act
+        var actualResult = await _tenantService.GetServiceAreasAsync(Guid.NewGuid(), query, default);
+
+        // Arrange
+        actualResult.TryPickT1(out var _, out var _).Should().BeTrue();
     }
 
     [Fact]
@@ -650,7 +713,8 @@ public class TenantServiceTests
             new Faker<ServiceArea>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow)
+                .RuleFor(t => t.TenantId, f => TestTenantId);
 
         public static readonly Faker<Department> TestDepartment =
             new Faker<Department>()
