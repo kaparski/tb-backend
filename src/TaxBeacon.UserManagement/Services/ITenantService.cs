@@ -23,7 +23,9 @@ public interface ITenantService
         FileType fileType,
         CancellationToken cancellationToken);
 
-    Task<IReadOnlyCollection<ServiceAreaDto>> GetServiceAreasAsync(CancellationToken cancellationToken = default);
+    Task<OneOf<QueryablePaging<ServiceAreaDto>, NotFound>> GetServiceAreasAsync(Guid tenantId,
+        GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default);
 
     Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken);
 

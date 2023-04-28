@@ -149,15 +149,29 @@ public class TenantService: ITenantService
         return _listToFileConverters[fileType].Convert(exportDepartments);
     }
 
-    public async Task<IReadOnlyCollection<ServiceAreaDto>> GetServiceAreasAsync(CancellationToken cancellationToken = default)
+    public async Task<OneOf<QueryablePaging<ServiceAreaDto>, NotFound>> GetServiceAreasAsync(Guid tenantId,
+        GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
     {
-        var items = await _context
+        var serviceAreas = await _context
             .ServiceAreas
-            .AsNoTracking()
-            .ProjectToType<ServiceAreaDto>()
-            .ToListAsync(cancellationToken);
+            .Where(d => d.TenantId == tenantId)
+            .Select(d => new ServiceAreaDto()
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                AssignedUsersCount = d.Users.Count(),
+                Department = d.Department == null ? string.Empty : d.Department.Name
+            })
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
-        return items;
+        if (gridifyQuery.Page == 1 && serviceAreas.Query.Any())
+        {
+            return serviceAreas;
+        }
+
+        return new NotFound();
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
