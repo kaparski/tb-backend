@@ -159,7 +159,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(DivisionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateTenantAsync([FromRoute] Guid id, [FromBody] UpdateDivisionRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateDivisionAsync([FromRoute] Guid id, [FromBody] UpdateDivisionRequest request, CancellationToken cancellationToken)
         {
             var resultOneOf = await _divisionsService.UpdateDivisionAsync(id, request.Adapt<UpdateDivisionDto>(), cancellationToken);
 

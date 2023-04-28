@@ -176,9 +176,10 @@ namespace TaxBeacon.UserManagement.Services
             await _context.DivisionActivityLogs.AddAsync(new DivisionActivityLog
             {
                 DivisionId = id,
+                TenantId = _currentUserService.TenantId,
                 Date = eventDateTime,
                 Revision = 1,
-                EventType = DivisionEventType.DivisionUpdateEvent,
+                EventType = DivisionEventType.DivisionUpdatedEvent,
                 Event = JsonSerializer.Serialize(new DivisionUpdatedEvent(
                     _currentUserService.UserId,
                     currentUserRoles ?? string.Empty,
