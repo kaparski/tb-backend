@@ -1,10 +1,13 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.Tenants.Requests;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Services;
@@ -16,12 +19,12 @@ namespace TaxBeacon.API.Controllers.Departments;
 [Authorize]
 public class DepartmentsController: BaseController
 {
-    private readonly ITenantService _tenantService;
+    private readonly IDepartmentService _service;
     private readonly ICurrentUserService _currentUserService;
 
-    public DepartmentsController(ITenantService tenantService, ICurrentUserService currentUserService)
+    public DepartmentsController(IDepartmentService departmentService, ICurrentUserService currentUserService)
     {
-        _tenantService = tenantService;
+        _service = departmentService;
         _currentUserService = currentUserService;
     }
 
@@ -53,7 +56,7 @@ public class DepartmentsController: BaseController
             return BadRequest();
         }
 
-        var departmentsOneOf = await _tenantService.GetDepartmentsAsync(_currentUserService.TenantId, query, cancellationToken);
+        var departmentsOneOf = await _service.GetDepartmentsAsync(_currentUserService.TenantId, query, cancellationToken);
         return departmentsOneOf.Match<IActionResult>(
             departments => Ok(new QueryablePaging<DepartmentResponse>(departments.Count, departments.Query.ProjectToType<DepartmentResponse>())),
             notFound => NotFound());
@@ -78,8 +81,68 @@ public class DepartmentsController: BaseController
     {
         var mimeType = exportDepartmentsRequest.FileType.ToMimeType();
 
-        var departments = await _tenantService.ExportDepartmentsAsync(_currentUserService.TenantId, exportDepartmentsRequest.FileType, cancellationToken);
+        var departments = await _service.ExportDepartmentsAsync(_currentUserService.TenantId, exportDepartmentsRequest.FileType, cancellationToken);
 
         return File(departments, mimeType, $"departments.{exportDepartmentsRequest.FileType.ToString().ToLowerInvariant()}");
+    }
+
+    /// <summary>
+    /// Get Department's Activity History
+    /// </summary>
+    /// <response code="200">Returns activity logs</response>
+    /// <response code="404">Department is not found</response>
+    [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
+    [HttpGet("{id:guid}/activities", Name = "DepartmentActivityHistory")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<DepartmentActivityHistoryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ActivitiesHistory([FromRoute] Guid id, [FromQuery] DepartmentActivityHistoryRequest request,
+        CancellationToken cancellationToken)
+    {
+        var activities = await _service.GetActivityHistoryAsync(id, request.Page, request.PageSize, cancellationToken);
+
+        return activities.Match<IActionResult>(
+            result => Ok(result.Adapt<DepartmentActivityHistoryResponse>()),
+            notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Get Department By Id
+    /// </summary>
+    /// <response code="200">Returns Department Details</response>
+    /// <response code="404">Department is not found</response>
+    [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
+    [HttpGet("{id:guid}", Name = "DepartmentDetails")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<DepartmentResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetDepartmentDetails([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var oneOfDepartmentDetails = await _service.GetDepartmentDetailsAsync(id, cancellationToken);
+
+        return oneOfDepartmentDetails.Match<IActionResult>(
+            result => Ok(result.Adapt<DepartmentResponse>()),
+            _ => NotFound());
+    }
+
+    /// <summary>
+    /// Update department details
+    /// </summary>
+    /// <response code="200">Returns updated department</response>
+    /// <response code="404">Department is not found</response>
+    /// <returns>Updated department</returns>
+    [HasPermissions(Common.Permissions.Departments.ReadWrite)]
+    [HttpPatch("{id:guid}", Name = "UpdateDepartment")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(DepartmentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateDepartmentAsync([FromRoute] Guid id, [FromBody] UpdateDepartmentRequest request, CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _service.UpdateDepartmentAsync(id, request.Adapt<UpdateDepartmentDto>(), cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            result => Ok(result.Adapt<DepartmentResponse>()),
+            notFound => NotFound());
     }
 }

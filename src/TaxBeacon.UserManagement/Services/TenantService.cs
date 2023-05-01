@@ -297,4 +297,11 @@ public class TenantService: ITenantService
             oldTenantId,
             newTenantId);
     }
+
+    public async Task<OneOf<DepartmentDto, NotFound>> GetDepartmentDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var tenant = await _context.Departments.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+        return tenant is null ? new NotFound() : tenant.Adapt<DepartmentDto>();
+    }
 }

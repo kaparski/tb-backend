@@ -19,16 +19,16 @@ namespace TaxBeacon.API.UnitTests.Controllers.Tenant;
 
 public class DepartmentsControllerTest
 {
-    private readonly Mock<ITenantService> _tenantServiceMock;
-    private readonly Mock<ICurrentUserService> _currentServiceMock;
+    private readonly Mock<IDepartmentService> _serviceMock;
+    private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly DepartmentsController _controller;
 
     public DepartmentsControllerTest()
     {
-        _tenantServiceMock = new();
-        _currentServiceMock = new();
+        _serviceMock = new();
+        _currentUserServiceMock = new();
 
-        _controller = new DepartmentsController(_tenantServiceMock.Object, _currentServiceMock.Object)
+        _controller = new DepartmentsController(_serviceMock.Object, _currentUserServiceMock.Object)
         {
             ControllerContext = new ControllerContext()
             {
@@ -46,12 +46,12 @@ public class DepartmentsControllerTest
         // Arrange
 
         Guid tenantId = new();
-        _currentServiceMock
+        _currentUserServiceMock
             .Setup(x => x.TenantId)
             .Returns(tenantId);
 
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _tenantServiceMock.Setup(p => p.GetDepartmentsAsync(tenantId, query, default)).ReturnsAsync(
+        _serviceMock.Setup(p => p.GetDepartmentsAsync(tenantId, query, default)).ReturnsAsync(
             new QueryablePaging<DepartmentDto>(0,
                 Enumerable.Empty<DepartmentDto>().AsQueryable()));
 
@@ -98,12 +98,12 @@ public class DepartmentsControllerTest
         // Arrange
 
         Guid tenantId = new();
-        _currentServiceMock
+        _currentUserServiceMock
             .Setup(x => x.TenantId)
             .Returns(tenantId);
 
         var request = new ExportDepartmentsRequest(fileType, "America/New_York");
-        _tenantServiceMock
+        _serviceMock
             .Setup(x => x.ExportDepartmentsAsync(
                 tenantId,
                 It.IsAny<FileType>(),

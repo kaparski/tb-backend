@@ -16,5 +16,7 @@ public class DepartmentDto
 
     public string ServiceAreas { get; set; } = null!;
 
+    public Guid? DivisionId { get; set; }
+
     public string Division { get; set; } = null!;
 }

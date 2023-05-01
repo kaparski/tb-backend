@@ -9,6 +9,8 @@ public class DepartmentResponse
 
     public string Description { get; set; } = null!;
 
+    public Guid? DivisionId { get; set; }
+
     public string Division { get; set; } = null!;
 
     public string ServiceAreas { get; set; } = null!;

@@ -80,11 +80,13 @@ public class UserService: IUserService
             user.Id);
 
         // TODO: make a seeder for roles and use roleId instead of role name 
-        return new LoginUserDto(
+        var dto = new LoginUserDto(
             user.Id,
             user.FullName,
             await GetUserPermissionsAsync(user.Id, cancellationToken),
             await HasNoTenantRoleAsync(user.Id, "Super admin", cancellationToken));
+
+        return dto;
     }
 
     public async Task<OneOf<QueryablePaging<UserDto>, NotFound>> GetUsersAsync(GridifyQuery gridifyQuery,
