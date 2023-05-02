@@ -6,12 +6,17 @@ using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
+using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Models.Export;
+using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -22,9 +27,18 @@ public class TeamService: ITeamService
     private readonly ITaxBeaconDbContext _context;
     private readonly IDateTimeFormatter _dateTimeFormatter;
     private readonly IDateTimeService _dateTimeService;
+    private readonly IImmutableDictionary<(TeamEventType, uint), ITeamActivityFactory> _teamActivityFactories;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
 
-    public TeamService(ICurrentUserService currentUserService, ILogger<TeamService> logger, ITaxBeaconDbContext context, IDateTimeFormatter dateTimeFormatter, IDateTimeService dateTimeService, IEnumerable<IListToFileConverter> listToFileConverters)
+    public TeamService(
+        ICurrentUserService currentUserService,
+        ILogger<TeamService> logger,
+        ITaxBeaconDbContext context,
+        IDateTimeFormatter dateTimeFormatter,
+        IDateTimeService dateTimeService,
+        IEnumerable<IListToFileConverter> listToFileConverters,
+        IEnumerable<ITeamActivityFactory> teamActivityFactories
+        )
     {
         _currentUserService = currentUserService;
         _logger = logger;
@@ -33,6 +47,8 @@ public class TeamService: ITeamService
         _dateTimeService = dateTimeService;
         _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
+        _teamActivityFactories = teamActivityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
+                                        ?? ImmutableDictionary<(TeamEventType, uint), ITeamActivityFactory>.Empty;
     }
 
     public async Task<OneOf<QueryablePaging<TeamDto>, NotFound>> GetTeamsAsync(GridifyQuery gridifyQuery,
@@ -79,5 +95,97 @@ public class TeamService: ITeamService
             _currentUserService.UserId);
 
         return _listToFileConverters[fileType].Convert(exportTeams);
+    }
+
+    public async Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid teamId, uint page = 1,
+    uint pageSize = 10, CancellationToken cancellationToken = default)
+    {
+        page = page == 0 ? 1 : page;
+        pageSize = pageSize == 0 ? 10 : pageSize;
+
+        var team = await _context.Teams
+            .Where(d => d.Id == teamId && d.TenantId == _currentUserService.TenantId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (team is null)
+        {
+            return new NotFound();
+        }
+
+        var teamActivityLogs = _context.TeamActivityLogs
+            .Where(ua => ua.TeamId == teamId && ua.TenantId == _currentUserService.TenantId);
+
+        var count = await teamActivityLogs.CountAsync(cancellationToken: cancellationToken);
+
+        var pageCount = (uint)Math.Ceiling((double)count / pageSize);
+
+        var activities = await teamActivityLogs
+            .OrderByDescending(x => x.Date)
+            .Skip((int)((page - 1) * pageSize))
+            .Take((int)pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new ActivityDto(pageCount,
+            activities.Select(x => _teamActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
+    }
+
+    public async Task<OneOf<TeamDetailsDto, NotFound>> GetTeamDetailsAsync(Guid teamId, CancellationToken cancellationToken = default)
+    {
+        var team = await _context
+            .Teams
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == teamId, cancellationToken);
+
+        return team is null
+            ? new NotFound()
+            : team.Adapt<TeamDetailsDto>();
+    }
+
+    public async Task<OneOf<TeamDto, NotFound>> UpdateTeamAsync(Guid id, UpdateTeamDto updateTeamDto,
+CancellationToken cancellationToken = default)
+    {
+        var team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+        if (team is null)
+        {
+            return new NotFound();
+        }
+
+        var previousValues = JsonSerializer.Serialize(team.Adapt<UpdateTeamDto>());
+        var currentUserFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
+        var currentUserRoles = await _context
+            .TenantUserRoles
+            .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == _currentUserService.TenantId)
+            .GroupBy(r => 1, t => t.TenantRole.Role.Name)
+            .Select(group => string.Join(", ", group.Select(name => name)))
+            .FirstOrDefaultAsync(cancellationToken);
+        var eventDateTime = _dateTimeService.UtcNow;
+
+        await _context.TeamActivityLogs.AddAsync(new TeamActivityLog
+        {
+            TeamId = id,
+            TenantId = _currentUserService.TenantId,
+            Date = eventDateTime,
+            Revision = 1,
+            EventType = TeamEventType.TeamUpdatedEvent,
+            Event = JsonSerializer.Serialize(new DivisionUpdatedEvent(
+                _currentUserService.UserId,
+                currentUserRoles ?? string.Empty,
+                currentUserFullName,
+                eventDateTime,
+                previousValues,
+                JsonSerializer.Serialize(updateTeamDto)))
+        }, cancellationToken);
+
+        updateTeamDto.Adapt(team);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Team ({teamId}) was updated by {@userId}",
+            eventDateTime,
+            id,
+            _currentUserService.UserId);
+
+        return team.Adapt<TeamDto>();
     }
 }

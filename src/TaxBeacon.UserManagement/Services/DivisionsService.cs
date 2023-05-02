@@ -1,22 +1,21 @@
 ﻿using Gridify;
+using Gridify.EntityFramework;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using OneOf.Types;
 using OneOf;
+using OneOf.Types;
 using System.Collections.Immutable;
+using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
-using Gridify.EntityFramework;
-using Microsoft.EntityFrameworkCore;
-using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Services.Activities.Divisions;
-using System.Text.Json;
-using TaxBeacon.DAL.Entities;
-using TaxBeacon.UserManagement.Models.Activities.Tenant;
 using TaxBeacon.UserManagement.Models.Activities;
+using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement.Services
 {
@@ -154,7 +153,7 @@ namespace TaxBeacon.UserManagement.Services
         }
 
         public async Task<OneOf<DivisionDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto,
-    CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
         {
             var division = await _context.Divisions.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 

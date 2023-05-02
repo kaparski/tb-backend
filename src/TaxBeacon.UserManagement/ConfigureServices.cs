@@ -4,7 +4,6 @@ using System.Reflection;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
-using TaxBeacon.UserManagement.Services.Activities.Divisions;
 using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement;
@@ -30,6 +29,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IUserActivityFactory, UnassignRolesEventFactory>();
 
         serviceCollection.AddScoped<ITeamService, TeamService>();
+        serviceCollection.AddScoped<ITeamActivityFactory, TeamUpdatedEventFactory>();
 
         serviceCollection.AddScoped<ITenantActivityFactory, TenantEnteredEventFactory>();
         serviceCollection.AddScoped<ITenantActivityFactory, TenantExitedEventFactory>();
