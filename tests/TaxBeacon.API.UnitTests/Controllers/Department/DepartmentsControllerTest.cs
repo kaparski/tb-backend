@@ -137,6 +137,15 @@ public class DepartmentsControllerTest
     {
         // Arrange
         var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetDepartmentList).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Departments.Read,
+            Common.Permissions.Departments.ReadWrite,
+            Common.Permissions.Departments.ReadExport,
+            Common.Permissions.ServiceAreas.Read,
+            Common.Permissions.ServiceAreas.ReadWrite,
+            Common.Permissions.ServiceAreas.ReadExport
+        };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -145,7 +154,7 @@ public class DepartmentsControllerTest
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Departments.Read;Departments.ReadWrite;Departments.ReadExport");
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 

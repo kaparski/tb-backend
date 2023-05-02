@@ -229,6 +229,13 @@ public class RoleServiceTests
         await _dbContextMock.Users.AddRangeAsync(usersToAssign);
         await _dbContextMock.Users.AddAsync(currentUser);
         await _dbContextMock.Roles.AddAsync(role);
+
+        await _dbContextMock.TenantUsers.AddRangeAsync(usersToAssign.Select(user => new TenantUser
+        {
+            TenantId = tenant.Id,
+            UserId = user.Id,
+            User = user
+        }));
         await _dbContextMock.TenantRoles.AddAsync(new TenantRole
         {
             TenantId = tenant.Id,
@@ -237,7 +244,8 @@ public class RoleServiceTests
         await _dbContextMock.TenantUsers.AddAsync(new TenantUser
         {
             TenantId = tenant.Id,
-            UserId = currentUser.Id
+            UserId = currentUser.Id,
+            User = currentUser
         });
         await _dbContextMock.TenantUserRoles.AddAsync(new TenantUserRole
         {
@@ -407,7 +415,8 @@ public class RoleServiceTests
                 .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
-                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>())
+                .RuleFor(u => u.IsDeleted, f => false);
 
         public static readonly Faker<Role> TestRole =
             new Faker<Role>()

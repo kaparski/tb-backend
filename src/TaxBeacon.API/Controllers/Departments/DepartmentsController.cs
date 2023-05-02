@@ -38,7 +38,10 @@ public class DepartmentsController: BaseController
     [HasPermissions(
         Common.Permissions.Departments.Read,
         Common.Permissions.Departments.ReadWrite,
-        Common.Permissions.Departments.ReadExport)]
+        Common.Permissions.Departments.ReadExport,
+        Common.Permissions.ServiceAreas.Read,
+        Common.Permissions.ServiceAreas.ReadWrite,
+        Common.Permissions.ServiceAreas.ReadExport)]
     [HttpGet(Name = "GetDepartments")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<DepartmentResponse>), StatusCodes.Status200OK)]

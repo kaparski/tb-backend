@@ -35,6 +35,8 @@ public static class ConfigureServices
         serviceCollection.AddScoped<ITenantActivityFactory, TenantExitedEventFactory>();
         serviceCollection.AddScoped<ITenantActivityFactory, TenantUpdatedEventFactory>();
 
+        serviceCollection.AddScoped<IDivisionActivityFactory, DivisionUpdatedEventFactory>();
+
         serviceCollection.AddScoped<IDepartmentActivityFactory, DepartmentUpdatedEventFactory>();
 
         return serviceCollection;

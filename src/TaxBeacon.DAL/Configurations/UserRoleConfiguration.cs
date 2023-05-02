@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.DAL.Configurations;
 
@@ -20,5 +21,8 @@ public class UserRoleConfiguration: IEntityTypeConfiguration<UserRole>
 
         userRole
             .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+        userRole.HasQueryFilter(ur => ur.User.IsDeleted == null || !ur.User.IsDeleted.Value);
+
     }
 }

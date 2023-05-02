@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.DAL.Configurations;
 
@@ -19,5 +20,8 @@ public class TenantUserRoleConfiguration: IEntityTypeConfiguration<TenantUserRol
             .OnDelete(DeleteBehavior.NoAction);
 
         roleTenantUser.HasKey(tur => new { tur.TenantId, tur.RoleId, tur.UserId });
+
+        roleTenantUser.HasQueryFilter(tur => tur.TenantUser.User.IsDeleted == null || !tur.TenantUser.User.IsDeleted.Value);
+
     }
 }

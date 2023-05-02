@@ -3,4 +3,5 @@
 public enum DivisionEventType
 {
     None = 0,
+    DivisionUpdatedEvent = 1,
 }

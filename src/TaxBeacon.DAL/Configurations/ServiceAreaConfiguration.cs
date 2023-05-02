@@ -10,7 +10,7 @@ namespace TaxBeacon.DAL.Configurations
             serviceArea
                 .Property(sa => sa.Name)
                 .HasColumnType("nvarchar")
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .IsRequired();
 
             serviceArea

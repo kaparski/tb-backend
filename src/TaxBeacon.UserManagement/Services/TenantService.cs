@@ -16,6 +16,7 @@ using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Tenant;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models.Activities.Tenant;
+using TaxBeacon.UserManagement.Models.Export;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -90,15 +91,115 @@ public class TenantService: ITenantService
         return tenant is null ? new NotFound() : tenant.Adapt<TenantDto>();
     }
 
-    public async Task<IReadOnlyCollection<ServiceAreaDto>> GetServiceAreasAsync(CancellationToken cancellationToken = default)
+    public async Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(Guid tenantId,
+        GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default)
     {
-        var items = await _context
-            .ServiceAreas
+        var departments = await _context
+            .Departments
+            .Where(d => d.TenantId == tenantId)
+            .Select(d => new DepartmentDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                AssignedUsersCount = d.Users.Count(),
+                Division = d.Division == null ? string.Empty : d.Division.Name,
+                ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
+                ServiceArea = d.ServiceAreas.Select(sa => sa.Name)
+                    .GroupBy(sa => 1)
+                    .Select(g => string.Join(string.Empty, g.Select(s => "|" + s + "|")))
+                    .FirstOrDefault() ?? string.Empty
+            })
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        if (gridifyQuery.Page == 1 || departments.Query.Any())
+        {
+            return departments;
+        }
+
+        return new NotFound();
+    }
+
+    public async Task<byte[]> ExportDepartmentsAsync(Guid tenantId,
+        FileType fileType,
+        CancellationToken cancellationToken)
+    {
+        var exportDepartments = await _context
+            .Departments
             .AsNoTracking()
-            .ProjectToType<ServiceAreaDto>()
+            .Where(d => d.TenantId == tenantId)
+            .Select(d => new DepartmentExportModel
+            {
+                Name = d.Name,
+                Description = d.Description,
+                Division = d.Division == null ? string.Empty : d.Division.Name,
+                ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
+                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                AssignedUsersCount = d.Users.Count()
+            })
             .ToListAsync(cancellationToken);
 
-        return items;
+        exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+
+        _logger.LogInformation("{dateTime} - Departments export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(exportDepartments);
+    }
+
+    public async Task<OneOf<QueryablePaging<ServiceAreaDto>, NotFound>> GetServiceAreasAsync(Guid tenantId,
+        GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
+    {
+        var serviceAreas = await _context
+            .ServiceAreas
+            .Where(d => d.TenantId == tenantId)
+            .Select(d => new ServiceAreaDto()
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                AssignedUsersCount = d.Users.Count(),
+                Department = d.Department == null ? string.Empty : d.Department.Name
+            })
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        if (gridifyQuery.Page == 1 || serviceAreas.Query.Any())
+        {
+            return serviceAreas;
+        }
+
+        return new NotFound();
+    }
+
+    public async Task<byte[]> ExportServiceAreasAsync(Guid tenantId,
+        FileType fileType,
+        CancellationToken cancellationToken)
+    {
+        var exportServiceAreas = await _context
+            .ServiceAreas
+            .AsNoTracking()
+            .Where(sa => sa.TenantId == tenantId)
+            .Select(sa => new ServiceAreaExportModel
+            {
+                Name = sa.Name,
+                Description = sa.Description,
+                Department = sa.Department == null ? string.Empty : sa.Department.Name,
+                CreatedDateTimeUtc = sa.CreatedDateTimeUtc,
+                AssignedUsersCount = sa.Users.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        exportServiceAreas.ForEach(sa => sa.CreatedDateView = _dateTimeFormatter.FormatDate(sa.CreatedDateTimeUtc));
+
+        _logger.LogInformation("{dateTime} - Service Areas export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(exportServiceAreas);
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,

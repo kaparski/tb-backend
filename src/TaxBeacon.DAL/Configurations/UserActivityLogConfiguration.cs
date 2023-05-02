@@ -39,6 +39,8 @@ namespace TaxBeacon.DAL.Configurations
             builder
                 .Property(ual => ual.Date)
                 .IsRequired();
+
+            builder.HasQueryFilter(ua => ua.User.IsDeleted == null || !ua.User.IsDeleted.Value);
         }
     }
 }

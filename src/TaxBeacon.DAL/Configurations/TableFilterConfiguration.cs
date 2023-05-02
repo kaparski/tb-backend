@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.DAL.Configurations;
 
@@ -39,5 +40,8 @@ public class TableFilterConfiguration: IEntityTypeConfiguration<TableFilter>
         tableFilter
             .Property(p => p.Id)
             .HasDefaultValueSql("NEWID()");
+
+        tableFilter.HasQueryFilter(tf => tf.User.IsDeleted == null || !tf.User.IsDeleted.Value);
+
     }
 }
