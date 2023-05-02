@@ -8,7 +8,6 @@ using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -18,13 +17,8 @@ namespace TaxBeacon.API.Controllers.Departments;
 public class DepartmentsController: BaseController
 {
     private readonly IDepartmentService _service;
-    private readonly ICurrentUserService _currentUserService;
 
-    public DepartmentsController(IDepartmentService departmentService, ICurrentUserService currentUserService)
-    {
-        _service = departmentService;
-        _currentUserService = currentUserService;
-    }
+    public DepartmentsController(IDepartmentService departmentService) => _service = departmentService;
 
     /// <summary>
     /// List of tenant's departments

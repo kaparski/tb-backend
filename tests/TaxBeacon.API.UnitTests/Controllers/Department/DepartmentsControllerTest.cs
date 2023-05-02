@@ -11,10 +11,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
-using TaxBeacon.API.Controllers.Tenants.Requests;
-using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -23,15 +20,13 @@ namespace TaxBeacon.API.UnitTests.Controllers.Tenant;
 public class DepartmentsControllerTest
 {
     private readonly Mock<IDepartmentService> _serviceMock;
-    private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly DepartmentsController _controller;
 
     public DepartmentsControllerTest()
     {
         _serviceMock = new();
-        _currentUserServiceMock = new();
 
-        _controller = new DepartmentsController(_serviceMock.Object, _currentUserServiceMock.Object)
+        _controller = new DepartmentsController(_serviceMock.Object)
         {
             ControllerContext = new ControllerContext()
             {
@@ -47,10 +42,6 @@ public class DepartmentsControllerTest
     public async Task GetDepartmentList_ValidQuery_ReturnSuccessStatusCode()
     {
         // Arrange
-
-        _currentUserServiceMock
-            .Setup(x => x.TenantId)
-            .Returns(Guid.NewGuid());
 
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
         _serviceMock.Setup(p => p.GetDepartmentsAsync(query, default)).ReturnsAsync(
@@ -98,10 +89,6 @@ public class DepartmentsControllerTest
     public async Task ExportDepartmentsAsync_ValidQuery_ReturnsFileContent(FileType fileType)
     {
         // Arrange
-
-        _currentUserServiceMock
-            .Setup(x => x.TenantId)
-            .Returns(Guid.NewGuid());
 
         var request = new ExportDepartmentsRequest(fileType, "America/New_York");
         _serviceMock
