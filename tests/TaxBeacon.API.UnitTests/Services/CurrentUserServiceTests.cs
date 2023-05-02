@@ -149,6 +149,12 @@ public class CurrentUserServiceTests
         var tenant = TestData.TestTenant.Generate();
         _dbContextMock.Tenants.Add(tenant);
 
+        _dbContextMock.TenantUsers.Add(new TenantUser
+        {
+            TenantId = tenant.Id,
+            UserId = user.Id,
+        });
+
         var role1 = TestData.TestRole.Generate();
         _dbContextMock.Roles.Add(role1);
 
