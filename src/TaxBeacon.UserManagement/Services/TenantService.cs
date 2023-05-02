@@ -16,6 +16,7 @@ using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Tenant;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models.Activities.Tenant;
+using TaxBeacon.UserManagement.Models.Export;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -166,12 +167,39 @@ public class TenantService: ITenantService
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
-        if (gridifyQuery.Page == 1 && serviceAreas.Query.Any())
+        if (gridifyQuery.Page == 1 || serviceAreas.Query.Any())
         {
             return serviceAreas;
         }
 
         return new NotFound();
+    }
+
+    public async Task<byte[]> ExportServiceAreasAsync(Guid tenantId,
+        FileType fileType,
+        CancellationToken cancellationToken)
+    {
+        var exportServiceAreas = await _context
+            .ServiceAreas
+            .AsNoTracking()
+            .Where(sa => sa.TenantId == tenantId)
+            .Select(sa => new ServiceAreaExportModel
+            {
+                Name = sa.Name,
+                Description = sa.Description,
+                Department = sa.Department == null ? string.Empty : sa.Department.Name,
+                CreatedDateTimeUtc = sa.CreatedDateTimeUtc,
+                AssignedUsersCount = sa.Users.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        exportServiceAreas.ForEach(sa => sa.CreatedDateView = _dateTimeFormatter.FormatDate(sa.CreatedDateTimeUtc));
+
+        _logger.LogInformation("{dateTime} - Service Areas export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(exportServiceAreas);
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,

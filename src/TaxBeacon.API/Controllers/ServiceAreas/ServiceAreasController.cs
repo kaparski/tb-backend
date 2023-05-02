@@ -3,8 +3,10 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.ServiceAreas.Requests;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Exceptions;
+using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
@@ -60,5 +62,29 @@ public class ServiceAreasController: BaseController
         return serviceAreasOneOf.Match<IActionResult>(
             serviceAreas => Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count, serviceAreas.Query.ProjectToType<ServiceAreaResponse>())),
             notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Endpoint to export tenant's service areas
+    /// </summary>
+    /// <param name="exportServiceAreasRequest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns file content</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <returns>File content</returns>
+    [HasPermissions(Common.Permissions.ServiceAreas.ReadExport)]
+    [HttpGet("export", Name = "ExportServiceAreas")]
+    [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ExportServiceAreasAsync([FromQuery] ExportServiceAreasRequest exportServiceAreasRequest,
+        CancellationToken cancellationToken)
+    {
+        var mimeType = exportServiceAreasRequest.FileType.ToMimeType();
+
+        var serviceAreasAsync = await _tenantService.ExportServiceAreasAsync(_currentUserService.TenantId, exportServiceAreasRequest.FileType, cancellationToken);
+
+        return File(serviceAreasAsync, mimeType, $"serviceareas.{exportServiceAreasRequest.FileType.ToString().ToLowerInvariant()}");
     }
 }

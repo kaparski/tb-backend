@@ -27,6 +27,10 @@ public interface ITenantService
         GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
+    Task<byte[]> ExportServiceAreasAsync(Guid tenantId,
+        FileType fileType,
+        CancellationToken cancellationToken);
+
     Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken);
 
     Task<OneOf<TenantDto, NotFound>> UpdateTenantAsync(Guid id, UpdateTenantDto updateTenantDto,
