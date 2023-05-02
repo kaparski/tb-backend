@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace TaxBeacon.API.Controllers.Tenants.Requests;
+namespace TaxBeacon.API.Controllers.Departments.Requests;
 
 public record UpdateDepartmentRequest(string Name, string Description);
 

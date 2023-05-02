@@ -62,10 +62,8 @@ public class DepartmentService: IDepartmentService
                 Id = d.Id,
                 Name = d.Name,
                 Description = d.Description,
-                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
                 AssignedUsersCount = d.Users.Count(),
                 Division = d.Division == null ? string.Empty : d.Division.Name,
-                ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
                 ServiceArea = d.ServiceAreas.Select(sa => sa.Name)
                     .GroupBy(sa => 1)
                     .Select(g => string.Join(string.Empty, g.Select(s => "|" + s + "|")))
@@ -128,18 +126,16 @@ public class DepartmentService: IDepartmentService
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
-    public async Task<OneOf<DepartmentDto, NotFound>> GetDepartmentDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<OneOf<DepartmentDetailsDto, NotFound>> GetDepartmentDetailsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var item = await _context
             .Departments
-            .Where(d => d.Id == id)
-            .ToDepartmentDto()
-            .SingleOrDefaultAsync(cancellationToken);
+            .GetDepartmentDetails(id);
 
         return item is null ? new NotFound() : item;
     }
 
-    public async Task<OneOf<DepartmentDto, NotFound>> UpdateDepartmentAsync(Guid id, UpdateDepartmentDto updatedEntity,
+    public async Task<OneOf<DepartmentDetailsDto, NotFound>> UpdateDepartmentAsync(Guid id, UpdateDepartmentDto updatedEntity,
         CancellationToken cancellationToken = default)
     {
         var entity = await _context.Departments.SingleOrDefaultAsync(t => t.Id == id, cancellationToken);
@@ -175,15 +171,13 @@ public class DepartmentService: IDepartmentService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Department ({tenantId}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Department ({departmentId}) was updated by {@userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);
 
         return await _context
             .Departments
-            .Where(d => d.Id == id)
-            .ToDepartmentDto()
-            .SingleAsync(cancellationToken);
+            .GetDepartmentDetails(id);
     }
 }

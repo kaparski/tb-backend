@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Interfaces;
 

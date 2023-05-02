@@ -1,13 +1,11 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using OneOf.Types;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
-using TaxBeacon.API.Controllers.Tenants.Requests;
-using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Services;
@@ -114,7 +112,7 @@ public class DepartmentsController: BaseController
     [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
     [HttpGet("{id:guid}", Name = "DepartmentDetails")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(IEnumerable<DepartmentResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<DepartmentDetailsResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetDepartmentDetails([FromRoute] Guid id,
         CancellationToken cancellationToken)
@@ -122,7 +120,7 @@ public class DepartmentsController: BaseController
         var oneOfDepartmentDetails = await _service.GetDepartmentDetailsAsync(id, cancellationToken);
 
         return oneOfDepartmentDetails.Match<IActionResult>(
-            result => Ok(result.Adapt<DepartmentResponse>()),
+            result => Ok(result.Adapt<DepartmentDetailsResponse>()),
             _ => NotFound());
     }
 
@@ -135,14 +133,14 @@ public class DepartmentsController: BaseController
     [HasPermissions(Common.Permissions.Departments.ReadWrite)]
     [HttpPatch("{id:guid}", Name = "UpdateDepartment")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(DepartmentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(DepartmentDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateDepartmentAsync([FromRoute] Guid id, [FromBody] UpdateDepartmentRequest request, CancellationToken cancellationToken)
     {
         var resultOneOf = await _service.UpdateDepartmentAsync(id, request.Adapt<UpdateDepartmentDto>(), cancellationToken);
 
         return resultOneOf.Match<IActionResult>(
-            result => Ok(result.Adapt<DepartmentResponse>()),
+            result => Ok(result.Adapt<DepartmentDetailsResponse>()),
             notFound => NotFound());
     }
 }

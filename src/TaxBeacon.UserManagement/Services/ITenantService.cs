@@ -15,14 +15,6 @@ public interface ITenantService
 
     Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id, CancellationToken cancellationToken);
 
-    Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(Guid tenantId,
-        GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
-
-    Task<byte[]> ExportDepartmentsAsync(Guid tenantId,
-        FileType fileType,
-        CancellationToken cancellationToken);
-
     Task<IReadOnlyCollection<ServiceAreaDto>> GetServiceAreasAsync(CancellationToken cancellationToken = default);
 
     Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken);
@@ -31,6 +23,4 @@ public interface ITenantService
         CancellationToken cancellationToken);
 
     Task SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId, CancellationToken cancellationToken = default);
-
-    Task<OneOf<DepartmentDto, NotFound>> GetDepartmentDetailsAsync(Guid id, CancellationToken cancellationToken);
 }
