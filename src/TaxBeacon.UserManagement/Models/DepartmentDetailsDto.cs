@@ -4,9 +4,9 @@ public class DepartmentDetailsDto
 {
     public Guid Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } = string.Empty;
 
-    public string Description { get; set; } = null!;
+    public string Description { get; set; } = string.Empty;
 
     public DateTime CreatedDateTimeUtc { get; set; }
 
@@ -14,5 +14,5 @@ public class DepartmentDetailsDto
 
     public Guid? DivisionId { get; set; }
 
-    public string Division { get; set; } = null!;
+    public string Division { get; set; } = string.Empty;
 }

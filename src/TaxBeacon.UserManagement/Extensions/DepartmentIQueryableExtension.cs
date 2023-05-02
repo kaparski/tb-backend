@@ -6,8 +6,8 @@ namespace TaxBeacon.UserManagement.Extensions;
 
 public static class DepartmentIQueryableExtension
 {
-    public static Task<DepartmentDetailsDto> GetDepartmentDetails(this IQueryable<Department> query, Guid id) => query
-        .Where(d => d.Id == id)
+    public static Task<DepartmentDetailsDto?> GetDepartmentDetailsAsync(this IQueryable<Department> query, Guid id, Guid tenantId) => query
+        .Where(d => d.Id == id && d.TenantId == tenantId)
         .Select(d => new DepartmentDetailsDto
         {
             Id = d.Id,
@@ -23,5 +23,5 @@ public static class DepartmentIQueryableExtension
                 })
                 .ToList()
         })
-        .SingleAsync();
+        .SingleOrDefaultAsync();
 }

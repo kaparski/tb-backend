@@ -50,13 +50,12 @@ public class DepartmentService: IDepartmentService
                                    ?? ImmutableDictionary<(DepartmentEventType, uint), IDepartmentActivityFactory>.Empty;
     }
 
-    public async Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(Guid tenantId,
-        GridifyQuery gridifyQuery,
+    public async Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
         var departments = await _context
             .Departments
-            .Where(d => d.TenantId == tenantId)
+            .Where(d => d.TenantId == _currentUserService.TenantId)
             .Select(d => new DepartmentDto
             {
                 Id = d.Id,
@@ -79,14 +78,13 @@ public class DepartmentService: IDepartmentService
         return new NotFound();
     }
 
-    public async Task<byte[]> ExportDepartmentsAsync(Guid tenantId,
-        FileType fileType,
+    public async Task<byte[]> ExportDepartmentsAsync(FileType fileType,
         CancellationToken cancellationToken)
     {
         var exportDepartments = await _context
             .Departments
             .AsNoTracking()
-            .Where(d => d.TenantId == tenantId)
+            .Where(d => d.TenantId == _currentUserService.TenantId)
             .Select(d => new DepartmentExportModel
             {
                 Name = d.Name,
@@ -110,7 +108,7 @@ public class DepartmentService: IDepartmentService
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.DepartmentActivityLogs.Where(log => log.DepartmentId == id);
+        var query = _context.DepartmentActivityLogs.Where(log => log.DepartmentId == id && log.TenantId == _currentUserService.TenantId);
 
         var count = await query.CountAsync(cancellationToken);
 
@@ -130,7 +128,7 @@ public class DepartmentService: IDepartmentService
     {
         var item = await _context
             .Departments
-            .GetDepartmentDetails(id);
+            .GetDepartmentDetailsAsync(id, _currentUserService.TenantId);
 
         return item is null ? new NotFound() : item;
     }
@@ -138,7 +136,9 @@ public class DepartmentService: IDepartmentService
     public async Task<OneOf<DepartmentDetailsDto, NotFound>> UpdateDepartmentAsync(Guid id, UpdateDepartmentDto updatedEntity,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _context.Departments.SingleOrDefaultAsync(t => t.Id == id, cancellationToken);
+        var entity = await _context
+            .Departments
+            .SingleOrDefaultAsync(t => t.Id == id && t.TenantId == _currentUserService.TenantId, cancellationToken);
 
         if (entity is null)
         {
@@ -176,8 +176,8 @@ public class DepartmentService: IDepartmentService
             id,
             _currentUserService.UserId);
 
-        return await _context
+        return (await _context
             .Departments
-            .GetDepartmentDetails(id);
+            .GetDepartmentDetailsAsync(id, _currentUserService.TenantId))!;
     }
 }

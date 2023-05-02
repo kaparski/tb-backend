@@ -6,22 +6,19 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using OneOf.Types;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.Activities.Tenant;
+using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities.Department;
-using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -100,7 +97,7 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "name asc" };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
         itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
@@ -121,7 +118,7 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "name desc" };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
         using (new AssertionScope())
@@ -142,7 +139,7 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 123, OrderBy = "name desc" };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
         using (new AssertionScope())
@@ -165,7 +162,7 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc", };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
         itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
@@ -182,7 +179,7 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
+        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
         itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
@@ -201,7 +198,7 @@ public class DepartmentServiceTests
         await _dbContextMock.SaveChangesAsync();
 
         //Act
-        _ = await _departmentService.ExportDepartmentsAsync(TestData.TestTenantId, fileType, default);
+        _ = await _departmentService.ExportDepartmentsAsync(fileType, default);
 
         //Assert
         if (fileType == FileType.Csv)
@@ -288,18 +285,18 @@ public class DepartmentServiceTests
         await _dbContextMock.SaveChangesAsync();
 
         // Act
-        var actualResult = await _departmentService.GetDepartmentDetailsAsync(department.Id);
+        var actualResult = await _departmentService.GetDepartmentDetailsAsync(Guid.NewGuid());
 
         // Assert
         using (new AssertionScope())
         {
-            actualResult.TryPickT0(out var _, out var notFound);
-            notFound.Should().NotBeNull();
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeTrue();
         }
     }
 
     [Fact]
-    public async Task GetDepartmentDetailsAsync_DepartmentWithNoServiceAreas_ReturnsDeparmentDetails()
+    public async Task GetDepartmentDetailsAsync_DepartmentWithNoServiceAreas_ReturnsDepartmentDetails()
     {
         // Arrange
         var department = TestData.TestDepartment.Generate();
@@ -331,7 +328,7 @@ public class DepartmentServiceTests
     }
 
     [Fact]
-    public async Task GetDepartmentDetailsAsync_ExistingDepartment_ReturnsDeparmentDetails()
+    public async Task GetDepartmentDetailsAsync_ExistingDepartment_ReturnsDepartmentDetails()
     {
         // Arrange
         var department = TestData.TestDepartment.Generate();
@@ -404,8 +401,8 @@ public class DepartmentServiceTests
         // Assert
         using (new AssertionScope())
         {
-            actualResult.TryPickT0(out var _, out var notFound);
-            notFound.Should().NotBeNull();
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeTrue();
         }
     }
 

@@ -11,15 +11,15 @@ public class DepartmentUpdatedEventFactory: IDepartmentActivityFactory
 
     public DepartmentEventType EventType => DepartmentEventType.DepartmentUpdatedEvent;
 
-    public ActivityItemDto Create(string tenantEvent)
+    public ActivityItemDto Create(string json)
     {
-        var tenantUpdatedEvent = JsonSerializer.Deserialize<DepartmentUpdatedEvent>(tenantEvent);
+        var evt = JsonSerializer.Deserialize<DepartmentUpdatedEvent>(json);
 
         return new ActivityItemDto
         (
-            Date: tenantUpdatedEvent!.UpdatedDate,
-            FullName: tenantUpdatedEvent.ExecutorFullName,
-            Message: tenantUpdatedEvent.ToString()
+            Date: evt!.UpdatedDate,
+            FullName: evt.ExecutorFullName,
+            Message: evt.ToString()
         );
     }
 }

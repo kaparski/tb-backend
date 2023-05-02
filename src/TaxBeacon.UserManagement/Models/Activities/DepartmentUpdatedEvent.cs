@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.UserManagement.Models.Activities;
 
-internal class DepartmentUpdatedEvent: EventBase
+public sealed class DepartmentUpdatedEvent: EventBase
 {
     public DepartmentUpdatedEvent(Guid executorId, string executorRoles, string executorFullName, DateTime updatedDate,
     string previousValues, string currentValues)

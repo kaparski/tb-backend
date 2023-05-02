@@ -48,13 +48,12 @@ public class DepartmentsControllerTest
     {
         // Arrange
 
-        Guid tenantId = new();
         _currentUserServiceMock
             .Setup(x => x.TenantId)
-            .Returns(tenantId);
+            .Returns(Guid.NewGuid());
 
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _serviceMock.Setup(p => p.GetDepartmentsAsync(tenantId, query, default)).ReturnsAsync(
+        _serviceMock.Setup(p => p.GetDepartmentsAsync(query, default)).ReturnsAsync(
             new QueryablePaging<DepartmentDto>(0,
                 Enumerable.Empty<DepartmentDto>().AsQueryable()));
 
@@ -100,15 +99,13 @@ public class DepartmentsControllerTest
     {
         // Arrange
 
-        Guid tenantId = new();
         _currentUserServiceMock
             .Setup(x => x.TenantId)
-            .Returns(tenantId);
+            .Returns(Guid.NewGuid());
 
         var request = new ExportDepartmentsRequest(fileType, "America/New_York");
         _serviceMock
             .Setup(x => x.ExportDepartmentsAsync(
-                tenantId,
                 It.IsAny<FileType>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<byte>());

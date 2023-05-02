@@ -57,7 +57,7 @@ public class DepartmentsController: BaseController
             return BadRequest();
         }
 
-        var departmentsOneOf = await _service.GetDepartmentsAsync(_currentUserService.TenantId, query, cancellationToken);
+        var departmentsOneOf = await _service.GetDepartmentsAsync(query, cancellationToken);
         return departmentsOneOf.Match<IActionResult>(
             departments => Ok(new QueryablePaging<DepartmentResponse>(departments.Count, departments.Query.ProjectToType<DepartmentResponse>())),
             notFound => NotFound());
@@ -82,7 +82,7 @@ public class DepartmentsController: BaseController
     {
         var mimeType = exportDepartmentsRequest.FileType.ToMimeType();
 
-        var departments = await _service.ExportDepartmentsAsync(_currentUserService.TenantId, exportDepartmentsRequest.FileType, cancellationToken);
+        var departments = await _service.ExportDepartmentsAsync(exportDepartmentsRequest.FileType, cancellationToken);
 
         return File(departments, mimeType, $"departments.{exportDepartmentsRequest.FileType.ToString().ToLowerInvariant()}");
     }
