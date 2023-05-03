@@ -17,5 +17,8 @@
         public Guid? DepartmentId { get; set; }
 
         public Department? Department { get; set; }
+
+        public ICollection<ServiceAreaActivityLog> ServiceAreaActivityLogs { get; set; } =
+            new HashSet<ServiceAreaActivityLog>();
     }
 }
