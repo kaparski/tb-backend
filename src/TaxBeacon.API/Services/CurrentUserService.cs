@@ -22,7 +22,7 @@ public class CurrentUserService: ICurrentUserService
             ? userId
     : Guid.Empty;
 
-    public bool IsSuperAdmin => _dbContext?.UserRoles?.Any(ur => ur.UserId == UserId && ur.Role.Name == Roles.SuperAdmin) == true;
+    public bool IsSuperAdmin => _context?.UserRoles?.Any(ur => ur.UserId == UserId && ur.Role.Name == Roles.SuperAdmin) == true;
 
     public Guid TenantId =>
         IsSuperAdmin &&
