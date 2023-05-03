@@ -1,7 +1,9 @@
 ﻿
+using TaxBeacon.API.Controllers.ServiceAreas.Responses;
+
 namespace TaxBeacon.API.Controllers.Departments.Responses;
 
-public class DepartmentResponse
+public class DepartmentDetailsResponse
 {
     public Guid Id { get; set; }
 
@@ -9,11 +11,11 @@ public class DepartmentResponse
 
     public string Description { get; set; } = null!;
 
+    public Guid? DivisionId { get; set; }
+
     public string Division { get; set; } = null!;
 
-    public string ServiceArea { get; set; } = null!;
+    public IList<ServiceAreaResponse> ServiceAreas { get; set; } = null!;
 
     public DateTime CreatedDateTimeUtc { get; set; }
-
-    public int AssignedUsersCount { get; set; }
 }

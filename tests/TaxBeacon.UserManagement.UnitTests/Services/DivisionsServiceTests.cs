@@ -16,6 +16,7 @@ using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities.Divisions;
+using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services
 {
@@ -86,6 +87,18 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                 _listToFileConverters.Object,
                 _dateTimeFormatterMock.Object,
                 _activityFactories.Object);
+
+            var currentUser = TestData.TestUser.Generate();
+            _dbContextMock.Users.Add(currentUser);
+            _dbContextMock.SaveChangesAsync().Wait();
+            _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
+
+            _activityFactories
+            .Setup(x => x.GetEnumerator())
+            .Returns(new IDivisionActivityFactory[]
+            {
+                new DivisionUpdatedEventFactory(),
+            }.ToList().GetEnumerator());
         }
         [Fact]
         public async Task GetDivisionsAsync_AscOrderingAndPaginationOfLastPage_AscOrderOfDivisionsAndCorrectPage()
@@ -432,6 +445,64 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             resultOneOf.TryPickT1(out _, out _).Should().BeTrue();
         }
 
+        [Fact]
+        public async Task UpdateDivisionAsync_DivisionExists_ReturnsUpdatedDivisionAndCapturesActivityLog()
+        {
+            // Arrange
+            var updateDivisionDto = TestData.UpdateDivisionDtoFaker.Generate();
+            var division = TestData.TestDivision.Generate();
+            await _dbContextMock.Divisions.AddAsync(division);
+            await _dbContextMock.SaveChangesAsync();
+
+            var currentDate = DateTime.UtcNow;
+            _dateTimeServiceMock
+                .Setup(service => service.UtcNow)
+                .Returns(currentDate);
+
+            // Act
+            var actualResult = await _divisionsService.UpdateDivisionAsync(division.Id, updateDivisionDto, default);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+                actualResult.TryPickT0(out var divisionDto, out _);
+                divisionDto.Should().NotBeNull();
+                divisionDto.Id.Should().Be(division.Id);
+                divisionDto.Name.Should().Be(updateDivisionDto.Name);
+
+                var actualActivityLog = await _dbContextMock.DivisionActivityLogs.LastOrDefaultAsync();
+                actualActivityLog.Should().NotBeNull();
+                actualActivityLog?.Date.Should().Be(currentDate);
+                actualActivityLog?.EventType.Should().Be(DivisionEventType.DivisionUpdatedEvent);
+                actualActivityLog?.TenantId.Should().Be(TenantId);
+                actualActivityLog?.DivisionId.Should().Be(division.Id);
+
+                _dateTimeServiceMock
+                    .Verify(ds => ds.UtcNow, Times.Once);
+            }
+        }
+
+        [Fact]
+        public async Task UpdateDivisionAsync_DivisionDoesNotExist_ReturnsNotFound()
+        {
+            // Arrange
+            var updateDivisionDto = TestData.UpdateDivisionDtoFaker.Generate();
+            var division = TestData.TestDivision.Generate();
+            await _dbContextMock.Divisions.AddAsync(division);
+            await _dbContextMock.SaveChangesAsync();
+
+            // Act
+            var actualResult = await _divisionsService.UpdateDivisionAsync(Guid.NewGuid(), updateDivisionDto, default);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                actualResult.TryPickT1(out var divisionDto, out _);
+                divisionDto.Should().NotBeNull();
+            }
+        }
+
         private static class TestData
         {
             public static readonly Faker<User> TestUser =
@@ -477,6 +548,11 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
                     .RuleFor(t => t.Id, _ => Guid.NewGuid())
                     .RuleFor(t => t.Name, f => f.Company.CompanyName())
                     .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
+
+            public static readonly Faker<UpdateDivisionDto> UpdateDivisionDtoFaker =
+               new Faker<UpdateDivisionDto>()
+                   .RuleFor(t => t.Name, f => f.Name.JobType())
+                   .RuleFor(t => t.Description, f => f.Lorem.Sentence(2));
         }
     }
 }

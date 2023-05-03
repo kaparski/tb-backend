@@ -1,7 +1,7 @@
 ﻿namespace TaxBeacon.Common.Enums.Activities;
 
-public enum DivisionEventType
+public enum DepartmentEventType
 {
     None = 0,
-    DivisionUpdatedEvent = 1,
+    DepartmentUpdatedEvent = 1,
 }

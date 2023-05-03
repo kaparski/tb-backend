@@ -249,134 +249,6 @@ public class TenantServiceTests
     }
 
     [Fact]
-    public async Task GetDepartmentsAsync_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfDepartmentsAndCorrectPage()
-    {
-        // Arrange
-        var items = TestData.TestDepartment.Generate(5);
-        await _dbContextMock.Departments.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "name asc" };
-
-        // Act
-        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
-
-        // Assert
-        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
-        pageOfDepartments.Should().NotBeNull();
-        var listOfDepartments = pageOfDepartments.Query.ToList();
-        listOfDepartments.Count.Should().Be(5);
-        listOfDepartments.Select(x => x.Name).Should().BeInAscendingOrder();
-        pageOfDepartments.Count.Should().Be(5);
-    }
-
-    [Fact]
-    public async Task GetDepartmentsAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfDepartmentsInDescendingOrder()
-    {
-        // Arrange
-        var items = TestData.TestDepartment.Generate(7);
-        await _dbContextMock.Departments.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "name desc" };
-
-        // Act
-        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
-            pageOfDepartments.Should().NotBeNull();
-            var listOfDepartments = pageOfDepartments.Query.ToList();
-            listOfDepartments.Count.Should().Be(4);
-            listOfDepartments.Select(x => x.Name).Should().BeInDescendingOrder();
-            pageOfDepartments.Count.Should().Be(7);
-        }
-    }
-
-    [Fact]
-    public async Task GetDepartmentsAsync_NoDepartments_CorrectNumberOfDepartments()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 123, OrderBy = "name desc" };
-
-        // Act
-        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
-            pageOfDepartments.Should().NotBeNull();
-            var listOfDepartments = pageOfDepartments.Query.ToList();
-            listOfDepartments.Count.Should().Be(0);
-            pageOfDepartments.Count.Should().Be(0);
-        }
-    }
-
-    [Fact]
-    public async Task GetDepartmentsAsync_PageNumberOutsideOfTotalRange_DepartmentListIsEmpty()
-    {
-        // Arrange
-        var items = TestData.TestDepartment.Generate(7);
-        await _dbContextMock.Departments.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc", };
-
-        // Act
-        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
-
-        // Assert
-        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
-        pageOfDepartments.Should().BeNull();
-    }
-
-    [Fact]
-    public async Task GetDepartmentsAsync_PageNumberRightOutsideOfTotalRange_DepartmentListIsEmpty()
-    {
-        // Arrange
-        var items = TestData.TestDepartment.Generate(10);
-        await _dbContextMock.Departments.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
-
-        // Act
-        var itemsOneOf = await _tenantService.GetDepartmentsAsync(TestData.TestTenantId, query, default);
-
-        // Assert
-        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
-        pageOfDepartments.Should().BeNull();
-    }
-
-    [Theory]
-    [InlineData(FileType.Csv)]
-    [InlineData(FileType.Xlsx)]
-    public async Task ExportDepartmentsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
-    {
-        //Arrange
-        var departments = TestData.TestDepartment.Generate(5);
-
-        await _dbContextMock.Departments.AddRangeAsync(departments);
-        await _dbContextMock.SaveChangesAsync();
-
-        //Act
-        _ = await _tenantService.ExportDepartmentsAsync(TestData.TestTenantId, fileType, default);
-
-        //Assert
-        if (fileType == FileType.Csv)
-        {
-            _csvMock.Verify(x => x.Convert(It.IsAny<List<DepartmentExportModel>>()), Times.Once());
-        }
-        else if (fileType == FileType.Xlsx)
-        {
-            _xlsxMock.Verify(x => x.Convert(It.IsAny<List<DepartmentExportModel>>()), Times.Once());
-        }
-        else
-        {
-            throw new InvalidOperationException();
-        }
-    }
-
-    [Fact]
     public async Task GetActivityHistoryAsync_TenantExists_ReturnListOfActivityLogsInDescendingOrderByDate()
     {
         var tenant = TestData.TestTenant.Generate();
@@ -446,20 +318,83 @@ public class TenantServiceTests
     }
 
     [Fact]
-
-    public async Task GetServiceAreasAsync_ReturnsServiceAreas()
+    public async Task GetServiceAreasAsync_TenantIdExistsAndQueryIsValidOrderByNameAscending_ReturnsServiceAreas()
     {
         // Arrange
         var items = TestData.TestServiceArea.Generate(5);
         await _dbContextMock.ServiceAreas.AddRangeAsync(items);
         await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name asc", };
 
         // Act
-        var result = await _tenantService.GetServiceAreasAsync(default);
+        var actualResult = await _tenantService.GetServiceAreasAsync(TestData.TestTenantId, query, default);
 
-        // Assert
+        // Arrange
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
+            pageOfServiceAreas.Should().NotBeNull();
+            pageOfServiceAreas.Count.Should().Be(5);
+            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
+            listOfServiceAreas.Count.Should().Be(5);
+            listOfServiceAreas.Select(x => x.Name).Should().BeInAscendingOrder();
+        }
+    }
 
-        result.Should().HaveCount(5);
+    [Fact]
+    public async Task GetServiceAreasAsync_TenantIdExistsAndQueryIsValidOrderByNameDescending_ReturnsServiceAreas()
+    {
+        // Arrange
+        var items = TestData.TestServiceArea.Generate(5);
+        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name desc", };
+
+        // Act
+        var actualResult = await _tenantService.GetServiceAreasAsync(TestData.TestTenantId, query, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
+            pageOfServiceAreas.Should().NotBeNull();
+            pageOfServiceAreas.Count.Should().Be(5);
+            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
+            listOfServiceAreas.Count.Should().Be(5);
+            listOfServiceAreas.Select(x => x.Name).Should().BeInDescendingOrder();
+        }
+    }
+
+    [Fact]
+    public async Task GetServiceAreasAsync_TenantIdExistsAndPageNumberIsOutOfRange_ReturnsNotFound()
+    {
+        // Arrange
+        var items = TestData.TestServiceArea.Generate(5);
+        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 2, PageSize = 5, OrderBy = "name asc", };
+
+        // Act
+        var actualResult = await _tenantService.GetServiceAreasAsync(TestData.TestTenantId, query, default);
+
+        // Arrange
+        actualResult.TryPickT1(out var _, out var _).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetServiceAreasAsync_TenantIdDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var items = TestData.TestServiceArea.Generate(5);
+        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 2, PageSize = 5, OrderBy = "name asc", };
+
+        // Act
+        var actualResult = await _tenantService.GetServiceAreasAsync(Guid.NewGuid(), query, default);
+
+        // Arrange
+        actualResult.TryPickT1(out var _, out var _).Should().BeTrue();
     }
 
     [Fact]
@@ -527,7 +462,7 @@ public class TenantServiceTests
         await _dbContextMock.SaveChangesAsync();
 
         // Act
-        var actualResult = await _tenantService.UpdateTenantAsync(tenant.Id, updateTenantDto, default);
+        var actualResult = await _tenantService.UpdateTenantAsync(Guid.NewGuid(), updateTenantDto, default);
 
         // Assert
         using (new AssertionScope())
@@ -650,7 +585,8 @@ public class TenantServiceTests
             new Faker<ServiceArea>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow)
+                .RuleFor(t => t.TenantId, f => TestTenantId);
 
         public static readonly Faker<Department> TestDepartment =
             new Faker<Department>()

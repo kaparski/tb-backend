@@ -7,16 +7,19 @@ namespace TaxBeacon.API.Extensions.Logging
         public static void AddLogging(this WebApplicationBuilder builder)
         {
             var connectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
-            // Add Application Insights Logging
-            var options = new ApplicationInsightsServiceOptions
+            if (!string.IsNullOrEmpty(connestionString))
             {
-                ConnectionString = connectionString
-            };
-            builder.Services.AddApplicationInsightsTelemetry(options);
-            builder
-                .Logging
-                .AddApplicationInsights(configureTelemetryConfiguration: opt => opt.ConnectionString = connectionString,
-                                        configureApplicationInsightsLoggerOptions: (options) => { });
+                // Add Application Insights Logging
+                var options = new ApplicationInsightsServiceOptions
+                {
+                    ConnectionString = connestionString
+                };
+                builder.Services.AddApplicationInsightsTelemetry(options);
+                builder
+                    .Logging
+                    .AddApplicationInsights(configureTelemetryConfiguration: opt => opt.ConnectionString = connestionString,
+                                            configureApplicationInsightsLoggerOptions: (options) => { });
+            }
 
         }
     }
