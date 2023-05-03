@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Bogus;
+using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +12,8 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.ServiceAreas;
 using TaxBeacon.API.Controllers.ServiceAreas.Requests;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
+using TaxBeacon.API.Controllers.Tenants.Requests;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
@@ -246,5 +249,141 @@ public class ServiceAreasControllerTest
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
+    }
+
+    [Fact]
+    public async Task GetActivityHistoryAsync_TenantExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _serviceAreaServiceMock.Setup(x =>
+                x.GetActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+            .ReturnsAsync(new ActivityDto(0, new ActivityItemDto[] { }));
+
+        // Act
+        var actualResponse = await _controller.GetActivityHistoryAsync(Guid.NewGuid(), new ServiceAreaActivityHistoryRequest(1, 1), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<ServiceAreaActivityHistoryResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task GetActivityHistoryAsync_TenantDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        _serviceAreaServiceMock.Setup(x =>
+                x.GetActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse =
+            await _controller.GetActivityHistoryAsync(Guid.NewGuid(), new ServiceAreaActivityHistoryRequest(1, 1), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void GetActivityHistoryAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, ServiceAreaActivityHistoryRequest, CancellationToken, Task<IActionResult>>)_controller.GetActivityHistoryAsync).Method;
+        var permissions = new object[] { Common.Permissions.ServiceAreas.Read, Common.Permissions.ServiceAreas.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public async Task UpdateServiceAreaAsync_ServiceAreaExistsAndRequestIsValid_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        var request = TestData.TestUpdateServiceAreaRequest.Generate();
+        var serviceArea = TestData.TestServiceAreaDetailsDto.Generate();
+        _serviceAreaServiceMock.Setup(x => x.UpdateServiceAreaDetailsAsync(It.Is<Guid>(id => id == serviceArea.Id), It.IsAny<UpdateServiceAreaDto>(), default))
+            .ReturnsAsync(serviceArea);
+
+        // Act
+        var actualResponse = await _controller.UpdateServiceAreaAsync(serviceArea.Id, request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<ServiceAreaDetailsResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateServiceAreaAsync_ServiceAreaDoesNotExists_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        var request = TestData.TestUpdateServiceAreaRequest.Generate();
+        _serviceAreaServiceMock.Setup(x => x.UpdateServiceAreaDetailsAsync(It.IsAny<Guid>(), It.IsAny<UpdateServiceAreaDto>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.UpdateServiceAreaAsync(Guid.NewGuid(), request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void UpdateServiceAreaAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, UpdateServiceAreaRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateServiceAreaAsync).Method;
+        var permissions = new object[] { Common.Permissions.ServiceAreas.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    private static class TestData
+    {
+        public static readonly Faker<ServiceAreaDetailsDto> TestServiceAreaDetailsDto =
+            new Faker<ServiceAreaDetailsDto>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+
+        public static readonly Faker<UpdateServiceAreaRequest> TestUpdateServiceAreaRequest =
+            new Faker<UpdateServiceAreaRequest>().CustomInstantiator(f => new UpdateServiceAreaRequest(f.Lorem.Word(), f.Lorem.Text()));
     }
 }

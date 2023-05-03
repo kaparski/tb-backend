@@ -117,7 +117,7 @@ public class ServiceAreasController: BaseController
     /// <response code="200">Returns activity logs</response>
     /// <response code="404">Service area is not found</response>
     /// <returns>List of activity logs</returns>
-    [HasPermissions(Common.Permissions.Tenants.Read, Common.Permissions.ServiceAreas.ReadWrite)]
+    [HasPermissions(Common.Permissions.ServiceAreas.Read, Common.Permissions.ServiceAreas.ReadWrite)]
     [HttpGet("{id:guid}/activities", Name = "GetServiceAreaActivityHistoryLog")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(ServiceAreaActivityHistoryResponse), StatusCodes.Status200OK)]
