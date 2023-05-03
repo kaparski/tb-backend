@@ -84,7 +84,8 @@ public class TenantService: ITenantService
         return _listToFileConverters[fileType].Convert(exportTenants);
     }
 
-    public async Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id,
+        CancellationToken cancellationToken = default)
     {
         var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
