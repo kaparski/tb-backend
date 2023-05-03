@@ -162,11 +162,14 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc", };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
+        var actualResult = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
-        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
-        pageOfDepartments.Should().BeNull();
+        using (new AssertionScope())
+        {
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeTrue();
+        }
     }
 
     [Fact]
@@ -179,11 +182,14 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
+        var actualResult = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
-        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
-        pageOfDepartments.Should().BeNull();
+        using (new AssertionScope())
+        {
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeTrue();
+        }
     }
 
     [Theory]
