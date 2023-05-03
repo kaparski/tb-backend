@@ -44,5 +44,7 @@ public interface ITaxBeaconDbContext
 
     DbSet<DivisionActivityLog> DivisionActivityLogs { get; }
 
+    DbSet<DepartmentActivityLog> DepartmentActivityLogs { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

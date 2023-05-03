@@ -4,6 +4,7 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using OneOf.Types;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
@@ -11,7 +12,6 @@ using TaxBeacon.API.Controllers.Departments;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -19,16 +19,14 @@ namespace TaxBeacon.API.UnitTests.Controllers.Tenant;
 
 public class DepartmentsControllerTest
 {
-    private readonly Mock<ITenantService> _tenantServiceMock;
-    private readonly Mock<ICurrentUserService> _currentServiceMock;
+    private readonly Mock<IDepartmentService> _serviceMock;
     private readonly DepartmentsController _controller;
 
     public DepartmentsControllerTest()
     {
-        _tenantServiceMock = new();
-        _currentServiceMock = new();
+        _serviceMock = new();
 
-        _controller = new DepartmentsController(_tenantServiceMock.Object, _currentServiceMock.Object)
+        _controller = new DepartmentsController(_serviceMock.Object)
         {
             ControllerContext = new ControllerContext()
             {
@@ -45,13 +43,8 @@ public class DepartmentsControllerTest
     {
         // Arrange
 
-        Guid tenantId = new();
-        _currentServiceMock
-            .Setup(x => x.TenantId)
-            .Returns(tenantId);
-
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _tenantServiceMock.Setup(p => p.GetDepartmentsAsync(tenantId, query, default)).ReturnsAsync(
+        _serviceMock.Setup(p => p.GetDepartmentsAsync(query, default)).ReturnsAsync(
             new QueryablePaging<DepartmentDto>(0,
                 Enumerable.Empty<DepartmentDto>().AsQueryable()));
 
@@ -97,15 +90,9 @@ public class DepartmentsControllerTest
     {
         // Arrange
 
-        Guid tenantId = new();
-        _currentServiceMock
-            .Setup(x => x.TenantId)
-            .Returns(tenantId);
-
         var request = new ExportDepartmentsRequest(fileType, "America/New_York");
-        _tenantServiceMock
+        _serviceMock
             .Setup(x => x.ExportDepartmentsAsync(
-                tenantId,
                 It.IsAny<FileType>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<byte>());
@@ -169,6 +156,124 @@ public class DepartmentsControllerTest
         {
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be("Departments.ReadExport");
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentAsync_DepartmentExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _serviceMock.Setup(x => x.GetDepartmentDetailsAsync(It.IsAny<Guid>(), default)).ReturnsAsync(new DepartmentDetailsDto());
+
+        // Act
+        var actualResponse = await _controller.GetDepartmentDetails(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<DepartmentDetailsResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentAsync_DepartmentDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        _serviceMock.Setup(x => x.GetDepartmentDetailsAsync(It.IsAny<Guid>(), default)).ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetDepartmentDetails(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+
+        }
+    }
+
+    [Fact]
+    public void GetDepartmentAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetDepartmentDetails).Method;
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be("Departments.Read;Departments.ReadWrite");
+        }
+    }
+
+    [Fact]
+    public async Task GetActivityHistoryAsync_DepartmentExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _serviceMock.Setup(x =>
+                x.GetActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+            .ReturnsAsync(new ActivityDto(0, new ActivityItemDto[] { }));
+
+        // Act
+        var actualResponse = await _controller.ActivitiesHistory(Guid.NewGuid(), new DepartmentActivityHistoryRequest(1, 1), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<DepartmentActivityHistoryResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task GetActivityHistoryAsync_DepartmentDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        _serviceMock.Setup(x =>
+                x.GetActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse =
+            await _controller.ActivitiesHistory(Guid.NewGuid(), new DepartmentActivityHistoryRequest(1, 1), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void GetActivityHistoryAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, DepartmentActivityHistoryRequest, CancellationToken, Task<IActionResult>>)_controller.ActivitiesHistory).Method;
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be("Departments.Read;Departments.ReadWrite");
         }
     }
 }

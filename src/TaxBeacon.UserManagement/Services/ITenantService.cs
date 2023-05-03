@@ -15,14 +15,6 @@ public interface ITenantService
 
     Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id, CancellationToken cancellationToken);
 
-    Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(Guid tenantId,
-        GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
-
-    Task<byte[]> ExportDepartmentsAsync(Guid tenantId,
-        FileType fileType,
-        CancellationToken cancellationToken);
-
     Task<OneOf<QueryablePaging<ServiceAreaDto>, NotFound>> GetServiceAreasAsync(Guid tenantId,
         GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);

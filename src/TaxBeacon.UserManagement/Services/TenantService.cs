@@ -91,65 +91,6 @@ public class TenantService: ITenantService
         return tenant is null ? new NotFound() : tenant.Adapt<TenantDto>();
     }
 
-    public async Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(Guid tenantId,
-        GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var departments = await _context
-            .Departments
-            .Where(d => d.TenantId == tenantId)
-            .Select(d => new DepartmentDto
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Description = d.Description,
-                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(),
-                Division = d.Division == null ? string.Empty : d.Division.Name,
-                ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
-                ServiceArea = d.ServiceAreas.Select(sa => sa.Name)
-                    .GroupBy(sa => 1)
-                    .Select(g => string.Join(string.Empty, g.Select(s => "|" + s + "|")))
-                    .FirstOrDefault() ?? string.Empty
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        if (gridifyQuery.Page == 1 || departments.Query.Any())
-        {
-            return departments;
-        }
-
-        return new NotFound();
-    }
-
-    public async Task<byte[]> ExportDepartmentsAsync(Guid tenantId,
-        FileType fileType,
-        CancellationToken cancellationToken)
-    {
-        var exportDepartments = await _context
-            .Departments
-            .AsNoTracking()
-            .Where(d => d.TenantId == tenantId)
-            .Select(d => new DepartmentExportModel
-            {
-                Name = d.Name,
-                Description = d.Description,
-                Division = d.Division == null ? string.Empty : d.Division.Name,
-                ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
-                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count()
-            })
-            .ToListAsync(cancellationToken);
-
-        exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
-
-        _logger.LogInformation("{dateTime} - Departments export was executed by {@userId}",
-            _dateTimeService.UtcNow,
-            _currentUserService.UserId);
-
-        return _listToFileConverters[fileType].Convert(exportDepartments);
-    }
-
     public async Task<OneOf<QueryablePaging<ServiceAreaDto>, NotFound>> GetServiceAreasAsync(Guid tenantId,
         GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
     {
