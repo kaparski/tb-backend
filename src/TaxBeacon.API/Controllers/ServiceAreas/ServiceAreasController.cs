@@ -117,7 +117,7 @@ public class ServiceAreasController: BaseController
     /// <response code="200">Returns activity logs</response>
     /// <response code="404">Service area is not found</response>
     /// <returns>List of activity logs</returns>
-    [HasPermissions(Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite)]
+    [HasPermissions(Common.Permissions.Tenants.Read, Common.Permissions.ServiceAreas.ReadWrite)]
     [HttpGet("{id:guid}/activities", Name = "GetServiceAreaActivityHistoryLog")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(ServiceAreaActivityHistoryResponse), StatusCodes.Status200OK)]
@@ -138,12 +138,12 @@ public class ServiceAreasController: BaseController
     /// <response code="200">Returns updated service area details</response>
     /// <response code="404">Service area is not found</response>
     /// <returns>Updated service area details</returns>
-    [HasPermissions(Common.Permissions.Tenants.ReadWrite)]
-    [HttpPatch("{id:guid}", Name = "UpdateTenant")]
+    [HasPermissions(Common.Permissions.ServiceAreas.ReadWrite)]
+    [HttpPatch("{id:guid}", Name = "UpdateServiceArea")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(ServiceAreaDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateTenantAsync([FromRoute] Guid id, [FromBody] UpdateServiceAreaRequest request,
+    public async Task<IActionResult> UpdateServiceAreaAsync([FromRoute] Guid id, [FromBody] UpdateServiceAreaRequest request,
         CancellationToken cancellationToken)
     {
         var resultOneOf = await _serviceAreaService.UpdateServiceAreaDetailsAsync(
