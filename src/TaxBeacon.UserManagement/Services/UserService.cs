@@ -19,6 +19,7 @@ using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Extensions;
 using TaxBeacon.UserManagement.Services.Activities;
+using TaxBeacon.Common.Roles;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -489,10 +490,40 @@ public class UserService: IUserService
     }
 
     public async Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Guid userId,
-        CancellationToken cancellationToken = default) =>
-        _currentUserService.TenantId == default
-            ? await GetNoTenantUserPermissionsAsync(userId, cancellationToken)
-            : await GetTenantUserPermissionsAsync(_currentUserService.TenantId, userId, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        var (tenantId, isSuperAdmin) = (_currentUserService.TenantId, _currentUserService.IsSuperAdmin);
+
+        if (tenantId == Guid.Empty)
+        {
+            return await GetNoTenantUserPermissionsAsync(userId, cancellationToken);
+        }
+
+        // super admin within specific tenant
+        if (isSuperAdmin)
+        {
+            return await GetSuperAdminPermissionsWithinTenant(tenantId, cancellationToken);
+        }
+
+        return await GetTenantUserPermissionsAsync(_currentUserService.TenantId, userId, cancellationToken);
+
+        //await GetTenantUserPermissionsAsync(_currentUserService.TenantId, userId, cancellationToken);
+        //return _currentUserService.TenantId == default
+        //    ? await GetNoTenantUserPermissionsAsync(userId, cancellationToken)
+        //    : _currentUserService.IsSuperAdmin
+        //        ? _context.TenantRolePermissions.Where(trp => trp.TenantId == _currentUserService.TenantId && trp.TenantRole.Role.Name == Roles.Admin).Include(trp => trp.TenantPermission).ThenInclude(tp => tp.Permission).SelectMany(trp => trp.TenantPermission).
+        //        : await GetTenantUserPermissionsAsync(_currentUserService.TenantId, userId, cancellationToken);
+    }
+
+    private async Task<IReadOnlyCollection<string>> GetSuperAdminPermissionsWithinTenant(Guid tenantId, CancellationToken cancellationToken)
+        => await _context.TenantUserRoles.Where(tur => tur.TenantId == tenantId)
+        .Join(_context.Roles.Where(r => r.Name == Roles.Admin), tur => tur.RoleId, r => r.Id, (tur, r) => r.Id)
+        .Join(_context.TenantRolePermissions.Where(trp => trp.TenantId == tenantId), r => r, trp => trp.RoleId, (r, trp) => trp.PermissionId)
+        .Join(_context.Permissions, permissionId => permissionId, p => p.Id, (permissionId, p) => p.Name)
+        .ToListAsync(cancellationToken);
+
+    public bool IsSuperAdmin(Guid userId)
+        => _context.UserRoles.Any(ur => ur.UserId == userId && ur.Role.Name == Roles.SuperAdmin);
 
     private async Task<IReadOnlyCollection<string>> GetTenantUserPermissionsAsync(Guid tenantId,
         Guid userId,

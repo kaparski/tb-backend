@@ -6,18 +6,22 @@ using System.Security.Principal;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Services;
 using TaxBeacon.Common.Services;
+using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Services;
 
 public class CurrentUserServiceTests
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+    private readonly Mock<ITaxBeaconDbContext> _dbContext;
     private readonly ICurrentUserService _currentUserService;
 
     public CurrentUserServiceTests()
     {
         _httpContextAccessorMock = new();
-        _currentUserService = new CurrentUserService(_httpContextAccessorMock.Object);
+        _dbContext = new();
+        _currentUserService = new CurrentUserService(_httpContextAccessorMock.Object, _dbContext.Object);
     }
 
     [Fact]
