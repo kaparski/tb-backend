@@ -193,7 +193,7 @@ public class ServiceAreasControllerTest
     {
         // Arrange
         _serviceAreaServiceMock.Setup(x => x.GetServiceAreaDetailsByIdAsync(It.IsAny<Guid>(), default))
-            .ReturnsAsync(new ServiceAreaDto());
+            .ReturnsAsync(new ServiceAreaDetailsDto());
 
         // Act
         var actualResponse = await _controller.GetServiceAreaAsync(Guid.NewGuid(), default);
@@ -205,7 +205,7 @@ public class ServiceAreasControllerTest
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<ServiceAreaResponse>();
+            actualResult?.Value.Should().BeOfType<ServiceAreaDetailsResponse>();
         }
     }
 
