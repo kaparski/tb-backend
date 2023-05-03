@@ -90,6 +90,7 @@ public class ServiceAreaService: IServiceAreaService
                 CreatedDateTimeUtc = sa.CreatedDateTimeUtc,
                 AssignedUsersCount = sa.Users.Count()
             })
+            .OrderBy(sa => sa.Name)
             .ToListAsync(cancellationToken);
 
         exportServiceAreas.ForEach(sa => sa.CreatedDateView = _dateTimeFormatter.FormatDate(sa.CreatedDateTimeUtc));

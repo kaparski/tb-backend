@@ -92,59 +92,6 @@ public class TenantService: ITenantService
         return tenant is null ? new NotFound() : tenant.Adapt<TenantDto>();
     }
 
-    public async Task<OneOf<QueryablePaging<ServiceAreaDto>, NotFound>> GetServiceAreasAsync(Guid tenantId,
-        GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
-    {
-        var serviceAreas = await _context
-            .ServiceAreas
-            .Where(d => d.TenantId == tenantId)
-            .Select(d => new ServiceAreaDto()
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Description = d.Description,
-                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(),
-                Department = d.Department == null ? string.Empty : d.Department.Name
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        if (gridifyQuery.Page == 1 || serviceAreas.Query.Any())
-        {
-            return serviceAreas;
-        }
-
-        return new NotFound();
-    }
-
-    public async Task<byte[]> ExportServiceAreasAsync(Guid tenantId,
-        FileType fileType,
-        CancellationToken cancellationToken)
-    {
-        var exportServiceAreas = await _context
-            .ServiceAreas
-            .AsNoTracking()
-            .Where(sa => sa.TenantId == tenantId)
-            .Select(sa => new ServiceAreaExportModel
-            {
-                Name = sa.Name,
-                Description = sa.Description,
-                Department = sa.Department == null ? string.Empty : sa.Department.Name,
-                CreatedDateTimeUtc = sa.CreatedDateTimeUtc,
-                AssignedUsersCount = sa.Users.Count()
-            })
-            .OrderBy(sa => sa.Name)
-            .ToListAsync(cancellationToken);
-
-        exportServiceAreas.ForEach(sa => sa.CreatedDateView = _dateTimeFormatter.FormatDate(sa.CreatedDateTimeUtc));
-
-        _logger.LogInformation("{dateTime} - Service Areas export was executed by {@userId}",
-            _dateTimeService.UtcNow,
-            _currentUserService.UserId);
-
-        return _listToFileConverters[fileType].Convert(exportServiceAreas);
-    }
-
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
