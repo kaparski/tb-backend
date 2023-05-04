@@ -163,13 +163,8 @@ namespace TaxBeacon.UserManagement.Services
             }
 
             var previousValues = JsonSerializer.Serialize(division.Adapt<UpdateDivisionDto>());
-            var currentUserFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
-            var currentUserRoles = await _context
-                .TenantUserRoles
-                .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == _currentUserService.TenantId)
-                .GroupBy(r => 1, t => t.TenantRole.Role.Name)
-                .Select(group => string.Join(", ", group.Select(name => name)))
-                .FirstOrDefaultAsync(cancellationToken);
+            var currentUserFullName = _currentUserService.UserInfo.FullName;
+            var currentUserRoles = _currentUserService.UserInfo.Roles;
             var eventDateTime = _dateTimeService.UtcNow;
 
             await _context.DivisionActivityLogs.AddAsync(new DivisionActivityLog

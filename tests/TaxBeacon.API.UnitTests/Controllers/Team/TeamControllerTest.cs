@@ -6,15 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
-using Org.BouncyCastle.Ocsp;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Teams;
 using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
-using TaxBeacon.API.Controllers.Tenants.Requests;
-using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
@@ -220,7 +217,7 @@ public class TeamControllerTest
     }
 
     [Fact]
-    public async Task UpdateTeamAsync_ValidDivisionId_ReturnsUpdatedTeam()
+    public async Task UpdateTeamAsync_ValidTeamId_ReturnsUpdatedTeam()
     {
         // Arrange
         var teamDto = TestData.TeamFaker.Generate();

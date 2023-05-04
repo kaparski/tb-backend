@@ -77,7 +77,7 @@ public class TeamService: ITeamService
         return new NotFound();
     }
 
-    public async Task<byte[]> ExportTeamsAsync(FileType fileType, CancellationToken cancellationToken)
+    public async Task<byte[]> ExportTeamsAsync(FileType fileType, CancellationToken cancellationToken = default)
     {
         var tenantId = _currentUserService.TenantId;
 
@@ -144,7 +144,9 @@ public class TeamService: ITeamService
     public async Task<OneOf<TeamDto, NotFound>> UpdateTeamAsync(Guid id, UpdateTeamDto updateTeamDto,
 CancellationToken cancellationToken = default)
     {
-        var team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        var team = await _context
+            .Teams
+            .FirstOrDefaultAsync(t => t.Id == id && t.TenantId == _currentUserService.TenantId, cancellationToken);
 
         if (team is null)
         {
@@ -152,13 +154,8 @@ CancellationToken cancellationToken = default)
         }
 
         var previousValues = JsonSerializer.Serialize(team.Adapt<UpdateTeamDto>());
-        var currentUserFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
-        var currentUserRoles = await _context
-            .TenantUserRoles
-            .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == _currentUserService.TenantId)
-            .GroupBy(r => 1, t => t.TenantRole.Role.Name)
-            .Select(group => string.Join(", ", group.Select(name => name)))
-            .FirstOrDefaultAsync(cancellationToken);
+        var currentUserFullName = _currentUserService.UserInfo.FullName;
+        var currentUserRoles = _currentUserService.UserInfo.Roles;
         var eventDateTime = _dateTimeService.UtcNow;
 
         await _context.TeamActivityLogs.AddAsync(new TeamActivityLog

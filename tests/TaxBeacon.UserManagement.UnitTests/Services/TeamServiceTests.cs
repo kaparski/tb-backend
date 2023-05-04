@@ -256,7 +256,7 @@ public class TeamServiceTests
     }
 
     [Fact]
-    public async Task GetActivitiesAsync_DivisionDoesNotExistWithinCurrentTenant_ShouldReturnNotFound()
+    public async Task GetActivitiesAsync_TeamDoesNotExistWithinCurrentTenant_ShouldReturnNotFound()
     {
         //Arrange
         var tenant = TestData.TestTenant.Generate();
@@ -310,7 +310,7 @@ public class TeamServiceTests
     }
 
     [Fact]
-    public async Task GetDivisionDetailsAsync_ValidId_ReturnsDivision()
+    public async Task GetTeamDetailsAsync_ValidId_ReturnsTeam()
     {
         //Arrange
         TestData.TestTeam.RuleFor(
@@ -350,6 +350,23 @@ public class TeamServiceTests
     }
 
     [Fact]
+    public async Task GetTeamDetailsAsync_UserTenantIdNotEqualTeamTenantId_ReturnsNotFound()
+    {
+        //Arrange
+        var teams = TestData.TestTeam.Generate(5);
+        teams.ForEach(t => t.TenantId = new Guid());
+
+        await _dbContextMock.Teams.AddRangeAsync(teams);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var result = await _teamService.GetTeamDetailsAsync(teams[0].Id);
+
+        //Assert
+        result.TryPickT1(out _, out _).Should().BeTrue();
+    }
+
+    [Fact]
     public async Task UpdateTeamAsync_TeamExists_ReturnsUpdatedTeamAndCapturesActivityLog()
     {
         // Arrange
@@ -370,10 +387,10 @@ public class TeamServiceTests
         using (new AssertionScope())
         {
             (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-            actualResult.TryPickT0(out var divisionDto, out _);
-            divisionDto.Should().NotBeNull();
-            divisionDto.Id.Should().Be(team.Id);
-            divisionDto.Name.Should().Be(updateTeamDto.Name);
+            actualResult.TryPickT0(out var teamDto, out _);
+            teamDto.Should().NotBeNull();
+            teamDto.Id.Should().Be(team.Id);
+            teamDto.Name.Should().Be(updateTeamDto.Name);
 
             var actualActivityLog = await _dbContextMock.TeamActivityLogs.LastOrDefaultAsync();
             actualActivityLog.Should().NotBeNull();
@@ -402,8 +419,28 @@ public class TeamServiceTests
         // Assert
         using (new AssertionScope())
         {
-            actualResult.TryPickT1(out var divisionDto, out _);
-            divisionDto.Should().NotBeNull();
+            actualResult.TryPickT1(out var teamDto, out _);
+            teamDto.Should().NotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateTeamAsync_UserTenantIdNotEqualTeamTenantId_ReturnsNotFound()
+    {
+        // Arrange
+        var updateTeamDto = TestData.UpdateTeamDtoFaker.Generate();
+        var team = TestData.TestTeam.Generate();
+        team.TenantId = new Guid();
+        await _dbContextMock.Teams.AddAsync(team);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _teamService.UpdateTeamAsync(Guid.NewGuid(), updateTeamDto, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT1(out _, out _).Should().BeTrue();
         }
     }
 
