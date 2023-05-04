@@ -61,6 +61,7 @@ public class DepartmentService: IDepartmentService
                 Id = d.Id,
                 Name = d.Name,
                 Description = d.Description,
+                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
                 AssignedUsersCount = d.Users.Count(),
                 Division = d.Division == null ? string.Empty : d.Division.Name,
                 ServiceArea = d.ServiceAreas.Select(sa => sa.Name)
