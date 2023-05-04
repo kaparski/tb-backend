@@ -33,4 +33,6 @@ public class Tenant: BaseEntity
     public ICollection<DivisionActivityLog> DivisionActivityLogs { get; set; } = new HashSet<DivisionActivityLog>();
 
     public ICollection<DepartmentActivityLog> DepartmentActivityLogs { get; set; } = new HashSet<DepartmentActivityLog>();
+
+    public ICollection<TeamActivityLog> TeamActivityLogs { get; set; } = new HashSet<TeamActivityLog>();
 }

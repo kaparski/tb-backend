@@ -14,5 +14,6 @@
 
         public ICollection<User> Users { get; set; } = new HashSet<User>();
 
+        public ICollection<TeamActivityLog> TeamActivityLogs { get; set; } = new HashSet<TeamActivityLog>();
     }
 }
