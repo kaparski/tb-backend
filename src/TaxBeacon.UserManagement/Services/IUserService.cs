@@ -39,6 +39,4 @@ public interface IUserService
 
     Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Guid userId,
         CancellationToken cancellationToken = default);
-
-    bool IsSuperAdmin(Guid userId);
 }
