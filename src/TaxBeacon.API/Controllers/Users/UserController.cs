@@ -131,12 +131,14 @@ public class UserController: BaseController
     /// <response code="200">Returns activity logs</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">No user with this Id was found</response>
     /// <returns>Activity history for a specific department</returns>
     [HasPermissions(Common.Permissions.Users.Read)]
     [HttpGet("activities", Name = "UserActivityHistory")]
     [ProducesResponseType(typeof(IEnumerable<UserActivityResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UserActivitiesHistory([FromRoute] Guid id,
         [FromQuery] UserActivitiesRequest request,
         CancellationToken cancellationToken)

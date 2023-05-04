@@ -7,7 +7,6 @@ using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -34,9 +33,9 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <response code="403">The user does not have the required permission</response>
         /// <returns>List of tenant divisions</returns>
         [HasPermissions(
-            Divisions.Read,
-            Divisions.ReadWrite,
-            Divisions.ReadExport)]
+            Common.Permissions.Divisions.Read,
+            Common.Permissions.Divisions.ReadWrite,
+            Common.Permissions.Divisions.ReadExport)]
         [HttpGet(Name = "GetDivisions")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(QueryablePaging<DivisionResponse>), StatusCodes.Status200OK)]
@@ -68,7 +67,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <response code="401">User is unauthorized</response>
         /// <response code="403">The user does not have the required permission</response>
         /// <returns>File content</returns>
-        [HasPermissions(Divisions.ReadExport)]
+        [HasPermissions(Common.Permissions.Divisions.ReadExport)]
         [HttpGet("export", Name = "ExportTenantDivisions")]
         [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -94,7 +93,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <response code="403">The user does not have the required permission</response>
         /// <response code="404">Division is not found</response>
         /// <returns>Activity history for a specific division</returns>
-        [HasPermissions(Divisions.Read, Divisions.ReadWrite)]
+        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
         [HttpGet("{id:guid}/activities", Name = "DivisionActivityHistory")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(IEnumerable<DivisionActivityResponse>), StatusCodes.Status200OK)]
@@ -121,7 +120,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <response code="403">The user does not have the required permission</response>
         /// <response code="404">Division is not found</response>
         /// <returns>A division details</returns>
-        [HasPermissions(Divisions.Read, Divisions.ReadWrite)]
+        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
         [HttpGet("{id:guid}", Name = "DivisionDetails")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(IEnumerable<DivisionDetailsResponse>), StatusCodes.Status200OK)]
@@ -146,7 +145,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <response code="403">The user does not have the required permission</response>
         /// <response code="404">Division is not found</response>
         /// <returns>A collection of users assigned to a particular division</returns>
-        [HasPermissions(Divisions.Read, Divisions.ReadWrite)]
+        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
         [HttpGet("{id:guid}/users", Name = "DivisionUsers")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(QueryablePaging<DivisionUserResponse>), StatusCodes.Status200OK)]
@@ -179,7 +178,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <response code="403">The user does not have the required permission</response>
         /// <response code="404">Division is not found</response>
         /// <returns>Updated division</returns>
-        [HasPermissions(Divisions.ReadWrite)]
+        [HasPermissions(Common.Permissions.Divisions.ReadWrite)]
         [HttpPatch("{id:guid}", Name = "UpdateDivision")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(DivisionResponse), StatusCodes.Status200OK)]

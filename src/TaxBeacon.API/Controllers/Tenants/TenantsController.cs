@@ -100,7 +100,9 @@ public class TenantsController: BaseController
     {
         var resultOneOf = await _tenantService.GetTenantByIdAsync(id, cancellationToken);
 
-        return resultOneOf.Match<IActionResult>(tenant => Ok(tenant.Adapt<TenantResponse>()), notFound => NotFound());
+        return resultOneOf.Match<IActionResult>(
+            tenant => Ok(tenant.Adapt<TenantResponse>()),
+            notFound => NotFound());
     }
 
     /// <summary>

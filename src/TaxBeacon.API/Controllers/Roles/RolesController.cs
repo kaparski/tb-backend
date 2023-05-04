@@ -58,6 +58,7 @@ public class RolesController: BaseController
     /// <response code="200">Returns list of role assigned users</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">The role was not found</response>
     /// <returns>A collection of users assigned to a particular role</returns>
     [HasPermissions(Common.Permissions.Roles.Read)]
     [HttpGet("{id:guid}/users", Name = "GetRoleAssignedUsers")]
@@ -65,6 +66,7 @@ public class RolesController: BaseController
     [ProducesResponseType(typeof(QueryablePaging<RoleAssignedUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRoleAssignedUsers([FromRoute] Guid id, [FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -107,9 +109,10 @@ public class RolesController: BaseController
     /// <remarks>
     /// Permission: Roles.ReadWrite
     /// </remarks>
-    /// <response code="204">Users have been successfully unasigned</response>
+    /// <response code="204">Users have been successfully unassigned</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">The role was not found</response>
     /// <returns>No content response</returns>
     [HasPermissions(Common.Permissions.Roles.ReadWrite)]
     [HttpDelete("{id:guid}/users", Name = "UnassignUsers")]
@@ -138,6 +141,7 @@ public class RolesController: BaseController
     /// <response code="200">Users have been successfully assigned</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">The role was not found</response>
     /// <returns>Success response</returns>
     [HasPermissions(Common.Permissions.Roles.ReadWrite)]
     [HttpPost("{id:guid}/users", Name = "AssignUsersToRole")]
