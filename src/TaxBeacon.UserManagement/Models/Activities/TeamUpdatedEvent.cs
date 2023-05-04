@@ -1,10 +1,15 @@
-﻿using TaxBeacon.Common.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TaxBeacon.Common.Models;
 
 namespace TaxBeacon.UserManagement.Models.Activities
 {
-    public class DivisionUpdatedEvent: EventBase
+    public class TeamUpdatedEvent: EventBase
     {
-        public DivisionUpdatedEvent(Guid executorId, string executorRoles, string executorFullName, DateTime updatedDate,
+        public TeamUpdatedEvent(Guid executorId, string executorRoles, string executorFullName, DateTime updatedDate,
         string previousValues, string currentValues)
         : base(executorId, executorRoles, executorFullName)
         {
@@ -19,6 +24,6 @@ namespace TaxBeacon.UserManagement.Models.Activities
 
         public DateTime UpdatedDate { get; set; }
 
-        public override string ToString() => "Divisions details updated";
+        public override string ToString() => "Team details updated";
     }
 }

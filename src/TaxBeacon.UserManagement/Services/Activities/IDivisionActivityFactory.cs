@@ -1,7 +1,7 @@
 ﻿using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Models;
 
-namespace TaxBeacon.UserManagement.Services.Activities.Divisions;
+namespace TaxBeacon.UserManagement.Services.Activities;
 
 public interface IDivisionActivityFactory
 {
