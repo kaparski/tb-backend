@@ -1,7 +1,6 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Teams.Requests;
@@ -29,6 +28,9 @@ public class TeamsController: BaseController
     ///     ```GET /teams?page=2&amp;pageSize=5&amp;orderBy=name```
     /// </remarks>
     /// <response code="200">Returns teams</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <returns>List of teams</returns>
     [HasPermissions(
         Common.Permissions.Teams.Read,
@@ -37,8 +39,10 @@ public class TeamsController: BaseController
     [HttpGet(Name = "GetTeams")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<TeamResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(BadRequest), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTeamList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -60,10 +64,13 @@ public class TeamsController: BaseController
     /// <param name="cancellationToken"></param>
     /// <response code="200">Returns file content</response>
     /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <returns>File content</returns>
     [HasPermissions(Common.Permissions.Teams.ReadExport)]
     [HttpGet("export", Name = "ExportTeams")]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> ExportTeamsAsync([FromQuery] ExportTeamsRequest exportTeamsRequest,
         CancellationToken cancellationToken)
     {
@@ -78,12 +85,17 @@ public class TeamsController: BaseController
     /// Get teams Activity History
     /// </summary>
     /// <response code="200">Returns activity logs</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Team is not found</response>
+    /// <returns>Activity history for a specific team</returns>
     [HasPermissions(Common.Permissions.Teams.Read, Common.Permissions.Teams.ReadWrite)]
     [HttpGet("{id:guid}/activities", Name = "TeamActivityHistory")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IEnumerable<TeamActivityResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> TeamActivitiesHistory([FromRoute] Guid id, [FromQuery] TeamActivityRequest request,
         CancellationToken cancellationToken)
     {
@@ -98,12 +110,17 @@ public class TeamsController: BaseController
     /// Get Team By Id
     /// </summary>
     /// <response code="200">Returns Team Details</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Team is not found</response>
+    /// <returns>Team details</returns>
     [HasPermissions(Common.Permissions.Teams.Read, Common.Permissions.Teams.ReadWrite)]
     [HttpGet("{id:guid}", Name = "TeamDetails")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IEnumerable<TeamDetailsResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTeamDetails([FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
@@ -118,14 +135,19 @@ public class TeamsController: BaseController
     /// Update team details
     /// </summary>
     /// <response code="200">Returns updated team</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Team is not found</response>
     /// <returns>Updated team</returns>
     [HasPermissions(Common.Permissions.Teams.ReadWrite)]
     [HttpPatch("{id:guid}", Name = "UpdateTeam")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(TeamResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateTeamAsync([FromRoute] Guid id, [FromBody] UpdateTeamRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateTeamAsync([FromRoute] Guid id, [FromBody] UpdateTeamRequest request,
+        CancellationToken cancellationToken)
     {
         var resultOneOf = await _teamService.UpdateTeamAsync(id, request.Adapt<UpdateTeamDto>(), cancellationToken);
 
