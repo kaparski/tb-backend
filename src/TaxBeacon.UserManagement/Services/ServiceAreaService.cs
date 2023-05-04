@@ -122,7 +122,7 @@ public class ServiceAreaService: IServiceAreaService
             return new NotFound();
         }
 
-        var (userFullName, userRoles) = ("", "");
+        var (userFullName, userRoles) = _currentUserService.UserInfo;
         var previousValues = JsonSerializer.Serialize(serviceArea.Adapt<UpdateServiceAreaDto>());
 
         var eventDateTime = _dateTimeService.UtcNow;
