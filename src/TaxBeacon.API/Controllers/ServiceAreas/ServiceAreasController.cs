@@ -85,10 +85,10 @@ public class ServiceAreasController: BaseController
     {
         var mimeType = exportServiceAreasRequest.FileType.ToMimeType();
 
-        var serviceAreasAsync = await _tenantService.ExportServiceAreasAsync(_currentUserService.TenantId,
+        var serviceAreas = await _serviceAreaService.ExportServiceAreasAsync(
             exportServiceAreasRequest.FileType, cancellationToken);
 
-        return File(serviceAreasAsync, mimeType,
+        return File(serviceAreas, mimeType,
             $"serviceareas.{exportServiceAreasRequest.FileType.ToString().ToLowerInvariant()}");
     }
 

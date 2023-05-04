@@ -4,7 +4,6 @@ using System.Reflection;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Department;
-using TaxBeacon.UserManagement.Services.Activities.Divisions;
 using TaxBeacon.UserManagement.Services.Activities.ServiceArea;
 using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
