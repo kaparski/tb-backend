@@ -31,6 +31,8 @@ public static class ConfigureServices
 
         serviceCollection.AddScoped<ITeamService, TeamService>();
         serviceCollection.AddScoped<IDepartmentService, DepartmentService>();
+        serviceCollection.AddScoped<IServiceAreaService, ServiceAreaService>();
+
         serviceCollection.AddScoped<ITeamActivityFactory, TeamUpdatedEventFactory>();
 
         serviceCollection.AddScoped<ITenantActivityFactory, TenantEnteredEventFactory>();
