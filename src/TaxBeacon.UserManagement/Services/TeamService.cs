@@ -154,8 +154,7 @@ CancellationToken cancellationToken = default)
         }
 
         var previousValues = JsonSerializer.Serialize(team.Adapt<UpdateTeamDto>());
-        var currentUserFullName = _currentUserService.UserInfo.FullName;
-        var currentUserRoles = _currentUserService.UserInfo.Roles;
+        var userInfo = _currentUserService.UserInfo;
         var eventDateTime = _dateTimeService.UtcNow;
 
         await _context.TeamActivityLogs.AddAsync(new TeamActivityLog
@@ -165,10 +164,10 @@ CancellationToken cancellationToken = default)
             Date = eventDateTime,
             Revision = 1,
             EventType = TeamEventType.TeamUpdatedEvent,
-            Event = JsonSerializer.Serialize(new DivisionUpdatedEvent(
+            Event = JsonSerializer.Serialize(new TeamUpdatedEvent(
                 _currentUserService.UserId,
-                currentUserRoles ?? string.Empty,
-                currentUserFullName,
+                userInfo.Roles ?? string.Empty,
+                userInfo.FullName,
                 eventDateTime,
                 previousValues,
                 JsonSerializer.Serialize(updateTeamDto)))

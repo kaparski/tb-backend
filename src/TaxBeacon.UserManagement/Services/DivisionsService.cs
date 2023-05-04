@@ -163,8 +163,7 @@ namespace TaxBeacon.UserManagement.Services
             }
 
             var previousValues = JsonSerializer.Serialize(division.Adapt<UpdateDivisionDto>());
-            var currentUserFullName = _currentUserService.UserInfo.FullName;
-            var currentUserRoles = _currentUserService.UserInfo.Roles;
+            var userInfo = _currentUserService.UserInfo;
             var eventDateTime = _dateTimeService.UtcNow;
 
             await _context.DivisionActivityLogs.AddAsync(new DivisionActivityLog
@@ -176,8 +175,8 @@ namespace TaxBeacon.UserManagement.Services
                 EventType = DivisionEventType.DivisionUpdatedEvent,
                 Event = JsonSerializer.Serialize(new DivisionUpdatedEvent(
                     _currentUserService.UserId,
-                    currentUserRoles ?? string.Empty,
-                    currentUserFullName,
+                    userInfo.Roles ?? string.Empty,
+                    userInfo.FullName,
                     eventDateTime,
                     previousValues,
                     JsonSerializer.Serialize(updateDivisionDto)))

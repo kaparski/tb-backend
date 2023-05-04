@@ -24,6 +24,6 @@ namespace TaxBeacon.UserManagement.Models.Activities
 
         public DateTime UpdatedDate { get; set; }
 
-        public override string ToString() => "Division details updated";
+        public override string ToString() => "Team details updated";
     }
 }
