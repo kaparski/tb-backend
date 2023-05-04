@@ -94,6 +94,7 @@ public class DepartmentService: IDepartmentService
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
                 AssignedUsersCount = d.Users.Count()
             })
+            .OrderBy(dep => dep.Name)
             .ToListAsync(cancellationToken);
 
         exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
