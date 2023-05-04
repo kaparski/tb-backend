@@ -97,8 +97,8 @@ public class TeamService: ITeamService
         return _listToFileConverters[fileType].Convert(exportTeams);
     }
 
-    public async Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid teamId, uint page = 1,
-    uint pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid teamId, int page = 1,
+    int pageSize = 10, CancellationToken cancellationToken = default)
     {
         page = page == 0 ? 1 : page;
         pageSize = pageSize == 0 ? 10 : pageSize;

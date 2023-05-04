@@ -11,7 +11,7 @@ namespace TaxBeacon.API.Controllers.Teams.Requests
             RuleFor(x => x.Name)
                 .NotEmpty()
                 .MaximumLength(100)
-                .WithMessage("The team name must contain no more than 100 charachters");
+                .WithMessage("The team name must contain no more than 100 characters");
 
             RuleFor(x => x.Description)
                 .MaximumLength(200)

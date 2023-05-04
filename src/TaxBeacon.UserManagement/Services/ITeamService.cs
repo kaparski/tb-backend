@@ -18,6 +18,6 @@ public interface ITeamService
 
     Task<OneOf<TeamDetailsDto, NotFound>> GetTeamDetailsAsync(Guid teamId, CancellationToken cancellationToken = default);
 
-    Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid teamId, uint page = 1,
-        uint pageSize = 10, CancellationToken cancellationToken = default);
+    Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid teamId, int page = 1,
+        int pageSize = 10, CancellationToken cancellationToken = default);
 }

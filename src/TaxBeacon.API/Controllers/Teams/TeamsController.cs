@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
+using TaxBeacon.API.Controllers.Tenants.Requests;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
@@ -72,5 +74,65 @@ public class TeamsController: BaseController
         var teams = await _teamService.ExportTeamsAsync(exportTeamsRequest.FileType, cancellationToken);
 
         return File(teams, mimeType, $"teams.{exportTeamsRequest.FileType.ToString().ToLowerInvariant()}");
+    }
+
+    /// <summary>
+    /// Get teams Activity History
+    /// </summary>
+    /// <response code="200">Returns activity logs</response>
+    /// <response code="404">Team is not found</response>
+    [HasPermissions(Common.Permissions.Teams.Read, Common.Permissions.Teams.ReadWrite)]
+    [HttpGet("{id:guid}/activities", Name = "TeamActivityHistory")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<TeamActivityResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> TeamActivitiesHistory([FromRoute] Guid id, [FromQuery] TeamActivityRequest request,
+        CancellationToken cancellationToken)
+    {
+        var activities = await _teamService.GetActivitiesAsync(id, request.Page, request.PageSize, cancellationToken);
+
+        return activities.Match<IActionResult>(
+            result => Ok(result.Adapt<TeamActivityResponse>()),
+            notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Get Team By Id
+    /// </summary>
+    /// <response code="200">Returns Team Details</response>
+    /// <response code="404">Team is not found</response>
+    [HasPermissions(Common.Permissions.Teams.Read, Common.Permissions.Teams.ReadWrite)]
+    [HttpGet("{id:guid}", Name = "TeamDetails")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<TeamDetailsResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetTeamDetails([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var oneOfTeamDetails = await _teamService.GetTeamDetailsAsync(id, cancellationToken);
+
+        return oneOfTeamDetails.Match<IActionResult>(
+            result => Ok(result.Adapt<TeamDetailsResponse>()),
+            _ => NotFound());
+    }
+
+    /// <summary>
+    /// Update team details
+    /// </summary>
+    /// <response code="200">Returns updated team</response>
+    /// <response code="404">Team is not found</response>
+    /// <returns>Updated team</returns>
+    [HasPermissions(Common.Permissions.Teams.ReadWrite)]
+    [HttpPatch("{id:guid}", Name = "UpdateTeam")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(TeamResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateTeamAsync([FromRoute] Guid id, [FromBody] UpdateTeamRequest request, CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _teamService.UpdateTeamAsync(id, request.Adapt<UpdateTeamDto>(), cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            result => Ok(result.Adapt<TeamResponse>()),
+            notFound => NotFound());
     }
 }
