@@ -14,7 +14,5 @@ public class DepartmentDto
 
     public string ServiceArea { get; set; } = null!;
 
-    public string ServiceAreas { get; set; } = null!;
-
     public string Division { get; set; } = null!;
 }

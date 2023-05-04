@@ -15,15 +15,13 @@ public interface ITenantService
 
     Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id, CancellationToken cancellationToken);
 
-    Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(Guid tenantId,
+    Task<OneOf<QueryablePaging<ServiceAreaDto>, NotFound>> GetServiceAreasAsync(Guid tenantId,
         GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
-    Task<byte[]> ExportDepartmentsAsync(Guid tenantId,
+    Task<byte[]> ExportServiceAreasAsync(Guid tenantId,
         FileType fileType,
         CancellationToken cancellationToken);
-
-    Task<IReadOnlyCollection<ServiceAreaDto>> GetServiceAreasAsync(CancellationToken cancellationToken = default);
 
     Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken);
 
