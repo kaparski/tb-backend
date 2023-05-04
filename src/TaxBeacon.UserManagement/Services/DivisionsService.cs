@@ -94,6 +94,7 @@ namespace TaxBeacon.UserManagement.Services
                     NumberOfUsers = div.Users.Count(),
                     Departments = string.Join(", ", div.Departments.Select(dep => dep.Name)),
                 })
+                .OrderBy(d => d.Name)
                 .AsNoTracking()
                 .ProjectToType<DivisionExportModel>()
                 .ToListAsync(cancellationToken);
