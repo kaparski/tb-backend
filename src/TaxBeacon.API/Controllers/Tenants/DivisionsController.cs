@@ -1,13 +1,13 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -19,6 +19,7 @@ namespace TaxBeacon.API.Controllers.Tenants
     {
         private readonly IDivisionsService _divisionsService;
         public DivisionsController(IDivisionsService divisionsService) => _divisionsService = divisionsService;
+
         /// <summary>
         /// List of tenant divisions
         /// </summary>
@@ -28,18 +29,20 @@ namespace TaxBeacon.API.Controllers.Tenants
         ///     ```GET /divisons?page=2&amp;pageSize=5&amp;orderBy=name```
         /// </remarks>
         /// <response code="200">Returns tenant divisions</response>
+        /// <response code="400">Invalid filtering or sorting</response>
+        /// <response code="401">User is unauthorized</response>
+        /// <response code="403">The user does not have the required permission</response>
         /// <returns>List of tenant divisions</returns>
         [HasPermissions(
-            Common.Permissions.Divisions.Read,
-            Common.Permissions.Divisions.ReadWrite,
-            Common.Permissions.Divisions.ReadExport)]
+            Divisions.Read,
+            Divisions.ReadWrite,
+            Divisions.ReadExport)]
         [HttpGet(Name = "GetDivisions")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(QueryablePaging<DivisionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> GetDivisionsList([FromQuery] GridifyQuery query,
             CancellationToken cancellationToken)
         {
@@ -51,7 +54,8 @@ namespace TaxBeacon.API.Controllers.Tenants
 
             var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, cancellationToken);
             return divisionsOneOf.Match<IActionResult>(
-                divisions => Ok(new QueryablePaging<DivisionResponse>(divisions.Count, divisions.Query.ProjectToType<DivisionResponse>())),
+                divisions => Ok(new QueryablePaging<DivisionResponse>(divisions.Count,
+                    divisions.Query.ProjectToType<DivisionResponse>())),
                 notFound => NotFound());
         }
 
@@ -62,8 +66,9 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// <param name="cancellationToken"></param>
         /// <response code="200">Returns file content</response>
         /// <response code="401">User is unauthorized</response>
+        /// <response code="403">The user does not have the required permission</response>
         /// <returns>File content</returns>
-        [HasPermissions(Common.Permissions.Divisions.ReadExport)]
+        [HasPermissions(Divisions.ReadExport)]
         [HttpGet("export", Name = "ExportTenantDivisions")]
         [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -74,25 +79,34 @@ namespace TaxBeacon.API.Controllers.Tenants
         {
             var mimeType = exportDivisionsRequest.FileType.ToMimeType();
 
-            var users = await _divisionsService.ExportDivisionsAsync(exportDivisionsRequest.FileType, cancellationToken);
+            var users = await _divisionsService.ExportDivisionsAsync(exportDivisionsRequest.FileType,
+                cancellationToken);
 
-            return File(users, mimeType, $"tenantDivisions.{exportDivisionsRequest.FileType.ToString().ToLowerInvariant()}");
+            return File(users, mimeType,
+                $"tenantDivisions.{exportDivisionsRequest.FileType.ToString().ToLowerInvariant()}");
         }
 
         /// <summary>
         /// Get Divisions Activity History
         /// </summary>
         /// <response code="200">Returns activity logs</response>
+        /// <response code="401">User is unauthorized</response>
+        /// <response code="403">The user does not have the required permission</response>
         /// <response code="404">Division is not found</response>
-        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
+        /// <returns>Activity history for a specific division</returns>
+        [HasPermissions(Divisions.Read, Divisions.ReadWrite)]
         [HttpGet("{id:guid}/activities", Name = "DivisionActivityHistory")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(IEnumerable<DivisionActivityResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DivisionActivitiesHistory([FromRoute] Guid id, [FromQuery] DivisionActivityRequest request,
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DivisionActivitiesHistory([FromRoute] Guid id,
+            [FromQuery] DivisionActivityRequest request,
             CancellationToken cancellationToken)
         {
-            var activities = await _divisionsService.GetActivitiesAsync(id, request.Page, request.PageSize, cancellationToken);
+            var activities =
+                await _divisionsService.GetActivitiesAsync(id, request.Page, request.PageSize, cancellationToken);
 
             return activities.Match<IActionResult>(
                 result => Ok(result.Adapt<DivisionActivityResponse>()),
@@ -103,12 +117,17 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// Get Divisions By Id
         /// </summary>
         /// <response code="200">Returns Division Details</response>
+        /// <response code="401">User is unauthorized</response>
+        /// <response code="403">The user does not have the required permission</response>
         /// <response code="404">Division is not found</response>
-        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
+        /// <returns>A division details</returns>
+        [HasPermissions(Divisions.Read, Divisions.ReadWrite)]
         [HttpGet("{id:guid}", Name = "DivisionDetails")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(IEnumerable<DivisionDetailsResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDivisionDetails([FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
@@ -123,15 +142,18 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// Get Users of Division
         /// </summary>
         /// <response code="200">Returns Division Users</response>
+        /// <response code="401">User is unauthorized</response>
+        /// <response code="403">The user does not have the required permission</response>
         /// <response code="404">Division is not found</response>
-        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
+        /// <returns>A collection of users assigned to a particular division</returns>
+        [HasPermissions(Divisions.Read, Divisions.ReadWrite)]
         [HttpGet("{id:guid}/users", Name = "DivisionUsers")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+        [ProducesResponseType(typeof(QueryablePaging<DivisionUserResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(QueryablePaging<DivisionUserResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDivisionUsers([FromQuery] GridifyQuery query, [FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
@@ -144,7 +166,8 @@ namespace TaxBeacon.API.Controllers.Tenants
             var oneOfDivisionUsers = await _divisionsService.GetDivisionUsersAsync(id, query, cancellationToken);
 
             return oneOfDivisionUsers.Match<IActionResult>(
-                result => Ok(new QueryablePaging<DivisionUserResponse>(result.Count, result.Query.ProjectToType<DivisionUserResponse>())),
+                result => Ok(new QueryablePaging<DivisionUserResponse>(result.Count,
+                    result.Query.ProjectToType<DivisionUserResponse>())),
                 _ => NotFound());
         }
 
@@ -152,16 +175,22 @@ namespace TaxBeacon.API.Controllers.Tenants
         /// Update division details
         /// </summary>
         /// <response code="200">Returns updated division</response>
+        /// <response code="401">User is unauthorized</response>
+        /// <response code="403">The user does not have the required permission</response>
         /// <response code="404">Division is not found</response>
         /// <returns>Updated division</returns>
-        [HasPermissions(Common.Permissions.Divisions.ReadWrite)]
+        [HasPermissions(Divisions.ReadWrite)]
         [HttpPatch("{id:guid}", Name = "UpdateDivision")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(DivisionResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateDivisionAsync([FromRoute] Guid id, [FromBody] UpdateDivisionRequest request, CancellationToken cancellationToken)
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateDivisionAsync([FromRoute] Guid id,
+            [FromBody] UpdateDivisionRequest request, CancellationToken cancellationToken)
         {
-            var resultOneOf = await _divisionsService.UpdateDivisionAsync(id, request.Adapt<UpdateDivisionDto>(), cancellationToken);
+            var resultOneOf =
+                await _divisionsService.UpdateDivisionAsync(id, request.Adapt<UpdateDivisionDto>(), cancellationToken);
 
             return resultOneOf.Match<IActionResult>(
                 result => Ok(result.Adapt<DivisionResponse>()),

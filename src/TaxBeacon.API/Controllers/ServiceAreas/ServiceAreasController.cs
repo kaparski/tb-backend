@@ -33,6 +33,9 @@ public class ServiceAreasController: BaseController
     ///     ```GET /serviceareas?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
     /// </remarks>
     /// <response code="200">Returns all service areas</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <returns>List of service areas</returns>
     [HasPermissions(
         Common.Permissions.Departments.Read,
@@ -48,7 +51,8 @@ public class ServiceAreasController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetServiceAreaList([FromQuery] GridifyQuery query, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetServiceAreaList([FromQuery] GridifyQuery query,
+        CancellationToken cancellationToken)
     {
         if (!query.IsValid<ServiceAreaDto>())
         {
@@ -60,7 +64,8 @@ public class ServiceAreasController: BaseController
         var serviceAreasOneOf = await _tenantService.GetServiceAreasAsync(tenantId, query, cancellationToken);
 
         return serviceAreasOneOf.Match<IActionResult>(
-            serviceAreas => Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count, serviceAreas.Query.ProjectToType<ServiceAreaResponse>())),
+            serviceAreas => Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count,
+                serviceAreas.Query.ProjectToType<ServiceAreaResponse>())),
             notFound => NotFound());
     }
 
@@ -71,6 +76,7 @@ public class ServiceAreasController: BaseController
     /// <param name="cancellationToken"></param>
     /// <response code="200">Returns file content</response>
     /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <returns>File content</returns>
     [HasPermissions(Common.Permissions.ServiceAreas.ReadExport)]
     [HttpGet("export", Name = "ExportServiceAreas")]
@@ -78,13 +84,16 @@ public class ServiceAreasController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> ExportServiceAreasAsync([FromQuery] ExportServiceAreasRequest exportServiceAreasRequest,
+    public async Task<IActionResult> ExportServiceAreasAsync(
+        [FromQuery] ExportServiceAreasRequest exportServiceAreasRequest,
         CancellationToken cancellationToken)
     {
         var mimeType = exportServiceAreasRequest.FileType.ToMimeType();
 
-        var serviceAreasAsync = await _tenantService.ExportServiceAreasAsync(_currentUserService.TenantId, exportServiceAreasRequest.FileType, cancellationToken);
+        var serviceAreasAsync = await _tenantService.ExportServiceAreasAsync(_currentUserService.TenantId,
+            exportServiceAreasRequest.FileType, cancellationToken);
 
-        return File(serviceAreasAsync, mimeType, $"serviceareas.{exportServiceAreasRequest.FileType.ToString().ToLowerInvariant()}");
+        return File(serviceAreasAsync, mimeType,
+            $"serviceareas.{exportServiceAreasRequest.FileType.ToString().ToLowerInvariant()}");
     }
 }

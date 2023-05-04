@@ -9,13 +9,11 @@ using System.Security.Principal;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Services;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Models;
 
 namespace TaxBeacon.API.UnitTests.Services;
 
@@ -126,8 +124,7 @@ public class CurrentUserServiceTests
     public void UserInfo_UserNotFoundInDb_Throws()
     {
         // Act
-
-        Action act = () => { var actualResult = _currentUserService.UserInfo; };
+        var act = () => { var actualResult = _currentUserService.UserInfo; };
 
         // Assert
         using (new AssertionScope())
@@ -149,11 +146,7 @@ public class CurrentUserServiceTests
         var tenant = TestData.TestTenant.Generate();
         _dbContextMock.Tenants.Add(tenant);
 
-        _dbContextMock.TenantUsers.Add(new TenantUser
-        {
-            TenantId = tenant.Id,
-            UserId = user.Id,
-        });
+        _dbContextMock.TenantUsers.Add(new TenantUser { TenantId = tenant.Id, UserId = user.Id });
 
         var role1 = TestData.TestRole.Generate();
         _dbContextMock.Roles.Add(role1);
@@ -161,28 +154,20 @@ public class CurrentUserServiceTests
         var role2 = TestData.TestRole.Generate();
         _dbContextMock.Roles.Add(role2);
 
-        _dbContextMock.TenantRoles.Add(new TenantRole
-        {
-            TenantId = tenant.Id,
-            RoleId = role1.Id,
-        });
-        _dbContextMock.TenantRoles.Add(new TenantRole
-        {
-            TenantId = tenant.Id,
-            RoleId = role2.Id,
-        });
+        _dbContextMock.TenantRoles.Add(new TenantRole { TenantId = tenant.Id, RoleId = role1.Id });
+        _dbContextMock.TenantRoles.Add(new TenantRole { TenantId = tenant.Id, RoleId = role2.Id });
 
         _dbContextMock.TenantUserRoles.Add(new TenantUserRole
         {
             TenantId = tenant.Id,
             UserId = user.Id,
-            RoleId = role1.Id,
+            RoleId = role1.Id
         });
         _dbContextMock.TenantUserRoles.Add(new TenantUserRole
         {
             TenantId = tenant.Id,
             UserId = user.Id,
-            RoleId = role2.Id,
+            RoleId = role2.Id
         });
 
         _dbContextMock.SaveChangesAsync().Wait();
@@ -213,15 +198,14 @@ public class CurrentUserServiceTests
     {
         public static readonly Faker<User> TestUser =
             new Faker<User>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
+                .RuleFor(u => u.Id, _ => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
                 .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
                 .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
                 .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
-                .RuleFor(u => u.Status, f => f.PickRandom<Status>())
-            ;
+                .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
