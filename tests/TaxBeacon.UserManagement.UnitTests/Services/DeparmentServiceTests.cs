@@ -499,7 +499,33 @@ public class DepartmentServiceTests
         var resultOneOf = await _departmentService.GetDepartmentUsersAsync(new Guid(), query);
 
         //Assert
-        resultOneOf.TryPickT1(out _, out _).Should().BeTrue();
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetDepartmentUsersAsync_UserIsFromDifferentTenant_ShouldReturnNotFound()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery
+        {
+            Page = 3,
+            PageSize = 2,
+            OrderBy = "email asc"
+        };
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentUsersAsync(department.Id, query);
+
+        //Assert
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
     }
 
     private static class TestData
