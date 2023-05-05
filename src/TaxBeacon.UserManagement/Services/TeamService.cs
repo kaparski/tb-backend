@@ -184,4 +184,34 @@ CancellationToken cancellationToken = default)
 
         return team.Adapt<TeamDto>();
     }
+
+    public async Task<OneOf<QueryablePaging<TeamUserDto>, NotFound>> GetTeamUsersAsync(Guid teamId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        var entity = await _context
+            .Teams
+            .SingleOrDefaultAsync(t => t.Id == teamId && t.TenantId == tenantId, cancellationToken);
+
+        if (entity is null)
+        {
+            return new NotFound();
+        }
+
+        var users = await _context
+            .Users
+            .Where(u => u.TeamId == teamId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
+            .Select(u => new TeamUserDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FullName = u.FullName,
+                JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
+                ServiceArea = u.ServiceArea == null ? string.Empty : u.ServiceArea.Name,
+                Department = u.Department == null ? string.Empty : u.Department.Name,
+            })
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
+    }
 }

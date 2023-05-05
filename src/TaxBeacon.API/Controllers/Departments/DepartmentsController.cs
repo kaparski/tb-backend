@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
@@ -163,5 +164,38 @@ public class DepartmentsController: BaseController
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<DepartmentDetailsResponse>()),
             notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Get Department Users
+    /// </summary>
+    /// <response code="200">Returns Department Users</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">User does not have the required permission</response>
+    /// <response code="404">Department is not found</response>
+    /// <returns>A collection of users assigned to a particular department</returns>
+    [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
+    [HttpGet("{id:guid}/users", Name = "DepartmentUsers")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(QueryablePaging<DepartmentUserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetDepartmentUsers([FromQuery] GridifyQuery query, [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        if (!query.IsValid<DepartmentUserDto>())
+        {
+            // TODO: Add an object with errors that we can use to detail the answers
+            return BadRequest();
+        }
+
+        var oneOfDepartmentUsers = await _service.GetDepartmentUsersAsync(id, query, cancellationToken);
+
+        return oneOfDepartmentUsers.Match<IActionResult>(
+            result => Ok(new QueryablePaging<DepartmentUserResponse>(result.Count,
+                result.Query.ProjectToType<DepartmentUserResponse>())),
+            _ => NotFound());
     }
 }
