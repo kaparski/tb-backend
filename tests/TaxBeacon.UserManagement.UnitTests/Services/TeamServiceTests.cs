@@ -444,6 +444,95 @@ public class TeamServiceTests
         }
     }
 
+    [Fact]
+    public async Task GetTeamUsersAsync_TeamExists_ShouldReturnAscOrderOfUsersAndCorrectPage()
+    {
+        //Arrange
+        var team = TestData.TestTeam.Generate();
+        team.TenantId = TenantId;
+        team.Users = TestData.TestUser.Generate(5);
+        await _dbContextMock.TenantUsers.AddRangeAsync(team.Users.Select(u => new TenantUser { UserId = u.Id, TenantId = TenantId }));
+        await _dbContextMock.Teams.AddRangeAsync(team);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery
+        {
+            Page = 3,
+            PageSize = 2,
+            OrderBy = "email asc"
+        };
+
+        //Act
+        var resultOneOf = await _teamService.GetTeamUsersAsync(team.Id, query);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            resultOneOf.TryPickT0(out var teamUsers, out _).Should().BeTrue();
+            teamUsers.Count.Should().Be(5);
+            teamUsers.Query.Count().Should().Be(1);
+            var users = teamUsers.Query.ToList();
+            users.Should().BeInAscendingOrder((o1, o2) => string.Compare(o1.Email, o2.Email, StringComparison.InvariantCultureIgnoreCase));
+            users.Should().AllSatisfy(u => u.FullName.Should().NotBeNullOrEmpty());
+            users.Should().AllSatisfy(u => u.JobTitle.Should().NotBeNullOrEmpty());
+        }
+    }
+
+    [Fact]
+    public async Task GetTeamUsersAsync_TeamExistsAndFilterApplied_ShouldReturnUsersWithSpecificTeam()
+    {
+        //Arrange
+        var team = TestData.TestTeam.Generate();
+        team.TenantId = TenantId;
+        var listOfUsers = TestData.TestUser.Generate(5);
+        team.Users = listOfUsers;
+        await _dbContextMock.TenantUsers.AddRangeAsync(team.Users.Select(u => new TenantUser { UserId = u.Id, TenantId = TenantId }));
+        await _dbContextMock.Teams.AddRangeAsync(team);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery
+        {
+            Page = 1,
+            PageSize = 5,
+            OrderBy = "department asc",
+            Filter = "department=" + listOfUsers.First().Department!.Name
+        };
+
+        //Act
+        var resultOneOf = await _teamService.GetTeamUsersAsync(team.Id, query);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            resultOneOf.TryPickT0(out var teamUsers, out _).Should().BeTrue();
+            teamUsers.Count.Should().BeGreaterThan(0);
+            teamUsers.Query.Count().Should().BeGreaterThan(0);
+            var users = teamUsers.Query.ToList();
+            users.Should().BeInAscendingOrder((o1, o2) => string.Compare(o1.Department, o2.Department, StringComparison.InvariantCultureIgnoreCase));
+            users.Should().AllSatisfy(u => u.Department.Should().Be(users.First().Department));
+        }
+    }
+
+    [Fact]
+    public async Task GetTeamUsersAsync_TeamDoesNotExist_ShouldReturnNotFound()
+    {
+        //Arrange
+        var team = TestData.TestTeam.Generate();
+        team.TenantId = TenantId;
+        await _dbContextMock.Teams.AddRangeAsync(team);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery
+        {
+            Page = 3,
+            PageSize = 2,
+            OrderBy = "email asc"
+        };
+
+        //Act
+        var resultOneOf = await _teamService.GetTeamUsersAsync(new Guid(), query);
+
+        //Assert
+        resultOneOf.TryPickT1(out _, out _).Should().BeTrue();
+    }
+
     private static class TestData
     {
         public static readonly Faker<User> TestUser =
@@ -455,7 +544,17 @@ public class TeamServiceTests
                 .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
-                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>())
+                .RuleFor(u => u.Department, f =>
+                    new Department
+                    {
+                        Name = f.Name.FirstName()
+                    })
+                .RuleFor(u => u.JobTitle, f =>
+                    new JobTitle
+                    {
+                        Name = f.Name.FirstName()
+                    });
 
         public static readonly Faker<Team> TestTeam =
             new Faker<Team>()

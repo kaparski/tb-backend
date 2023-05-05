@@ -182,4 +182,34 @@ public class DepartmentService: IDepartmentService
             .Departments
             .GetDepartmentDetailsAsync(id, _currentUserService.TenantId))!;
     }
+
+    public async Task<OneOf<QueryablePaging<DepartmentUserDto>, NotFound>> GetDepartmentUsersAsync(Guid departmentId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        var entity = await _context
+            .Departments
+            .SingleOrDefaultAsync(t => t.Id == departmentId && t.TenantId == tenantId, cancellationToken);
+
+        if (entity is null)
+        {
+            return new NotFound();
+        }
+
+        var users = await _context
+            .Users
+            .Where(u => u.DepartmentId == departmentId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
+            .Select(u => new DepartmentUserDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FullName = u.FullName,
+                JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
+                ServiceArea = u.ServiceArea == null ? string.Empty : u.ServiceArea.Name,
+                Team = u.Team == null ? string.Empty : u.Team.Name,
+            })
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
+    }
 }

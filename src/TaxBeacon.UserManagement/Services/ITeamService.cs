@@ -11,7 +11,7 @@ public interface ITeamService
     public Task<OneOf<QueryablePaging<TeamDto>, NotFound>> GetTeamsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
-    Task<byte[]> ExportTeamsAsync(FileType fileType, CancellationToken cancellationToken);
+    Task<byte[]> ExportTeamsAsync(FileType fileType, CancellationToken cancellationToken = default);
 
     Task<OneOf<TeamDto, NotFound>> UpdateTeamAsync(Guid id, UpdateTeamDto updateTeamDto,
         CancellationToken cancellationToken = default);
@@ -20,4 +20,6 @@ public interface ITeamService
 
     Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid teamId, int page = 1,
         int pageSize = 10, CancellationToken cancellationToken = default);
+
+    Task<OneOf<QueryablePaging<TeamUserDto>, NotFound>> GetTeamUsersAsync(Guid teamId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default);
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
@@ -154,5 +155,38 @@ public class TeamsController: BaseController
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<TeamResponse>()),
             notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Get Team Users
+    /// </summary>
+    /// <response code="200">Returns Team Users</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">User does not have the required permission</response>
+    /// <response code="404">Team is not found</response>
+    /// <returns>A collection of users assigned to a particular team</returns>
+    [HasPermissions(Common.Permissions.Teams.Read, Common.Permissions.Teams.ReadWrite)]
+    [HttpGet("{id:guid}/users", Name = "TeamUsers")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(QueryablePaging<TeamUserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetTeamUsers([FromQuery] GridifyQuery query, [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        if (!query.IsValid<TeamUserDto>())
+        {
+            // TODO: Add an object with errors that we can use to detail the answers
+            return BadRequest();
+        }
+
+        var oneOfTeamUsers = await _teamService.GetTeamUsersAsync(id, query, cancellationToken);
+
+        return oneOfTeamUsers.Match<IActionResult>(
+            result => Ok(new QueryablePaging<TeamUserResponse>(result.Count,
+                result.Query.ProjectToType<TeamUserResponse>())),
+            _ => NotFound());
     }
 }

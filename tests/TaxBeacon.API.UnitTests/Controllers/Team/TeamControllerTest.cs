@@ -12,6 +12,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Teams;
 using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
@@ -261,6 +262,95 @@ public class TeamControllerTest
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
+
+    [Fact]
+    public void GetTeamUsers_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<GridifyQuery, Guid, CancellationToken, Task<IActionResult>>)_controller.GetTeamUsers).Method;
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be("Teams.Read;Teams.ReadWrite");
+        }
+    }
+
+    [Fact]
+    public async Task GetTeamUsers_ValidQuery_ShouldReturnSuccessStatusCode()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+        _teamServiceMock.Setup(p => p.GetTeamUsersAsync(It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(
+            new QueryablePaging<TeamUserDto>(0,
+                Enumerable.Empty<TeamUserDto>().AsQueryable()));
+
+        // Act
+        var actualResponse = await _controller.GetTeamUsers(query, new Guid(), default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<QueryablePaging<TeamUserResponse>>();
+        }
+    }
+
+    [Fact]
+    public async Task GetTeamUsers_InvalidQuery_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
+        _teamServiceMock.Setup(p => p.GetTeamUsersAsync(It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(
+            new QueryablePaging<TeamUserDto>(0,
+                Enumerable.Empty<TeamUserDto>().AsQueryable()));
+
+        // Act
+        var actualResponse = await _controller.GetTeamUsers(query, new Guid(), default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as BadRequestResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<BadRequestResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        }
+    }
+
+    [Fact]
+    public async Task GetTeamUsers_TeamDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+        _teamServiceMock
+            .Setup(x => x.GetTeamUsersAsync(It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetTeamUsers(query, Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
     private static class TestData
     {
         public static readonly Faker<TeamDto> TeamFaker =
