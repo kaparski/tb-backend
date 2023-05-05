@@ -121,7 +121,7 @@ public class ServiceAreasController: BaseController
     [HttpGet("{id:guid}/activities", Name = "GetServiceAreaActivityHistoryLog")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(ServiceAreaActivityHistoryResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetActivityHistoryAsync([FromRoute] Guid id, [FromQuery] ServiceAreaActivityHistoryRequest request,
         CancellationToken cancellationToken)
     {
@@ -142,7 +142,7 @@ public class ServiceAreasController: BaseController
     [HttpPatch("{id:guid}", Name = "UpdateServiceArea")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(ServiceAreaDetailsResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateServiceAreaAsync([FromRoute] Guid id, [FromBody] UpdateServiceAreaRequest request,
         CancellationToken cancellationToken)
     {
