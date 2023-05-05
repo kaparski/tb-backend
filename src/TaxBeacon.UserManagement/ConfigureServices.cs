@@ -4,6 +4,7 @@ using System.Reflection;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Department;
+using TaxBeacon.UserManagement.Services.Activities.ServiceArea;
 using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement;
@@ -30,6 +31,8 @@ public static class ConfigureServices
 
         serviceCollection.AddScoped<ITeamService, TeamService>();
         serviceCollection.AddScoped<IDepartmentService, DepartmentService>();
+        serviceCollection.AddScoped<IServiceAreaService, ServiceAreaService>();
+
         serviceCollection.AddScoped<ITeamActivityFactory, TeamUpdatedEventFactory>();
 
         serviceCollection.AddScoped<ITenantActivityFactory, TenantEnteredEventFactory>();
@@ -39,6 +42,8 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IDivisionActivityFactory, DivisionUpdatedEventFactory>();
 
         serviceCollection.AddScoped<IDepartmentActivityFactory, DepartmentUpdatedEventFactory>();
+
+        serviceCollection.AddScoped<IServiceAreaActivityFactory, ServiceAreaUpdatedEventFactory>();
 
         return serviceCollection;
     }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230503134024_AddedServiceAreaActivityLogTable")]
+    partial class AddedServiceAreaActivityLogTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -463,34 +466,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.ToTable("Teams");
                 });
 
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.TeamActivityLog", b =>
-                {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TeamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Event")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("EventType")
-                        .HasColumnType("int");
-
-                    b.Property<long>("Revision")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("TenantId", "TeamId", "Date");
-
-                    b.HasIndex("TeamId");
-
-                    b.ToTable("TeamActivityLogs");
-                });
-
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -938,25 +913,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.TeamActivityLog", b =>
-                {
-                    b.HasOne("TaxBeacon.DAL.Entities.Team", "Team")
-                        .WithMany("TeamActivityLogs")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
-                        .WithMany("TeamActivityLogs")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.ClientNoAction)
-                        .IsRequired();
-
-                    b.Navigation("Team");
-
-                    b.Navigation("Tenant");
-                });
-
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantActivityLog", b =>
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
@@ -1176,8 +1132,6 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Team", b =>
                 {
-                    b.Navigation("TeamActivityLogs");
-
                     b.Navigation("Users");
                 });
 
@@ -1198,8 +1152,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("ServiceAreas");
 
                     b.Navigation("TableFilters");
-
-                    b.Navigation("TeamActivityLogs");
 
                     b.Navigation("Teams");
 
