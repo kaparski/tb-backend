@@ -110,7 +110,7 @@ public class UserController: BaseController
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>Success response</returns>
-    [HasPermissions(Common.Permissions.Users.RolesWrite)]
+    [HasPermissions(Common.Permissions.Users.ReadWrite)]
     [HttpPost("assign", Name = "AssignRoles")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
