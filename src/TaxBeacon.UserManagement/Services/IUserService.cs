@@ -27,8 +27,6 @@ public interface IUserService
 
     Task<byte[]> ExportUsersAsync(Guid tenantId, FileType fileType, CancellationToken cancellationToken);
 
-    Task<Guid> GetTenantIdAsync(Guid userId);
-
     Task AssignRoleAsync(Guid tenantId, Guid[] roleIds, Guid userId, CancellationToken cancellationToken);
 
     Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid tenantId, Guid userId, UpdateUserDto updateUserDto,
@@ -39,4 +37,6 @@ public interface IUserService
 
     Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Guid userId,
         CancellationToken cancellationToken = default);
+
+    Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken);
 }

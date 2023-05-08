@@ -19,7 +19,6 @@ using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Extensions;
 using TaxBeacon.UserManagement.Services.Activities;
-using TaxBeacon.Common.Roles;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -283,12 +282,6 @@ public class UserService: IUserService
         return _listToFileConverters[fileType].Convert(exportUsers);
     }
 
-    public Task<Guid> GetTenantIdAsync(Guid userId) =>
-        _context.TenantUsers
-            .Where(tu => tu.UserId == userId)
-            .Select(tu => tu.TenantId)
-            .FirstOrDefaultAsync();
-
     public async Task AssignRoleAsync(Guid tenantId, Guid[] roleIds, Guid userId, CancellationToken cancellationToken)
     {
         var existingRoleIds = await _context.TenantUserRoles
@@ -494,26 +487,38 @@ public class UserService: IUserService
     {
         var (tenantId, isSuperAdmin) = (_currentUserService.TenantId, _currentUserService.IsSuperAdmin);
 
-        if (tenantId == Guid.Empty)
-        {
-            return await GetNoTenantUserPermissionsAsync(userId, cancellationToken);
-        }
-
-        // super admin within specific tenant
         if (isSuperAdmin)
         {
-            return await GetSuperAdminPermissionsWithinTenant(tenantId, cancellationToken);
+            return await GetNoTenantUserPermissionsAsync(userId, cancellationToken);
         }
 
         return await GetTenantUserPermissionsAsync(_currentUserService.TenantId, userId, cancellationToken);
     }
 
-    private async Task<IReadOnlyCollection<string>> GetSuperAdminPermissionsWithinTenant(Guid tenantId, CancellationToken cancellationToken)
-        => await _context.TenantUserRoles.Where(tur => tur.TenantId == tenantId)
-        .Join(_context.Roles.Where(r => r.Name == Roles.Admin), tur => tur.RoleId, r => r.Id, (tur, r) => r.Id)
-        .Join(_context.TenantRolePermissions.Where(trp => trp.TenantId == tenantId), r => r, trp => trp.RoleId, (r, trp) => trp.PermissionId)
-        .Join(_context.Permissions, permissionId => permissionId, p => p.Id, (permissionId, p) => p.Name)
-        .ToListAsync(cancellationToken);
+    public async Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken)
+    {
+        var tenantId = await GetTenantIdAsync(mailAddress, cancellationToken);
+
+        var userQuery = from u in _context.Users
+                        join ur in _context.UserRoles on u.Id equals ur.UserId into rolesGrouping
+                        from userRole in rolesGrouping.DefaultIfEmpty()
+                        join tur in _context.TenantUserRoles on new { UserId = u.Id, TenantId = tenantId } equals new { tur.UserId, tur.TenantId } into tenantRolesGrouping
+                        from tenantUserRole in tenantRolesGrouping.DefaultIfEmpty()
+                        where u.Email == mailAddress.Address
+                        select new { u.Id, u.FullName, Role = userRole.Role.Name, TenantRole = tenantUserRole.TenantRole.Role.Name };
+
+        return (await userQuery.ToListAsync(cancellationToken: cancellationToken))
+                                .GroupBy(z => new { z.Id, z.FullName })
+                                .Select(g => new UserInfo
+                                (
+                                    tenantId,
+                                    g.Key.Id,
+                                    g.Key.FullName,
+                                    g.Where(r => !string.IsNullOrEmpty(r.Role)).Select(r => r.Role).Distinct().ToList(),
+                                    g.Where(tr => !string.IsNullOrEmpty(tr.TenantRole)).Select(tr => tr.TenantRole).Distinct().ToList()
+                                 ))
+                                .SingleOrDefault();
+    }
 
     private async Task<IReadOnlyCollection<string>> GetTenantUserPermissionsAsync(Guid tenantId,
         Guid userId,
@@ -549,4 +554,10 @@ public class UserService: IUserService
         await _context
             .UserRoles
             .AnyAsync(ur => ur.UserId == id && ur.Role.Name == roleName, cancellationToken);
+
+    private Task<Guid> GetTenantIdAsync(MailAddress mail, CancellationToken cancellationToken) =>
+        _context.TenantUsers
+            .Where(tu => tu.User.Email == mail.Address)
+            .Select(tu => tu.TenantId)
+            .SingleOrDefaultAsync(cancellationToken);
 }
