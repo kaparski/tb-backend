@@ -10,8 +10,8 @@ public class UpdateDepartmentRequestValidator: AbstractValidator<UpdateDepartmen
     {
         RuleFor(x => x.Name)
             .NotEmpty()
-            .MaximumLength(50)
-            .WithMessage("The department name must contain no more than 50 characters");
+            .MaximumLength(100)
+            .WithMessage("The department name must contain no more than 100 characters");
 
         RuleFor(x => x.Description)
             .NotEmpty()
