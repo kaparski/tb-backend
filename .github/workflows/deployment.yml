@@ -66,7 +66,7 @@ jobs:
             run: dotnet ef database update -p ${{ github.workspace }}/src/TaxBeacon.DAL/TaxBeacon.DAL.csproj -s ${{ github.workspace }}/src/TaxBeacon.API/TaxBeacon.API.csproj --connection '${{secrets.CONNECTION_STRING}}'
 
     deploy:
-        name: Deployment to ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
+        name: Deployment
         runs-on: backend
         needs: build
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
