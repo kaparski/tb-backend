@@ -376,7 +376,7 @@ public class ServiceAreasControllerTest
     }
 
     [Fact]
-    public async Task GetUsers_ValidQuery_ReturnSuccessStatusCode()
+    public async Task GetUsers_ValidQuery_ShouldReturnSuccessStatusCode()
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "fullname desc", };
@@ -400,7 +400,7 @@ public class ServiceAreasControllerTest
     }
 
     [Fact]
-    public async Task GetUsers_OrderByNonExistingProperty_ReturnBadRequestStatusCode()
+    public async Task GetUsers_OrderByNonExistingProperty_ShouldReturnBadRequestStatusCode()
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistingfield desc", };
@@ -423,7 +423,7 @@ public class ServiceAreasControllerTest
     }
 
     [Fact]
-    public async Task GetUsers_TenantIdDoesNotExist_ReturnNotFoundStatusCode()
+    public async Task GetUsers_TenantIdDoesNotExist_ShouldReturnNotFoundStatusCode()
     {
         // Arrange
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };

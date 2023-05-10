@@ -464,12 +464,12 @@ public class ServiceAreaServiceTests
         // Arrange
         using (new AssertionScope())
         {
-            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
-            pageOfServiceAreas.Should().NotBeNull();
-            pageOfServiceAreas.Count.Should().Be(4);
-            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
-            listOfServiceAreas.Count.Should().Be(2);
-            listOfServiceAreas.Select(x => x.FullName).Should().BeInAscendingOrder();
+            actualResult.TryPickT0(out var pageOfUsers, out _);
+            pageOfUsers.Should().NotBeNull();
+            pageOfUsers.Count.Should().Be(4);
+            var listOfUsers = pageOfUsers.Query.ToList();
+            listOfUsers.Count.Should().Be(2);
+            listOfUsers.Select(x => x.FullName).Should().BeInAscendingOrder();
         }
     }
 
@@ -511,12 +511,12 @@ public class ServiceAreaServiceTests
         // Arrange
         using (new AssertionScope())
         {
-            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
-            pageOfServiceAreas.Should().NotBeNull();
-            pageOfServiceAreas.Count.Should().Be(3);
-            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
-            listOfServiceAreas.Count.Should().Be(3);
-            listOfServiceAreas.Select(x => x.Email).Should().BeInDescendingOrder();
+            actualResult.TryPickT0(out var pageOfUsers, out _);
+            pageOfUsers.Should().NotBeNull();
+            pageOfUsers.Count.Should().Be(3);
+            var listOfUsers = pageOfUsers.Query.ToList();
+            listOfUsers.Count.Should().Be(3);
+            listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
         }
     }
 

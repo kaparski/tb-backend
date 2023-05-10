@@ -185,8 +185,9 @@ public class ServiceAreaService: IServiceAreaService
 
     public async Task<OneOf<QueryablePaging<ServiceAreaUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId, GridifyQuery gridifyQuery, CancellationToken cancellationToken)
     {
+        var currentTenantId = _currentUserService.TenantId;
         var serviceArea = await _context.ServiceAreas
-            .FirstOrDefaultAsync(sa => sa.Id == serviceAreaId && sa.TenantId == _currentUserService.TenantId,
+            .FirstOrDefaultAsync(sa => sa.Id == serviceAreaId && sa.TenantId == currentTenantId,
                 cancellationToken);
 
         if (serviceArea is null)
@@ -197,7 +198,7 @@ public class ServiceAreaService: IServiceAreaService
         var users = await _context
             .Users
             .AsNoTracking()
-            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId) && sa.ServiceAreaId == serviceAreaId)
+            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.ServiceAreaId == serviceAreaId)
             .Select(d => new ServiceAreaUserDto()
             {
                 Id = d.Id,
