@@ -375,6 +375,76 @@ public class ServiceAreasControllerTest
         }
     }
 
+    [Fact]
+    public async Task GetUsers_ValidQuery_ReturnSuccessStatusCode()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "fullname desc", };
+        _serviceAreaServiceMock.Setup(p => p.GetUsersAsync(It.IsAny<Guid>(), query, default)).ReturnsAsync(
+            new QueryablePaging<ServiceAreaUserDto>(0,
+                Enumerable.Empty<ServiceAreaUserDto>().AsQueryable()));
+
+        // Act
+        var actualResponse = await _controller.GetUsers(new Guid(), query, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<QueryablePaging<ServiceAreaUserResponse>>();
+        }
+    }
+
+    [Fact]
+    public async Task GetUsers_OrderByNonExistingProperty_ReturnBadRequestStatusCode()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistingfield desc", };
+        _serviceAreaServiceMock.Setup(p => p.GetUsersAsync(It.IsAny<Guid>(), query, default)).ReturnsAsync(
+            new QueryablePaging<ServiceAreaUserDto>(0,
+                Enumerable.Empty<ServiceAreaUserDto>().AsQueryable()));
+
+        // Act
+        var actualResponse = await _controller.GetUsers(new Guid(), query, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as BadRequestResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<BadRequestResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        }
+    }
+
+    [Fact]
+    public async Task GetUsers_TenantIdDoesNotExist_ReturnNotFoundStatusCode()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+        _serviceAreaServiceMock
+            .Setup(p => p.GetUsersAsync(It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetUsers(new Guid(), query, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<NotFoundResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
     private static class TestData
     {
         public static readonly Faker<ServiceAreaDetailsDto> TestServiceAreaDetailsDto =

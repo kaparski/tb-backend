@@ -446,6 +446,80 @@ public class ServiceAreaServiceTests
         }
     }
 
+    [Fact]
+    public async Task GetUsersAsync_ServiceAreaExists_ShouldReturnUsersInAscendingOrder()
+    {
+        // Arrange
+        TestData.TestServiceArea.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(4));
+        var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "fullname asc", };
+        var serviceArea = TestData.TestServiceArea.Generate();
+        await _dbContextMock.ServiceAreas.AddAsync(serviceArea);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
+
+        // Act
+        var actualResult = await _serviceAreaService.GetUsersAsync(serviceArea.Id, query, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
+            pageOfServiceAreas.Should().NotBeNull();
+            pageOfServiceAreas.Count.Should().Be(4);
+            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
+            listOfServiceAreas.Count.Should().Be(2);
+            listOfServiceAreas.Select(x => x.FullName).Should().BeInAscendingOrder();
+        }
+    }
+
+    [Fact]
+    public async Task GetUsersAsync_ServiceAreaDoesNotExists_ShouldReturnNotFound()
+    {
+        // Arrange
+        TestData.TestServiceArea.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(1));
+        var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "fullname asc", };
+        var serviceArea = TestData.TestServiceArea.Generate();
+        await _dbContextMock.ServiceAreas.AddAsync(serviceArea);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
+
+        // Act
+        var actualResult = await _serviceAreaService.GetUsersAsync(new Guid(), query, default);
+
+        // Arrange
+        actualResult.IsT1.Should().BeTrue();
+        actualResult.IsT0.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetUsersAsync_ServiceAreaExists_ShouldReturnUsersInDescendingOrderByEmail()
+    {
+        // Arrange
+        TestData.TestServiceArea.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(3));
+        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "email desc", };
+        var serviceArea = TestData.TestServiceArea.Generate();
+        await _dbContextMock.ServiceAreas.AddAsync(serviceArea);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
+
+        // Act
+        var actualResult = await _serviceAreaService.GetUsersAsync(serviceArea.Id, query, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
+            pageOfServiceAreas.Should().NotBeNull();
+            pageOfServiceAreas.Count.Should().Be(3);
+            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
+            listOfServiceAreas.Count.Should().Be(3);
+            listOfServiceAreas.Select(x => x.Email).Should().BeInDescendingOrder();
+        }
+    }
+
     private static class TestData
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();
@@ -466,6 +540,13 @@ public class ServiceAreaServiceTests
                 .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
+                .RuleFor(u => u.TenantUsers, f => new List<TenantUser>()
+                {
+                     new TenantUser()
+                     {
+                         TenantId = TestTenantId,
+                     }
+                })
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
         public static readonly Faker<UpdateServiceAreaDto> UpdateServiceAreaDtoFaker =
