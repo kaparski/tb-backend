@@ -1,0 +1,81 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1D7F782A-6727-4216-A75A-986158A288A6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.API", "src\TaxBeacon.API\TaxBeacon.API.csproj", "{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.UserManagement", "src\TaxBeacon.UserManagement\TaxBeacon.UserManagement.csproj", "{76DACBB4-458E-4840-A5DB-FEA9D837467E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.DAL", "src\TaxBeacon.DAL\TaxBeacon.DAL.csproj", "{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{228716C1-EB3B-45F4-AA50-A5DFCDC4623E}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Common", "src\TaxBeacon.Common\TaxBeacon.Common.csproj", "{4420293B-B679-4DD3-8226-1F08066EBE13}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{78103266-2E2B-4710-9139-0AB800F12A71}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.UserManagement.UnitTests", "tests\TaxBeacon.UserManagement.UnitTests\TaxBeacon.UserManagement.UnitTests.csproj", "{BF40CE7B-1B35-4BAF-819E-998431E1C239}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.API.UnitTests", "tests\TaxBeacon.API.UnitTests\TaxBeacon.API.UnitTests.csproj", "{FA27BB92-9E96-4117-84C8-95787C922BED}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migration-scripts", "{E149189A-4D39-48F3-9B5A-DBDA8D351B70}"
+	ProjectSection(SolutionItems) = preProject
+		migration-scripts\AddPermisionsToAdminRole.sql = migration-scripts\AddPermisionsToAdminRole.sql
+		migration-scripts\InsertPermissionsAndRoles.sql = migration-scripts\InsertPermissionsAndRoles.sql
+		migration-scripts\InsertSuperAdminRoleWithPermissions.sql = migration-scripts\InsertSuperAdminRoleWithPermissions.sql
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4420293B-B679-4DD3-8226-1F08066EBE13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4420293B-B679-4DD3-8226-1F08066EBE13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4420293B-B679-4DD3-8226-1F08066EBE13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4420293B-B679-4DD3-8226-1F08066EBE13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA27BB92-9E96-4117-84C8-95787C922BED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA27BB92-9E96-4117-84C8-95787C922BED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA27BB92-9E96-4117-84C8-95787C922BED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA27BB92-9E96-4117-84C8-95787C922BED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{34C51C43-6755-4DEB-9CFD-5CB9FF18E104} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{76DACBB4-458E-4840-A5DB-FEA9D837467E} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{4420293B-B679-4DD3-8226-1F08066EBE13} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{BF40CE7B-1B35-4BAF-819E-998431E1C239} = {78103266-2E2B-4710-9139-0AB800F12A71}
+		{FA27BB92-9E96-4117-84C8-95787C922BED} = {78103266-2E2B-4710-9139-0AB800F12A71}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F4F2EB9-1E83-4F40-B890-0589652A15CA}
+	EndGlobalSection
+EndGlobal
