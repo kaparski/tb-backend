@@ -7,4 +7,6 @@ public interface ICurrentUserService
     public Guid TenantId { get; }
 
     (string FullName, string Roles) UserInfo { get; }
+
+    bool IsSuperAdmin { get; }
 }
