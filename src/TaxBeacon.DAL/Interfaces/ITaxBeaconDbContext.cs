@@ -50,5 +50,9 @@ public interface ITaxBeaconDbContext
 
     DbSet<ServiceAreaActivityLog> ServiceAreaActivityLogs { get; }
 
+    public DbSet<Program> Programs { get; }
+
+    public DbSet<TenantProgram> TenantsPrograms { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
