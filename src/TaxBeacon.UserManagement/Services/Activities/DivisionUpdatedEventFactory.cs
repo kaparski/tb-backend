@@ -1,9 +1,10 @@
 ﻿using System.Text.Json;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Models.Activities.Tenant;
 
-namespace TaxBeacon.UserManagement.Services.Activities.Divisions
+namespace TaxBeacon.UserManagement.Services.Activities
 {
     public class DivisionUpdatedEventFactory: IDivisionActivityFactory
     {
@@ -13,7 +14,7 @@ namespace TaxBeacon.UserManagement.Services.Activities.Divisions
 
         public ActivityItemDto Create(string divisionEvent)
         {
-            var divisionUpdatedEvent = JsonSerializer.Deserialize<TenantUpdatedEvent>(divisionEvent);
+            var divisionUpdatedEvent = JsonSerializer.Deserialize<DivisionUpdatedEvent>(divisionEvent);
 
             return new ActivityItemDto
             (

@@ -61,6 +61,7 @@ public class DepartmentService: IDepartmentService
                 Id = d.Id,
                 Name = d.Name,
                 Description = d.Description,
+                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
                 AssignedUsersCount = d.Users.Count(),
                 Division = d.Division == null ? string.Empty : d.Division.Name,
                 ServiceArea = d.ServiceAreas.Select(sa => sa.Name)
@@ -94,6 +95,7 @@ public class DepartmentService: IDepartmentService
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
                 AssignedUsersCount = d.Users.Count()
             })
+            .OrderBy(dep => dep.Name)
             .ToListAsync(cancellationToken);
 
         exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
@@ -179,5 +181,35 @@ public class DepartmentService: IDepartmentService
         return (await _context
             .Departments
             .GetDepartmentDetailsAsync(id, _currentUserService.TenantId))!;
+    }
+
+    public async Task<OneOf<QueryablePaging<DepartmentUserDto>, NotFound>> GetDepartmentUsersAsync(Guid departmentId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        var entity = await _context
+            .Departments
+            .SingleOrDefaultAsync(t => t.Id == departmentId && t.TenantId == tenantId, cancellationToken);
+
+        if (entity is null)
+        {
+            return new NotFound();
+        }
+
+        var users = await _context
+            .Users
+            .Where(u => u.DepartmentId == departmentId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
+            .Select(u => new DepartmentUserDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FullName = u.FullName,
+                JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
+                ServiceArea = u.ServiceArea == null ? string.Empty : u.ServiceArea.Name,
+                Team = u.Team == null ? string.Empty : u.Team.Name,
+            })
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
     }
 }

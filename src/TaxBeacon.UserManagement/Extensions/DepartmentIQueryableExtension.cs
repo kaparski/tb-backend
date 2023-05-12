@@ -13,6 +13,7 @@ public static class DepartmentIQueryableExtension
             Id = d.Id,
             Name = d.Name,
             Description = d.Description,
+            CreatedDateTimeUtc = d.CreatedDateTimeUtc,
             DivisionId = d.DivisionId,
             Division = d.Division == null ? string.Empty : d.Division.Name,
             ServiceAreas = d.ServiceAreas

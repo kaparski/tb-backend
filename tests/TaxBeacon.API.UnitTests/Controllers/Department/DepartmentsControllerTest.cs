@@ -11,6 +11,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
@@ -274,6 +275,94 @@ public class DepartmentsControllerTest
         {
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be("Departments.Read;Departments.ReadWrite");
+        }
+    }
+
+    [Fact]
+    public void GetDepartmentUsers_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<GridifyQuery, Guid, CancellationToken, Task<IActionResult>>)_controller.GetDepartmentUsers).Method;
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be("Departments.Read;Departments.ReadWrite");
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentUsers_ValidQuery_ShouldReturnSuccessStatusCode()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+        _serviceMock.Setup(p => p.GetDepartmentUsersAsync(It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(
+            new QueryablePaging<DepartmentUserDto>(0,
+                Enumerable.Empty<DepartmentUserDto>().AsQueryable()));
+
+        // Act
+        var actualResponse = await _controller.GetDepartmentUsers(query, new Guid(), default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<QueryablePaging<DepartmentUserResponse>>();
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentUsers_InvalidQuery_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
+        _serviceMock.Setup(p => p.GetDepartmentUsersAsync(It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(
+            new QueryablePaging<DepartmentUserDto>(0,
+                Enumerable.Empty<DepartmentUserDto>().AsQueryable()));
+
+        // Act
+        var actualResponse = await _controller.GetDepartmentUsers(query, new Guid(), default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as BadRequestResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<BadRequestResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentUsers_DepartmentDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
+        _serviceMock
+            .Setup(x => x.GetDepartmentUsersAsync(It.IsAny<Guid>(), query, default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetDepartmentUsers(query, Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }
     }
 }

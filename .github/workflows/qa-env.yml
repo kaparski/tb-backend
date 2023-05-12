@@ -12,18 +12,27 @@ on:
         type: boolean
 
 jobs:
-  tests:
-    runs-on: backend
+  migrations:
+    runs-on: ubuntu-latest
     environment: qa
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - run: echo ${{ github.ref_name }}
-
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.*'
+      - name: Install ef
+        run: dotnet tool install --global dotnet-ef
+      - name: Restore tool
+        run: dotnet restore ${{ github.workspace }}/TaxBeacon.sln
+      - name: Update database
+        run: dotnet ef database update -p ${{ github.workspace }}/src/TaxBeacon.DAL/TaxBeacon.DAL.csproj -s ${{ github.workspace }}/src/TaxBeacon.API/TaxBeacon.API.csproj --connection '${{secrets.CONNECTION_STRING}}'
 
   build:
     runs-on: backend
-    needs: tests
     environment: qa
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main

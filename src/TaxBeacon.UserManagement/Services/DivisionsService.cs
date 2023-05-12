@@ -1,22 +1,21 @@
 ﻿using Gridify;
+using Gridify.EntityFramework;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using OneOf.Types;
 using OneOf;
+using OneOf.Types;
 using System.Collections.Immutable;
+using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
-using Gridify.EntityFramework;
-using Microsoft.EntityFrameworkCore;
-using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Services.Activities.Divisions;
-using System.Text.Json;
-using TaxBeacon.DAL.Entities;
-using TaxBeacon.UserManagement.Models.Activities.Tenant;
 using TaxBeacon.UserManagement.Models.Activities;
+using TaxBeacon.UserManagement.Services.Activities;
 
 namespace TaxBeacon.UserManagement.Services
 {
@@ -95,6 +94,7 @@ namespace TaxBeacon.UserManagement.Services
                     NumberOfUsers = div.Users.Count(),
                     Departments = string.Join(", ", div.Departments.Select(dep => dep.Name)),
                 })
+                .OrderBy(d => d.Name)
                 .AsNoTracking()
                 .ProjectToType<DivisionExportModel>()
                 .ToListAsync(cancellationToken);
@@ -154,7 +154,7 @@ namespace TaxBeacon.UserManagement.Services
         }
 
         public async Task<OneOf<DivisionDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto,
-    CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
         {
             var division = await _context.Divisions.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
@@ -164,13 +164,7 @@ namespace TaxBeacon.UserManagement.Services
             }
 
             var previousValues = JsonSerializer.Serialize(division.Adapt<UpdateDivisionDto>());
-            var currentUserFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
-            var currentUserRoles = await _context
-                .TenantUserRoles
-                .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == _currentUserService.TenantId)
-                .GroupBy(r => 1, t => t.TenantRole.Role.Name)
-                .Select(group => string.Join(", ", group.Select(name => name)))
-                .FirstOrDefaultAsync(cancellationToken);
+            var userInfo = _currentUserService.UserInfo;
             var eventDateTime = _dateTimeService.UtcNow;
 
             await _context.DivisionActivityLogs.AddAsync(new DivisionActivityLog
@@ -182,8 +176,8 @@ namespace TaxBeacon.UserManagement.Services
                 EventType = DivisionEventType.DivisionUpdatedEvent,
                 Event = JsonSerializer.Serialize(new DivisionUpdatedEvent(
                     _currentUserService.UserId,
-                    currentUserRoles ?? string.Empty,
-                    currentUserFullName,
+                    userInfo.Roles ?? string.Empty,
+                    userInfo.FullName,
                     eventDateTime,
                     previousValues,
                     JsonSerializer.Serialize(updateDivisionDto)))

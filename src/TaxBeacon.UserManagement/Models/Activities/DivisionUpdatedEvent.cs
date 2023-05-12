@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.UserManagement.Models.Activities
 {
-    internal class DivisionUpdatedEvent: EventBase
+    public class DivisionUpdatedEvent: EventBase
     {
         public DivisionUpdatedEvent(Guid executorId, string executorRoles, string executorFullName, DateTime updatedDate,
         string previousValues, string currentValues)
@@ -19,6 +19,6 @@ namespace TaxBeacon.UserManagement.Models.Activities
 
         public DateTime UpdatedDate { get; set; }
 
-        public override string ToString() => "Division details updated";
+        public override string ToString() => "Divisions details updated";
     }
 }

@@ -2,10 +2,10 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OneOf.Types;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
@@ -28,6 +28,9 @@ public class DepartmentsController: BaseController
     ///     ```GET /departments?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
     /// </remarks>
     /// <response code="200">Returns departments in a given tenant</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <returns>List of departments</returns>
     [HasPermissions(
         Common.Permissions.Departments.Read,
@@ -53,7 +56,8 @@ public class DepartmentsController: BaseController
 
         var departmentsOneOf = await _service.GetDepartmentsAsync(query, cancellationToken);
         return departmentsOneOf.Match<IActionResult>(
-            departments => Ok(new QueryablePaging<DepartmentResponse>(departments.Count, departments.Query.ProjectToType<DepartmentResponse>())),
+            departments => Ok(new QueryablePaging<DepartmentResponse>(departments.Count,
+                departments.Query.ProjectToType<DepartmentResponse>())),
             notFound => NotFound());
     }
 
@@ -63,7 +67,9 @@ public class DepartmentsController: BaseController
     /// <param name="exportDepartmentsRequest"></param>
     /// <param name="cancellationToken"></param>
     /// <response code="200">Returns file content</response>
+    /// <response code="400">Invalid request</response>
     /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <returns>File content</returns>
     [HasPermissions(Common.Permissions.Departments.ReadExport)]
     [HttpGet("export", Name = "ExportDepartments")]
@@ -71,27 +77,35 @@ public class DepartmentsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> ExportDepartmentsAsync([FromQuery] ExportDepartmentsRequest exportDepartmentsRequest,
+    public async Task<IActionResult> ExportDepartmentsAsync(
+        [FromQuery] ExportDepartmentsRequest exportDepartmentsRequest,
         CancellationToken cancellationToken)
     {
         var mimeType = exportDepartmentsRequest.FileType.ToMimeType();
 
         var departments = await _service.ExportDepartmentsAsync(exportDepartmentsRequest.FileType, cancellationToken);
 
-        return File(departments, mimeType, $"departments.{exportDepartmentsRequest.FileType.ToString().ToLowerInvariant()}");
+        return File(departments, mimeType,
+            $"departments.{exportDepartmentsRequest.FileType.ToString().ToLowerInvariant()}");
     }
 
     /// <summary>
     /// Get Department's Activity History
     /// </summary>
     /// <response code="200">Returns activity logs</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Department is not found</response>
+    /// <returns>Activity history for a specific department</returns>
     [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
     [HttpGet("{id:guid}/activities", Name = "DepartmentActivityHistory")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IEnumerable<DepartmentActivityHistoryResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ActivitiesHistory([FromRoute] Guid id, [FromQuery] DepartmentActivityHistoryRequest request,
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ActivitiesHistory([FromRoute] Guid id,
+        [FromQuery] DepartmentActivityHistoryRequest request,
         CancellationToken cancellationToken)
     {
         var activities = await _service.GetActivityHistoryAsync(id, request.Page, request.PageSize, cancellationToken);
@@ -105,12 +119,17 @@ public class DepartmentsController: BaseController
     /// Get Department By Id
     /// </summary>
     /// <response code="200">Returns Department Details</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Department is not found</response>
+    /// <returns>Department details</returns>
     [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
     [HttpGet("{id:guid}", Name = "DepartmentDetails")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IEnumerable<DepartmentDetailsResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetDepartmentDetails([FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
@@ -125,19 +144,58 @@ public class DepartmentsController: BaseController
     /// Update department details
     /// </summary>
     /// <response code="200">Returns updated department</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Department is not found</response>
     /// <returns>Updated department</returns>
     [HasPermissions(Common.Permissions.Departments.ReadWrite)]
     [HttpPatch("{id:guid}", Name = "UpdateDepartment")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(DepartmentDetailsResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateDepartmentAsync([FromRoute] Guid id, [FromBody] UpdateDepartmentRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateDepartmentAsync([FromRoute] Guid id,
+        [FromBody] UpdateDepartmentRequest request, CancellationToken cancellationToken)
     {
-        var resultOneOf = await _service.UpdateDepartmentAsync(id, request.Adapt<UpdateDepartmentDto>(), cancellationToken);
+        var resultOneOf =
+            await _service.UpdateDepartmentAsync(id, request.Adapt<UpdateDepartmentDto>(), cancellationToken);
 
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<DepartmentDetailsResponse>()),
             notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Get Department Users
+    /// </summary>
+    /// <response code="200">Returns Department Users</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">User does not have the required permission</response>
+    /// <response code="404">Department is not found</response>
+    /// <returns>A collection of users assigned to a particular department</returns>
+    [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
+    [HttpGet("{id:guid}/users", Name = "DepartmentUsers")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(QueryablePaging<DepartmentUserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetDepartmentUsers([FromQuery] GridifyQuery query, [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        if (!query.IsValid<DepartmentUserDto>())
+        {
+            // TODO: Add an object with errors that we can use to detail the answers
+            return BadRequest();
+        }
+
+        var oneOfDepartmentUsers = await _service.GetDepartmentUsersAsync(id, query, cancellationToken);
+
+        return oneOfDepartmentUsers.Match<IActionResult>(
+            result => Ok(new QueryablePaging<DepartmentUserResponse>(result.Count,
+                result.Query.ProjectToType<DepartmentUserResponse>())),
+            _ => NotFound());
     }
 }

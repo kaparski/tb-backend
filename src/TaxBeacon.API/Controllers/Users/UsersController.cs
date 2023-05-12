@@ -1,7 +1,6 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users.Requests;
@@ -29,6 +28,9 @@ public class UsersController: BaseController
     ///     ```GET /users?page=2&amp;pageSize=5&amp;orderBy=email```
     /// </remarks>
     /// <response code="200">Returns users</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <returns>List of users</returns>
     [HasPermissions(
         Common.Permissions.Users.Read,
@@ -37,8 +39,10 @@ public class UsersController: BaseController
     [HttpGet(Name = "GetUsers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(BadRequest), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(NotFound), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -71,11 +75,15 @@ public class UsersController: BaseController
     ///     }
     /// </remarks>
     /// <response code="201">Returns created user</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <returns>User</returns>
     [HasPermissions(Common.Permissions.Users.ReadWrite)]
     [HttpPost(Name = "CreateUser")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest,
         CancellationToken cancellationToken)
     {
@@ -91,10 +99,13 @@ public class UsersController: BaseController
     /// <param name="cancellationToken"></param>
     /// <response code="200">Returns file content</response>
     /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <returns>File content</returns>
     [HasPermissions(Common.Permissions.Users.ReadExport)]
     [HttpGet("export", Name = "ExportUsers")]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> ExportUsersAsync([FromQuery] ExportUsersRequest exportUsersRequest,
         CancellationToken cancellationToken)
     {

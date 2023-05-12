@@ -125,8 +125,7 @@ public class CurrentUserServiceTests
     public void UserInfo_UserNotFoundInDb_Throws()
     {
         // Act
-
-        Action act = () => { var actualResult = _currentUserService.UserInfo; };
+        var act = () => { var actualResult = _currentUserService.UserInfo; };
 
         // Assert
         using (new AssertionScope())
@@ -219,15 +218,14 @@ public class CurrentUserServiceTests
     {
         public static readonly Faker<User> TestUser =
             new Faker<User>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
+                .RuleFor(u => u.Id, _ => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
                 .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
                 .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
                 .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
-                .RuleFor(u => u.Status, f => f.PickRandom<Status>())
-            ;
+                .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()

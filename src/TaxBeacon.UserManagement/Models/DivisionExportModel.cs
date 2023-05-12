@@ -5,7 +5,7 @@ namespace TaxBeacon.UserManagement.Models
 {
     public sealed class DivisionExportModel
     {
-
+        [Column("Division name")]
         public string Name { get; set; } = string.Empty;
 
         public string Description { get; set; } = string.Empty;
