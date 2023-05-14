@@ -1,4 +1,4 @@
-namespace TaxBeacon.API.Controllers.ServiceAreas.Responses;
+namespace TaxBeacon.API.Controllers.JobTitles.Responses;
 
 public class JobTitleDetailsResponse
 {

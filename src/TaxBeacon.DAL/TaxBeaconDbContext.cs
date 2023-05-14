@@ -60,6 +60,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
 
     public DbSet<ServiceAreaActivityLog> ServiceAreaActivityLogs => Set<ServiceAreaActivityLog>();
 
+    public DbSet<JobTitleActivityLog> JobTitleActivityLogs => Set<JobTitleActivityLog>();
+
     public DbSet<Program> Programs => Set<Program>();
 
     public DbSet<TenantProgram> TenantsPrograms => Set<TenantProgram>();

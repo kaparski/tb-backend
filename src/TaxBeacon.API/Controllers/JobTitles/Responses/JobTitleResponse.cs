@@ -1,6 +1,7 @@
-namespace TaxBeacon.API.Controllers.ServiceAreas.Responses;
+﻿
+namespace TaxBeacon.API.Controllers.JobTitles.Responses;
 
-public class JobTitleDetailsResponse
+public class JobTitleResponse
 {
     public Guid Id { get; set; }
 
@@ -8,5 +9,9 @@ public class JobTitleDetailsResponse
 
     public string Description { get; set; } = string.Empty;
 
+    public string Department { get; set; } = string.Empty;
+
     public DateTime CreatedDateTimeUtc { get; set; }
+
+    public int AssignedUsersCount { get; set; }
 }
