@@ -100,14 +100,14 @@ public class ServiceAreasController: BaseController
     /// <returns>Service area details with specified ID</returns>
     [HasPermissions(Common.Permissions.ServiceAreas.Read, Common.Permissions.ServiceAreas.ReadWrite)]
     [HttpGet("{id:guid}", Name = "GetServiceArea")]
-    [ProducesResponseType(typeof(JobTitleDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ServiceAreaDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetServiceAreaAsync([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var resultOneOf = await _serviceAreaService.GetServiceAreaDetailsByIdAsync(id, cancellationToken);
 
         return resultOneOf.Match<IActionResult>(
-            details => Ok(details.Adapt<JobTitleDetailsResponse>()),
+            details => Ok(details.Adapt<ServiceAreaDetailsResponse>()),
             notFound => NotFound());
     }
 
@@ -141,7 +141,7 @@ public class ServiceAreasController: BaseController
     [HasPermissions(Common.Permissions.ServiceAreas.ReadWrite)]
     [HttpPatch("{id:guid}", Name = "UpdateServiceArea")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(JobTitleDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ServiceAreaDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateServiceAreaAsync([FromRoute] Guid id, [FromBody] UpdateServiceAreaRequest request,
         CancellationToken cancellationToken)
@@ -150,7 +150,7 @@ public class ServiceAreasController: BaseController
             id, request.Adapt<UpdateServiceAreaDto>(), cancellationToken);
 
         return resultOneOf.Match<IActionResult>(
-            result => Ok(result.Adapt<JobTitleDetailsResponse>()),
+            result => Ok(result.Adapt<ServiceAreaDetailsResponse>()),
             notFound => NotFound());
     }
 
