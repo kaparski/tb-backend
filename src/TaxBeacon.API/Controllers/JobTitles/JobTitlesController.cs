@@ -94,8 +94,8 @@ public class JobTitlesController: BaseController
     /// Get job title details by ID
     /// </summary>
     /// <response code="200">Returns job title details with specified ID</response>
-    /// <response code="404">Service area is not found</response>
-    /// <returns>Service area details with specified ID</returns>
+    /// <response code="404">Job title is not found</response>
+    /// <returns>Job title details with specified ID</returns>
     [HasPermissions(Common.Permissions.JobTitles.Read, Common.Permissions.JobTitles.ReadWrite)]
     [HttpGet("{id:guid}", Name = "GetJobTitle")]
     [ProducesResponseType(typeof(JobTitleDetailsResponse), StatusCodes.Status200OK)]
@@ -113,7 +113,7 @@ public class JobTitlesController: BaseController
     /// Get activity history log by job title ID
     /// </summary>
     /// <response code="200">Returns activity logs</response>
-    /// <response code="404">Service area is not found</response>
+    /// <response code="404">Job title is not found</response>
     /// <returns>List of activity logs</returns>
     [HasPermissions(Common.Permissions.JobTitles.Read, Common.Permissions.JobTitles.ReadWrite)]
     [HttpGet("{id:guid}/activities", Name = "GetJobTitleActivityHistoryLog")]
@@ -134,7 +134,7 @@ public class JobTitlesController: BaseController
     /// Update job title details
     /// </summary>
     /// <response code="200">Returns updated job title details</response>
-    /// <response code="404">Service area is not found</response>
+    /// <response code="404">Job title is not found</response>
     /// <returns>Updated job title details</returns>
     [HasPermissions(Common.Permissions.JobTitles.ReadWrite)]
     [HttpPatch("{id:guid}", Name = "UpdateJobTitle")]
@@ -158,7 +158,7 @@ public class JobTitlesController: BaseController
     /// <response code="200">Returns Users of job title</response>
     /// <response code="400">Invalid query parameters</response>
     /// <response code="403">The user does not have the required permission</response>
-    /// <response code="404">Service area is not found</response>
+    /// <response code="404">Job title is not found</response>
     /// <returns>Users of job title</returns>
     [HasPermissions(Common.Permissions.JobTitles.ReadWrite)]
     [HttpGet("{id:guid}/users", Name = "GetUsersOfJobTitle")]
