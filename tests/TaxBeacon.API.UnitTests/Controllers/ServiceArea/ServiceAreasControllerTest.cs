@@ -208,7 +208,7 @@ public class ServiceAreasControllerTest
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<JobTitleDetailsResponse>();
+            actualResult?.Value.Should().BeOfType<ServiceAreaDetailsResponse>();
         }
     }
 
@@ -332,7 +332,7 @@ public class ServiceAreasControllerTest
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<JobTitleDetailsResponse>();
+            actualResult?.Value.Should().BeOfType<ServiceAreaDetailsResponse>();
         }
     }
 
