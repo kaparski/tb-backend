@@ -95,7 +95,7 @@ public class JobTitleService: IJobTitleService
 
         exportJobTitles.ForEach(sa => sa.CreatedDateView = _dateTimeFormatter.FormatDate(sa.CreatedDateTimeUtc));
 
-        _logger.LogInformation("{dateTime} - Service Areas export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Job Titles export was executed by {@userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
@@ -204,8 +204,9 @@ public class JobTitleService: IJobTitleService
                 Id = d.Id,
                 FullName = d.FullName,
                 Email = d.Email,
+                Department = d.Department != null ? d.Department.Name : string.Empty,
+                ServiceArea = d.ServiceArea != null ? d.ServiceArea.Name : string.Empty,
                 Team = d.Team != null ? d.Team.Name : string.Empty,
-                JobTitle = d.JobTitle != null ? d.JobTitle.Name : string.Empty,
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 

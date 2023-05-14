@@ -8,7 +8,9 @@ public class JobTitleUserDto
 
     public string Email { get; set; } = string.Empty;
 
-    public string Team { get; set; } = string.Empty;
+    public string Department { get; set; } = string.Empty;
 
-    public string JobTitle { get; set; } = string.Empty;
+    public string ServiceArea { get; set; } = string.Empty;
+
+    public string Team { get; set; } = string.Empty;
 }
