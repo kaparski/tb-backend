@@ -37,7 +37,7 @@ public class JobTitleService: IJobTitleService
         ICurrentUserService currentUserService,
         IDateTimeFormatter dateTimeFormatter,
         IEnumerable<IListToFileConverter> listToFileConverters,
-        IEnumerable<IJobTitleActivityFactory> serviceAreaActivityFactories)
+        IEnumerable<IJobTitleActivityFactory> jobTitleActivityFactories)
     {
         _logger = logger;
         _context = context;
@@ -46,14 +46,14 @@ public class JobTitleService: IJobTitleService
         _dateTimeFormatter = dateTimeFormatter;
         _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
-        _activityFactories = serviceAreaActivityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
+        _activityFactories = jobTitleActivityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
                             ?? ImmutableDictionary<(JobTitleEventType, uint), IJobTitleActivityFactory>.Empty;
     }
 
     public async Task<OneOf<QueryablePaging<JobTitleDto>, NotFound>> GetJobTitlesAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
-        var serviceAreas = await _context
+        var jobTitles = await _context
             .JobTitles
             .Where(d => d.TenantId == _currentUserService.TenantId)
             .Select(d => new JobTitleDto()
@@ -67,9 +67,9 @@ public class JobTitleService: IJobTitleService
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
-        if (gridifyQuery.Page == 1 || serviceAreas.Query.Any())
+        if (gridifyQuery.Page == 1 || jobTitles.Query.Any())
         {
-            return serviceAreas;
+            return jobTitles;
         }
 
         return new NotFound();
@@ -104,33 +104,33 @@ public class JobTitleService: IJobTitleService
 
     public async Task<OneOf<JobTitleDetailsDto, NotFound>> GetJobTitleDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        var serviceArea = await _context.JobTitles.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        var jobTitle = await _context.JobTitles.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
-        return serviceArea is null || serviceArea.TenantId != _currentUserService.TenantId
+        return jobTitle is null || jobTitle.TenantId != _currentUserService.TenantId
             ? new NotFound()
-            : serviceArea.Adapt<JobTitleDetailsDto>();
+            : jobTitle.Adapt<JobTitleDetailsDto>();
     }
 
     public async Task<OneOf<JobTitleDetailsDto, NotFound>> UpdateJobTitleDetailsAsync(Guid id,
         UpdateJobTitleDto updateJobTitleDto,
         CancellationToken cancellationToken)
     {
-        var serviceArea = await _context.JobTitles.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        var jobTitle = await _context.JobTitles.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
-        if (serviceArea is null)
+        if (jobTitle is null)
         {
             return new NotFound();
         }
 
         var (userFullName, userRoles) = _currentUserService.UserInfo;
-        var previousValues = JsonSerializer.Serialize(serviceArea.Adapt<UpdateJobTitleDto>());
+        var previousValues = JsonSerializer.Serialize(jobTitle.Adapt<UpdateJobTitleDto>());
 
         var eventDateTime = _dateTimeService.UtcNow;
 
         await _context.JobTitleActivityLogs.AddAsync(new JobTitleActivityLog
         {
-            TenantId = serviceArea.TenantId,
-            JobTitleId = serviceArea.Id,
+            TenantId = jobTitle.TenantId,
+            JobTitleId = jobTitle.Id,
             Date = eventDateTime,
             Revision = 1,
             EventType = JobTitleEventType.JobTitleUpdatedEvent,
@@ -143,26 +143,26 @@ public class JobTitleService: IJobTitleService
                 JsonSerializer.Serialize(updateJobTitleDto)))
         }, cancellationToken);
 
-        updateJobTitleDto.Adapt(serviceArea);
+        updateJobTitleDto.Adapt(jobTitle);
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Service Area ({serviceArea}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Job Title ({jobTitle}) was updated by {@userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);
 
-        return serviceArea.Adapt<JobTitleDetailsDto>();
+        return jobTitle.Adapt<JobTitleDetailsDto>();
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        var serviceArea = await _context.JobTitles
+        var jobTitle = await _context.JobTitles
             .FirstOrDefaultAsync(sa => sa.Id == id && sa.TenantId == _currentUserService.TenantId,
                 cancellationToken);
 
-        if (serviceArea is null)
+        if (jobTitle is null)
         {
             return new NotFound();
         }
@@ -183,14 +183,14 @@ public class JobTitleService: IJobTitleService
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
-    public async Task<OneOf<QueryablePaging<JobTitleUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId, GridifyQuery gridifyQuery, CancellationToken cancellationToken)
+    public async Task<OneOf<QueryablePaging<JobTitleUserDto>, NotFound>> GetUsersAsync(Guid jobTitleId, GridifyQuery gridifyQuery, CancellationToken cancellationToken)
     {
         var currentTenantId = _currentUserService.TenantId;
-        var serviceArea = await _context.JobTitles
-            .FirstOrDefaultAsync(sa => sa.Id == serviceAreaId && sa.TenantId == currentTenantId,
+        var jobTitle = await _context.JobTitles
+            .FirstOrDefaultAsync(sa => sa.Id == jobTitleId && sa.TenantId == currentTenantId,
                 cancellationToken);
 
-        if (serviceArea is null)
+        if (jobTitle is null)
         {
             return new NotFound();
         }
@@ -198,7 +198,7 @@ public class JobTitleService: IJobTitleService
         var users = await _context
             .Users
             .AsNoTracking()
-            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.JobTitleId == serviceAreaId)
+            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.JobTitleId == jobTitleId)
             .Select(d => new JobTitleUserDto()
             {
                 Id = d.Id,
