@@ -1,28 +1,34 @@
-﻿using System.Security.Claims;
-using TaxBeacon.API.Authentication;
+﻿using TaxBeacon.API.Authentication;
+using TaxBeacon.Common.Roles;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.API.Services;
 
 public class CurrentUserService: ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ITaxBeaconDbContext _context;
 
-    public CurrentUserService(IHttpContextAccessor httpContextAccessor, ITaxBeaconDbContext context)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _context = context;
-    }
+    public CurrentUserService(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
     public Guid UserId =>
-        Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(Claims.UserIdClaimName), out var userId)
+        Guid.TryParse(_httpContextAccessor.HttpContext?.User.Claims.SingleOrDefault(c => c.Type == Claims.UserIdClaimName)?.Value, out var userId)
             ? userId
-            : Guid.Empty;
+    : Guid.Empty;
+
+    public bool IsSuperAdmin => _httpContextAccessor?.HttpContext
+                                                    ?.User
+                                                    ?.Claims
+                                                    ?.Where(c => c.Type == Claims.Roles)
+                                                    ?.Select(c => c.Value)
+                                                    ?.ToHashSet()
+                                                    ?.Contains(Roles.SuperAdmin) == true;
 
     public Guid TenantId =>
-        Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(Claims.TenantId), out var tenantId)
+        IsSuperAdmin &&
+        _httpContextAccessor?.HttpContext?.Request?.Headers?.TryGetValue(Headers.SuperAdminTenantId, out var superAdminTenantIdString) == true &&
+        Guid.TryParse(superAdminTenantIdString, out var superAdminTenantId)
+        ? superAdminTenantId
+        : Guid.TryParse(_httpContextAccessor?.HttpContext?.User.Claims.SingleOrDefault(c => c.Type == Claims.TenantId)?.Value, out var tenantId)
             ? tenantId
             : Guid.Empty;
 
@@ -30,21 +36,16 @@ public class CurrentUserService: ICurrentUserService
     {
         get
         {
-            var user = _context
-                .Users
-                .Where(u => u.Id == UserId)
-                .Select(u => new
-                {
-                    u.FullName,
-                    Roles = string.Join(", ", _context
-                        .TenantUserRoles
-                        .Where(r => r.UserId == UserId && r.TenantId == TenantId)
-                        .Select(r => r.TenantRole.Role.Name)
-                    )
-                })
-                .Single();
+            var fullName = _httpContextAccessor?.HttpContext
+                                                    ?.User
+                                                    ?.Claims
+                                                    ?.SingleOrDefault(c => c.Type == Claims.FullName)?.Value ?? throw new InvalidOperationException();
+            var roles = _httpContextAccessor?.HttpContext
+                                                    ?.User
+                                                    ?.Claims
+                                                    ?.Where(c => c.Type == Claims.TenantRoles)?.Select(c => c.Value) ?? Enumerable.Empty<string>();
 
-            return (user.FullName, user.Roles);
+            return (fullName, string.Join(", ", roles));
         }
     }
 }

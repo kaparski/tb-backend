@@ -25,4 +25,8 @@ public interface IServiceAreaService
         int page,
         int pageSize,
         CancellationToken cancellationToken);
+
+    Task<OneOf<QueryablePaging<ServiceAreaUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId,
+        GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken);
 }

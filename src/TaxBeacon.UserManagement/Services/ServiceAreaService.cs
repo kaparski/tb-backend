@@ -182,4 +182,33 @@ public class ServiceAreaService: IServiceAreaService
         return new ActivityDto(pageCount,
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
+
+    public async Task<OneOf<QueryablePaging<ServiceAreaUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId, GridifyQuery gridifyQuery, CancellationToken cancellationToken)
+    {
+        var currentTenantId = _currentUserService.TenantId;
+        var serviceArea = await _context.ServiceAreas
+            .FirstOrDefaultAsync(sa => sa.Id == serviceAreaId && sa.TenantId == currentTenantId,
+                cancellationToken);
+
+        if (serviceArea is null)
+        {
+            return new NotFound();
+        }
+
+        var users = await _context
+            .Users
+            .AsNoTracking()
+            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.ServiceAreaId == serviceAreaId)
+            .Select(d => new ServiceAreaUserDto()
+            {
+                Id = d.Id,
+                FullName = d.FullName,
+                Email = d.Email,
+                Team = d.Team != null ? d.Team.Name : string.Empty,
+                JobTitle = d.JobTitle != null ? d.JobTitle.Name : string.Empty,
+            })
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
+    }
 }

@@ -38,4 +38,9 @@ public class Tenant: BaseEntity
 
     public ICollection<ServiceAreaActivityLog> ServiceAreaActivityLogs { get; set; } =
         new HashSet<ServiceAreaActivityLog>();
+
+    public ICollection<JobTitleActivityLog> JobTitleActivityLogs { get; set; } =
+        new HashSet<JobTitleActivityLog>();
+
+    public ICollection<TenantProgram> TenantsPrograms { get; set; } = new HashSet<TenantProgram>();
 }
