@@ -14,11 +14,11 @@ public interface IProgramService
 
     Task<byte[]> ExportProgramsAsync(FileType fileType, CancellationToken cancellationToken = default);
 
-    Task<OneOf<ProgramDto, NotFound>> GetProgramDetailsAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<OneOf<ProgramDetailsDto, NotFound>> GetProgramDetailsAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistory(Guid id, int page, int pageSize,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<ProgramDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
+    Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
         CancellationToken cancellationToken = default);
 }

@@ -42,7 +42,7 @@ public class ProgramsController: BaseController
     public async Task<IActionResult> GetAllProgramsAsync([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
-        if (query.IsValid<ProgramDto>())
+        if (!query.IsValid<ProgramDto>())
         {
             // TODO: Add an object with errors that we can use to detail the answers
             return BadRequest();
@@ -97,7 +97,7 @@ public class ProgramsController: BaseController
         Common.Permissions.Programs.ReadExport)]
     [HttpGet("{id:guid}", Name = "ProgramDetails")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(IEnumerable<ProgramResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<ProgramDetailsResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -107,7 +107,7 @@ public class ProgramsController: BaseController
         var oneOfProgramDetails = await _programService.GetProgramDetailsAsync(id, cancellationToken);
 
         return oneOfProgramDetails.Match<IActionResult>(
-            program => Ok(program.Adapt<ProgramResponse>()),
+            program => Ok(program.Adapt<ProgramDetailsResponse>()),
             notFound => NotFound());
     }
 
