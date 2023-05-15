@@ -47,6 +47,7 @@ namespace TaxBeacon.DAL.Configurations
             program
                 .Property(p => p.LegalAuthority)
                 .HasMaxLength(200);
+
             program
                 .Property(p => p.Agency)
                 .HasMaxLength(200);
@@ -58,6 +59,7 @@ namespace TaxBeacon.DAL.Configurations
             program
                 .Property(p => p.County)
                 .HasMaxLength(200);
+
             program
                 .Property(p => p.City)
                 .HasMaxLength(200);

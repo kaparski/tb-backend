@@ -1,8 +1,8 @@
-﻿namespace TaxBeacon.Common.Permissions;
+namespace TaxBeacon.Common.Permissions;
 
 public enum Programs
 {
     Read,
-    ReadWrite,
-    ReadExport
+    ReadExport,
+    ReadWrite
 }
