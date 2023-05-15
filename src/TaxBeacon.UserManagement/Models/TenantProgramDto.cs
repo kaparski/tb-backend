@@ -1,8 +1,8 @@
 ﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.API.Controllers.Programs.Responses;
+namespace TaxBeacon.UserManagement.Models;
 
-public class TenantProgramResponse
+public class TenantProgramDto
 {
     public Guid Id { get; set; }
 
@@ -26,4 +26,3 @@ public class TenantProgramResponse
 
     public DateTime CreatedDateTimeUtc { get; set; }
 }
-
