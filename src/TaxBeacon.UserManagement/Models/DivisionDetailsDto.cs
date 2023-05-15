@@ -10,7 +10,6 @@ public class DivisionDetailsDto
 
     public DateTime CreatedDateTimeUtc { get; set; }
 
-    public IEnumerable<DepartmentDto> Departments { get; set; } = Enumerable.Empty<DepartmentDto>();
+    public IEnumerable<DivisionDepartmentDto> Departments { get; set; } = Enumerable.Empty<DivisionDepartmentDto>();
 
-    public record DepartmentDto(Guid Id, string Name);
 }

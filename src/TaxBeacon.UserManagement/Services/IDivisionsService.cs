@@ -17,10 +17,12 @@ namespace TaxBeacon.UserManagement.Services
         Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid divisionId, uint page = 1,
             uint pageSize = 10, CancellationToken cancellationToken = default);
 
+        Task<OneOf<List<DivisionDepartmentDto>, NotFound>> GetDivisionDepartmentsAsync(Guid divisionId, CancellationToken cancellationToken = default);
+
         Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId, CancellationToken cancellationToken = default);
 
         Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default);
 
-        Task<OneOf<DivisionDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default);
+        Task<OneOf<DivisionDetailsDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default);
     }
 }
