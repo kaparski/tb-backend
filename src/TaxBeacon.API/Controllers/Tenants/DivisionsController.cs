@@ -207,7 +207,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
         [HttpGet("{id:guid}/departments", Name = "DivisionDepartmentss")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-        [ProducesResponseType(typeof(List<DepartmentUserResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<DivisionDepartmentResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
