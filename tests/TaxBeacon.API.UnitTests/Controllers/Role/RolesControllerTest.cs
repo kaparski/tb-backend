@@ -17,13 +17,11 @@ public class RolesControllerTest
 {
     private readonly RolesController _controller;
     private readonly Mock<ICurrentUserService> _currentServiceMock;
-    private readonly Mock<IPermissionsService> _permissionServiceMock;
     private readonly Mock<IRoleService> _roleServiceMock;
 
     public RolesControllerTest()
     {
         _roleServiceMock = new Mock<IRoleService>();
-        _permissionServiceMock = new();
         _currentServiceMock = new Mock<ICurrentUserService>();
 
         _currentServiceMock
@@ -34,7 +32,7 @@ public class RolesControllerTest
             .Setup(x => x.TenantId)
             .Returns(new Guid());
 
-        _controller = new RolesController(_roleServiceMock.Object, _permissionServiceMock.Object);
+        _controller = new RolesController(_roleServiceMock.Object);
     }
 
     [Fact]
@@ -61,7 +59,7 @@ public class RolesControllerTest
         var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email asc" };
 
         _roleServiceMock.Setup(p => p.GetRoleAssignedUsersAsync(It.IsAny<Guid>(), query, default))
-            .ReturnsAsync(new QueryablePaging<UserDto>(0, Enumerable.Empty<UserDto>().AsQueryable()));
+            .ReturnsAsync(new QueryablePaging<RoleAssignedUserDto>(0, Enumerable.Empty<RoleAssignedUserDto>().AsQueryable()));
 
         // Act
         var actualResponse = await _controller.GetRoleAssignedUsers(It.IsAny<Guid>(), query, default);

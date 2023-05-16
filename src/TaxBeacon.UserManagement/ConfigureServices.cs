@@ -20,7 +20,6 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IPasswordGenerator, PasswordGenerator>();
         serviceCollection.AddScoped<IUserExternalStore, UserExternalStore>();
         serviceCollection.AddScoped<IDivisionsService, DivisionsService>();
-        serviceCollection.AddScoped<IPermissionsService, PermissionsService>();
         serviceCollection.AddScoped<ITableFiltersService, TableFilterService>();
         serviceCollection.AddScoped<IUserActivityFactory, UserCreatedEventFactory>();
         serviceCollection.AddScoped<IUserActivityFactory, AssignRolesEventFactory>();

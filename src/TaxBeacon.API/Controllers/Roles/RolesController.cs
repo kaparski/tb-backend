@@ -13,13 +13,8 @@ namespace TaxBeacon.API.Controllers.Roles;
 public class RolesController: BaseController
 {
     private readonly IRoleService _roleService;
-    private readonly IPermissionsService _permissionService;
 
-    public RolesController(IRoleService roleService, IPermissionsService permissionService)
-    {
-        _permissionService = permissionService;
-        _roleService = roleService;
-    }
+    public RolesController(IRoleService roleService) => _roleService = roleService;
 
     /// <summary>
     /// List of roles
@@ -98,7 +93,7 @@ public class RolesController: BaseController
     public async Task<ActionResult<IEnumerable<PermissionResponse>>> GetPermissionsByRoleId(Guid roleId,
         CancellationToken cancellationToken)
     {
-        var permissionsListResponse = await _permissionService.GetPermissionsByRoleIdAsync(roleId, cancellationToken);
+        var permissionsListResponse = await _roleService.GetRolePermissionsByIdAsync(roleId, cancellationToken);
 
         return Ok(permissionsListResponse.Adapt<List<PermissionResponse>>());
     }
