@@ -45,6 +45,8 @@ public static class ConfigureServices
 
         serviceCollection.AddScoped<IServiceAreaActivityFactory, ServiceAreaUpdatedEventFactory>();
 
+        serviceCollection.AddScoped<IProgramService, ProgramService>();
+
         return serviceCollection;
     }
 }

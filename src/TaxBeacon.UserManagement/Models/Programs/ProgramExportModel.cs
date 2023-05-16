@@ -13,6 +13,7 @@ public class ProgramExportModel
     [Column("Program overview")]
     public string Overview { get; set; } = string.Empty;
 
+    [Column("Legal authority")]
     public string LegalAuthority { get; set; } = string.Empty;
 
     [Column("Program Agency")]

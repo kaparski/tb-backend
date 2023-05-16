@@ -1,3 +1,5 @@
+using TaxBeacon.Common.Enums;
+
 namespace TaxBeacon.UserManagement.Models.Programs;
 
 public class ProgramDetailsDto
@@ -14,7 +16,7 @@ public class ProgramDetailsDto
 
     public string Agency { get; set; } = string.Empty;
 
-    public string Jurisdiction { get; set; } = string.Empty;
+    public Jurisdiction Jurisdiction { get; set; }
 
     public string State { get; set; } = string.Empty;
 

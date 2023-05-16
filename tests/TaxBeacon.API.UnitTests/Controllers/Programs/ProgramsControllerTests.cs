@@ -185,7 +185,7 @@ public class ProgramsControllerTests
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<ProgramDetailsDto>();
+            actualResult?.Value.Should().BeOfType<ProgramDetailsResponse>();
         }
     }
 
