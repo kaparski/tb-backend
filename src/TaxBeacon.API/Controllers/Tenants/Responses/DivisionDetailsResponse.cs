@@ -12,5 +12,5 @@ public class DivisionDetailsResponse
 
     public DateTime CreatedDateTimeUtc { get; set; }
 
-    public IEnumerable<DivisionDepartmentResponse> Departments { get; set; } = Enumerable.Empty<DivisionDepartmentResponse>();
+    public IEnumerable<DepartmentResponse> Departments { get; set; } = Enumerable.Empty<DepartmentResponse>();
 }

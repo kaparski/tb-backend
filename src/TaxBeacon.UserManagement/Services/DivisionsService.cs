@@ -10,11 +10,9 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Extensions;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Services.Activities;
@@ -146,7 +144,7 @@ namespace TaxBeacon.UserManagement.Services
         {
             var division = await _context
                 .Divisions
-                .Include(x => x.Departments)
+                .Include(x => x.Departments.OrderBy(dep => dep.Name))
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == divisionId, cancellationToken);
 
@@ -155,23 +153,23 @@ namespace TaxBeacon.UserManagement.Services
                 : division.Adapt<DivisionDetailsDto>();
         }
 
-        public async Task<OneOf<List<DivisionDepartmentDto>, NotFound>> GetDivisionDepartmentsAsync(Guid divisionId, CancellationToken cancellationToken = default)
-        {
-            var list = await _context
-                .Departments
-                .Where(dep => (dep.DivisionId == null || dep.DivisionId == divisionId) && dep.TenantId == _currentUserService.TenantId)
-                .Select(dep => new DivisionDepartmentDto { Id = dep.Id, Name = dep.Name })
-                .ToListAsync(cancellationToken);
-
-            return list.Any() ? list : new NotFound();
-        }
-
         public async Task<OneOf<DivisionDetailsDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto,
         CancellationToken cancellationToken = default)
         {
             var division = await _context.Divisions.Include(d => d.Departments).FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
             if (division is null)
+            {
+                return new NotFound();
+            }
+
+            var isUpdateBlocked = _context.Departments
+                .Where(d => updateDivisionDto.DepartmentIds.Contains(d.Id)
+                    && d.DivisionId != null
+                    && d.DivisionId != division.Id)
+                .Any();
+
+            if (isUpdateBlocked)
             {
                 return new NotFound();
             }
@@ -226,14 +224,13 @@ namespace TaxBeacon.UserManagement.Services
                     Description = d.Description,
                     CreatedDateTimeUtc = d.CreatedDateTimeUtc,
                     Departments = d.Departments
-                       .Select(sa => new DivisionDepartmentDto
+                       .Select(sa => new DepartmentDto
                        {
                            Id = sa.Id,
                            Name = sa.Name,
-                       })
-               .ToList()
+                       }).OrderBy(dep => dep.Name).ToList(),
                 })
-               .SingleOrDefaultAsync(cancellationToken: cancellationToken))!;
+               .SingleOrDefaultAsync(cancellationToken))!;
         }
 
         public async Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)

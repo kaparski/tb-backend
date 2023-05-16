@@ -195,31 +195,5 @@ namespace TaxBeacon.API.Controllers.Tenants
                 result => Ok(result.Adapt<DivisionDetailsResponse>()),
                 notFound => NotFound());
         }
-
-        /// <summary>
-        /// Get Division Departments
-        /// </summary>
-        /// <response code="200">Returns Division Departments</response>
-        /// <response code="401">User is unauthorized</response>
-        /// <response code="403">User does not have the required permission</response>
-        /// <response code="404">Division is not found</response>
-        /// <returns>A collection of departments associated with a particular division</returns>
-        [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
-        [HttpGet("{id:guid}/departments", Name = "DivisionDepartmentss")]
-        [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-        [ProducesResponseType(typeof(List<DivisionDepartmentResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDivisionDepartmentsAsync([FromRoute] Guid id,
-            CancellationToken cancellationToken)
-        {
-            var oneOfDivisionDepartments = await _divisionsService.GetDivisionDepartmentsAsync(id, cancellationToken);
-
-            return oneOfDivisionDepartments.Match<IActionResult>(
-                result => Ok(result.Adapt<List<DivisionDepartmentResponse>>()),
-                _ => NotFound());
-        }
     }
 }

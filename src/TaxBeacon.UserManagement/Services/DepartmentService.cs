@@ -55,7 +55,8 @@ public class DepartmentService: IDepartmentService
     {
         var departments = await _context
             .Departments
-            .Where(d => d.TenantId == _currentUserService.TenantId)
+            .Where(d => d.TenantId == _currentUserService.TenantId
+                   && (d.Division == null || d.Division.TenantId == _currentUserService.TenantId))
             .Select(d => new DepartmentDto
             {
                 Id = d.Id,

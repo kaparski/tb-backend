@@ -10,6 +10,5 @@ public class DivisionDetailsDto
 
     public DateTime CreatedDateTimeUtc { get; set; }
 
-    public IEnumerable<DivisionDepartmentDto> Departments { get; set; } = Enumerable.Empty<DivisionDepartmentDto>();
-
+    public IList<DepartmentDto> Departments { get; set; } = null!;
 }

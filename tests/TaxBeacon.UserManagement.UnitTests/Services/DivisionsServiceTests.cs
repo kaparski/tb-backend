@@ -483,65 +483,6 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             }
         }
 
-        [Fact]
-        public async Task GetDivisionDepartmentsAsync_UserTenantIdNotEqualDivisionTenantId_ReturnsNotFound()
-        {
-            // Arrange
-            var division = TestData.TestDivision.Generate();
-            var department = TestData.TestDepartment.Generate();
-            department.TenantId = new Guid();
-            division.Departments.Add(department);
-            await _dbContextMock.Divisions.AddAsync(division);
-            await _dbContextMock.SaveChangesAsync();
-
-            // Act
-            var actualResult = await _divisionsService.GetDivisionDepartmentsAsync(division.Id, default);
-
-            // Assert
-            using (new AssertionScope())
-            {
-                actualResult.TryPickT1(out _, out _).Should().BeTrue();
-            }
-        }
-
-        [Fact]
-        public async Task GetDivisionDepartmentsAsync_DivisionExists_ShouldReturnDivisionDepartments()
-        {
-            //Arrange
-            var division = TestData.TestDivision.Generate();
-            division.TenantId = TenantId;
-            division.Departments = TestData.TestDepartment.Generate(5);
-            await _dbContextMock.Divisions.AddRangeAsync(division);
-            await _dbContextMock.SaveChangesAsync();
-
-            //Act
-            var resultOneOf = await _divisionsService.GetDivisionDepartmentsAsync(division.Id);
-
-            //Assert
-            using (new AssertionScope())
-            {
-                resultOneOf.TryPickT0(out var divisionDepartments, out _).Should().BeTrue();
-                divisionDepartments.Count.Should().Be(5);
-            }
-        }
-
-        [Fact]
-        public async Task GetDivisionDepartmentsAsync_NoNotAssignedDepartments_ReturnsNotFound()
-        {
-            //Arrange
-            var division = TestData.TestDivision.Generate();
-            division.TenantId = TenantId;
-            division.Departments = TestData.TestDepartment.Generate(5);
-            await _dbContextMock.Divisions.AddRangeAsync(division);
-            await _dbContextMock.SaveChangesAsync();
-
-            //Act
-            var result = await _divisionsService.GetDivisionDepartmentsAsync(new Guid());
-
-            //Assert
-            result.TryPickT1(out _, out _).Should().BeTrue();
-        }
-
         private static class TestData
         {
             public static readonly Faker<User> TestUser =

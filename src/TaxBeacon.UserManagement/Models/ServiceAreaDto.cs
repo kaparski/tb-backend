@@ -1,6 +1,4 @@
-﻿using TaxBeacon.Common.Enums;
-
-namespace TaxBeacon.UserManagement.Models;
+﻿namespace TaxBeacon.UserManagement.Models;
 
 public class ServiceAreaDto
 {
