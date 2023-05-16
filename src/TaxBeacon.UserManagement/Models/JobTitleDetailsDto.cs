@@ -1,6 +1,6 @@
-﻿namespace TaxBeacon.UserManagement.Models;
+namespace TaxBeacon.UserManagement.Models;
 
-public class ServiceAreaDto
+public class JobTitleDetailsDto
 {
     public Guid Id { get; set; }
 
@@ -11,6 +11,4 @@ public class ServiceAreaDto
     public string Department { get; set; } = string.Empty;
 
     public DateTime CreatedDateTimeUtc { get; set; }
-
-    public int AssignedUsersCount { get; set; }
 }

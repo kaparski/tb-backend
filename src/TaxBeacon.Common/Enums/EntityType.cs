@@ -1,4 +1,4 @@
-﻿namespace TaxBeacon.Common.Enums;
+namespace TaxBeacon.Common.Enums;
 
 public enum EntityType
 {
@@ -16,5 +16,7 @@ public enum EntityType
 
     ServiceArea = 7,
 
-    Program = 8
+    JobTitle = 8,
+    
+    Program = 9
 }

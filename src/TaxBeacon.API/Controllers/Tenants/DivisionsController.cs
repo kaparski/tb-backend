@@ -192,7 +192,7 @@ namespace TaxBeacon.API.Controllers.Tenants
                 await _divisionsService.UpdateDivisionAsync(id, request.Adapt<UpdateDivisionDto>(), cancellationToken);
 
             return resultOneOf.Match<IActionResult>(
-                result => Ok(result.Adapt<DivisionResponse>()),
+                result => Ok(result.Adapt<DivisionDetailsResponse>()),
                 notFound => NotFound());
         }
     }

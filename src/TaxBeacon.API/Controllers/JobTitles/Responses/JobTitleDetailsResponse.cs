@@ -1,6 +1,6 @@
-﻿namespace TaxBeacon.UserManagement.Models;
+namespace TaxBeacon.API.Controllers.JobTitles.Responses;
 
-public class ServiceAreaDto
+public class JobTitleDetailsResponse
 {
     public Guid Id { get; set; }
 
@@ -8,9 +8,5 @@ public class ServiceAreaDto
 
     public string Description { get; set; } = string.Empty;
 
-    public string Department { get; set; } = string.Empty;
-
     public DateTime CreatedDateTimeUtc { get; set; }
-
-    public int AssignedUsersCount { get; set; }
 }
