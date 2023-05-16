@@ -1,6 +1,7 @@
-﻿namespace TaxBeacon.UserManagement.Models;
+﻿
+namespace TaxBeacon.UserManagement.Models;
 
-public class ServiceAreaDto
+public class JobTitleDto
 {
     public Guid Id { get; set; }
 

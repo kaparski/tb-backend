@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.DAL.Configurations
 {
@@ -13,6 +12,12 @@ namespace TaxBeacon.DAL.Configurations
                 .HasColumnType("nvarchar")
                 .HasMaxLength(100)
                 .IsRequired();
+
+            jobTitle
+                .Property(sa => sa.Description)
+                .HasColumnType("nvarchar")
+                .HasMaxLength(200)
+                .IsRequired(false);
 
             jobTitle
                 .HasKey(jt => jt.Id)

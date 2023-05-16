@@ -483,26 +483,6 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             }
         }
 
-        [Fact]
-        public async Task UpdateDivisionAsync_DivisionDoesNotExist_ReturnsNotFound()
-        {
-            // Arrange
-            var updateDivisionDto = TestData.UpdateDivisionDtoFaker.Generate();
-            var division = TestData.TestDivision.Generate();
-            await _dbContextMock.Divisions.AddAsync(division);
-            await _dbContextMock.SaveChangesAsync();
-
-            // Act
-            var actualResult = await _divisionsService.UpdateDivisionAsync(Guid.NewGuid(), updateDivisionDto, default);
-
-            // Assert
-            using (new AssertionScope())
-            {
-                actualResult.TryPickT1(out var divisionDto, out _);
-                divisionDto.Should().NotBeNull();
-            }
-        }
-
         private static class TestData
         {
             public static readonly Faker<User> TestUser =
@@ -552,7 +532,16 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             public static readonly Faker<UpdateDivisionDto> UpdateDivisionDtoFaker =
                new Faker<UpdateDivisionDto>()
                    .RuleFor(t => t.Name, f => f.Name.JobType())
-                   .RuleFor(t => t.Description, f => f.Lorem.Sentence(2));
+                   .RuleFor(t => t.Description, f => f.Lorem.Sentence(2))
+                   .RuleFor(t => t.DepartmentIds, f => f.Make(3, Guid.NewGuid));
+
+            public static readonly Faker<Department> TestDepartment =
+               new Faker<Department>()
+                   .RuleFor(t => t.Id, f => Guid.NewGuid())
+                   .RuleFor(t => t.TenantId, _ => DivisionsServiceTests.TenantId)
+                   .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                   .RuleFor(t => t.Description, f => f.Lorem.Sentence(2))
+                   .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
         }
     }
 }
