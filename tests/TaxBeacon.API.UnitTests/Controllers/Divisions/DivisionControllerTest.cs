@@ -334,72 +334,6 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
             }
         }
 
-        [Fact]
-        public async Task GetDivisionDepartments_InvalidDivisionId_ReturnsNotFoundResponse()
-        {
-            // Arrange
-            _divisionsServiceMock
-                .Setup(service => service.GetDivisionDepartmentsAsync(
-                    It.IsAny<Guid>(),
-                    It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new NotFound());
-
-            // Act
-            var actualResponse = await _controller.GetDivisionDepartmentsAsync(Guid.NewGuid(), default);
-
-            // Arrange
-            using (new AssertionScope())
-            {
-                var actualResult = actualResponse as NotFoundResult;
-                actualResponse.Should().NotBeNull();
-                actualResult.Should().NotBeNull();
-                actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-            }
-        }
-
-        [Fact]
-        public async Task GetDivisionDepartmentsAsync_ValidDivisionId_ReturnsDivisionDepartments()
-        {
-            // Arrange
-            var divisionId = Guid.NewGuid();
-            _divisionsServiceMock.Setup(service => service.GetDivisionDepartmentsAsync(
-                    It.Is<Guid>(id => id == divisionId),
-                    It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<DivisionDepartmentDto>());
-
-            // Act
-            var actualResponse = await _controller.GetDivisionDepartmentsAsync(divisionId, default);
-
-            // Arrange
-            using (new AssertionScope())
-            {
-                var actualResult = actualResponse as OkObjectResult;
-                actualResponse.Should().NotBeNull();
-                actualResult.Should().NotBeNull();
-                actualResponse.Should().BeOfType<OkObjectResult>();
-                actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-                actualResult?.Value.Should().BeOfType<List<DivisionDepartmentResponse>>();
-            }
-        }
-
-        [Fact]
-        public void GetDivisionDepartmentsAsync_MarkedWithCorrectHasPermissionsAttribute()
-        {
-            // Arrange
-            var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetDivisionDepartmentsAsync).Method;
-            var permissions = new object[] { Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite };
-
-            // Act
-            var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-            // Assert
-            using (new AssertionScope())
-            {
-                hasPermissionsAttribute.Should().NotBeNull();
-                hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
-            }
-        }
-
         private static class TestData
         {
             public static readonly Faker<DivisionDto> DivisionFaker =
@@ -416,11 +350,6 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
-
-            public static readonly Faker<DivisionDepartmentDto> DivisionDepartmentsFaker =
-            new Faker<DivisionDepartmentDto>()
-                .RuleFor(t => t.Id, f => Guid.NewGuid())
-                .RuleFor(t => t.Name, f => f.Company.CompanyName());
 
             public static readonly Faker<UpdateDivisionRequest> UpdateDivisionFaker =
                 new Faker<UpdateDivisionRequest>()
