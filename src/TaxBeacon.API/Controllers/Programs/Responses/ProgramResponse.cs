@@ -1,6 +1,8 @@
-namespace TaxBeacon.API.Controllers.Programs.Response;
+using TaxBeacon.Common.Enums;
 
-public class ProgramDetailsResponse
+namespace TaxBeacon.API.Controllers.Programs.Responses;
+
+public class ProgramResponse
 {
     public Guid Id { get; set; }
 
@@ -14,13 +16,9 @@ public class ProgramDetailsResponse
 
     public string Agency { get; set; } = string.Empty;
 
-    public string Jurisdiction { get; set; } = string.Empty;
+    public Jurisdiction Jurisdiction { get; set; }
 
-    public string State { get; set; } = string.Empty;
-
-    public string County { get; set; } = string.Empty;
-
-    public string City { get; set; } = string.Empty;
+    public string JurisdictionName { get; set; } = string.Empty;
 
     public string IncentivesArea { get; set; } = string.Empty;
 

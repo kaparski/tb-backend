@@ -10,7 +10,7 @@ using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Programs;
 using TaxBeacon.API.Controllers.Programs.Requests;
-using TaxBeacon.API.Controllers.Programs.Response;
+using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Programs;

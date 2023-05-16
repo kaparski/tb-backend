@@ -3,7 +3,6 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Programs.Requests;
-using TaxBeacon.API.Controllers.Programs.Response;
 using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
@@ -156,24 +155,85 @@ public class ProgramsController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>List of Tenant Programs</returns>
     [HasPermissions(
-        Common.Permissions.Programs.Read,
-        Common.Permissions.Programs.ReadExport,
-        Common.Permissions.Programs.ReadWrite)]
-    [HttpGet("tenants/programs", Name = "GetTenantPrograms")]
+        Common.Permissions.TenantPrograms.Read,
+        Common.Permissions.TenantPrograms.ReadExport,
+        Common.Permissions.TenantPrograms.ReadWrite)]
+    [HttpGet("/api/tenants/programs", Name = "GetTenantPrograms")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<TenantProgramResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetTenantPrograms([FromQuery] GridifyQuery query)
+    public async Task<IActionResult> GetTenantPrograms([FromQuery] GridifyQuery query,
+        CancellationToken cancellationToken)
     {
-        if (!query.IsValid<TenantProgramResponse>())
+        if (!query.IsValid<ProgramDto>())
         {
+            // TODO: Add an object with errors that we can use to detail the answers
             return BadRequest();
         }
 
-        var programs = new List<TenantProgramResponse>();
-        return Ok(new QueryablePaging<TenantProgramResponse>(programs.Count, programs.AsQueryable()));
+        var programs = await _programService.GetAllTenantProgramsAsync(query, cancellationToken);
+
+        var response = new QueryablePaging<TenantProgramResponse>(programs.Count,
+            programs.Query.ProjectToType<TenantProgramResponse>());
+
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Endpoint to export list of tenant programs
+    /// </summary>
+    /// <param name="exportProgramsRequest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns file content</response>
+    /// <response code="400">Invalid request</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>File content</returns>
+    [HasPermissions(Common.Permissions.TenantPrograms.ReadExport)]
+    [HttpGet("/api/tenants/programs/export", Name = "TenantExportPrograms")]
+    [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> TenantExportProgramsAsync([FromQuery] ExportProgramsRequest exportProgramsRequest,
+        CancellationToken cancellationToken)
+    {
+        var mimeType = exportProgramsRequest.FileType.ToMimeType();
+
+        var programs = await _programService.ExportTenantProgramsAsync(exportProgramsRequest.FileType, cancellationToken);
+
+        return File(programs, mimeType,
+            $"programs.{exportProgramsRequest.FileType.ToString().ToLowerInvariant()}");
+    }
+
+    /// <summary>
+    /// Get Tenant Program details by ID
+    /// </summary>
+    /// <response code="200">Returns Tenant Program details</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Program is not found</response>
+    /// <returns>Program details</returns>
+    [HasPermissions(
+        Common.Permissions.TenantPrograms.Read,
+        Common.Permissions.TenantPrograms.ReadWrite,
+        Common.Permissions.TenantPrograms.ReadExport)]
+    [HttpGet("/api/tenants/programs/{id:guid}", Name = "TenantProgramDetails")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<ProgramDetailsResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetTenantProgramDetailsAsync([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var oneOfProgramDetails = await _programService.GetTenantProgramDetailsAsync(id, cancellationToken);
+
+        return oneOfProgramDetails.Match<IActionResult>(
+            program => Ok(program.Adapt<TenantProgramDetailsResponse>()),
+            notFound => NotFound());
     }
 }

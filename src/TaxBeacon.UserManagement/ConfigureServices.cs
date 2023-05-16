@@ -32,6 +32,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<ITeamService, TeamService>();
         serviceCollection.AddScoped<IDepartmentService, DepartmentService>();
         serviceCollection.AddScoped<IServiceAreaService, ServiceAreaService>();
+        serviceCollection.AddScoped<IProgramService, ProgramService>();
 
         serviceCollection.AddScoped<ITeamActivityFactory, TeamUpdatedEventFactory>();
 
@@ -44,7 +45,6 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IDepartmentActivityFactory, DepartmentUpdatedEventFactory>();
 
         serviceCollection.AddScoped<IServiceAreaActivityFactory, ServiceAreaUpdatedEventFactory>();
-
         return serviceCollection;
     }
 }

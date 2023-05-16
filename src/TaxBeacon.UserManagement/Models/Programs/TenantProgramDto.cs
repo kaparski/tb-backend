@@ -1,16 +1,14 @@
 ﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.API.Controllers.Programs.Responses;
+namespace TaxBeacon.UserManagement.Models.Programs;
 
-public class TenantProgramResponse
+public class TenantProgramDto
 {
     public Guid Id { get; set; }
 
     public string Reference { get; set; } = string.Empty;
 
     public string Name { get; set; } = string.Empty;
-
-    public Jurisdiction Jurisdiction { get; set; }
 
     public string Overview { get; set; } = string.Empty;
 
@@ -21,6 +19,8 @@ public class TenantProgramResponse
     public string Department { get; set; } = string.Empty;
 
     public string ServiceArea { get; set; } = string.Empty;
+
+    public Jurisdiction Jurisdiction { get; set; }
 
     public string JurisdictionName { get; set; } = string.Empty;
 
@@ -36,4 +36,3 @@ public class TenantProgramResponse
 
     public DateTime CreatedDateTimeUtc { get; set; }
 }
-
