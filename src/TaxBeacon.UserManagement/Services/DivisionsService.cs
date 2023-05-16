@@ -163,11 +163,11 @@ namespace TaxBeacon.UserManagement.Services
                 return new NotFound();
             }
 
-            var isUpdateBlocked = _context.Departments
+            var isUpdateBlocked = await _context.Departments
                 .Where(d => updateDivisionDto.DepartmentIds.Contains(d.Id)
                     && d.DivisionId != null
                     && d.DivisionId != division.Id)
-                .Any();
+                .AnyAsync();
 
             if (isUpdateBlocked)
             {
