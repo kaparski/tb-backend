@@ -1,6 +1,6 @@
 ﻿using TaxBeacon.API.Authentication;
-using TaxBeacon.Common.Roles;
 using TaxBeacon.Common.Services;
+using RolesConstants = TaxBeacon.Common.Roles.Roles;
 
 namespace TaxBeacon.API.Services;
 
@@ -21,7 +21,7 @@ public class CurrentUserService: ICurrentUserService
                                                     ?.Where(c => c.Type == Claims.Roles)
                                                     ?.Select(c => c.Value)
                                                     ?.ToHashSet()
-                                                    ?.Contains(Roles.SuperAdmin) == true;
+                                                    ?.Contains(RolesConstants.SuperAdmin) == true;
 
     public Guid TenantId =>
         IsSuperAdmin &&
@@ -40,12 +40,18 @@ public class CurrentUserService: ICurrentUserService
                                                     ?.User
                                                     ?.Claims
                                                     ?.SingleOrDefault(c => c.Type == Claims.FullName)?.Value ?? throw new InvalidOperationException();
-            var roles = _httpContextAccessor?.HttpContext
-                                                    ?.User
-                                                    ?.Claims
-                                                    ?.Where(c => c.Type == Claims.TenantRoles)?.Select(c => c.Value) ?? Enumerable.Empty<string>();
 
-            return (fullName, string.Join(", ", roles));
+            return (fullName, string.Join(", ", TenantRoles));
         }
     }
+
+    public IReadOnlyCollection<string> TenantRoles => (_httpContextAccessor?.HttpContext
+                                                    ?.User
+                                                    ?.Claims
+                                                    ?.Where(c => c.Type == Claims.TenantRoles)?.Select(c => c.Value) ?? Enumerable.Empty<string>()).ToArray();
+
+    public IReadOnlyCollection<string> Roles => (_httpContextAccessor?.HttpContext
+                                                ?.User
+                                                ?.Claims
+                                                ?.Where(c => c.Type == Claims.Roles)?.Select(c => c.Value) ?? Enumerable.Empty<string>()).ToArray();
 }
