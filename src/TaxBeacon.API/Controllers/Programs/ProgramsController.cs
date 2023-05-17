@@ -168,7 +168,7 @@ public class ProgramsController: BaseController
     public async Task<IActionResult> GetTenantPrograms([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
-        if (!query.IsValid<ProgramDto>())
+        if (!query.IsValid<TenantProgramDto>())
         {
             // TODO: Add an object with errors that we can use to detail the answers
             return BadRequest();
@@ -223,7 +223,7 @@ public class ProgramsController: BaseController
         Common.Permissions.TenantPrograms.ReadExport)]
     [HttpGet("/api/tenants/programs/{id:guid}", Name = "TenantProgramDetails")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(IEnumerable<ProgramDetailsResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<TenantProgramDetailsResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -9,10 +9,8 @@ using System.Collections.Immutable;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Models.Programs;
 
 namespace TaxBeacon.UserManagement.Services;
@@ -140,6 +138,8 @@ public class ProgramService: IProgramService
                         : p.Program.Jurisdiction.ToString()) ?? string.Empty,
                     IncentivesArea = p.Program.IncentivesArea ?? string.Empty,
                     IncentivesType = p.Program.IncentivesType ?? string.Empty,
+                    Department = string.Empty,
+                    ServiceArea = string.Empty,
                     StartDateTimeUtc = p.Program.StartDateTimeUtc,
                     EndDateTimeUtc = p.Program.EndDateTimeUtc,
                     CreatedDateTimeUtc = p.Program.CreatedDateTimeUtc,
