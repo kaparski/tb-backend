@@ -34,7 +34,7 @@ public class RolesController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<QueryablePaging<RoleResponse>>> GetRoleList([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var roles = await _roleService.GetRolesAsync(query, cancellationToken);
         var roleListResponse =
@@ -62,8 +62,9 @@ public class RolesController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetRoleAssignedUsers([FromRoute] Guid id, [FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetRoleAssignedUsers([FromRoute] Guid id,
+        [FromQuery] GridifyQuery query,
+        CancellationToken cancellationToken = default)
     {
         var usersOneOf = await _roleService.GetRoleAssignedUsersAsync(id, query, cancellationToken);
 
@@ -93,7 +94,7 @@ public class RolesController: BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetPermissionsByRoleId(Guid roleId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var getPermissionsResult = await _roleService.GetRolePermissionsByIdAsync(roleId, cancellationToken);
 
@@ -122,7 +123,7 @@ public class RolesController: BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UnassignUsers([FromRoute] Guid id,
         [FromBody] List<Guid> userIds,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var result = await _roleService.UnassignUsersAsync(id, userIds, cancellationToken);
 
@@ -149,7 +150,8 @@ public class RolesController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> AssignUsersToRole([FromRoute] Guid id, [FromBody] List<Guid> userIds,
+    public async Task<IActionResult> AssignUsersToRole([FromRoute] Guid id,
+        [FromBody] List<Guid> userIds,
         CancellationToken cancellationToken = default)
     {
         var resultOneOf = await _roleService.AssignUsersAsync(id, userIds, cancellationToken);
