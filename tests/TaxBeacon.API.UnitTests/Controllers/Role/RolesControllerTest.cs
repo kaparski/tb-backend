@@ -187,9 +187,7 @@ public class RolesControllerTest
         // Arrange
         _roleServiceMock
             .Setup(p => p.GetRolePermissionsByIdAsync(It.IsAny<Guid>(), default))
-            .ReturnsAsync(Enumerable.Empty<PermissionDto>()
-                .ToList()
-                .AsReadOnly());
+            .ReturnsAsync(Array.Empty<PermissionDto>());
 
         // Act
         var actualResponse = await _controller.GetPermissionsByRoleId(Guid.NewGuid());

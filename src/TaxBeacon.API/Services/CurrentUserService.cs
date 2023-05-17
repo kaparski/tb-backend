@@ -20,14 +20,16 @@ public class CurrentUserService: ICurrentUserService
                                     ?.Where(c => c.Type == Claims.Roles)
                                     ?.Select(c => c.Value)
                                     ?.ToHashSet()
-                                    ?.Contains(RolesConstants.SuperAdmin) == true;
+                                    ?.Contains(RolesConstants.SuperAdmin)
+                                == true;
 
     public bool IsUserInTenant => TenantId != default;
 
     public Guid TenantId =>
         IsSuperAdmin
         && _httpContextAccessor?.HttpContext?.Request?.Headers?
-            .TryGetValue(Headers.SuperAdminTenantId, out var superAdminTenantIdString) == true
+            .TryGetValue(Headers.SuperAdminTenantId, out var superAdminTenantIdString)
+        == true
         && Guid.TryParse(superAdminTenantIdString, out var superAdminTenantId)
             ? superAdminTenantId
             : Guid.TryParse(UserClaims?.SingleOrDefault(c => c.Type == Claims.TenantId)?.Value,
@@ -39,25 +41,26 @@ public class CurrentUserService: ICurrentUserService
     {
         get
         {
-            var fullName = _httpContextAccessor?.HttpContext
-                                                    ?.User
-                                                    ?.Claims
-                                                    ?.SingleOrDefault(c => c.Type == Claims.FullName)?.Value ?? throw new InvalidOperationException();
+            var fullName = UserClaims?.SingleOrDefault(c => c.Type == Claims.FullName)?.Value
+                           ?? throw new InvalidOperationException();
 
-            return (fullName, string.Join(", ", TenantRoles));
+            return (fullName, string.Join(", ", TenantRoles.Concat(Roles).Order()));
         }
     }
 
     public IReadOnlyCollection<string> TenantRoles => (_httpContextAccessor?.HttpContext
-        ?.User
-        ?.Claims
-        ?.Where(c => c.Type == Claims.TenantRoles)?.Select(c => c.Value) ?? Enumerable.Empty<string>()).ToArray();
+                                                           ?.User
+                                                           ?.Claims
+                                                           ?.Where(c => c.Type == Claims.TenantRoles)
+                                                           ?.Select(c => c.Value)
+                                                       ?? Enumerable.Empty<string>()).ToArray();
 
     public IReadOnlyCollection<string> Roles => (_httpContextAccessor?.HttpContext
-        ?.User
-        ?.Claims
-        ?.Where(c => c.Type == Claims.Roles)?.Select(c => c.Value) ?? Enumerable.Empty<string>()).ToArray();
-
+                                                     ?.User
+                                                     ?.Claims
+                                                     ?.Where(c => c.Type == Claims.Roles)?
+                                                     .Select(c => c.Value)
+                                                 ?? Enumerable.Empty<string>()).ToArray();
 
     private IEnumerable<Claim>? UserClaims => _httpContextAccessor?.HttpContext?.User?.Claims;
 }
