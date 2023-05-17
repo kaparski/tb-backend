@@ -193,7 +193,6 @@ public class ProgramService: IProgramService
         var programDetailsDto = program.Program.Adapt<TenantProgramDetailsDto>();
         programDetailsDto.Status = program.Status;
         programDetailsDto.Jurisdiction = program.Program.Jurisdiction.ToString();
-        programDetailsDto.JurisdictionName = program.Program.JurisdictionName ?? string.Empty;
 
         return programDetailsDto;
     }
