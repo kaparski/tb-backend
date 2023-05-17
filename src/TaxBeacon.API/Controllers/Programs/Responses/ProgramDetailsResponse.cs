@@ -1,5 +1,6 @@
-namespace TaxBeacon.API.Controllers.Programs.Responses;
+using TaxBeacon.Common.Enums;
 
+namespace TaxBeacon.API.Controllers.Programs.Responses;
 
 public class ProgramDetailsResponse
 {

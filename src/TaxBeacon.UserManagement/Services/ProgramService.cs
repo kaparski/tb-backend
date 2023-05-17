@@ -128,11 +128,7 @@ public class ProgramService: IProgramService
                     LegalAuthority = p.Program.LegalAuthority ?? string.Empty,
                     Agency = p.Program.Agency ?? string.Empty,
                     Jurisdiction = p.Program.Jurisdiction,
-                    JurisdictionName = (p.Program.Jurisdiction != Jurisdiction.Federal
-                        ? p.Program.Jurisdiction == Jurisdiction.Local
-                            ? string.Join(", ", p.Program.State, p.Program.County, p.Program.City)
-                            : p.Program.State
-                        : p.Program.Jurisdiction.ToString()) ?? string.Empty,
+                    JurisdictionName = p.Program.JurisdictionName ?? string.Empty,
                     IncentivesArea = p.Program.IncentivesArea ?? string.Empty,
                     IncentivesType = p.Program.IncentivesType ?? string.Empty,
                     Department = string.Empty,
@@ -158,11 +154,7 @@ public class ProgramService: IProgramService
                 LegalAuthority = p.Program.LegalAuthority ?? string.Empty,
                 Agency = p.Program.Agency ?? string.Empty,
                 Jurisdiction = p.Program.Jurisdiction.ToString(),
-                JurisdictionName = (p.Program.Jurisdiction != Jurisdiction.Federal
-                    ? p.Program.Jurisdiction == Jurisdiction.Local
-                        ? string.Join(", ", p.Program.State, p.Program.County, p.Program.City)
-                        : p.Program.State
-                    : p.Program.Jurisdiction.ToString()) ?? string.Empty,
+                JurisdictionName = p.Program.JurisdictionName ?? string.Empty,
                 IncentivesArea = p.Program.IncentivesArea ?? string.Empty,
                 IncentivesType = p.Program.IncentivesType ?? string.Empty,
                 StartDateTimeUtc = p.Program.StartDateTimeUtc,
@@ -201,11 +193,7 @@ public class ProgramService: IProgramService
         var programDetailsDto = program.Program.Adapt<TenantProgramDetailsDto>();
         programDetailsDto.Status = program.Status;
         programDetailsDto.Jurisdiction = program.Program.Jurisdiction.ToString();
-        programDetailsDto.JurisdictionName = (program.Program.Jurisdiction != Jurisdiction.Federal
-            ? program.Program.Jurisdiction == Jurisdiction.Local
-                ? string.Join(", ", program.Program.State, program.Program.County, program.Program.City)
-                : program.Program.State
-            : program.Program.Jurisdiction.ToString()) ?? string.Empty;
+        programDetailsDto.JurisdictionName = program.Program.JurisdictionName ?? string.Empty;
 
         return programDetailsDto;
     }

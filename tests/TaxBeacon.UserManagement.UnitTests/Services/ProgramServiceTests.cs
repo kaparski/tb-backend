@@ -25,6 +25,7 @@ public class ProgramServiceTests
     private readonly Mock<IDateTimeService> _dateTimeServiceMock;
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly ProgramService _programService;
+    public static readonly Guid TenantId = Guid.NewGuid();
 
     public ProgramServiceTests()
     {
@@ -51,6 +52,13 @@ public class ProgramServiceTests
             entitySaveChangesInterceptorMock.Object);
 
         _currentUserServiceMock = new();
+        _dbContextMock.Tenants.Add(new Tenant()
+        {
+            Id = TenantId,
+            Name = "TestTenant",
+        });
+        _dbContextMock.SaveChangesAsync();
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TenantId);
 
         _dateTimeServiceMock = new();
 
@@ -195,10 +203,147 @@ public class ProgramServiceTests
         actualResult.IsT0.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task GetAllTenantProgramsAsync_QueryIsValidOrderByNameAscending_ReturnsListOfPrograms()
+    {
+        // Arrange
+        var programs = TestData.TestTenantProgram.Generate(10);
+        await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name asc", };
+
+        // Act
+        var actualResult = await _programService.GetAllTenantProgramsAsync(query);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            actualResult.Should().NotBeNull();
+            actualResult.Count.Should().Be(10);
+            var tenantProgramDtos = actualResult.Query.ToList();
+            tenantProgramDtos.Count.Should().Be(5);
+            tenantProgramDtos.Select(x => x.Name).Should().BeInAscendingOrder();
+        }
+    }
+
+    [Fact]
+    public async Task GetAllTenantProgramsAsync_QueryIsValidOrderByNameDescending_ReturnsListOfPrograms()
+    {
+        // Arrange
+        var programs = TestData.TestTenantProgram.Generate(10);
+        await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name desc", };
+
+        // Act
+        var actualResult = await _programService.GetAllTenantProgramsAsync(query);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            actualResult.Should().NotBeNull();
+            actualResult.Count.Should().Be(10);
+            var tenantProgramDtos = actualResult.Query.ToList();
+            tenantProgramDtos.Count.Should().Be(5);
+            tenantProgramDtos.Select(x => x.Name).Should().BeInDescendingOrder();
+        }
+    }
+
+    [Fact]
+    public async Task GetAllTenantProgramsAsync_PageNumberIsOutOfRange_ReturnsEmptyList()
+    {
+        // Arrange
+        var programs = TestData.TestTenantProgram.Generate(10);
+        await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
+        await _dbContextMock.SaveChangesAsync();
+        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
+
+        // Act
+        var actualResult = await _programService.GetAllTenantProgramsAsync(query);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            actualResult.Should().NotBeNull();
+            actualResult.Count.Should().Be(10);
+            var tenantProgramDtos = actualResult.Query.ToList();
+            tenantProgramDtos.Count.Should().Be(0);
+        }
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportTenantProgramsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
+    {
+        //Arrange
+        var programs = TestData.TestTenantProgram.Generate(5);
+
+        await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        _ = await _programService.ExportTenantProgramsAsync(fileType);
+
+        //Assert
+        switch (fileType)
+        {
+            case FileType.Csv:
+                _csvMock.Verify(x =>
+                    x.Convert(It.IsAny<List<TenantProgramExportModel>>()), Times.Once());
+                break;
+            case FileType.Xlsx:
+                _xlsxMock.Verify(x =>
+                    x.Convert(It.IsAny<List<TenantProgramExportModel>>()), Times.Once());
+                break;
+            default:
+                throw new InvalidOperationException();
+        }
+    }
+
+    [Fact]
+    public async Task GetTenantProgramDetailsAsync_ProgramExists_ReturnsProgramDetailsDto()
+    {
+        // Arrange
+        var program = TestData.TestTenantProgram.Generate();
+
+        await _dbContextMock.TenantsPrograms.AddAsync(program);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _programService.GetTenantProgramDetailsAsync(program.Program.Id);
+
+        // Assert
+        actualResult.TryPickT0(out var programDetails, out _).Should().BeTrue();
+        programDetails.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetTenantProgramDetailsAsync_ProgramDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var program = TestData.TestTenantProgram.Generate();
+
+        await _dbContextMock.TenantsPrograms.AddAsync(program);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _programService.GetTenantProgramDetailsAsync(Guid.NewGuid());
+
+        // Assert
+        actualResult.IsT1.Should().BeTrue();
+        actualResult.IsT0.Should().BeFalse();
+    }
+
     private static class TestData
     {
         public static readonly Faker<Program> TestProgram = new Faker<Program>()
             .RuleFor(p => p.Id, f => Guid.NewGuid())
             .RuleFor(p => p.Name, f => f.Name.FirstName());
+
+        public static readonly Faker<TenantProgram> TestTenantProgram = new Faker<TenantProgram>()
+            .RuleFor(p => p.TenantId, f => TenantId)
+            .RuleFor(p => p.Status, f => f.PickRandom<Status>())
+            .RuleFor(p => p.Program, f => TestProgram.Generate());
     }
 }

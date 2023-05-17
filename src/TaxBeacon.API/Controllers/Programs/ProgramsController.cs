@@ -165,7 +165,7 @@ public class ProgramsController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetTenantPrograms([FromQuery] GridifyQuery query,
+    public async Task<IActionResult> GetAllTenantProgramsAsync([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
         if (!query.IsValid<TenantProgramDto>())
@@ -198,7 +198,7 @@ public class ProgramsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> TenantExportProgramsAsync([FromQuery] ExportProgramsRequest exportProgramsRequest,
+    public async Task<IActionResult> ExportTenantProgramsAsync([FromQuery] ExportProgramsRequest exportProgramsRequest,
         CancellationToken cancellationToken)
     {
         var mimeType = exportProgramsRequest.FileType.ToMimeType();

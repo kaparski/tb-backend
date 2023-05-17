@@ -18,7 +18,7 @@ public enum EntityType
 
     JobTitle = 8,
 
-    Program = 9
-    
+    Program = 9,
+
     TenantProgram = 10,
 }
