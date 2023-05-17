@@ -146,11 +146,7 @@ public class CurrentUserServiceTests
             .ToList();
 
         var identity = new GenericIdentity("test", "test");
-        foreach (var roleName in rolesNames)
-        {
-            identity.AddClaim(new Claim(Claims.TenantRoles, roleName));
-
-        }
+        rolesNames.ForEach(roleName => identity.AddClaim(new Claim(Claims.TenantRoles, roleName)));
         identity.AddClaim(new Claim(Claims.FullName, user.FullName));
         var contextUser = new ClaimsPrincipal(identity);
         var httpContext = new DefaultHttpContext { User = contextUser };

@@ -191,9 +191,11 @@ public class RoleService: IRoleService
         CancellationToken cancellationToken = default)
     {
         var role = !_currentUserService.IsUserInTenant && _currentUserService.IsSuperAdmin
-            ? await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId, cancellationToken)
+            ? await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId && r.Type == SourceType.System,
+                cancellationToken)
             : await _context.Roles
                 .FirstOrDefaultAsync(r => r.Id == roleId
+                                          && r.Type == SourceType.Tenant
                                           && r.TenantRoles.Any(tr => tr.TenantId == _currentUserService.TenantId),
                     cancellationToken);
 

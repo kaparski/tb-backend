@@ -7,7 +7,6 @@ using Moq;
 using OneOf.Types;
 using TaxBeacon.API.Controllers.Roles;
 using TaxBeacon.API.Controllers.Roles.Responses;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -16,21 +15,11 @@ namespace TaxBeacon.API.UnitTests.Controllers.Role;
 public class RolesControllerTest
 {
     private readonly RolesController _controller;
-    private readonly Mock<ICurrentUserService> _currentServiceMock;
     private readonly Mock<IRoleService> _roleServiceMock;
 
     public RolesControllerTest()
     {
         _roleServiceMock = new Mock<IRoleService>();
-        _currentServiceMock = new Mock<ICurrentUserService>();
-
-        _currentServiceMock
-            .Setup(x => x.UserId)
-            .Returns(new Guid());
-
-        _currentServiceMock
-            .Setup(x => x.TenantId)
-            .Returns(new Guid());
 
         _controller = new RolesController(_roleServiceMock.Object);
     }
