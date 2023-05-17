@@ -23,6 +23,8 @@ public class CurrentUserService: ICurrentUserService
                                     ?.Contains(Roles.SuperAdmin)
                                 == true;
 
+    public bool IsUserInTenant => TenantId != default;
+
     public Guid TenantId =>
         IsSuperAdmin
         && _httpContextAccessor?.HttpContext?.Request?.Headers?

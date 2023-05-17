@@ -37,9 +37,9 @@ public class RoleService: IRoleService
     public async Task<QueryablePaging<RoleDto>> GetRolesAsync(IGridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
-        var roles = _currentUserService.TenantId != default
-            ? GetTenantRolesQuery()
-            : GetNotTenantRolesQuery();
+        var roles = !_currentUserService.IsUserInTenant && _currentUserService.IsSuperAdmin
+            ? GetNotTenantRolesQuery()
+            : GetTenantRolesQuery();
 
         return await roles.GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
@@ -48,12 +48,13 @@ public class RoleService: IRoleService
         IGridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
-        if (!await IsRoleExistsAsync(roleId, cancellationToken))
+        var getRoleResult = await GetRoleByIdAsync(roleId, cancellationToken);
+        if (!getRoleResult.TryPickT0(out var role, out var notFound))
         {
-            return new NotFound();
+            return notFound;
         }
 
-        var users = _currentUserService.TenantId != default
+        var users = role.Type == SourceType.Tenant
             ? GetTenantRoleAssignedUsersQuery(roleId)
             : GetNotTenantRoleAssignedUsersQuery(roleId);
 
@@ -67,19 +68,18 @@ public class RoleService: IRoleService
         CancellationToken cancellationToken = default)
     {
         var getRoleResult = await GetRoleByIdAsync(roleId, cancellationToken);
-
         if (!getRoleResult.TryPickT0(out var role, out var notFound))
         {
             return notFound;
         }
 
-        if (_currentUserService.TenantId == default)
+        if (role.Type == SourceType.Tenant)
         {
-            UnassignNotTenantUsers(roleId, users);
+            UnassignTenantUsers(roleId, users);
         }
         else
         {
-            UnassignTenantUsers(roleId, users);
+            UnassignNotTenantUsers(roleId, users);
         }
 
         var userInfo = _currentUserService.UserInfo;
@@ -124,13 +124,13 @@ public class RoleService: IRoleService
             return notFound;
         }
 
-        if (_currentUserService.TenantId == default)
+        if (role.Type == SourceType.Tenant)
         {
-            await AssignNotTenantUsersAsync(roleId, userIds, cancellationToken);
+            await AssignTenantUsersAsync(roleId, userIds, cancellationToken);
         }
         else
         {
-            await AssignTenantUsersAsync(roleId, userIds, cancellationToken);
+            await AssignNotTenantUsersAsync(roleId, userIds, cancellationToken);
         }
 
         var eventDateTime = _dateTimeService.UtcNow;
@@ -169,15 +169,15 @@ public class RoleService: IRoleService
         Guid roleId,
         CancellationToken cancellationToken = default)
     {
-        if (!await IsRoleExistsAsync(roleId, cancellationToken))
+        var getRoleResult = await GetRoleByIdAsync(roleId, cancellationToken);
+        if (!getRoleResult.TryPickT0(out var role, out var notFound))
         {
-            return new NotFound();
+            return notFound;
         }
 
-        var permissions =
-            _currentUserService.TenantId != default
-                ? await GetTenantRolePermissionsByIdAsync(roleId, cancellationToken)
-                : await GetNotTenantRolePermissionsByIdAsync(roleId, cancellationToken);
+        var permissions = role.Type == SourceType.Tenant
+            ? await GetTenantRolePermissionsByIdAsync(roleId, cancellationToken)
+            : await GetNotTenantRolePermissionsByIdAsync(roleId, cancellationToken);
 
         var permissionsWithCategory = permissions.Select(p => p with
         {
@@ -190,7 +190,7 @@ public class RoleService: IRoleService
     private async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
         CancellationToken cancellationToken = default)
     {
-        var role = _currentUserService.TenantId == default
+        var role = !_currentUserService.IsUserInTenant && _currentUserService.IsSuperAdmin
             ? await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId, cancellationToken)
             : await _context.Roles
                 .FirstOrDefaultAsync(r => r.Id == roleId
@@ -200,17 +200,10 @@ public class RoleService: IRoleService
         return role is not null ? role : new NotFound();
     }
 
-    private async Task<bool> IsRoleExistsAsync(Guid roleId, CancellationToken cancellationToken) =>
-        _currentUserService.TenantId == default
-            ? await _context.Roles.AnyAsync(r => r.Id == roleId, cancellationToken)
-            : await _context.Roles
-                .AnyAsync(r => r.Id == roleId && r.TenantRoles.Any(tr => tr.TenantId == _currentUserService.TenantId),
-                    cancellationToken);
-
     private IQueryable<RoleDto> GetTenantRolesQuery() =>
         _context.TenantRoles
             .AsNoTracking()
-            .Where(tr => tr.TenantId == _currentUserService.TenantId)
+            .Where(tr => tr.TenantId == _currentUserService.TenantId && tr.Role.Type == SourceType.Tenant)
             .Select(tr => new RoleDto
             {
                 Id = tr.RoleId,
@@ -287,7 +280,11 @@ public class RoleService: IRoleService
             .Join(_context.Permissions,
                 trp => trp.PermissionId,
                 p => p.Id,
-                (trp, p) => new { p.Id, p.Name })
+                (trp, p) => new
+                {
+                    p.Id,
+                    p.Name
+                })
             .ProjectToType<PermissionDto>()
             .ToListAsync(cancellationToken);
 
@@ -300,7 +297,11 @@ public class RoleService: IRoleService
             .Join(_context.Permissions,
                 trp => trp.PermissionId,
                 p => p.Id,
-                (trp, p) => new { p.Id, p.Name })
+                (trp, p) => new
+                {
+                    p.Id,
+                    p.Name
+                })
             .ProjectToType<PermissionDto>()
             .ToListAsync(cancellationToken);
 }

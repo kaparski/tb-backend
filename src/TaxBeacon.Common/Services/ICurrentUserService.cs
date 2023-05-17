@@ -9,4 +9,6 @@ public interface ICurrentUserService
     (string FullName, string Roles) UserInfo { get; }
 
     bool IsSuperAdmin { get; }
+
+    bool IsUserInTenant { get; }
 }
