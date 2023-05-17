@@ -63,6 +63,14 @@ namespace TaxBeacon.DAL.Configurations
             program
                 .Property(p => p.City)
                 .HasMaxLength(200);
+
+            program
+                .Property(p => p.JurisdictionName)
+                .HasColumnType("nvarchar")
+                .HasMaxLength(604)
+                .HasComputedColumnSql(
+                    @"TRIM(CASE WHEN [Jurisdiction] = 1 THEN 'Federal' WHEN [Jurisdiction] = 2 THEN [State] WHEN [Jurisdiction] = 3 THEN CONCAT([State], ', ', [County], ', ', [City]) ELSE NULL END)",
+                    stored: true);
         }
     }
 }

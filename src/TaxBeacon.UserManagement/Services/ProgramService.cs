@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Programs;
@@ -54,9 +55,7 @@ public class ProgramService: IProgramService
                 LegalAuthority = p.LegalAuthority ?? string.Empty,
                 Agency = p.Agency ?? string.Empty,
                 Jurisdiction = p.Jurisdiction,
-                JurisdictionName = p.Jurisdiction == Jurisdiction.Local
-                    ? string.Join(',', p.State, p.County, p.City)
-                    : p.Jurisdiction.ToString(),
+                JurisdictionName = p.JurisdictionName ?? string.Empty,
                 IncentivesArea = p.IncentivesArea ?? string.Empty,
                 IncentivesType = p.IncentivesType ?? string.Empty,
                 StartDateTimeUtc = p.StartDateTimeUtc,
@@ -78,9 +77,7 @@ public class ProgramService: IProgramService
                 LegalAuthority = p.LegalAuthority ?? string.Empty,
                 Agency = p.Agency ?? string.Empty,
                 Jurisdiction = p.Jurisdiction.ToString(),
-                JurisdictionName = p.Jurisdiction == Jurisdiction.Local
-                    ? string.Join(',', p.State, p.County, p.City)
-                    : p.Jurisdiction.ToString(),
+                JurisdictionName = p.JurisdictionName ?? string.Empty,
                 IncentivesArea = p.IncentivesArea ?? string.Empty,
                 IncentivesType = p.IncentivesType ?? string.Empty,
                 StartDateTimeUtc = p.StartDateTimeUtc,

@@ -6,12 +6,13 @@ public class ProgramExportModel
 {
     public string Reference { get; set; } = string.Empty;
 
-    [Column("Program name")]
+    [Column("Program Name")]
     public string Name { get; set; } = string.Empty;
 
-    [Column("Program overview")]
+    [Column("Program Overview")]
     public string Overview { get; set; } = string.Empty;
 
+    [Column("Legal Authority")]
     public string LegalAuthority { get; set; } = string.Empty;
 
     [Column("Program Agency")]
@@ -19,13 +20,13 @@ public class ProgramExportModel
 
     public string Jurisdiction { get; set; } = string.Empty;
 
-    [Column("Jurisdiction name")]
+    [Column("Jurisdiction Name")]
     public string? JurisdictionName { get; set; } = string.Empty;
 
-    [Column("Incentives area")]
+    [Column("Incentives Area")]
     public string IncentivesArea { get; set; } = string.Empty;
 
-    [Column("Incentives type")]
+    [Column("Incentives Type")]
     public string IncentivesType { get; set; } = string.Empty;
 
     [Ignore]
