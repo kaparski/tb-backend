@@ -384,6 +384,6 @@ public class ServiceAreasControllerTest
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
         public static readonly Faker<UpdateServiceAreaRequest> TestUpdateServiceAreaRequest =
-            new Faker<UpdateServiceAreaRequest>().CustomInstantiator(f => new UpdateServiceAreaRequest(f.Lorem.Word(), f.Lorem.Text()));
+            new Faker<UpdateServiceAreaRequest>().CustomInstantiator(f => new UpdateServiceAreaRequest(f.Lorem.Word(), f.Lorem.Text(), Guid.NewGuid()));
     }
 }
