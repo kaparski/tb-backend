@@ -18,7 +18,11 @@ public class TenantProgramDetailsDto
 
     public string Jurisdiction { get; set; } = string.Empty;
 
-    public string JurisdictionName { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
+
+    public string County { get; set; } = string.Empty;
+
+    public string City { get; set; } = string.Empty;
 
     public string IncentivesArea { get; set; } = string.Empty;
 
