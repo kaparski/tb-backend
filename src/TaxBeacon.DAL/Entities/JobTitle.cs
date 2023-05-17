@@ -8,6 +8,8 @@
 
         public string Name { get; set; } = string.Empty;
 
+        public string Description { get; set; } = string.Empty;
+
         public Guid? DepartmentId { get; set; }
 
         public Department? Department { get; set; }
@@ -16,5 +18,7 @@
 
         public ICollection<User> Users { get; set; } = new HashSet<User>();
 
+        public ICollection<JobTitleActivityLog> JobTitleActivityLogs { get; set; } =
+            new HashSet<JobTitleActivityLog>();
     }
 }

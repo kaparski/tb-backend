@@ -35,6 +35,9 @@ VALUES ('Users.Read'),
        ('ServiceAreas.Read'),
        ('ServiceAreas.ReadWrite'),
        ('ServiceAreas.ReadExport'),
+       ('JobTitles.Read'),
+       ('JobTitles.ReadWrite'),
+       ('JobTitles.ReadExport')
        ('TenantPrograms.Read'),
        ('TenantPrograms.ReadWrite'),
        ('TenantPrograms.ReadExport')

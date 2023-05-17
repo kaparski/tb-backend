@@ -1,6 +1,7 @@
-﻿namespace TaxBeacon.UserManagement.Models;
+﻿
+namespace TaxBeacon.API.Controllers.JobTitles.Responses;
 
-public class ServiceAreaDto
+public class JobTitleResponse
 {
     public Guid Id { get; set; }
 

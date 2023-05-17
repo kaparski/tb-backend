@@ -16,5 +16,7 @@ public enum EntityType
 
     ServiceArea = 7,
 
-    TenantProgram = 9,
+    JobTitle = 8,
+    
+    TenantProgram = 10,
 }
