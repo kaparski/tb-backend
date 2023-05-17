@@ -117,12 +117,7 @@ public class UserService: IUserService
 
         if (id == _currentUserService.UserId)
         {
-            user.Roles = string.Join(", ", (_currentUserService.Roles ?? Enumerable.Empty<string>())
-                                            .Concat(_currentUserService.TenantRoles ?? Enumerable.Empty<string>()).Order());
-        }
-        else if (!string.IsNullOrEmpty(user.Roles))
-        {
-            user.Roles = string.Join(", ", user.Roles.Split(",").Select(r => r.Trim()).Order());
+            user.Roles = string.Join(", ", _currentUserService.Roles.Concat(_currentUserService.TenantRoles).Order());
         }
 
         return user;

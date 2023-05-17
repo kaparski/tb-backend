@@ -33,7 +33,7 @@ public static class UserIQueryableExtension
     private static IQueryable<UserDto> MapToUserDtoWithRoleNames(this IQueryable<UserWithRoleId> source,
         ITaxBeaconDbContext context) =>
         source
-            .GroupJoin(context.Roles,
+            .GroupJoin(context.Roles.OrderBy(r => r.Name),
                 ur => new { ur.RoleId },
                 role => new { RoleId = (Guid?)role.Id },
                 (ur, roles) => new { ur.User, Roles = roles })
