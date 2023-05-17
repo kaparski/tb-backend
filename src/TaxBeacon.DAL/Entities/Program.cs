@@ -23,6 +23,8 @@ namespace TaxBeacon.DAL.Entities
 
         public Jurisdiction Jurisdiction { get; set; }
 
+        public string? JurisdictionName { get; set; }
+
         public string? State { get; set; }
 
         public string? County { get; set; }

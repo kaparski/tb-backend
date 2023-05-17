@@ -1,7 +1,7 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.Common.Roles;
 using TaxBeacon.Common.Services;
+using RolesConstants = TaxBeacon.Common.Roles.Roles;
 
 namespace TaxBeacon.API.Services;
 
@@ -20,8 +20,7 @@ public class CurrentUserService: ICurrentUserService
                                     ?.Where(c => c.Type == Claims.Roles)
                                     ?.Select(c => c.Value)
                                     ?.ToHashSet()
-                                    ?.Contains(Roles.SuperAdmin)
-                                == true;
+                                    ?.Contains(RolesConstants.SuperAdmin) == true;
 
     public bool IsUserInTenant => TenantId != default;
 
@@ -40,16 +39,25 @@ public class CurrentUserService: ICurrentUserService
     {
         get
         {
-            var fullName = UserClaims?.SingleOrDefault(c => c.Type == Claims.FullName)?.Value
-                           ?? throw new InvalidOperationException();
-            var roles = UserClaims?
-                            .Where(c => c.Type is Claims.TenantRoles or Claims.Roles)?
-                            .Select(c => c.Value)
-                        ?? Enumerable.Empty<string>();
+            var fullName = _httpContextAccessor?.HttpContext
+                                                    ?.User
+                                                    ?.Claims
+                                                    ?.SingleOrDefault(c => c.Type == Claims.FullName)?.Value ?? throw new InvalidOperationException();
 
-            return (fullName, string.Join(", ", roles));
+            return (fullName, string.Join(", ", TenantRoles));
         }
     }
+
+    public IReadOnlyCollection<string> TenantRoles => (_httpContextAccessor?.HttpContext
+        ?.User
+        ?.Claims
+        ?.Where(c => c.Type == Claims.TenantRoles)?.Select(c => c.Value) ?? Enumerable.Empty<string>()).ToArray();
+
+    public IReadOnlyCollection<string> Roles => (_httpContextAccessor?.HttpContext
+        ?.User
+        ?.Claims
+        ?.Where(c => c.Type == Claims.Roles)?.Select(c => c.Value) ?? Enumerable.Empty<string>()).ToArray();
+
 
     private IEnumerable<Claim>? UserClaims => _httpContextAccessor?.HttpContext?.User?.Claims;
 }

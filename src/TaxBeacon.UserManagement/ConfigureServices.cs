@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using TaxBeacon.UserManagement.Services;
@@ -45,6 +45,8 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IDepartmentActivityFactory, DepartmentUpdatedEventFactory>();
 
         serviceCollection.AddScoped<IServiceAreaActivityFactory, ServiceAreaUpdatedEventFactory>();
+
+        serviceCollection.AddScoped<IProgramService, ProgramService>();
 
         serviceCollection.AddScoped<IJobTitleActivityFactory, JobTitleUpdatedEventFactory>();
 
