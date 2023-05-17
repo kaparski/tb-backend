@@ -10,6 +10,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -122,6 +123,16 @@ public class ServiceAreaService: IServiceAreaService
         if (serviceArea is null)
         {
             return new NotFound();
+        }
+
+        if (updateServiceAreaDto.DepartmentId != Guid.Empty)
+        {
+            var departmentToAdd = await _context.Departments.FirstOrDefaultAsync(d => d.Id == updateServiceAreaDto.DepartmentId);
+
+            if (departmentToAdd != null && departmentToAdd.TenantId != serviceArea.TenantId)
+            {
+                return new NotFound();
+            }
         }
 
         var (userFullName, userRoles) = _currentUserService.UserInfo;
