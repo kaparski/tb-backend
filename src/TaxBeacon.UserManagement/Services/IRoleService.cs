@@ -16,7 +16,7 @@ public interface IRoleService
 
     Task<OneOf<Success, NotFound>> UnassignUsersAsync(Guid roleId,
         List<Guid> users,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 
     Task<OneOf<Success, NotFound>> AssignUsersAsync(Guid roleId,
         List<Guid> userIds,

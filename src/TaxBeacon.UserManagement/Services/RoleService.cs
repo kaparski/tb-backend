@@ -64,7 +64,7 @@ public class RoleService: IRoleService
 
     public async Task<OneOf<Success, NotFound>> UnassignUsersAsync(Guid roleId,
         List<Guid> users,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var getRoleResult = await GetRoleByIdAsync(roleId, cancellationToken);
 
@@ -187,7 +187,8 @@ public class RoleService: IRoleService
         return permissionsWithCategory;
     }
 
-    private async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken)
+    private async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
+        CancellationToken cancellationToken = default)
     {
         var role = _currentUserService.TenantId == default
             ? await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId, cancellationToken)
