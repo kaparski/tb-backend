@@ -21,7 +21,7 @@ public class ProgramExportModel
     public string Jurisdiction { get; set; } = string.Empty;
 
     [Column("Jurisdiction Name")]
-    public string? JurisdictionName { get; set; } = string.Empty;
+    public string JurisdictionName { get; set; } = string.Empty;
 
     [Column("Incentives Area")]
     public string IncentivesArea { get; set; } = string.Empty;
