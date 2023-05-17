@@ -296,6 +296,14 @@ public class UserServiceTests
             .Setup(ds => ds.UtcNow)
             .Returns(currentDate);
 
+        _currentUserServiceMock
+            .Setup(s => s.TenantRoles)
+            .Returns(Array.Empty<string>());
+
+        _currentUserServiceMock
+            .Setup(s => s.Roles)
+            .Returns(Array.Empty<string>());
+
         //Act
         var actualResult = await _userService.UpdateUserStatusAsync(tenant.Id, user.Id, Status.Active);
 
@@ -328,6 +336,14 @@ public class UserServiceTests
         _dateTimeServiceMock
             .Setup(ds => ds.UtcNow)
             .Returns(currentDate);
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantRoles)
+            .Returns(Array.Empty<string>());
+
+        _currentUserServiceMock
+            .Setup(s => s.Roles)
+            .Returns(Array.Empty<string>());
 
         //Act
         var actualResult = await _userService.UpdateUserStatusAsync(tenant.Id, user.Id, Status.Deactivated);
@@ -496,6 +512,14 @@ public class UserServiceTests
         _dateTimeServiceMock
             .Setup(service => service.UtcNow)
             .Returns(currentDate);
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantRoles)
+            .Returns(Array.Empty<string>());
+
+        _currentUserServiceMock
+            .Setup(s => s.Roles)
+            .Returns(Array.Empty<string>());
 
         // Act
         var usersOneOf = await _userService.UpdateUserByIdAsync(Guid.Empty, user.Id, updateUserDto);

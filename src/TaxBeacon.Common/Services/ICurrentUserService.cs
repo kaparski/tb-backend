@@ -13,4 +13,6 @@ public interface ICurrentUserService
     IReadOnlyCollection<string> Roles { get; }
 
     IReadOnlyCollection<string> TenantRoles { get; }
+
+    bool IsUserInTenant { get; }
 }
