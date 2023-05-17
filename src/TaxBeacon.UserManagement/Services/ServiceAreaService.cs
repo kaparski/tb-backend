@@ -154,23 +154,7 @@ public class ServiceAreaService: IServiceAreaService
             id,
             _currentUserService.UserId);
 
-        return (await _context.ServiceAreas
-                .Where(d => d.Id == id && d.TenantId == _currentUserService.TenantId)
-                .Select(sa => new ServiceAreaDetailsDto
-                {
-                    Id = sa.Id,
-                    Name = sa.Name,
-                    Description = sa.Description,
-                    CreatedDateTimeUtc = sa.CreatedDateTimeUtc,
-                    Department = sa.Department != null
-                    ? new DepartmentDto
-                    {
-                        Id = sa.Department.Id,
-                        Name = sa.Department.Name,
-                    }
-                    : null,
-                })
-               .SingleOrDefaultAsync(cancellationToken))!;
+        return await GetServiceAreaDetailsByIdAsync(id, cancellationToken);
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
