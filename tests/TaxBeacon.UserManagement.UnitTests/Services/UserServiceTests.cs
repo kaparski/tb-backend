@@ -38,6 +38,7 @@ public class UserServiceTests
     private readonly Mock<IUserActivityFactory> _userCreatedActivityFactory;
     private readonly Mock<IEnumerable<IUserActivityFactory>> _activityFactories;
     private readonly Guid _tenantId = Guid.NewGuid();
+    private readonly User _currentUser;
 
     public UserServiceTests()
     {
@@ -74,10 +75,10 @@ public class UserServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
-        var currentUser = TestData.TestUser.Generate();
-        _dbContextMock.Users.Add(currentUser);
+        _currentUser = TestData.TestUser.Generate();
+        _dbContextMock.Users.Add(_currentUser);
 
-        _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
+        _currentUserServiceMock.Setup(x => x.UserId).Returns(_currentUser.Id);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(_tenantId);
 
         _userService = new UserService(
@@ -847,6 +848,38 @@ public class UserServiceTests
 
         // Assert
         actualResult.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetUserByIdAsync_UserRequestHisOwnData_ReturnsTenantAndNoTenantRolesInAscendingOrder()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser { Tenant = tenant, User = _currentUser });
+
+        var roles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
+        var tenantRoles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
+
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(s => s.Roles)
+            .Returns(roles);
+
+        _currentUserServiceMock.Setup(s => s.TenantRoles)
+            .Returns(tenantRoles);
+
+        // Act
+        var result = await _userService.GetUserByIdAsync(_currentUser.Id, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var rolesResult = result.Roles.Split(",").Select(r => r.Trim());
+            rolesResult.Should().BeInAscendingOrder();
+            rolesResult.Should().BeEquivalentTo(roles.Concat(tenantRoles).Order());
+        }
     }
 
     private static class TestData
