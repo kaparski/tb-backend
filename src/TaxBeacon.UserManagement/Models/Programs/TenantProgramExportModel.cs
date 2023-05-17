@@ -30,6 +30,12 @@ public class TenantProgramExportModel
     [Column("Incentives Type")]
     public string IncentivesType { get; set; } = string.Empty;
 
+    [Column("Department")]
+    public string Department { get; set; } = string.Empty;
+
+    [Column("Service Area")]
+    public string ServiceArea { get; set; } = string.Empty;
+
     [Ignore]
     public DateTime StartDateTimeUtc { get; set; }
 
