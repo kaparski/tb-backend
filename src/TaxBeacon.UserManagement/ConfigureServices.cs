@@ -1,4 +1,4 @@
-using Mapster;
+﻿using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using TaxBeacon.UserManagement.Services;
@@ -32,6 +32,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<ITeamService, TeamService>();
         serviceCollection.AddScoped<IDepartmentService, DepartmentService>();
         serviceCollection.AddScoped<IServiceAreaService, ServiceAreaService>();
+        serviceCollection.AddScoped<IProgramService, ProgramService>();
         serviceCollection.AddScoped<IJobTitleService, JobTitleService>();
 
         serviceCollection.AddScoped<ITeamActivityFactory, TeamUpdatedEventFactory>();
@@ -45,8 +46,6 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IDepartmentActivityFactory, DepartmentUpdatedEventFactory>();
 
         serviceCollection.AddScoped<IServiceAreaActivityFactory, ServiceAreaUpdatedEventFactory>();
-
-        serviceCollection.AddScoped<IProgramService, ProgramService>();
 
         serviceCollection.AddScoped<IJobTitleActivityFactory, JobTitleUpdatedEventFactory>();
 
