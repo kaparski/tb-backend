@@ -113,4 +113,87 @@ public class ProgramService: IProgramService
 
     public Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
         CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+    public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
+        =>
+            _context.TenantsPrograms
+                .AsNoTracking()
+                .Where(x => x.TenantId == _currentUserService.TenantId)
+                .Select(p => new TenantProgramDto
+                {
+                    Id = p.ProgramId,
+                    Name = p.Program.Name,
+                    Reference = p.Program.Reference ?? string.Empty,
+                    Overview = p.Program.Overview ?? string.Empty,
+                    LegalAuthority = p.Program.LegalAuthority ?? string.Empty,
+                    Agency = p.Program.Agency ?? string.Empty,
+                    Jurisdiction = p.Program.Jurisdiction,
+                    JurisdictionName = p.Program.JurisdictionName ?? string.Empty,
+                    IncentivesArea = p.Program.IncentivesArea ?? string.Empty,
+                    IncentivesType = p.Program.IncentivesType ?? string.Empty,
+                    Department = string.Empty,
+                    ServiceArea = string.Empty,
+                    StartDateTimeUtc = p.Program.StartDateTimeUtc,
+                    EndDateTimeUtc = p.Program.EndDateTimeUtc,
+                    CreatedDateTimeUtc = p.Program.CreatedDateTimeUtc,
+                    Status = p.Status
+                })
+                .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+    public async Task<byte[]> ExportTenantProgramsAsync(FileType fileType, CancellationToken cancellationToken = default)
+    {
+        var exportPrograms = await _context
+            .TenantsPrograms
+            .Where(x => x.TenantId == _currentUserService.TenantId)
+            .AsNoTracking()
+            .Select(p => new TenantProgramExportModel()
+            {
+                Name = p.Program.Name,
+                Reference = p.Program.Reference ?? string.Empty,
+                Overview = p.Program.Overview ?? string.Empty,
+                LegalAuthority = p.Program.LegalAuthority ?? string.Empty,
+                Agency = p.Program.Agency ?? string.Empty,
+                Jurisdiction = p.Program.Jurisdiction.ToString(),
+                JurisdictionName = p.Program.JurisdictionName ?? string.Empty,
+                IncentivesArea = p.Program.IncentivesArea ?? string.Empty,
+                IncentivesType = p.Program.IncentivesType ?? string.Empty,
+                StartDateTimeUtc = p.Program.StartDateTimeUtc,
+                EndDateTimeUtc = p.Program.EndDateTimeUtc,
+                CreatedDateTimeUtc = p.Program.CreatedDateTimeUtc,
+                Status = p.Status,
+            })
+            .ToListAsync(cancellationToken);
+
+        exportPrograms.ForEach(p =>
+        {
+            p.StartDateView = _dateTimeFormatter.FormatDate(p.StartDateTimeUtc);
+            p.EndDateView = _dateTimeFormatter.FormatDate(p.EndDateTimeUtc);
+            p.CreatedDateView = _dateTimeFormatter.FormatDate(p.CreatedDateTimeUtc);
+        });
+
+        _logger.LogInformation("{dateTime} - Tenant programs export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(exportPrograms);
+    }
+
+    public async Task<OneOf<TenantProgramDetailsDto, NotFound>> GetTenantProgramDetailsAsync(Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var program = await _context.TenantsPrograms
+            .Include(x => x.Program)
+            .FirstOrDefaultAsync(p => p.ProgramId == id && p.TenantId == _currentUserService.TenantId, cancellationToken);
+
+        if (program is null)
+        {
+            return new NotFound();
+        }
+
+        var programDetailsDto = program.Program.Adapt<TenantProgramDetailsDto>();
+        programDetailsDto.Status = program.Status;
+        programDetailsDto.Jurisdiction = program.Program.Jurisdiction.ToString();
+
+        return programDetailsDto;
+    }
 }

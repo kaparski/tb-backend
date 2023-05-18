@@ -1,8 +1,8 @@
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.API.Controllers.Programs.Response;
+namespace TaxBeacon.UserManagement.Models.Programs;
 
-public class ProgramDetailsResponse
+public class TenantProgramDetailsDto
 {
     public Guid Id { get; set; }
 
@@ -16,7 +16,7 @@ public class ProgramDetailsResponse
 
     public string Agency { get; set; } = string.Empty;
 
-    public Jurisdiction Jurisdiction { get; set; }
+    public string Jurisdiction { get; set; } = string.Empty;
 
     public string State { get; set; } = string.Empty;
 
@@ -33,4 +33,6 @@ public class ProgramDetailsResponse
     public DateTime EndDateTimeUtc { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
+
+    public Status Status { get; set; }
 }

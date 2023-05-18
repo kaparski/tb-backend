@@ -21,4 +21,12 @@ public interface IProgramService
 
     Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
         CancellationToken cancellationToken = default);
+
+    Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default);
+
+    Task<byte[]> ExportTenantProgramsAsync(FileType fileType, CancellationToken cancellationToken = default);
+
+    Task<OneOf<TenantProgramDetailsDto, NotFound>> GetTenantProgramDetailsAsync(Guid id,
+        CancellationToken cancellationToken = default);
 }

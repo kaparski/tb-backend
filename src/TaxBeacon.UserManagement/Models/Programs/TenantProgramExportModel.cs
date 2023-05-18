@@ -1,8 +1,9 @@
-using Npoi.Mapper.Attributes;
+﻿using Npoi.Mapper.Attributes;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.UserManagement.Models.Programs;
 
-public class ProgramExportModel
+public class TenantProgramExportModel
 {
     public string Reference { get; set; } = string.Empty;
 
@@ -29,6 +30,12 @@ public class ProgramExportModel
     [Column("Incentives Type")]
     public string IncentivesType { get; set; } = string.Empty;
 
+    [Column("Department")]
+    public string Department { get; set; } = string.Empty;
+
+    [Column("Service Area")]
+    public string ServiceArea { get; set; } = string.Empty;
+
     [Ignore]
     public DateTime StartDateTimeUtc { get; set; }
 
@@ -46,4 +53,7 @@ public class ProgramExportModel
 
     [Column("Creation Date")]
     public string CreatedDateView { get; set; } = string.Empty;
+
+    [Column("Program Status")]
+    public Status Status { get; set; }
 }

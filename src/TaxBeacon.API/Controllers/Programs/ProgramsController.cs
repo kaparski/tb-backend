@@ -3,7 +3,7 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Programs.Requests;
-using TaxBeacon.API.Controllers.Programs.Response;
+using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models.Programs;
@@ -34,6 +34,7 @@ public class ProgramsController: BaseController
         Common.Permissions.Programs.ReadWrite,
         Common.Permissions.Programs.ReadExport)]
     [HttpGet(Name = "GetAllPrograms")]
+    [HasSuperAdminRole]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<ProgramResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -68,6 +69,7 @@ public class ProgramsController: BaseController
     /// <returns>File content</returns>
     [HasPermissions(Common.Permissions.Programs.ReadExport)]
     [HttpGet("export", Name = "ExportPrograms")]
+    [HasSuperAdminRole]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -96,6 +98,7 @@ public class ProgramsController: BaseController
         Common.Permissions.Programs.ReadWrite,
         Common.Permissions.Programs.ReadExport)]
     [HttpGet("{id:guid}", Name = "ProgramDetails")]
+    [HasSuperAdminRole]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IEnumerable<ProgramDetailsResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -138,6 +141,102 @@ public class ProgramsController: BaseController
 
         return oneOfActivities.Match<IActionResult>(
             result => Ok(result.Adapt<ProgramActivityHistoryResponse>()),
+            notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Get tenant programs for table
+    /// </summary>
+    /// <remarks>
+    /// Sample requests: <br/><br/>
+    ///     ```GET /teams?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DPeter```<br/><br/>
+    ///     ```GET /teams?page=2&amp;pageSize=5&amp;orderBy=name```
+    /// </remarks>
+    /// <response code="200">Returns programs</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>List of Tenant Programs</returns>
+    [HasPermissions(
+        Common.Permissions.Programs.Read,
+        Common.Permissions.Programs.ReadExport,
+        Common.Permissions.Programs.ReadWrite)]
+    [HttpGet("/api/tenants/programs", Name = "GetTenantPrograms")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(QueryablePaging<TenantProgramResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAllTenantProgramsAsync([FromQuery] GridifyQuery query,
+        CancellationToken cancellationToken)
+    {
+        if (!query.IsValid<TenantProgramDto>())
+        {
+            // TODO: Add an object with errors that we can use to detail the answers
+            return BadRequest();
+        }
+
+        var programs = await _programService.GetAllTenantProgramsAsync(query, cancellationToken);
+
+        var response = new QueryablePaging<TenantProgramResponse>(programs.Count,
+            programs.Query.ProjectToType<TenantProgramResponse>());
+
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Endpoint to export list of tenant programs
+    /// </summary>
+    /// <param name="exportProgramsRequest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns file content</response>
+    /// <response code="400">Invalid request</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>File content</returns>
+    [HasPermissions(Common.Permissions.Programs.ReadExport)]
+    [HttpGet("/api/tenants/programs/export", Name = "TenantExportPrograms")]
+    [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ExportTenantProgramsAsync([FromQuery] ExportProgramsRequest exportProgramsRequest,
+        CancellationToken cancellationToken)
+    {
+        var mimeType = exportProgramsRequest.FileType.ToMimeType();
+
+        var programs = await _programService.ExportTenantProgramsAsync(exportProgramsRequest.FileType, cancellationToken);
+
+        return File(programs, mimeType,
+            $"programs.{exportProgramsRequest.FileType.ToString().ToLowerInvariant()}");
+    }
+
+    /// <summary>
+    /// Get Tenant Program details by ID
+    /// </summary>
+    /// <response code="200">Returns Tenant Program details</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Program is not found</response>
+    /// <returns>Program details</returns>
+    [HasPermissions(
+        Common.Permissions.Programs.Read,
+        Common.Permissions.Programs.ReadWrite,
+        Common.Permissions.Programs.ReadExport)]
+    [HttpGet("/api/tenants/programs/{id:guid}", Name = "TenantProgramDetails")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<TenantProgramDetailsResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetTenantProgramDetailsAsync([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var oneOfProgramDetails = await _programService.GetTenantProgramDetailsAsync(id, cancellationToken);
+
+        return oneOfProgramDetails.Match<IActionResult>(
+            program => Ok(program.Adapt<TenantProgramDetailsResponse>()),
             notFound => NotFound());
     }
 }
