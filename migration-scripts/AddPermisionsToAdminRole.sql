@@ -38,9 +38,9 @@ VALUES ('Users.Read'),
        ('JobTitles.Read'),
        ('JobTitles.ReadWrite'),
        ('JobTitles.ReadExport'),
-       ('TenantPrograms.Read'),
-       ('TenantPrograms.ReadWrite'),
-       ('TenantPrograms.ReadExport')
+       ('Programs.Read'),
+       ('Programs.ReadWrite'),
+       ('Programs.ReadExport')
 
 INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 SELECT NEWID(),

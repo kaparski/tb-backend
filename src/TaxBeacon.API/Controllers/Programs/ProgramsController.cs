@@ -34,6 +34,7 @@ public class ProgramsController: BaseController
         Common.Permissions.Programs.ReadWrite,
         Common.Permissions.Programs.ReadExport)]
     [HttpGet(Name = "GetAllPrograms")]
+    [HasSuperAdminRole]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<ProgramResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -68,6 +69,7 @@ public class ProgramsController: BaseController
     /// <returns>File content</returns>
     [HasPermissions(Common.Permissions.Programs.ReadExport)]
     [HttpGet("export", Name = "ExportPrograms")]
+    [HasSuperAdminRole]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -96,6 +98,7 @@ public class ProgramsController: BaseController
         Common.Permissions.Programs.ReadWrite,
         Common.Permissions.Programs.ReadExport)]
     [HttpGet("{id:guid}", Name = "ProgramDetails")]
+    [HasSuperAdminRole]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IEnumerable<ProgramDetailsResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -155,9 +158,9 @@ public class ProgramsController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>List of Tenant Programs</returns>
     [HasPermissions(
-        Common.Permissions.TenantPrograms.Read,
-        Common.Permissions.TenantPrograms.ReadExport,
-        Common.Permissions.TenantPrograms.ReadWrite)]
+        Common.Permissions.Programs.Read,
+        Common.Permissions.Programs.ReadExport,
+        Common.Permissions.Programs.ReadWrite)]
     [HttpGet("/api/tenants/programs", Name = "GetTenantPrograms")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(QueryablePaging<TenantProgramResponse>), StatusCodes.Status200OK)]
@@ -192,7 +195,7 @@ public class ProgramsController: BaseController
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>File content</returns>
-    [HasPermissions(Common.Permissions.TenantPrograms.ReadExport)]
+    [HasPermissions(Common.Permissions.Programs.ReadExport)]
     [HttpGet("/api/tenants/programs/export", Name = "TenantExportPrograms")]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -218,9 +221,9 @@ public class ProgramsController: BaseController
     /// <response code="404">Program is not found</response>
     /// <returns>Program details</returns>
     [HasPermissions(
-        Common.Permissions.TenantPrograms.Read,
-        Common.Permissions.TenantPrograms.ReadWrite,
-        Common.Permissions.TenantPrograms.ReadExport)]
+        Common.Permissions.Programs.Read,
+        Common.Permissions.Programs.ReadWrite,
+        Common.Permissions.Programs.ReadExport)]
     [HttpGet("/api/tenants/programs/{id:guid}", Name = "TenantProgramDetails")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IEnumerable<TenantProgramDetailsResponse>), StatusCodes.Status200OK)]

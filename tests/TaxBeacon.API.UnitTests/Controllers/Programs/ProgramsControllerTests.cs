@@ -388,7 +388,7 @@ public class ProgramsControllerTests
         var methodInfo = ((Func<ExportProgramsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportTenantProgramsAsync).Method;
         var permissions = new object[]
         {
-            Common.Permissions.TenantPrograms.ReadExport
+            Common.Permissions.Programs.ReadExport
         };
 
         // Act
@@ -453,9 +453,9 @@ public class ProgramsControllerTests
         var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetTenantProgramDetailsAsync).Method;
         var permissions = new object[]
         {
-            Common.Permissions.TenantPrograms.Read,
-            Common.Permissions.TenantPrograms.ReadWrite,
-            Common.Permissions.TenantPrograms.ReadExport
+            Common.Permissions.Programs.Read,
+            Common.Permissions.Programs.ReadWrite,
+            Common.Permissions.Programs.ReadExport
         };
 
         // Act
