@@ -149,8 +149,8 @@ public class ProgramsController: BaseController
     /// </summary>
     /// <remarks>
     /// Sample requests: <br/><br/>
-    ///     ```GET /teams?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DPeter```<br/><br/>
-    ///     ```GET /teams?page=2&amp;pageSize=5&amp;orderBy=name```
+    ///     ```GET /tenants/programs?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DPeter```<br/><br/>
+    ///     ```GET /tenants/programs?page=2&amp;pageSize=5&amp;orderBy=name```
     /// </remarks>
     /// <response code="200">Returns programs</response>
     /// <response code="400">Invalid filtering or sorting</response>
