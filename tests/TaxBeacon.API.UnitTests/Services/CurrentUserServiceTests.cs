@@ -139,17 +139,15 @@ public class CurrentUserServiceTests
     public void UserInfo_ExistingUser_Succeeds()
     {
         // Arrange
-
         var user = TestData.TestUser.Generate();
-
-        var role1 = TestData.TestRole.Generate();
-
-        var role2 = TestData.TestRole.Generate();
+        var rolesNames = TestData.TestRole.Generate(2)
+            .OrderBy(r => r.Name)
+            .Select(r => r.Name)
+            .ToList();
 
         var identity = new GenericIdentity("test", "test");
-        identity.AddClaim(new Claim(Claims.TenantRoles, role1.Name.ToString()));
-        identity.AddClaim(new Claim(Claims.TenantRoles, role2.Name.ToString()));
-        identity.AddClaim(new Claim(Claims.FullName, user.FullName.ToString()));
+        rolesNames.ForEach(roleName => identity.AddClaim(new Claim(Claims.TenantRoles, roleName)));
+        identity.AddClaim(new Claim(Claims.FullName, user.FullName));
         var contextUser = new ClaimsPrincipal(identity);
         var httpContext = new DefaultHttpContext { User = contextUser };
 
@@ -165,7 +163,7 @@ public class CurrentUserServiceTests
         using (new AssertionScope())
         {
             actualResult.FullName.Should().Be(user.FullName);
-            actualResult.Roles.Should().Be($"{role1.Name}, {role2.Name}");
+            actualResult.Roles.Should().Be(string.Join(", ", rolesNames));
         }
     }
 

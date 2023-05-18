@@ -112,8 +112,15 @@ public class UserService: IUserService
                 .Users
                 .MapToUserDtoWithTenantRoleNames(_context, _currentUserService);
 
-        return await users.FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+        var user = await users.SingleOrDefaultAsync(x => x.Id == id, cancellationToken)
                ?? throw new NotFoundException(nameof(User), id);
+
+        if (id == _currentUserService.UserId)
+        {
+            user.Roles = string.Join(", ", _currentUserService.Roles.Concat(_currentUserService.TenantRoles).Order());
+        }
+
+        return user;
     }
 
     public async Task<UserDto> GetUserByEmailAsync(MailAddress mailAddress,

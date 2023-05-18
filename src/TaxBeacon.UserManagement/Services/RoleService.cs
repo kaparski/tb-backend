@@ -5,9 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
-using TaxBeacon.Common.Services;
 using System.Text.Json;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
@@ -22,7 +23,10 @@ public class RoleService: IRoleService
     private readonly IDateTimeService _dateTimeService;
     private readonly ICurrentUserService _currentUserService;
 
-    public RoleService(ITaxBeaconDbContext context, ILogger<RoleService> logger, IDateTimeService dateTimeService, ICurrentUserService currentUserService)
+    public RoleService(ITaxBeaconDbContext context,
+        ILogger<RoleService> logger,
+        IDateTimeService dateTimeService,
+        ICurrentUserService currentUserService)
     {
         _context = context;
         _logger = logger;
@@ -30,75 +34,59 @@ public class RoleService: IRoleService
         _currentUserService = currentUserService;
     }
 
-    public Task<QueryablePaging<RoleDto>> GetRolesAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) =>
-        _context.TenantRoles
-            .Where(tr => tr.TenantId == _currentUserService.TenantId)
-            .Select(tr => new RoleDto
-            {
-                Id = tr.RoleId,
-                Name = tr.Role.Name,
-                AssignedUsersCount = tr.TenantUserRoles.Count
-            })
-            .AsNoTracking()
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-    public async Task<OneOf<QueryablePaging<UserDto>, NotFound>> GetRoleAssignedUsersAsync(Guid roleId, GridifyQuery gridifyQuery,
+    public async Task<QueryablePaging<RoleDto>> GetRolesAsync(IGridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
-        var roleExists = await _context.Roles
-            .AnyAsync(
-                r => r.Id == roleId && r.TenantRoles.Any(tr => tr.TenantId == _currentUserService.TenantId),
-                cancellationToken);
+        var roles = !_currentUserService.IsUserInTenant && _currentUserService.IsSuperAdmin
+            ? GetNotTenantRolesQuery()
+            : GetTenantRolesQuery();
 
-        if (!roleExists)
-        {
-            return new NotFound();
-        }
-
-        var users = await _context.TenantUserRoles
-            .Where(tr => tr.TenantId == _currentUserService.TenantId && tr.RoleId == roleId)
-            .Select(tr => tr.TenantUser.User)
-            .ProjectToType<UserDto>()
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        return gridifyQuery.Page != 1 && gridifyQuery.Page > Math.Ceiling((double)users.Count / gridifyQuery.PageSize)
-            ? new NotFound()
-            : users;
+        return await roles.GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
 
-    public async Task<OneOf<Success, NotFound>> UnassignUsersAsync(Guid roleId, List<Guid> users, CancellationToken cancellationToken)
+    public async Task<OneOf<QueryablePaging<RoleAssignedUserDto>, NotFound>> GetRoleAssignedUsersAsync(Guid roleId,
+        IGridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default)
     {
-        var currentUserId = _currentUserService.UserId;
-        var tenantId = _currentUserService.TenantId;
-        var role = await _context.Roles
-            .Where(x => x.Id == roleId && x.TenantRoles.Any(x => x.TenantId == tenantId))
-            .FirstOrDefaultAsync(cancellationToken);
-        if (role is null)
+        var getRoleResult = await GetRoleByIdAsync(roleId, cancellationToken);
+        if (!getRoleResult.TryPickT0(out var role, out var notFound))
         {
-            return new NotFound();
+            return notFound;
         }
 
-        var currentUser = await _context.Users
-            .Where(x => x.Id == currentUserId && x.TenantUsers
-                .Any(x => x.TenantId == tenantId))
-            .FirstAsync(cancellationToken);
-        var usersToRemove = _context.TenantUserRoles
-            .Where(x => x.TenantId == tenantId && x.RoleId == roleId && users.Contains(x.UserId));
+        var users = role.Type == SourceType.Tenant
+            ? GetTenantRoleAssignedUsersQuery(roleId)
+            : GetNotTenantRoleAssignedUsersQuery(roleId);
 
-        var currentUserRoles =
-            string.Join(", ", await _context
-                .TenantUserRoles
-                .Where(x => x.TenantId == tenantId && x.UserId == currentUserId)
-                .Select(x => x.TenantRole.Role.Name)
-                .ToListAsync(cancellationToken));
+        return await users
+            .ProjectToType<RoleAssignedUserDto>()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+    }
 
-        _context.TenantUserRoles.RemoveRange(usersToRemove);
+    public async Task<OneOf<Success, NotFound>> UnassignUsersAsync(Guid roleId,
+        List<Guid> users,
+        CancellationToken cancellationToken = default)
+    {
+        var getRoleResult = await GetRoleByIdAsync(roleId, cancellationToken);
+        if (!getRoleResult.TryPickT0(out var role, out var notFound))
+        {
+            return notFound;
+        }
 
+        if (role.Type == SourceType.Tenant)
+        {
+            UnassignTenantUsers(roleId, users);
+        }
+        else
+        {
+            UnassignNotTenantUsers(roleId, users);
+        }
+
+        var userInfo = _currentUserService.UserInfo;
         var activityUserLogs = users
             .Select(x => new UserActivityLog
             {
-                TenantId = tenantId,
+                TenantId = _currentUserService.TenantId,
                 UserId = x,
                 Date = _dateTimeService.UtcNow,
                 Revision = 1,
@@ -106,53 +94,47 @@ public class RoleService: IRoleService
                     new UnassignRolesEvent(
                         role.Name,
                         _dateTimeService.UtcNow,
-                        currentUserId,
-                        currentUser.FullName,
-                        currentUserRoles
+                        _currentUserService.UserId,
+                        userInfo.FullName,
+                        userInfo.Roles
                     )),
                 EventType = UserEventType.UserRolesUnassign
             });
-        await _context.UserActivityLogs
-            .AddRangeAsync(activityUserLogs, cancellationToken);
+
+        await _context.UserActivityLogs.AddRangeAsync(activityUserLogs, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - Users({userIds}) were unassigned from role({roleId}) by {userId}",
             _dateTimeService.UtcNow,
             string.Join(",", users),
             roleId,
-            currentUserId);
+            _currentUserService.UserId);
 
         return new Success();
     }
 
-    public async Task<OneOf<Success, NotFound>> AssignUsersAsync(Guid roleId, List<Guid> userIds, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success, NotFound>> AssignUsersAsync(Guid roleId,
+        List<Guid> userIds,
+        CancellationToken cancellationToken = default)
     {
-        var role = await _context.TenantRoles
-            .Where(tr => tr.TenantId == _currentUserService.TenantId && tr.RoleId == roleId)
-            .Select(tr => tr.Role)
-            .FirstOrDefaultAsync(cancellationToken);
+        var getRoleResult = await GetRoleByIdAsync(roleId, cancellationToken);
 
-        if (role is null)
+        if (!getRoleResult.TryPickT0(out var role, out var notFound))
         {
-            return new NotFound();
+            return notFound;
         }
 
-        var tenantUserRolesToAdd = userIds.Select(userId => new TenantUserRole
+        if (role.Type == SourceType.Tenant)
         {
-            TenantId = _currentUserService.TenantId,
-            RoleId = roleId,
-            UserId = userId
-        });
-        await _context.TenantUserRoles.AddRangeAsync(tenantUserRolesToAdd, cancellationToken);
+            await AssignTenantUsersAsync(roleId, userIds, cancellationToken);
+        }
+        else
+        {
+            await AssignNotTenantUsersAsync(roleId, userIds, cancellationToken);
+        }
 
-        var currentUserFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
-        var currentUserRoles = await _context
-            .TenantUserRoles
-            .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == _currentUserService.TenantId)
-            .GroupBy(r => 1, t => t.TenantRole.Role.Name)
-            .Select(group => string.Join(", ", group.Select(name => name)))
-            .FirstOrDefaultAsync(cancellationToken);
         var eventDateTime = _dateTimeService.UtcNow;
+        var userInfo = _currentUserService.UserInfo;
 
         var activityLogs = userIds.Select(userId => new UserActivityLog
         {
@@ -165,8 +147,8 @@ public class RoleService: IRoleService
                     role.Name,
                     eventDateTime,
                     _currentUserService.UserId,
-                    currentUserFullName,
-                    currentUserRoles ?? string.Empty)),
+                    userInfo.FullName,
+                    userInfo.Roles)),
             EventType = UserEventType.UserRolesAssign
         });
 
@@ -174,12 +156,154 @@ public class RoleService: IRoleService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Users({userIds}) have been assigned to the role({roleId}) by {assignedBy}",
+        _logger.LogInformation("{dateTime} - Users({userIds}) have been assigned to the role({roleId}) by {userId}",
             _dateTimeService.UtcNow,
             string.Join(',', userIds),
             roleId,
-            currentUserFullName);
+            _currentUserService.UserId);
 
         return new Success();
     }
+
+    public async Task<OneOf<IReadOnlyCollection<PermissionDto>, NotFound>> GetRolePermissionsByIdAsync(
+        Guid roleId,
+        CancellationToken cancellationToken = default)
+    {
+        var getRoleResult = await GetRoleByIdAsync(roleId, cancellationToken);
+        if (!getRoleResult.TryPickT0(out var role, out var notFound))
+        {
+            return notFound;
+        }
+
+        var permissions = role.Type == SourceType.Tenant
+            ? await GetTenantRolePermissionsByIdAsync(roleId, cancellationToken)
+            : await GetNotTenantRolePermissionsByIdAsync(roleId, cancellationToken);
+
+        var permissionsWithCategory = permissions.Select(p => p with
+        {
+            Category = p.Name.Split('.')[0]
+        }).ToList();
+
+        return permissionsWithCategory;
+    }
+
+    private async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
+        CancellationToken cancellationToken = default)
+    {
+        var role = !_currentUserService.IsUserInTenant && _currentUserService.IsSuperAdmin
+            ? await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId && r.Type == SourceType.System,
+                cancellationToken)
+            : await _context.Roles
+                .FirstOrDefaultAsync(r => r.Id == roleId
+                                          && r.Type == SourceType.Tenant
+                                          && r.TenantRoles.Any(tr => tr.TenantId == _currentUserService.TenantId),
+                    cancellationToken);
+
+        return role is not null ? role : new NotFound();
+    }
+
+    private IQueryable<RoleDto> GetTenantRolesQuery() =>
+        _context.TenantRoles
+            .AsNoTracking()
+            .Where(tr => tr.TenantId == _currentUserService.TenantId && tr.Role.Type == SourceType.Tenant)
+            .Select(tr => new RoleDto
+            {
+                Id = tr.RoleId,
+                Name = tr.Role.Name,
+                AssignedUsersCount = tr.TenantUserRoles.Count
+            });
+
+    private IQueryable<RoleDto> GetNotTenantRolesQuery() =>
+        _context.Roles
+            .AsNoTracking()
+            .Where(r => r.Type == SourceType.System)
+            .Select(r => new RoleDto
+            {
+                Id = r.Id,
+                Name = r.Name,
+                AssignedUsersCount = r.UserRoles.Count
+            });
+
+    private IQueryable<User> GetTenantRoleAssignedUsersQuery(Guid roleId) =>
+        _context.TenantUserRoles
+            .Where(tr => tr.TenantId == _currentUserService.TenantId && tr.RoleId == roleId)
+            .Select(tr => tr.TenantUser.User);
+
+    private IQueryable<User> GetNotTenantRoleAssignedUsersQuery(Guid roleId) =>
+        _context.UserRoles
+            .Where(ur => ur.RoleId == roleId)
+            .Select(ur => ur.User);
+
+    private void UnassignTenantUsers(Guid roleId, IEnumerable<Guid> users)
+    {
+        var usersToRemove = _context.TenantUserRoles
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.RoleId == roleId && users.Contains(x.UserId));
+
+        _context.TenantUserRoles.RemoveRange(usersToRemove);
+    }
+
+    private void UnassignNotTenantUsers(Guid roleId, IEnumerable<Guid> users)
+    {
+        var usersToRemove = _context.UserRoles
+            .Where(x => x.RoleId == roleId && users.Contains(x.UserId));
+
+        _context.UserRoles.RemoveRange(usersToRemove);
+    }
+
+    private async Task AssignTenantUsersAsync(Guid roleId,
+        IEnumerable<Guid> userIds,
+        CancellationToken cancellationToken = default) =>
+        await _context.TenantUserRoles
+            .AddRangeAsync(userIds
+                .Select(userId => new TenantUserRole
+                {
+                    TenantId = _currentUserService.TenantId,
+                    RoleId = roleId,
+                    UserId = userId
+                }), cancellationToken);
+
+    private async Task AssignNotTenantUsersAsync(Guid roleId,
+        IEnumerable<Guid> userIds,
+        CancellationToken cancellationToken = default) =>
+        await _context.UserRoles
+            .AddRangeAsync(userIds
+                .Select(userId => new UserRole
+                {
+                    RoleId = roleId,
+                    UserId = userId
+                }), cancellationToken);
+
+    private async Task<List<PermissionDto>> GetTenantRolePermissionsByIdAsync(
+        Guid roleId,
+        CancellationToken cancellationToken = default) =>
+        await _context.TenantRolePermissions
+            .AsNoTracking()
+            .Where(trp => trp.TenantId == _currentUserService.TenantId && trp.RoleId == roleId)
+            .Join(_context.Permissions,
+                trp => trp.PermissionId,
+                p => p.Id,
+                (trp, p) => new
+                {
+                    p.Id,
+                    p.Name
+                })
+            .ProjectToType<PermissionDto>()
+            .ToListAsync(cancellationToken);
+
+    private async Task<List<PermissionDto>> GetNotTenantRolePermissionsByIdAsync(
+        Guid roleId,
+        CancellationToken cancellationToken = default) =>
+        await _context.RolePermissions
+            .AsNoTracking()
+            .Where(rp => rp.RoleId == roleId)
+            .Join(_context.Permissions,
+                trp => trp.PermissionId,
+                p => p.Id,
+                (trp, p) => new
+                {
+                    p.Id,
+                    p.Name
+                })
+            .ProjectToType<PermissionDto>()
+            .ToListAsync(cancellationToken);
 }
