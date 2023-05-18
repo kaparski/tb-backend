@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace TaxBeacon.API.Controllers.ServiceAreas.Requests;
 
-public record UpdateServiceAreaRequest(string Name, string Description);
+public record UpdateServiceAreaRequest(string Name, string Description, Guid DepartmentId);
 
 public class UpdateServiceAreaRequestValidator: AbstractValidator<UpdateServiceAreaRequest>
 {

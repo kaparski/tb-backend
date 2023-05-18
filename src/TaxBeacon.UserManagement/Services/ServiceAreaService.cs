@@ -10,6 +10,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -104,7 +105,9 @@ public class ServiceAreaService: IServiceAreaService
 
     public async Task<OneOf<ServiceAreaDetailsDto, NotFound>> GetServiceAreaDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        var serviceArea = await _context.ServiceAreas.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        var serviceArea = await _context.ServiceAreas
+            .Include(sa => sa.Department)
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
         return serviceArea is null || serviceArea.TenantId != _currentUserService.TenantId
             ? new NotFound()
@@ -120,6 +123,16 @@ public class ServiceAreaService: IServiceAreaService
         if (serviceArea is null)
         {
             return new NotFound();
+        }
+
+        if (updateServiceAreaDto.DepartmentId != Guid.Empty)
+        {
+            var departmentToAdd = await _context.Departments.FirstOrDefaultAsync(d => d.Id == updateServiceAreaDto.DepartmentId);
+
+            if (departmentToAdd != null && departmentToAdd.TenantId != serviceArea.TenantId)
+            {
+                return new NotFound();
+            }
         }
 
         var (userFullName, userRoles) = _currentUserService.UserInfo;
@@ -152,7 +165,7 @@ public class ServiceAreaService: IServiceAreaService
             id,
             _currentUserService.UserId);
 
-        return serviceArea.Adapt<ServiceAreaDetailsDto>();
+        return await GetServiceAreaDetailsByIdAsync(id, cancellationToken);
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,

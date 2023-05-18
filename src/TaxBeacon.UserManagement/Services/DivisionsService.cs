@@ -215,22 +215,7 @@ namespace TaxBeacon.UserManagement.Services
                 id,
                 _currentUserService.UserId);
 
-            return (await _context.Divisions
-                .Where(d => d.Id == id && d.TenantId == _currentUserService.TenantId)
-                .Select(d => new DivisionDetailsDto
-                {
-                    Id = d.Id,
-                    Name = d.Name,
-                    Description = d.Description,
-                    CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                    Departments = d.Departments
-                       .Select(sa => new DepartmentDto
-                       {
-                           Id = sa.Id,
-                           Name = sa.Name,
-                       }).OrderBy(dep => dep.Name).ToList(),
-                })
-               .SingleOrDefaultAsync(cancellationToken))!;
+            return await GetDivisionDetailsAsync(id, cancellationToken);
         }
 
         public async Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
