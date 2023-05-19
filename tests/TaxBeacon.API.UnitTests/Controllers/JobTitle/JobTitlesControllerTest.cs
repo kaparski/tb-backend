@@ -381,6 +381,6 @@ public class JobTitlesControllerTest
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
         public static readonly Faker<UpdateJobTitleRequest> TestUpdateJobTitleRequest =
-            new Faker<UpdateJobTitleRequest>().CustomInstantiator(f => new UpdateJobTitleRequest(f.Lorem.Word(), f.Lorem.Text()));
+            new Faker<UpdateJobTitleRequest>().CustomInstantiator(f => new UpdateJobTitleRequest(f.Lorem.Word(), f.Lorem.Text(), Guid.NewGuid()));
     }
 }
