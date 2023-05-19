@@ -121,26 +121,26 @@ public class ProgramService: IProgramService
         var tenantId = _currentUserService.TenantId;
 
         // TODO: Move the same code into separated method
-        var program = await _context
-                       .Programs
-                       .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
+        var tenantProgram = await _context
+                       .TenantsPrograms
+                       .FirstOrDefaultAsync(p => p.ProgramId == id && p.TenantId == tenantId, cancellationToken)
                    ?? throw new NotFoundException(nameof(User), id);
 
         switch (status)
         {
             case Status.Deactivated:
-                program.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
-                program.ReactivationDateTimeUtc = null;
-                //  program.Status = Status.Deactivated;
+                tenantProgram.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
+                tenantProgram.ReactivationDateTimeUtc = null;
+                tenantProgram.Status = Status.Deactivated;
                 break;
             case Status.Active:
-                program.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
-                program.DeactivationDateTimeUtc = null;
-                // program.Status = Status.Active;
+                tenantProgram.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
+                tenantProgram.DeactivationDateTimeUtc = null;
+                tenantProgram.Status = Status.Active;
                 break;
         }
 
-        // program.Status = status;
+        tenantProgram.Status = status;
 
         var now = _dateTimeService.UtcNow;
         var (currentUserFullName, currentUserRoles) = _currentUserService.UserInfo;
@@ -182,11 +182,11 @@ public class ProgramService: IProgramService
 
         _logger.LogInformation("{dateTime} - Program ({createdProgramId}) status was changed to {newUserStatus} by {@userId}",
             _dateTimeService.UtcNow,
-            program.Id,
+            tenantProgram.ProgramId,
             status,
             _currentUserService.UserId);
 
-        return program.Adapt<TenantProgramDto>();
+        return tenantProgram.Adapt<TenantProgramDto>();
     }
 
     public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
@@ -267,6 +267,8 @@ public class ProgramService: IProgramService
 
         var programDetailsDto = program.Program.Adapt<TenantProgramDetailsDto>();
         programDetailsDto.Status = program.Status;
+        programDetailsDto.DeactivationDateTimeUtc = program.DeactivationDateTimeUtc;
+        programDetailsDto.ReactivationDateTimeUtc = program.ReactivationDateTimeUtc;
         programDetailsDto.Jurisdiction = program.Program.Jurisdiction.ToString();
 
         return programDetailsDto;

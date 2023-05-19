@@ -35,4 +35,8 @@ public class TenantProgramDetailsResponse
     public DateTime EndDateTimeUtc { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
+
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
 }

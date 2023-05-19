@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.DAL.Entities
 {
@@ -38,10 +33,6 @@ namespace TaxBeacon.DAL.Entities
         public DateTime StartDateTimeUtc { get; set; }
 
         public DateTime EndDateTimeUtc { get; set; }
-
-        public DateTime? DeactivationDateTimeUtc { get; set; }
-
-        public DateTime? ReactivationDateTimeUtc { get; set; }
 
         public ICollection<TenantProgram> TenantsPrograms { get; set; } = new HashSet<TenantProgram>();
     }

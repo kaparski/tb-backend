@@ -253,7 +253,7 @@ public class ProgramsController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>Updated program</returns>
     [HasPermissions(Common.Permissions.Programs.ReadWrite)]
-    [HttpPut("status", Name = "UpdateProgramStatus")]
+    [HttpPut("/api/tenants/programs/{id:guid}/status", Name = "UpdateProgramStatus")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
