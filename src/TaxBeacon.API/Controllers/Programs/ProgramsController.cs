@@ -138,7 +138,7 @@ public class ProgramsController: BaseController
         [FromQuery] ProgramActivityHistoryRequest request,
         CancellationToken cancellationToken)
     {
-        var oneOfActivities = await _programService.GetProgramActivityHistory(
+        var oneOfActivities = await _programService.GetProgramActivityHistoryAsync(
             id, request.Page, request.PageSize, cancellationToken);
 
         return oneOfActivities.Match<IActionResult>(

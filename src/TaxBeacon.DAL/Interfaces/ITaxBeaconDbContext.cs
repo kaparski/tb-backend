@@ -52,9 +52,11 @@ public interface ITaxBeaconDbContext
 
     DbSet<JobTitleActivityLog> JobTitleActivityLogs { get; }
 
-    public DbSet<Program> Programs { get; }
+    DbSet<Program> Programs { get; }
 
-    public DbSet<TenantProgram> TenantsPrograms { get; }
+    DbSet<TenantProgram> TenantsPrograms { get; }
+
+    DbSet<ProgramActivityLog> ProgramActivityLogs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
