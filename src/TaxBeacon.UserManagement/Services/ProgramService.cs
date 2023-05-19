@@ -147,7 +147,7 @@ public class ProgramService: IProgramService
 
         //var userActivityLog = status switch
         //{
-        //    Status.Active => new UserActivityLog
+        //    Status.Active => new ProgramActivityLog
         //    {
         //        TenantId = tenantId,
         //        ProgramId = tenantProgram.ProgramId,
@@ -159,9 +159,9 @@ public class ProgramService: IProgramService
         //                currentUserFullName,
         //                currentUserRoles
         //                )),
-        //        EventType = UserEventType.UserReactivated
+        //        EventType = ProgramEventType.ProgramReactivated
         //    },
-        //    Status.Deactivated => new UserActivityLog
+        //    Status.Deactivated => new ProgramActivityLog
         //    {
         //        TenantId = tenantId,
         //        ProgramId = tenantProgram.ProgramId,
@@ -172,7 +172,7 @@ public class ProgramService: IProgramService
         //                now,
         //                currentUserFullName,
         //                currentUserRoles)),
-        //        EventType = UserEventType.UserDeactivated
+        //        EventType = ProgramEventType.ProgramDeactivated
         //    },
         //    _ => throw new InvalidOperationException()
         //};
