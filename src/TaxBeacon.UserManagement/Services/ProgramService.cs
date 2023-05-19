@@ -131,16 +131,16 @@ public class ProgramService: IProgramService
             case Status.Deactivated:
                 program.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
                 program.ReactivationDateTimeUtc = null;
-                program.Status = Status.Deactivated;
+                //  program.Status = Status.Deactivated;
                 break;
             case Status.Active:
                 program.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
                 program.DeactivationDateTimeUtc = null;
-                program.Status = Status.Active;
+                // program.Status = Status.Active;
                 break;
         }
 
-        program.Status = status;
+        // program.Status = status;
 
         var now = _dateTimeService.UtcNow;
         var (currentUserFullName, currentUserRoles) = _currentUserService.UserInfo;
@@ -182,7 +182,7 @@ public class ProgramService: IProgramService
 
         _logger.LogInformation("{dateTime} - Program ({createdProgramId}) status was changed to {newUserStatus} by {@userId}",
             _dateTimeService.UtcNow,
-            program.ProgramId,
+            program.Id,
             status,
             _currentUserService.UserId);
 
