@@ -1,10 +1,12 @@
 ﻿using Mapster;
 using Microsoft.Extensions.DependencyInjection;
+using NPOI.OpenXmlFormats.Spreadsheet;
 using System.Reflection;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Department;
 using TaxBeacon.UserManagement.Services.Activities.JobTitle;
+using TaxBeacon.UserManagement.Services.Activities.Program;
 using TaxBeacon.UserManagement.Services.Activities.ServiceArea;
 using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
@@ -48,6 +50,12 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IServiceAreaActivityFactory, ServiceAreaUpdatedEventFactory>();
 
         serviceCollection.AddScoped<IJobTitleActivityFactory, JobTitleUpdatedEventFactory>();
+
+        serviceCollection.AddScoped<IProgramActivityFactory, ProgramCreatedEventFactory>();
+        serviceCollection.AddScoped<IProgramActivityFactory, ProgramDeactivatedEventFactory>();
+        serviceCollection.AddScoped<IProgramActivityFactory, ProgramReactivatedEventFactory>();
+        serviceCollection.AddScoped<IProgramActivityFactory, ProgramUpdatedEventFactory>();
+        serviceCollection.AddScoped<IProgramActivityFactory, ProgramAssignmentUpdatedEventFactory>();
 
         return serviceCollection;
     }

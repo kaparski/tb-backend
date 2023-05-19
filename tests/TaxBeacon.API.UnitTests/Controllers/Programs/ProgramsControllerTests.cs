@@ -216,7 +216,7 @@ public class ProgramsControllerTests
     {
         // Arrange
         _programServiceMock.Setup(x =>
-                x.GetProgramActivityHistory(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+                x.GetProgramActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
             .ReturnsAsync(new ActivityDto(0, new ActivityItemDto[] { }));
 
         // Act
@@ -239,7 +239,7 @@ public class ProgramsControllerTests
     {
         // Arrange
         _programServiceMock.Setup(x =>
-                x.GetProgramActivityHistory(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+                x.GetProgramActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
             .ReturnsAsync(new NotFound());
 
         // Act

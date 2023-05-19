@@ -6,13 +6,16 @@ using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
+using System.Linq.Expressions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Programs;
+using TaxBeacon.UserManagement.Services.Activities.Program;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -24,6 +27,7 @@ public class ProgramService: IProgramService
     private readonly ICurrentUserService _currentUserService;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
     private readonly IDateTimeFormatter _dateTimeFormatter;
+    private readonly IImmutableDictionary<(ProgramEventType, uint), IProgramActivityFactory> _activityFactories;
 
     public ProgramService(
         ILogger<ProgramService> logger,
@@ -31,7 +35,8 @@ public class ProgramService: IProgramService
         IDateTimeService dateTimeService,
         ICurrentUserService currentUserService,
         IEnumerable<IListToFileConverter> listToFileConverters,
-        IDateTimeFormatter dateTimeFormatter)
+        IDateTimeFormatter dateTimeFormatter,
+        IEnumerable<IProgramActivityFactory> programActivityFactories)
     {
         _logger = logger;
         _context = context;
@@ -40,6 +45,8 @@ public class ProgramService: IProgramService
         _dateTimeFormatter = dateTimeFormatter;
         _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
+        _activityFactories = programActivityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
+                             ?? ImmutableDictionary<(ProgramEventType, uint), IProgramActivityFactory>.Empty;
     }
 
     public Task<QueryablePaging<ProgramDto>> GetAllProgramsAsync(GridifyQuery gridifyQuery,
@@ -108,8 +115,33 @@ public class ProgramService: IProgramService
         return program is not null ? program.Adapt<ProgramDetailsDto>() : new NotFound();
     }
 
-    public Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistory(Guid id, int page, int pageSize,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public async Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistoryAsync(
+        Guid id, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+    {
+        var program = await GetProgramByIdAsync(id, cancellationToken);
+
+        if (program is null)
+        {
+            return new NotFound();
+        }
+
+        var activityLogs = _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
+            ? GetProgramActivityLogsQuery(program.Id)
+            : GetTenantProgramActivityLogsQuery(program.Id, _currentUserService.TenantId);
+
+        var count = await activityLogs.CountAsync(cancellationToken);
+
+        var pageCount = (uint)Math.Ceiling((double)count / pageSize);
+
+        var activities = await activityLogs
+            .OrderByDescending(log => log.Date)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new ActivityDto(pageCount,
+            activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
+    }
 
     public Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
         CancellationToken cancellationToken = default) => throw new NotImplementedException();
@@ -195,5 +227,23 @@ public class ProgramService: IProgramService
         programDetailsDto.Jurisdiction = program.Program.Jurisdiction.ToString();
 
         return programDetailsDto;
+    }
+
+    private IQueryable<ProgramActivityLog> GetProgramActivityLogsQuery(Guid programId) =>
+        _context.ProgramActivityLogs
+            .Where(log => log.ProgramId == programId && log.TenantId == null);
+
+    private IQueryable<ProgramActivityLog> GetTenantProgramActivityLogsQuery(Guid programId, Guid tenantId) =>
+        _context.ProgramActivityLogs
+            .Where(log => log.ProgramId == programId && log.TenantId == tenantId);
+
+    private Task<Program?> GetProgramByIdAsync(Guid programId, CancellationToken cancellationToken)
+    {
+        Expression<Func<Program, bool>> predicate = _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
+            ? (Program program) => program.Id == programId
+            : (Program program) => program.Id == programId &&
+                                   program.TenantsPrograms.Any(tp => tp.TenantId == _currentUserService.TenantId);
+
+        return _context.Programs.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 }
