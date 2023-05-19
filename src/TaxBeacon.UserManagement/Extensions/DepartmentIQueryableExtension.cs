@@ -22,6 +22,13 @@ public static class DepartmentIQueryableExtension
                     Id = sa.Id,
                     Name = sa.Name,
                 })
+                .ToList(),
+            JobTitles = d.JobTitles
+                .Select(sa => new JobTitleDto
+                {
+                    Id = sa.Id,
+                    Name = sa.Name,
+                })
                 .ToList()
         })
         .SingleOrDefaultAsync();

@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace TaxBeacon.API.Controllers.JobTitles.Requests;
 
-public record UpdateJobTitleRequest(string Name, string Description);
+public record UpdateJobTitleRequest(string Name, string Description, Guid DepartmentId);
 
 public class UpdateJobTitleRequestValidator: AbstractValidator<UpdateJobTitleRequest>
 {
@@ -16,5 +16,9 @@ public class UpdateJobTitleRequestValidator: AbstractValidator<UpdateJobTitleReq
         RuleFor(x => x.Description)
             .MaximumLength(200)
             .WithMessage("The job title description must contain no more than 200 characters");
+
+        RuleFor(x => x.DepartmentId)
+            .NotEmpty()
+            .WithMessage("The job title must have at least 1 department");
     }
 }

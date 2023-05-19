@@ -12,6 +12,8 @@ public class DepartmentDetailsDto
 
     public IList<ServiceAreaDto> ServiceAreas { get; set; } = null!;
 
+    public IList<JobTitleDto> JobTitles { get; set; } = null!;
+
     public Guid? DivisionId { get; set; }
 
     public string Division { get; set; } = string.Empty;
