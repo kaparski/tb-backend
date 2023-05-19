@@ -29,4 +29,7 @@ public interface IProgramService
 
     Task<OneOf<TenantProgramDetailsDto, NotFound>> GetTenantProgramDetailsAsync(Guid id,
         CancellationToken cancellationToken = default);
+
+    Task<TenantProgramDto> UpdateTenantProgramStatusAsync(Guid id, Status status,
+        CancellationToken cancellationToken = default);
 }

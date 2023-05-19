@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs.Responses;
+using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models.Programs;
 using TaxBeacon.UserManagement.Services;
 
@@ -238,5 +240,29 @@ public class ProgramsController: BaseController
         return oneOfProgramDetails.Match<IActionResult>(
             program => Ok(program.Adapt<TenantProgramDetailsResponse>()),
             notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Endpoint to update program status
+    /// </summary>
+    /// <param name="id">Program id</param>
+    /// <param name="programStatus">New program status</param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns updated program</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>Updated program</returns>
+    [HasPermissions(Common.Permissions.Programs.ReadWrite)]
+    [HttpPut("status", Name = "UpdateProgramStatus")]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<UserResponse>> UpdateProgramStatusAsync(Guid id, [FromBody] Status programStatus,
+        CancellationToken cancellationToken)
+    {
+
+        var user = await _programService.UpdateTenantProgramStatusAsync(id, programStatus, cancellationToken);
+
+        return Ok(user.Adapt<UserResponse>());
     }
 }

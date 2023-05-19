@@ -8,6 +8,7 @@ using OneOf.Types;
 using System.Collections.Immutable;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -113,6 +114,80 @@ public class ProgramService: IProgramService
 
     public Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
         CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+    public async Task<TenantProgramDto> UpdateTenantProgramStatusAsync(Guid id, Status status,
+        CancellationToken cancellationToken = default)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        // TODO: Move the same code into separated method
+        var program = await _context
+                       .Programs
+                       .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
+                   ?? throw new NotFoundException(nameof(User), id);
+
+        switch (status)
+        {
+            case Status.Deactivated:
+                program.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
+                program.ReactivationDateTimeUtc = null;
+                program.Status = Status.Deactivated;
+                break;
+            case Status.Active:
+                program.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
+                program.DeactivationDateTimeUtc = null;
+                program.Status = Status.Active;
+                break;
+        }
+
+        program.Status = status;
+
+        var now = _dateTimeService.UtcNow;
+        var (currentUserFullName, currentUserRoles) = _currentUserService.UserInfo;
+
+        //var userActivityLog = status switch
+        //{
+        //    Status.Active => new UserActivityLog
+        //    {
+        //        TenantId = tenantId,
+        //        ProgramId = tenantProgram.ProgramId,
+        //        Date = now,
+        //        Revision = 1,
+        //        Event = JsonSerializer.Serialize(
+        //            new UserReactivatedEvent(_currentUserService.UserId,
+        //                now,
+        //                currentUserFullName,
+        //                currentUserRoles
+        //                )),
+        //        EventType = UserEventType.UserReactivated
+        //    },
+        //    Status.Deactivated => new UserActivityLog
+        //    {
+        //        TenantId = tenantId,
+        //        ProgramId = tenantProgram.ProgramId,
+        //        Date = _dateTimeService.UtcNow,
+        //        Revision = 1,
+        //        Event = JsonSerializer.Serialize(
+        //            new UserDeactivatedEvent(_currentUserService.UserId,
+        //                now,
+        //                currentUserFullName,
+        //                currentUserRoles)),
+        //        EventType = UserEventType.UserDeactivated
+        //    },
+        //    _ => throw new InvalidOperationException()
+        //};
+
+        //await _context.UserActivityLogs.AddAsync(userActivityLog, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Program ({createdProgramId}) status was changed to {newUserStatus} by {@userId}",
+            _dateTimeService.UtcNow,
+            program.ProgramId,
+            status,
+            _currentUserService.UserId);
+
+        return program.Adapt<TenantProgramDto>();
+    }
 
     public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
         =>

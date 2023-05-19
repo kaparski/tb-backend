@@ -39,6 +39,10 @@ namespace TaxBeacon.DAL.Entities
 
         public DateTime EndDateTimeUtc { get; set; }
 
+        public DateTime? DeactivationDateTimeUtc { get; set; }
+
+        public DateTime? ReactivationDateTimeUtc { get; set; }
+
         public ICollection<TenantProgram> TenantsPrograms { get; set; } = new HashSet<TenantProgram>();
     }
 }
