@@ -10,6 +10,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -104,7 +105,7 @@ public class JobTitleService: IJobTitleService
 
     public async Task<OneOf<JobTitleDetailsDto, NotFound>> GetJobTitleDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        var jobTitle = await _context.JobTitles.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        var jobTitle = await _context.JobTitles.Include(jt => jt.Department).FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
         return jobTitle is null || jobTitle.TenantId != _currentUserService.TenantId
             ? new NotFound()
@@ -120,6 +121,16 @@ public class JobTitleService: IJobTitleService
         if (jobTitle is null)
         {
             return new NotFound();
+        }
+
+        if (updateJobTitleDto.DepartmentId != Guid.Empty)
+        {
+            var departmentToAdd = await _context.Departments.FirstOrDefaultAsync(d => d.Id == updateJobTitleDto.DepartmentId);
+
+            if (departmentToAdd != null && departmentToAdd.TenantId != jobTitle.TenantId)
+            {
+                return new NotFound();
+            }
         }
 
         var (userFullName, userRoles) = _currentUserService.UserInfo;
@@ -152,7 +163,7 @@ public class JobTitleService: IJobTitleService
             id,
             _currentUserService.UserId);
 
-        return jobTitle.Adapt<JobTitleDetailsDto>();
+        return await GetJobTitleDetailsByIdAsync(id, cancellationToken);
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
