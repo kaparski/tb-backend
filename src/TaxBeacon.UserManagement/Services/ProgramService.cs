@@ -7,6 +7,7 @@ using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
+using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
@@ -15,6 +16,7 @@ using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Models.Activities.Program;
 using TaxBeacon.UserManagement.Models.Programs;
 using TaxBeacon.UserManagement.Services.Activities.Program;
 
@@ -177,39 +179,39 @@ public class ProgramService: IProgramService
         var now = _dateTimeService.UtcNow;
         var (currentUserFullName, currentUserRoles) = _currentUserService.UserInfo;
 
-        //var userActivityLog = status switch
-        //{
-        //    Status.Active => new ProgramActivityLog
-        //    {
-        //        TenantId = tenantId,
-        //        ProgramId = tenantProgram.ProgramId,
-        //        Date = now,
-        //        Revision = 1,
-        //        Event = JsonSerializer.Serialize(
-        //            new UserReactivatedEvent(_currentUserService.UserId,
-        //                now,
-        //                currentUserFullName,
-        //                currentUserRoles
-        //                )),
-        //        EventType = ProgramEventType.ProgramReactivated
-        //    },
-        //    Status.Deactivated => new ProgramActivityLog
-        //    {
-        //        TenantId = tenantId,
-        //        ProgramId = tenantProgram.ProgramId,
-        //        Date = _dateTimeService.UtcNow,
-        //        Revision = 1,
-        //        Event = JsonSerializer.Serialize(
-        //            new UserDeactivatedEvent(_currentUserService.UserId,
-        //                now,
-        //                currentUserFullName,
-        //                currentUserRoles)),
-        //        EventType = ProgramEventType.ProgramDeactivated
-        //    },
-        //    _ => throw new InvalidOperationException()
-        //};
+        var programActivityLog = status switch
+        {
+            Status.Active => new ProgramActivityLog
+            {
+                TenantId = tenantId,
+                ProgramId = tenantProgram.ProgramId,
+                Date = now,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new ProgramReactivatedEvent(_currentUserService.UserId,
+                        now,
+                        currentUserFullName,
+                        currentUserRoles
+                        )),
+                EventType = ProgramEventType.ProgramReactivatedEvent
+            },
+            Status.Deactivated => new ProgramActivityLog
+            {
+                TenantId = tenantId,
+                ProgramId = tenantProgram.ProgramId,
+                Date = _dateTimeService.UtcNow,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new ProgramDeactivatedEvent(_currentUserService.UserId,
+                        now,
+                        currentUserFullName,
+                        currentUserRoles)),
+                EventType = ProgramEventType.ProgramDeactivatedEvent
+            },
+            _ => throw new InvalidOperationException()
+        };
 
-        //await _context.UserActivityLogs.AddAsync(userActivityLog, cancellationToken);
+        await _context.ProgramActivityLogs.AddAsync(programActivityLog, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - Program ({createdProgramId}) status was changed to {newUserStatus} by {@userId}",
