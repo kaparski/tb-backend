@@ -5,15 +5,19 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.UserManagement.Models.Activities.Program;
 using TaxBeacon.UserManagement.Models.Programs;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Activities.Program;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -25,6 +29,7 @@ public class ProgramServiceTests
     private readonly Mock<IDateTimeService> _dateTimeServiceMock;
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly ProgramService _programService;
+
     public static readonly Guid TenantId = Guid.NewGuid();
 
     public ProgramServiceTests()
@@ -62,13 +67,26 @@ public class ProgramServiceTests
 
         _dateTimeServiceMock = new();
 
+        Mock<IEnumerable<IProgramActivityFactory>> activityFactoriesMock = new();
+        activityFactoriesMock
+            .Setup(x => x.GetEnumerator())
+            .Returns(new IProgramActivityFactory[]
+            {
+                new ProgramCreatedEventFactory(),
+                new ProgramDeactivatedEventFactory(),
+                new ProgramReactivatedEventFactory(),
+                new ProgramUpdatedEventFactory(),
+                new ProgramAssignmentUpdatedEventFactory()
+            }.ToList().GetEnumerator());
+
         _programService = new ProgramService(
             programServiceLoggerMock.Object,
             _dbContextMock,
             _dateTimeServiceMock.Object,
             _currentUserServiceMock.Object,
             listToFileConverters.Object,
-            dateTimeFormatterMock.Object);
+            dateTimeFormatterMock.Object,
+            activityFactoriesMock.Object);
     }
 
     [Fact]
@@ -88,9 +106,9 @@ public class ProgramServiceTests
         {
             actualResult.Should().NotBeNull();
             actualResult.Count.Should().Be(10);
-            var listOfServiceAreas = actualResult.Query.ToList();
-            listOfServiceAreas.Count.Should().Be(5);
-            listOfServiceAreas.Select(x => x.Name).Should().BeInAscendingOrder();
+            var listOfprograms = actualResult.Query.ToList();
+            listOfprograms.Count.Should().Be(5);
+            listOfprograms.Select(x => x.Name).Should().BeInAscendingOrder();
         }
     }
 
@@ -111,9 +129,9 @@ public class ProgramServiceTests
         {
             actualResult.Should().NotBeNull();
             actualResult.Count.Should().Be(10);
-            var listOfServiceAreas = actualResult.Query.ToList();
-            listOfServiceAreas.Count.Should().Be(5);
-            listOfServiceAreas.Select(x => x.Name).Should().BeInDescendingOrder();
+            var listOfprograms = actualResult.Query.ToList();
+            listOfprograms.Count.Should().Be(5);
+            listOfprograms.Select(x => x.Name).Should().BeInDescendingOrder();
         }
     }
 
@@ -134,8 +152,8 @@ public class ProgramServiceTests
         {
             actualResult.Should().NotBeNull();
             actualResult.Count.Should().Be(10);
-            var listOfServiceAreas = actualResult.Query.ToList();
-            listOfServiceAreas.Count.Should().Be(0);
+            var listOfprograms = actualResult.Query.ToList();
+            listOfprograms.Count.Should().Be(0);
         }
     }
 
@@ -335,6 +353,227 @@ public class ProgramServiceTests
         actualResult.IsT0.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task GetProgramActivityHistoryAsync_ProgramExistsInTenantAndUserIsSuperAdminAndNotInTenant_ReturnsListOfProgramActivityLogsInDescendingOrderByDate()
+    {
+        // Arrange
+        var tenant = await _dbContextMock.Tenants.FirstOrDefaultAsync();
+        var program = TestData.TestProgram.Generate();
+        program.TenantsPrograms = new List<TenantProgram> { new() { TenantId = tenant!.Id } };
+        var user = TestData.TestUser.Generate();
+        var activities = new[]
+        {
+            new ProgramActivityLog
+            {
+                Date = new DateTime(2000, 01, 1),
+                ProgramId = program.Id,
+                EventType = ProgramEventType.ProgramUpdatedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new ProgramUpdatedEvent(
+                        user.Id,
+                        "Super admin",
+                        user.FullName,
+                        DateTime.UtcNow,
+                        "Old",
+                        "New"
+                    )
+                )
+            },
+            new ProgramActivityLog
+            {
+                Date = new DateTime(2000, 01, 2),
+                ProgramId = program.Id,
+                EventType = ProgramEventType.ProgramUpdatedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new ProgramUpdatedEvent(
+                        user.Id,
+                        "Super admin",
+                        user.FullName,
+                        DateTime.UtcNow,
+                        "Old",
+                        "New"
+                    )
+                )
+            },
+            new ProgramActivityLog
+            {
+                Date = new DateTime(2000, 01, 3),
+                TenantId = tenant!.Id,
+                ProgramId = program.Id,
+                EventType = ProgramEventType.ProgramAssignmentUpdatedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new ProgramAssignmentUpdatedEvent(
+                        user.Id,
+                        "Admin",
+                        user.FullName,
+                        DateTime.UtcNow,
+                        "Old",
+                        "New"
+                    )
+                )
+            }
+        };
+
+        await _dbContextMock.Programs.AddAsync(program);
+        await _dbContextMock.ProgramActivityLogs.AddRangeAsync(activities);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.IsSuperAdmin).Returns(true);
+        _currentUserServiceMock.Setup(x => x.IsUserInTenant).Returns(false);
+
+        // Act
+        var actualResult = await _programService
+            .GetProgramActivityHistoryAsync(program.Id);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var activitiesResult, out _).Should().BeTrue();
+            activitiesResult.Count.Should().Be(1);
+            activitiesResult.Query.Count().Should().Be(2);
+            activitiesResult.Query.Should().BeInDescendingOrder(x => x.Date);
+        }
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    public async Task GetProgramActivityHistoryAsync_ProgramExistsAndUserInTenant_ReturnsListOfTenantProgramActivityLogsInDescendingOrderByDate(
+        bool isSuperAdmin, bool isUserInTenant)
+    {
+        // Arrange
+        var tenant = await _dbContextMock.Tenants.FirstOrDefaultAsync();
+        var program = TestData.TestProgram.Generate();
+        program.TenantsPrograms = new List<TenantProgram> { new() { TenantId = tenant!.Id } };
+        var user = TestData.TestUser.Generate();
+        var activities = new[]
+        {
+            new ProgramActivityLog
+            {
+                Date = new DateTime(2000, 01, 2),
+                ProgramId = program.Id,
+                EventType = ProgramEventType.ProgramUpdatedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new ProgramUpdatedEvent(
+                        user.Id,
+                        "Super admin",
+                        user.FullName,
+                        DateTime.UtcNow,
+                        "Old",
+                        "New"
+                    )
+                )
+            },
+            new ProgramActivityLog
+            {
+                Date = new DateTime(2000, 01, 3),
+                TenantId = tenant!.Id,
+                ProgramId = program.Id,
+                EventType = ProgramEventType.ProgramAssignmentUpdatedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new ProgramAssignmentUpdatedEvent(
+                        user.Id,
+                        "Admin",
+                        user.FullName,
+                        DateTime.UtcNow,
+                        "Old",
+                        "New"
+                    )
+                )
+            },
+            new ProgramActivityLog
+            {
+                Date = new DateTime(2000, 01, 4),
+                TenantId = tenant!.Id,
+                ProgramId = program.Id,
+                EventType = ProgramEventType.ProgramAssignmentUpdatedEvent,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(new ProgramAssignmentUpdatedEvent(
+                        user.Id,
+                        "Admin",
+                        user.FullName,
+                        DateTime.UtcNow,
+                        "Old",
+                        "New"
+                    )
+                )
+            }
+        };
+
+        await _dbContextMock.Programs.AddAsync(program);
+        await _dbContextMock.ProgramActivityLogs.AddRangeAsync(activities);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.IsSuperAdmin).Returns(isSuperAdmin);
+        _currentUserServiceMock.Setup(x => x.IsUserInTenant).Returns(isUserInTenant);
+
+        // Act
+        var actualResult = await _programService
+            .GetProgramActivityHistoryAsync(program.Id);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT0(out var activitiesResult, out _).Should().BeTrue();
+            activitiesResult.Count.Should().Be(1);
+            activitiesResult.Query.Count().Should().Be(2);
+            activitiesResult.Query.Should().BeInDescendingOrder(x => x.Date);
+        }
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    public async Task GetProgramActivityHistoryAsync_ProgramDoesNotExistInTenantAndUserInTenantId_ReturnsNotFound(
+        bool isSuperAdmin, bool isUserInTenant)
+    {
+        // Arrange
+        var program = TestData.TestProgram.Generate();
+
+        await _dbContextMock.Programs.AddAsync(program);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.IsSuperAdmin).Returns(isSuperAdmin);
+        _currentUserServiceMock.Setup(x => x.IsUserInTenant).Returns(isUserInTenant);
+
+        // Act
+        var actualResult = await _programService.GetProgramActivityHistoryAsync(program.Id);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.IsT1.Should().BeTrue();
+            actualResult.IsT0.Should().BeFalse();
+        }
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    public async Task GetProgramActivityHistory_ProgramDoesNotExist_ReturnsNotFound(
+        bool isSuperAdmin, bool isUserInTenant)
+    {
+        // Arrange
+        var program = TestData.TestProgram.Generate();
+
+        await _dbContextMock.Programs.AddAsync(program);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.IsSuperAdmin).Returns(isSuperAdmin);
+        _currentUserServiceMock.Setup(x => x.IsUserInTenant).Returns(isUserInTenant);
+
+        // Act
+        var actualResult = await _programService.GetProgramActivityHistoryAsync(Guid.NewGuid());
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.IsT1.Should().BeTrue();
+            actualResult.IsT0.Should().BeFalse();
+        }
+    }
+
     private static class TestData
     {
         public static readonly Faker<Program> TestProgram = new Faker<Program>()
@@ -345,5 +584,23 @@ public class ProgramServiceTests
             .RuleFor(p => p.TenantId, f => TenantId)
             .RuleFor(p => p.Status, f => f.PickRandom<Status>())
             .RuleFor(p => p.Program, f => TestProgram.Generate());
+
+        public static readonly Faker<User> TestUser =
+            new Faker<User>()
+                .RuleFor(u => u.Id, f => Guid.NewGuid())
+                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+                .RuleFor(u => u.LastName, f => f.Name.LastName())
+                .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
+                .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
+                .RuleFor(u => u.Email, f => f.Internet.Email())
+                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
+                .RuleFor(u => u.TenantUsers, f => new List<TenantUser>()
+                {
+                    new TenantUser()
+                    {
+                        TenantId = TenantId,
+                    }
+                })
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
     }
 }
