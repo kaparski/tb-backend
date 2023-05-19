@@ -118,13 +118,7 @@ public class ProgramService: IProgramService
     public async Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistoryAsync(
         Guid id, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
     {
-        Expression<Func<Program, bool>> predicate = _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
-            ? (Program program) => program.Id == id
-            : (Program program) => program.Id == id &&
-                                   program.TenantsPrograms.Any(tp => tp.TenantId == _currentUserService.TenantId);
-
-        var program = await _context.Programs
-            .FirstOrDefaultAsync(predicate, cancellationToken);
+        var program = await GetProgramByIdAsync(id, cancellationToken);
 
         if (program is null)
         {
@@ -242,4 +236,14 @@ public class ProgramService: IProgramService
     private IQueryable<ProgramActivityLog> GetTenantProgramActivityLogsQuery(Guid programId, Guid tenantId) =>
         _context.ProgramActivityLogs
             .Where(log => log.ProgramId == programId && log.TenantId == tenantId);
+
+    private Task<Program?> GetProgramByIdAsync(Guid programId, CancellationToken cancellationToken)
+    {
+        Expression<Func<Program, bool>> predicate = _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
+            ? (Program program) => program.Id == programId
+            : (Program program) => program.Id == programId &&
+                                   program.TenantsPrograms.Any(tp => tp.TenantId == _currentUserService.TenantId);
+
+        return _context.Programs.FirstOrDefaultAsync(predicate, cancellationToken);
+    }
 }
