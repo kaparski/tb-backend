@@ -485,6 +485,75 @@ public class ProgramServiceTests
         }
     }
 
+    [Fact]
+    public async Task UpdateProgramAsync_ProgramExists_ReturnsUpdatedProgramDetailsAndCapturesActivityLog()
+    {
+        // Arrange
+        var updateProgramDto = TestData.UpdateProgramDtoFaker.Generate();
+        var program = TestData.TestProgram.Generate();
+        await _dbContextMock.Programs.AddAsync(program);
+        await _dbContextMock.SaveChangesAsync();
+
+        var currentDate = DateTime.UtcNow;
+        _dateTimeServiceMock
+            .Setup(service => service.UtcNow)
+            .Returns(currentDate);
+
+        // Act
+        var actualResult = await _programService.UpdateProgramAsync(program.Id, updateProgramDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out var programDetailsDto, out _);
+            programDetailsDto.Should().NotBeNull();
+            programDetailsDto.Id.Should().Be(program.Id);
+            programDetailsDto.Name.Should().Be(updateProgramDto.Name);
+            programDetailsDto.Reference.Should().Be(updateProgramDto.Reference);
+            programDetailsDto.Overview.Should().Be(updateProgramDto.Overview);
+            programDetailsDto.LegalAuthority.Should().Be(updateProgramDto.LegalAuthority);
+            programDetailsDto.Agency.Should().Be(updateProgramDto.Agency);
+            programDetailsDto.Jurisdiction.Should().Be(updateProgramDto.Jurisdiction);
+            programDetailsDto.State.Should().Be(updateProgramDto.State);
+            programDetailsDto.County.Should().Be(updateProgramDto.County);
+            programDetailsDto.City.Should().Be(updateProgramDto.City);
+            programDetailsDto.IncentivesArea.Should().Be(updateProgramDto.IncentivesArea);
+            programDetailsDto.IncentivesType.Should().Be(updateProgramDto.IncentivesType);
+            programDetailsDto.StartDateTimeUtc.Should().Be(updateProgramDto.StartDateTimeUtc);
+            programDetailsDto.EndDateTimeUtc.Should().Be(updateProgramDto.EndDateTimeUtc);
+
+            var actualActivityLog = await _dbContextMock.ProgramActivityLogs.LastOrDefaultAsync();
+            actualActivityLog.Should().NotBeNull();
+            actualActivityLog?.Date.Should().Be(currentDate);
+            actualActivityLog?.EventType.Should().Be(ProgramEventType.ProgramUpdatedEvent);
+            actualActivityLog?.ProgramId.Should().Be(program.Id);
+
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Once);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateProgramAsync_ProgramDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var updateProgramDto = TestData.UpdateProgramDtoFaker.Generate();
+        var program = TestData.TestProgram.Generate();
+        await _dbContextMock.Programs.AddAsync(program);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _programService.UpdateProgramAsync(Guid.NewGuid(), updateProgramDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeTrue();
+        }
+    }
+
     private static class TestData
     {
         public static readonly Faker<Program> TestProgram = new Faker<Program>()
@@ -521,5 +590,21 @@ public class ProgramServiceTests
             .RuleFor(x => x.Event, (f, x) => JsonSerializer.Serialize(
                 new ProgramCreatedEvent(Guid.NewGuid(), x.Date, f.Name.FullName(), f.Name.JobTitle())
             ));
+
+        public static readonly Faker<UpdateProgramDto> UpdateProgramDtoFaker =
+            new Faker<UpdateProgramDto>()
+                .RuleFor(dto => dto.Name, f => f.Name.FirstName())
+                .RuleFor(dto => dto.Reference, f => f.Company.CompanyName())
+                .RuleFor(dto => dto.Overview, f => f.Lorem.Text())
+                .RuleFor(dto => dto.LegalAuthority, f => f.Lorem.Word())
+                .RuleFor(dto => dto.Agency, f => f.Internet.Url())
+                .RuleFor(dto => dto.Jurisdiction, f => f.PickRandom<Jurisdiction>())
+                .RuleFor(dto => dto.State, f => f.Address.State())
+                .RuleFor(dto => dto.County, f => f.Address.County())
+                .RuleFor(dto => dto.City, f => f.Address.City())
+                .RuleFor(dto => dto.IncentivesArea, f => f.Lorem.Word())
+                .RuleFor(dto => dto.IncentivesType, f => f.Lorem.Word())
+                .RuleFor(dto => dto.StartDateTimeUtc, f => f.Date.Past())
+                .RuleFor(dto => dto.EndDateTimeUtc, f => f.Date.Future());
     }
 }

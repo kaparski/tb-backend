@@ -1,3 +1,4 @@
+using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
@@ -8,6 +9,7 @@ using OneOf.Types;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs;
 using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs.Responses;
@@ -490,5 +492,92 @@ public class ProgramsControllerTests
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
+    }
+
+    [Fact]
+    public async Task UpdateProgramAsync_ProgramExistsAndRequestIsValid_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        var request = TestData.TestUpdateProgramRequest.Generate();
+        var program = TestData.TestProgramDetailsDto.Generate();
+        _programServiceMock.Setup(x => x.UpdateProgramAsync(It.Is<Guid>(id => id == program.Id), It.IsAny<UpdateProgramDto>(), default))
+            .ReturnsAsync(program);
+
+        // Act
+        var actualResponse = await _controller.UpdateProgramAsync(program.Id, request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<ProgramDetailsResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateProgramAsync_ProgramDoesNotExists_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        var request = TestData.TestUpdateProgramRequest.Generate();
+        _programServiceMock.Setup(x => x.UpdateProgramAsync(It.IsAny<Guid>(), It.IsAny<UpdateProgramDto>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.UpdateProgramAsync(Guid.NewGuid(), request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void UpdateProgramAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, UpdateProgramRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateProgramAsync).Method;
+        var permissions = new object[] { Common.Permissions.Programs.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    private static class TestData
+    {
+        public static readonly Faker<ProgramDetailsDto> TestProgramDetailsDto =
+            new Faker<ProgramDetailsDto>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+
+        public static readonly Faker<UpdateProgramRequest> TestUpdateProgramRequest =
+            new Faker<UpdateProgramRequest>().CustomInstantiator(f => new UpdateProgramRequest(
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Text(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.PickRandom<Jurisdiction>(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Date.Past(),
+                f.Date.Future()));
     }
 }
