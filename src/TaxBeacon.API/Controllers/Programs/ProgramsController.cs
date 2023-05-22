@@ -239,4 +239,26 @@ public class ProgramsController: BaseController
             program => Ok(program.Adapt<TenantProgramDetailsResponse>()),
             notFound => NotFound());
     }
+
+    /// <summary>
+    /// Update program details
+    /// </summary>
+    /// <response code="200">Returns updated program details</response>
+    /// <response code="404">Program is not found</response>
+    /// <returns>Updated program details</returns>
+    [HasPermissions(Common.Permissions.Programs.ReadWrite)]
+    [HttpPatch("{id:guid}", Name = "UpdateProgram")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(ProgramDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateProgramAsync([FromRoute] Guid id, [FromBody] UpdateProgramRequest request,
+        CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _programService.UpdateProgramAsync(
+            id, request.Adapt<UpdateProgramDto>(), cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            result => Ok(result.Adapt<ProgramDetailsResponse>()),
+            notFound => NotFound());
+    }
 }
