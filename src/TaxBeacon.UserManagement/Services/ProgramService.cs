@@ -7,6 +7,7 @@ using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
+using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
@@ -14,6 +15,7 @@ using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Models.Activities.Program;
 using TaxBeacon.UserManagement.Models.Programs;
 using TaxBeacon.UserManagement.Services.Activities.Program;
 
@@ -143,8 +145,47 @@ public class ProgramService: IProgramService
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
-    public Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public async Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateProgramDto,
+        CancellationToken cancellationToken = default)
+    {
+        var program = await _context.Programs.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+        if (program is null)
+        {
+            return new NotFound();
+        }
+
+        var (userFullName, userRoles) = _currentUserService.UserInfo;
+        var previousValues = JsonSerializer.Serialize(program.Adapt<UpdateDivisionDto>());
+
+        var eventDateTime = _dateTimeService.UtcNow;
+
+        await _context.ProgramActivityLogs.AddAsync(new ProgramActivityLog
+        {
+            ProgramId = program.Id,
+            Date = eventDateTime,
+            Revision = 1,
+            EventType = ProgramEventType.ProgramUpdatedEvent,
+            Event = JsonSerializer.Serialize(new ProgramUpdatedEvent(
+                _currentUserService.UserId,
+                userFullName,
+                userRoles ?? string.Empty,
+                eventDateTime,
+                previousValues,
+                JsonSerializer.Serialize(updateProgramDto)))
+        }, cancellationToken);
+
+        updateProgramDto.Adapt(program);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Program ({program}) was updated by {@userId}",
+            eventDateTime,
+            id,
+            _currentUserService.UserId);
+
+        return program.Adapt<ProgramDetailsDto>();
+    }
 
     public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
         =>
