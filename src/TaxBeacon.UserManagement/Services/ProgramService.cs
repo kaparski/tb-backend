@@ -12,6 +12,7 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -149,7 +150,7 @@ public class ProgramService: IProgramService
     public Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
         CancellationToken cancellationToken = default) => throw new NotImplementedException();
 
-    public async Task<TenantProgramDto> UpdateTenantProgramStatusAsync(Guid id, Status status,
+    public async Task<OneOf<TenantProgramDetailsDto, NotFound>> UpdateTenantProgramStatusAsync(Guid id, Status status,
         CancellationToken cancellationToken = default)
     {
         var tenantId = _currentUserService.TenantId;
@@ -157,18 +158,24 @@ public class ProgramService: IProgramService
         // TODO: Move the same code into separated method
         var tenantProgram = await _context
                        .TenantsPrograms
-                       .FirstOrDefaultAsync(p => p.ProgramId == id && p.TenantId == tenantId, cancellationToken)
-                   ?? throw new NotFoundException(nameof(User), id);
+                       .FirstOrDefaultAsync(p => p.ProgramId == id && p.TenantId == tenantId, cancellationToken);
+
+        if (tenantProgram is null)
+        {
+            return new NotFound();
+        }
+
+        var now = _dateTimeService.UtcNow;
 
         switch (status)
         {
             case Status.Deactivated:
-                tenantProgram.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
+                tenantProgram.DeactivationDateTimeUtc = now;
                 tenantProgram.ReactivationDateTimeUtc = null;
                 tenantProgram.Status = Status.Deactivated;
                 break;
             case Status.Active:
-                tenantProgram.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
+                tenantProgram.ReactivationDateTimeUtc = now;
                 tenantProgram.DeactivationDateTimeUtc = null;
                 tenantProgram.Status = Status.Active;
                 break;
@@ -176,7 +183,6 @@ public class ProgramService: IProgramService
 
         tenantProgram.Status = status;
 
-        var now = _dateTimeService.UtcNow;
         var (currentUserFullName, currentUserRoles) = _currentUserService.UserInfo;
 
         var programActivityLog = status switch
@@ -220,7 +226,7 @@ public class ProgramService: IProgramService
             status,
             _currentUserService.UserId);
 
-        return tenantProgram.Adapt<TenantProgramDto>();
+        return await GetTenantProgramDetailsAsync(id, cancellationToken);
     }
 
     public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)

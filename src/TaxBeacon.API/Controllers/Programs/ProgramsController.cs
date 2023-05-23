@@ -254,15 +254,15 @@ public class ProgramsController: BaseController
     /// <returns>Updated program</returns>
     [HasPermissions(Common.Permissions.Programs.ReadWrite)]
     [HttpPut("/api/tenants/programs/{id:guid}/status", Name = "UpdateProgramStatus")]
-    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(TenantProgramDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<UserResponse>> UpdateProgramStatusAsync(Guid id, [FromBody] Status programStatus,
+    public async Task<ActionResult<TenantProgramDetailsResponse>> UpdateProgramStatusAsync(Guid id, [FromBody] Status programStatus,
         CancellationToken cancellationToken)
     {
 
         var user = await _programService.UpdateTenantProgramStatusAsync(id, programStatus, cancellationToken);
 
-        return Ok(user.Adapt<UserResponse>());
+        return Ok(user.Adapt<TenantProgramDetailsResponse>());
     }
 }
