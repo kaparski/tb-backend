@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Erros;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;

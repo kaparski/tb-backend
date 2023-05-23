@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
+using OneOf.Types;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -142,7 +143,7 @@ public class AuthorizeFilterTests
                 It.Is<MailAddress>(mailAddress =>
                     mailAddress.Address.Equals(email, StringComparison.OrdinalIgnoreCase)),
                 default))
-            .ThrowsAsync(new NotFoundException(nameof(User), email));
+            .ReturnsAsync(new NotFound());
 
         // Act
         await _authorizeFilter.OnAuthorizationAsync(authorizationFilterContext);

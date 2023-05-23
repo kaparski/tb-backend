@@ -37,7 +37,7 @@ public class RoleService: IRoleService
     public async Task<QueryablePaging<RoleDto>> GetRolesAsync(IGridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
-        var roles = !_currentUserService.IsUserInTenant && _currentUserService.IsSuperAdmin
+        var roles = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
             ? GetNotTenantRolesQuery()
             : GetTenantRolesQuery();
 
@@ -190,7 +190,7 @@ public class RoleService: IRoleService
     private async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
         CancellationToken cancellationToken = default)
     {
-        var role = !_currentUserService.IsUserInTenant && _currentUserService.IsSuperAdmin
+        var role = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
             ? await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId && r.Type == SourceType.System,
                 cancellationToken)
             : await _context.Roles

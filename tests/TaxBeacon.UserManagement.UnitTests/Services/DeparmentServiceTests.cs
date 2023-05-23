@@ -85,7 +85,7 @@ public class DepartmentServiceTests
             _dateTimeFormatterMock.Object,
             _activityFactoriesMock.Object);
 
-        TypeAdapterConfig.GlobalSettings.Scan(typeof(UserMappingConfig).Assembly);
+        TypeAdapterConfig.GlobalSettings.Scan(typeof(IDepartmentService).Assembly);
     }
 
     [Fact]

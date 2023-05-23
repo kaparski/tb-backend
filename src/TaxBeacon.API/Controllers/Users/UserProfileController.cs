@@ -24,14 +24,18 @@ public class UserProfileController: BaseController
     /// </summary>
     /// <response code="200">Returns my profile details</response>
     /// <response code="401">User is unauthorized</response>
+    /// <response code="404">User was not found</response>
     /// <returns>User</returns>
     [HttpGet("/api/me/profile", Name = "GetMyProfile")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
     {
         var currentUserId = _currentUserService.UserId;
-        var userDto = await _userService.GetUserByIdAsync(currentUserId, cancellationToken);
+        var getUserDetailsResult = await _userService.GetUserDetailsByIdAsync(currentUserId, cancellationToken);
 
-        return Ok(userDto.Adapt<UserResponse>());
+        return getUserDetailsResult.Match<IActionResult>(
+            userDto => Ok(userDto.Adapt<UserResponse>()),
+            _ => NotFound());
     }
 }

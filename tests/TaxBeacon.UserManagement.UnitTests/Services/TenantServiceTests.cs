@@ -83,7 +83,7 @@ public class TenantServiceTests
             _dateTimeFormatterMock.Object,
             _activityFactoriesMock.Object);
 
-        TypeAdapterConfig.GlobalSettings.Scan(typeof(UserMappingConfig).Assembly);
+        TypeAdapterConfig.GlobalSettings.Scan(typeof(ITenantService).Assembly);
     }
 
     [Fact]
