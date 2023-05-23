@@ -16,5 +16,9 @@ public class UpdateServiceAreaRequestValidator: AbstractValidator<UpdateServiceA
         RuleFor(x => x.Description)
             .MaximumLength(200)
             .WithMessage("The service area description must contain no more than 200 characters");
+
+        RuleFor(x => x.DepartmentId)
+            .NotEmpty()
+            .WithMessage("The service area must have at least 1 department");
     }
 }

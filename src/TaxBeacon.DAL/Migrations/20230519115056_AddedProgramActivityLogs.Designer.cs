@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230519115056_AddedProgramActivityLogs")]
+    partial class AddedProgramActivityLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -330,7 +333,7 @@ namespace TaxBeacon.DAL.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(604)
                         .HasColumnType("nvarchar")
-                        .HasComputedColumnSql("TRIM(CASE WHEN [Jurisdiction] = 1 THEN 'Federal' WHEN [Jurisdiction] = 2 THEN [State] WHEN [Jurisdiction] = 3 THEN CONCAT_WS(', ',[State], [County], [City]) ELSE NULL END)", true);
+                        .HasComputedColumnSql("TRIM(CASE WHEN [Jurisdiction] = 1 THEN 'Federal' WHEN [Jurisdiction] = 2 THEN [State] WHEN [Jurisdiction] = 3 THEN CONCAT([State], ', ', [County], ', ', [City]) ELSE NULL END)", true);
 
                     b.Property<DateTime?>("LastModifiedDateTimeUtc")
                         .HasColumnType("datetime2");
@@ -720,12 +723,6 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.Property<Guid>("ProgramId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeactivationDateTimeUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ReactivationDateTimeUtc")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

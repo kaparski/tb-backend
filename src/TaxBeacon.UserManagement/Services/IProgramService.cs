@@ -16,10 +16,10 @@ public interface IProgramService
 
     Task<OneOf<ProgramDetailsDto, NotFound>> GetProgramDetailsAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistory(Guid id, int page, int pageSize,
+    Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
+    Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateProgramDto,
         CancellationToken cancellationToken = default);
 
     Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery,
@@ -28,5 +28,8 @@ public interface IProgramService
     Task<byte[]> ExportTenantProgramsAsync(FileType fileType, CancellationToken cancellationToken = default);
 
     Task<OneOf<TenantProgramDetailsDto, NotFound>> GetTenantProgramDetailsAsync(Guid id,
+        CancellationToken cancellationToken = default);
+
+    Task<OneOf<TenantProgramDetailsDto, NotFound>> UpdateTenantProgramStatusAsync(Guid id, Status status,
         CancellationToken cancellationToken = default);
 }

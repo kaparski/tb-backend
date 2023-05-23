@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230522195335_UpdatedJurisdictionNameColumnForPrograms")]
+    partial class UpdatedJurisdictionNameColumnForPrograms
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -720,12 +723,6 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.Property<Guid>("ProgramId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeactivationDateTimeUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ReactivationDateTimeUtc")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

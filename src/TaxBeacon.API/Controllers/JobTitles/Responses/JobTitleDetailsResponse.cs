@@ -1,3 +1,5 @@
+using TaxBeacon.API.Controllers.Departments.Responses;
+
 namespace TaxBeacon.API.Controllers.JobTitles.Responses;
 
 public class JobTitleDetailsResponse
@@ -7,6 +9,8 @@ public class JobTitleDetailsResponse
     public string Name { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
+
+    public DepartmentResponse Department { get; set; } = null!;
 
     public DateTime CreatedDateTimeUtc { get; set; }
 }

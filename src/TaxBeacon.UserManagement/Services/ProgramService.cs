@@ -6,13 +6,20 @@ using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
+using System.Linq.Expressions;
+using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Models.Activities.Program;
 using TaxBeacon.UserManagement.Models.Programs;
+using TaxBeacon.UserManagement.Services.Activities.Program;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -24,6 +31,7 @@ public class ProgramService: IProgramService
     private readonly ICurrentUserService _currentUserService;
     private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
     private readonly IDateTimeFormatter _dateTimeFormatter;
+    private readonly IImmutableDictionary<(ProgramEventType, uint), IProgramActivityFactory> _activityFactories;
 
     public ProgramService(
         ILogger<ProgramService> logger,
@@ -31,7 +39,8 @@ public class ProgramService: IProgramService
         IDateTimeService dateTimeService,
         ICurrentUserService currentUserService,
         IEnumerable<IListToFileConverter> listToFileConverters,
-        IDateTimeFormatter dateTimeFormatter)
+        IDateTimeFormatter dateTimeFormatter,
+        IEnumerable<IProgramActivityFactory> programActivityFactories)
     {
         _logger = logger;
         _context = context;
@@ -40,6 +49,8 @@ public class ProgramService: IProgramService
         _dateTimeFormatter = dateTimeFormatter;
         _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
+        _activityFactories = programActivityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
+                             ?? ImmutableDictionary<(ProgramEventType, uint), IProgramActivityFactory>.Empty;
     }
 
     public Task<QueryablePaging<ProgramDto>> GetAllProgramsAsync(GridifyQuery gridifyQuery,
@@ -108,11 +119,154 @@ public class ProgramService: IProgramService
         return program is not null ? program.Adapt<ProgramDetailsDto>() : new NotFound();
     }
 
-    public Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistory(Guid id, int page, int pageSize,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public async Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistoryAsync(
+        Guid id, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+    {
+        var program = await GetProgramByIdAsync(id, cancellationToken);
 
-    public Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        if (program is null)
+        {
+            return new NotFound();
+        }
+
+        var activityLogs = _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
+            ? GetProgramActivityLogsQuery(program.Id)
+            : GetTenantProgramActivityLogsQuery(program.Id, _currentUserService.TenantId);
+
+        var count = await activityLogs.CountAsync(cancellationToken);
+
+        var pageCount = (uint)Math.Ceiling((double)count / pageSize);
+
+        var activities = await activityLogs
+            .OrderByDescending(log => log.Date)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new ActivityDto(pageCount,
+            activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
+    }
+
+    public async Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateProgramDto,
+        CancellationToken cancellationToken = default)
+    {
+        var program = await _context.Programs.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+        if (program is null)
+        {
+            return new NotFound();
+        }
+
+        var (userFullName, userRoles) = _currentUserService.UserInfo;
+        var previousValues = JsonSerializer.Serialize(program.Adapt<UpdateProgramDto>());
+
+        var eventDateTime = _dateTimeService.UtcNow;
+
+        await _context.ProgramActivityLogs.AddAsync(new ProgramActivityLog
+        {
+            ProgramId = program.Id,
+            Date = eventDateTime,
+            Revision = 1,
+            EventType = ProgramEventType.ProgramUpdatedEvent,
+            Event = JsonSerializer.Serialize(new ProgramUpdatedEvent(
+                _currentUserService.UserId,
+                userFullName,
+                userRoles ?? string.Empty,
+                eventDateTime,
+                previousValues,
+                JsonSerializer.Serialize(updateProgramDto)))
+        }, cancellationToken);
+
+        updateProgramDto.Adapt(program);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Program ({program}) was updated by {@userId}",
+            eventDateTime,
+            id,
+            _currentUserService.UserId);
+
+        return program.Adapt<ProgramDetailsDto>();
+    }
+
+    public async Task<OneOf<TenantProgramDetailsDto, NotFound>> UpdateTenantProgramStatusAsync(Guid id, Status status,
+        CancellationToken cancellationToken = default)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        // TODO: Move the same code into separated method
+        var tenantProgram = await _context
+                       .TenantsPrograms
+                       .FirstOrDefaultAsync(p => p.ProgramId == id && p.TenantId == tenantId, cancellationToken);
+
+        if (tenantProgram is null)
+        {
+            return new NotFound();
+        }
+
+        var now = _dateTimeService.UtcNow;
+
+        switch (status)
+        {
+            case Status.Deactivated:
+                tenantProgram.DeactivationDateTimeUtc = now;
+                tenantProgram.ReactivationDateTimeUtc = null;
+                tenantProgram.Status = Status.Deactivated;
+                break;
+            case Status.Active:
+                tenantProgram.ReactivationDateTimeUtc = now;
+                tenantProgram.DeactivationDateTimeUtc = null;
+                tenantProgram.Status = Status.Active;
+                break;
+        }
+
+        tenantProgram.Status = status;
+
+        var (currentUserFullName, currentUserRoles) = _currentUserService.UserInfo;
+
+        var programActivityLog = status switch
+        {
+            Status.Active => new ProgramActivityLog
+            {
+                TenantId = tenantId,
+                ProgramId = tenantProgram.ProgramId,
+                Date = now,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new ProgramReactivatedEvent(_currentUserService.UserId,
+                        now,
+                        currentUserFullName,
+                        currentUserRoles
+                        )),
+                EventType = ProgramEventType.ProgramReactivatedEvent
+            },
+            Status.Deactivated => new ProgramActivityLog
+            {
+                TenantId = tenantId,
+                ProgramId = tenantProgram.ProgramId,
+                Date = _dateTimeService.UtcNow,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new ProgramDeactivatedEvent(_currentUserService.UserId,
+                        now,
+                        currentUserFullName,
+                        currentUserRoles)),
+                EventType = ProgramEventType.ProgramDeactivatedEvent
+            },
+            _ => throw new InvalidOperationException()
+        };
+
+        await _context.ProgramActivityLogs.AddAsync(programActivityLog, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Program ({createdProgramId}) status was changed to {newUserStatus} by {@userId}",
+            _dateTimeService.UtcNow,
+            tenantProgram.ProgramId,
+            status,
+            _currentUserService.UserId);
+
+        return await GetTenantProgramDetailsAsync(id, cancellationToken);
+    }
 
     public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
         =>
@@ -192,8 +346,28 @@ public class ProgramService: IProgramService
 
         var programDetailsDto = program.Program.Adapt<TenantProgramDetailsDto>();
         programDetailsDto.Status = program.Status;
+        programDetailsDto.DeactivationDateTimeUtc = program.DeactivationDateTimeUtc;
+        programDetailsDto.ReactivationDateTimeUtc = program.ReactivationDateTimeUtc;
         programDetailsDto.Jurisdiction = program.Program.Jurisdiction.ToString();
 
         return programDetailsDto;
+    }
+
+    private IQueryable<ProgramActivityLog> GetProgramActivityLogsQuery(Guid programId) =>
+        _context.ProgramActivityLogs
+            .Where(log => log.ProgramId == programId && log.TenantId == null);
+
+    private IQueryable<ProgramActivityLog> GetTenantProgramActivityLogsQuery(Guid programId, Guid tenantId) =>
+        _context.ProgramActivityLogs
+            .Where(log => log.ProgramId == programId && log.TenantId == tenantId);
+
+    private Task<Program?> GetProgramByIdAsync(Guid programId, CancellationToken cancellationToken)
+    {
+        Expression<Func<Program, bool>> predicate = _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
+            ? (Program program) => program.Id == programId
+            : (Program program) => program.Id == programId &&
+                                   program.TenantsPrograms.Any(tp => tp.TenantId == _currentUserService.TenantId);
+
+        return _context.Programs.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 }

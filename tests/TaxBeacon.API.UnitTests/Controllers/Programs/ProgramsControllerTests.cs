@@ -1,3 +1,4 @@
+using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
@@ -8,10 +9,11 @@ using OneOf.Types;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Programs;
 using TaxBeacon.API.Controllers.Programs.Requests;
+using TaxBeacon.API.Controllers.Programs;
 using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Programs;
 using TaxBeacon.UserManagement.Services;
@@ -22,6 +24,8 @@ public class ProgramsControllerTests
 {
     private readonly Mock<IProgramService> _programServiceMock;
     private readonly ProgramsController _controller;
+
+    public static readonly Guid TenantId = Guid.NewGuid();
 
     public ProgramsControllerTests()
     {
@@ -216,7 +220,7 @@ public class ProgramsControllerTests
     {
         // Arrange
         _programServiceMock.Setup(x =>
-                x.GetProgramActivityHistory(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+                x.GetProgramActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
             .ReturnsAsync(new ActivityDto(0, new ActivityItemDto[] { }));
 
         // Act
@@ -239,7 +243,7 @@ public class ProgramsControllerTests
     {
         // Arrange
         _programServiceMock.Setup(x =>
-                x.GetProgramActivityHistory(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
+                x.GetProgramActivityHistoryAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), default))
             .ReturnsAsync(new NotFound());
 
         // Act
@@ -276,6 +280,40 @@ public class ProgramsControllerTests
         {
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Theory]
+    [InlineData(Status.Deactivated)]
+    [InlineData(Status.Active)]
+    public async Task UpdateTenantProgramStatusAsync_NewProgramStatus_ReturnsUpdatedTenantProgram(Status status)
+    {
+        // Arrange
+        var tenantProgramDto = TestData.TestTenantProgram.Generate();
+        tenantProgramDto.Status = Status.Deactivated;
+        tenantProgramDto.DeactivationDateTimeUtc = DateTime.UtcNow;
+
+        _programServiceMock
+            .Setup(service => service.UpdateTenantProgramStatusAsync(
+                It.Is<Guid>(id => id == tenantProgramDto.Id),
+                It.IsAny<Status>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(tenantProgramDto);
+
+        // Act
+        var actualResponse = await _controller.UpdateProgramStatusAsync(tenantProgramDto.Id, status, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse.Result as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<ActionResult<TenantProgramDetailsResponse>>();
+            actualResponse.Result.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<TenantProgramDetailsResponse>();
+            (actualResult?.Value as TenantProgramDetailsResponse)?.Id.Should().Be(tenantProgramDto.Id);
         }
     }
 
@@ -490,5 +528,101 @@ public class ProgramsControllerTests
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
+    }
+
+    [Fact]
+    public async Task UpdateProgramAsync_ProgramExistsAndRequestIsValid_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        var request = TestData.TestUpdateProgramRequest.Generate();
+        var program = TestData.TestProgramDetailsDto.Generate();
+        _programServiceMock.Setup(x => x.UpdateProgramAsync(It.Is<Guid>(id => id == program.Id), It.IsAny<UpdateProgramDto>(), default))
+            .ReturnsAsync(program);
+
+        // Act
+        var actualResponse = await _controller.UpdateProgramAsync(program.Id, request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<ProgramDetailsResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateProgramAsync_ProgramDoesNotExists_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        var request = TestData.TestUpdateProgramRequest.Generate();
+        _programServiceMock.Setup(x => x.UpdateProgramAsync(It.IsAny<Guid>(), It.IsAny<UpdateProgramDto>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.UpdateProgramAsync(Guid.NewGuid(), request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void UpdateProgramAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, UpdateProgramRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateProgramAsync).Method;
+        var permissions = new object[] { Common.Permissions.Programs.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    private static class TestData
+    {
+        public static readonly Faker<ProgramDetailsDto> TestProgramDetailsDto =
+            new Faker<ProgramDetailsDto>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+
+        public static readonly Faker<UpdateProgramRequest> TestUpdateProgramRequest =
+            new Faker<UpdateProgramRequest>().CustomInstantiator(f => new UpdateProgramRequest(
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Text(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.PickRandom<Jurisdiction>(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Date.Past(),
+                f.Date.Future()));
+
+        public static readonly Faker<Program> TestProgram = new Faker<Program>()
+            .RuleFor(p => p.Id, f => Guid.NewGuid())
+            .RuleFor(p => p.Name, f => f.Name.FirstName());
+
+        public static readonly Faker<TenantProgramDetailsDto> TestTenantProgram = new Faker<TenantProgramDetailsDto>()
+            .RuleFor(p => p.Status, f => f.PickRandom<Status>())
+            .RuleFor(u => u.ReactivationDateTimeUtc, f => DateTime.UtcNow)
+            .RuleFor(u => u.DeactivationDateTimeUtc, f => DateTime.UtcNow);
     }
 }

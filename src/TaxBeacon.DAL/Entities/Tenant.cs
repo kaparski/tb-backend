@@ -43,4 +43,7 @@ public class Tenant: BaseEntity
         new HashSet<JobTitleActivityLog>();
 
     public ICollection<TenantProgram> TenantsPrograms { get; set; } = new HashSet<TenantProgram>();
+
+    public ICollection<ProgramActivityLog> ProgramActivityLogs { get; set; } =
+        new HashSet<ProgramActivityLog>();
 }

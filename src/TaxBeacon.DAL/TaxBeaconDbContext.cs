@@ -66,6 +66,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
 
     public DbSet<TenantProgram> TenantsPrograms => Set<TenantProgram>();
 
+    public DbSet<ProgramActivityLog> ProgramActivityLogs => Set<ProgramActivityLog>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

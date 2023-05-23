@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs.Responses;
+using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models.Programs;
 using TaxBeacon.UserManagement.Services;
 
@@ -136,7 +138,7 @@ public class ProgramsController: BaseController
         [FromQuery] ProgramActivityHistoryRequest request,
         CancellationToken cancellationToken)
     {
-        var oneOfActivities = await _programService.GetProgramActivityHistory(
+        var oneOfActivities = await _programService.GetProgramActivityHistoryAsync(
             id, request.Page, request.PageSize, cancellationToken);
 
         return oneOfActivities.Match<IActionResult>(
@@ -149,8 +151,8 @@ public class ProgramsController: BaseController
     /// </summary>
     /// <remarks>
     /// Sample requests: <br/><br/>
-    ///     ```GET /teams?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DPeter```<br/><br/>
-    ///     ```GET /teams?page=2&amp;pageSize=5&amp;orderBy=name```
+    ///     ```GET /tenants/programs?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DPeter```<br/><br/>
+    ///     ```GET /tenants/programs?page=2&amp;pageSize=5&amp;orderBy=name```
     /// </remarks>
     /// <response code="200">Returns programs</response>
     /// <response code="400">Invalid filtering or sorting</response>
@@ -238,5 +240,55 @@ public class ProgramsController: BaseController
         return oneOfProgramDetails.Match<IActionResult>(
             program => Ok(program.Adapt<TenantProgramDetailsResponse>()),
             notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Update program details
+    /// </summary>
+    /// <response code="200">Returns updated program details</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Program is not found</response>
+    /// <returns>Updated program details</returns>
+    [HasPermissions(Common.Permissions.Programs.ReadWrite)]
+    [HttpPatch("{id:guid}", Name = "UpdateProgram")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(ProgramDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateProgramAsync([FromRoute] Guid id, [FromBody] UpdateProgramRequest request,
+        CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _programService.UpdateProgramAsync(
+            id, request.Adapt<UpdateProgramDto>(), cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            result => Ok(result.Adapt<ProgramDetailsResponse>()),
+            notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Endpoint to update program status
+    /// </summary>
+    /// <param name="id">Program id</param>
+    /// <param name="programStatus">New program status</param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns updated program</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>Updated program</returns>
+    [HasPermissions(Common.Permissions.Programs.ReadWrite)]
+    [HttpPut("/api/tenants/programs/{id:guid}/status", Name = "UpdateProgramStatus")]
+    [ProducesResponseType(typeof(TenantProgramDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<TenantProgramDetailsResponse>> UpdateProgramStatusAsync(Guid id, [FromBody] Status programStatus,
+        CancellationToken cancellationToken)
+    {
+
+        var user = await _programService.UpdateTenantProgramStatusAsync(id, programStatus, cancellationToken);
+
+        return Ok(user.Adapt<TenantProgramDetailsResponse>());
     }
 }
