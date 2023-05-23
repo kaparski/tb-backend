@@ -30,11 +30,11 @@ public interface IUserService
         UserDto user,
         CancellationToken cancellationToken = default);
 
-    Task<byte[]> ExportUsersAsync(FileType fileType, CancellationToken cancellationToken);
+    Task<byte[]> ExportUsersAsync(FileType fileType, CancellationToken cancellationToken = default);
 
     Task<OneOf<Success, NotFound>> ChangeUserRolesAsync(Guid userId,
         Guid[] roleIds,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 
     Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid userId,
         UpdateUserDto updateUserDto,
@@ -48,5 +48,5 @@ public interface IUserService
     Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Guid userId,
         CancellationToken cancellationToken = default);
 
-    Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken);
+    Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
 }

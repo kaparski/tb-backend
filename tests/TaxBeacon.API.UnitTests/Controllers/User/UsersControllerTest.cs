@@ -91,7 +91,6 @@ public class UsersControllerTest
         var request = new ExportUsersRequest(fileType, "America/New_York");
         _userServiceMock
             .Setup(x => x.ExportUsersAsync(
-                It.IsAny<Guid>(),
                 It.IsAny<FileType>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<byte>());

@@ -54,7 +54,6 @@ public class UserControllerTests
 
         _userServiceMock
             .Setup(service => service.UpdateUserStatusAsync(
-                It.IsAny<Guid>(),
                 It.Is<Guid>(id => id == userDto.Id),
                 It.IsAny<Status>(),
                 It.IsAny<CancellationToken>()))
@@ -66,11 +65,9 @@ public class UserControllerTests
         // Arrange
         using (new AssertionScope())
         {
-            var actualResult = actualResponse.Result as OkObjectResult;
+            var actualResult = actualResponse as OkObjectResult;
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<ActionResult<UserResponse>>();
-            actualResponse.Result.Should().BeOfType<OkObjectResult>();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
             actualResult?.Value.Should().BeOfType<UserResponse>();
             (actualResult?.Value as UserResponse)?.Id.Should().Be(userDto.Id);
@@ -84,7 +81,6 @@ public class UserControllerTests
         var request = TestData.UpdateUserFaker.Generate();
         _userServiceMock
             .Setup(service => service.UpdateUserByIdAsync(
-                It.IsAny<Guid>(),
                 It.IsAny<Guid>(),
                 It.IsAny<UpdateUserDto>(),
                 It.IsAny<CancellationToken>()))
@@ -111,7 +107,6 @@ public class UserControllerTests
         var request = TestData.UpdateUserFaker.Generate();
         _userServiceMock
             .Setup(service => service.UpdateUserByIdAsync(
-                It.IsAny<Guid>(),
                 It.Is<Guid>(id => id == userDto.Id),
                 It.IsAny<UpdateUserDto>(),
                 It.IsAny<CancellationToken>()))

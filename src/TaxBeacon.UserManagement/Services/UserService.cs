@@ -277,7 +277,7 @@ public class UserService: IUserService
     }
 
     public async Task<byte[]> ExportUsersAsync(FileType fileType,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         byte[] result;
         if (_currentUserService is { IsUserInTenant: false, IsSuperAdmin: true })
@@ -326,7 +326,7 @@ public class UserService: IUserService
 
     public async Task<OneOf<Success, NotFound>> ChangeUserRolesAsync(Guid userId,
         Guid[] roleIds,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         if (!await IsUserExists(userId, cancellationToken))
         {
