@@ -10,6 +10,10 @@ namespace TaxBeacon.DAL.Entities
 
         public Guid ProgramId { get; set; }
 
+        public DateTime? DeactivationDateTimeUtc { get; set; }
+
+        public DateTime? ReactivationDateTimeUtc { get; set; }
+
         public Program Program { get; set; } = null!;
 
         public Status Status { get; set; }
