@@ -19,7 +19,7 @@ public class UpdateProgramRequestValidatorTest
             .CustomInstantiator(f => new UpdateProgramRequest(
                 f.Lorem.Word(),
                 f.Lorem.Word(),
-                f.Lorem.Text(),
+                f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.PickRandom<Jurisdiction>(),
@@ -64,7 +64,7 @@ public class UpdateProgramRequestValidatorTest
             .CustomInstantiator(f => new UpdateProgramRequest(
                 name,
                 f.Lorem.Word(),
-                f.Lorem.Text(),
+                f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.PickRandom<Jurisdiction>(),
@@ -108,7 +108,7 @@ public class UpdateProgramRequestValidatorTest
             .CustomInstantiator(f => new UpdateProgramRequest(
                 name,
                 f.Lorem.Word(),
-                f.Lorem.Text(),
+                f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.PickRandom<Jurisdiction>(),
@@ -152,7 +152,7 @@ public class UpdateProgramRequestValidatorTest
             .CustomInstantiator(f => new UpdateProgramRequest(
             f.Lorem.Word(),
             f.Lorem.Word(),
-            f.Lorem.Text(),
+            f.Lorem.Word(),
             f.Lorem.Word(),
             f.Lorem.Word(),
             f.PickRandom<Jurisdiction>(),
