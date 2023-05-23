@@ -364,7 +364,7 @@ public class UserService: IUserService
         UpdateUserDto updateUserDto,
         CancellationToken cancellationToken = default)
     {
-        var getUserResult = await GetUserDetailsByIdAsync(userId, cancellationToken);
+        var getUserResult = await GetUserByIdAsync(userId, cancellationToken);
 
         if (!getUserResult.TryPickT0(out var user, out var notFound))
         {
@@ -398,24 +398,12 @@ public class UserService: IUserService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        var userDto = user.Adapt<UserDto>();
-        userDto.Roles = string.Join(", ", await _context
-            .TenantUserRoles
-            .Where(tu => tu.TenantId == _currentUserService.TenantId && tu.UserId == userId)
-            .Join(_context.TenantRoles,
-                tur => new { tur.TenantId, tur.RoleId },
-                tr => new { tr.TenantId, tr.RoleId },
-                (tur, tr) => tr.RoleId)
-            .Join(_context.Roles, id => id, r => r.Id, (id, r) => r.Name)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken));
-
         _logger.LogInformation("{dateTime} - User ({createdUserId}) was updated by {@userId}",
             now,
             user.Id,
             _currentUserService.UserId);
 
-        return userDto;
+        return await GetUserDetailsByIdAsync(userId, cancellationToken);
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1,
@@ -424,7 +412,7 @@ public class UserService: IUserService
         page = page == 0 ? 1 : page;
         pageSize = pageSize == 0 ? 10 : pageSize;
 
-        var getUserResult = await GetUserDetailsByIdAsync(userId, cancellationToken);
+        var getUserResult = await GetUserByIdAsync(userId, cancellationToken);
 
         if (!getUserResult.TryPickT0(out var _, out var notFound))
         {
