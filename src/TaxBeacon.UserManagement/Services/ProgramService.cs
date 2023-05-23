@@ -156,7 +156,7 @@ public class ProgramService: IProgramService
         }
 
         var (userFullName, userRoles) = _currentUserService.UserInfo;
-        var previousValues = JsonSerializer.Serialize(program.Adapt<UpdateDivisionDto>());
+        var previousValues = JsonSerializer.Serialize(program.Adapt<UpdateProgramDto>());
 
         var eventDateTime = _dateTimeService.UtcNow;
 
