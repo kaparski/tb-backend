@@ -509,20 +509,8 @@ public class ProgramServiceTests
             (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
             actualResult.TryPickT0(out var programDetailsDto, out _);
             programDetailsDto.Should().NotBeNull();
-            programDetailsDto.Id.Should().Be(program.Id);
-            programDetailsDto.Name.Should().Be(updateProgramDto.Name);
-            programDetailsDto.Reference.Should().Be(updateProgramDto.Reference);
-            programDetailsDto.Overview.Should().Be(updateProgramDto.Overview);
-            programDetailsDto.LegalAuthority.Should().Be(updateProgramDto.LegalAuthority);
-            programDetailsDto.Agency.Should().Be(updateProgramDto.Agency);
-            programDetailsDto.Jurisdiction.Should().Be(updateProgramDto.Jurisdiction);
-            programDetailsDto.State.Should().Be(updateProgramDto.State);
-            programDetailsDto.County.Should().Be(updateProgramDto.County);
-            programDetailsDto.City.Should().Be(updateProgramDto.City);
-            programDetailsDto.IncentivesArea.Should().Be(updateProgramDto.IncentivesArea);
-            programDetailsDto.IncentivesType.Should().Be(updateProgramDto.IncentivesType);
-            programDetailsDto.StartDateTimeUtc.Should().Be(updateProgramDto.StartDateTimeUtc);
-            programDetailsDto.EndDateTimeUtc.Should().Be(updateProgramDto.EndDateTimeUtc);
+            programDetailsDto.Should().BeEquivalentTo(program,
+                opt => opt.ExcludingMissingMembers());
 
             var actualActivityLog = await _dbContextMock.ProgramActivityLogs.LastOrDefaultAsync();
             actualActivityLog.Should().NotBeNull();
