@@ -11,7 +11,8 @@ namespace TaxBeacon.API.Authentication
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<PermissionsAuthorizationHandler> _logger;
 
-        public PermissionsAuthorizationHandler(IServiceScopeFactory scopeFactory, ILogger<PermissionsAuthorizationHandler> logger)
+        public PermissionsAuthorizationHandler(IServiceScopeFactory scopeFactory,
+            ILogger<PermissionsAuthorizationHandler> logger)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
@@ -21,14 +22,15 @@ namespace TaxBeacon.API.Authentication
             AuthorizationHandlerContext context,
             PermissionsRequirement requirement)
         {
-
             var email = context.User.Claims
-                .FirstOrDefault(claim => claim.Type.Equals(Claims.EmailClaimName, StringComparison.OrdinalIgnoreCase))
-                ?.Value
-                ??
-                context.User.Claims
-                .FirstOrDefault(claim => claim.Type.Equals(Claims.OtherMails, StringComparison.OrdinalIgnoreCase))
-                ?.Value;
+                            .FirstOrDefault(claim =>
+                                claim.Type.Equals(Claims.EmailClaimName, StringComparison.OrdinalIgnoreCase))
+                            ?.Value
+                        ??
+                        context.User.Claims
+                            .FirstOrDefault(claim =>
+                                claim.Type.Equals(Claims.OtherMails, StringComparison.OrdinalIgnoreCase))
+                            ?.Value;
 
             if (email is null)
             {
@@ -37,28 +39,26 @@ namespace TaxBeacon.API.Authentication
 
             using var scope = _scopeFactory.CreateScope();
 
-            try
-            {
-                var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-                var user = await userService.GetUserByEmailAsync(new MailAddress(email), default);
+            var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+            var getUserResult = await userService.GetUserByEmailAsync(new MailAddress(email));
 
-                if (user.DeactivationDateTimeUtc is not null || user.Status == Status.Deactivated)
-                {
-                    context.Fail();
-                    return;
-                }
-
-                IEnumerable<string> permissions = await userService.GetUserPermissionsAsync(user.Id);
-
-                if (permissions.Intersect(requirement.Permissions).Any())
-                {
-                    context.Succeed(requirement);
-                }
-            }
-            catch (NotFoundException ex)
+            if (!getUserResult.TryPickT0(out var user, out _))
             {
                 context.Fail();
-                _logger.LogError(ex, "Failed to authenticate user with {@email}", email);
+                _logger.LogError("Failed to authenticate user with {@email}", email);
+            }
+
+            if (user.DeactivationDateTimeUtc is not null || user.Status == Status.Deactivated)
+            {
+                context.Fail();
+                return;
+            }
+
+            IEnumerable<string> permissions = await userService.GetUserPermissionsAsync(user.Id);
+
+            if (permissions.Intersect(requirement.Permissions).Any())
+            {
+                context.Succeed(requirement);
             }
         }
     }

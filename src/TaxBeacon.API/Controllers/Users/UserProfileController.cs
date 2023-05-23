@@ -30,7 +30,7 @@ public class UserProfileController: BaseController
     public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
     {
         var currentUserId = _currentUserService.UserId;
-        var userDto = await _userService.GetUserByIdAsync(currentUserId, cancellationToken);
+        var userDto = await _userService.GetUserDetailsByIdAsync(currentUserId, cancellationToken);
 
         return Ok(userDto.Adapt<UserResponse>());
     }
