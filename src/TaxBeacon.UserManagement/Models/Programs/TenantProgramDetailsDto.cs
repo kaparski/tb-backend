@@ -34,5 +34,9 @@ public class TenantProgramDetailsDto
 
     public DateTime CreatedDateTimeUtc { get; set; }
 
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
+
     public Status Status { get; set; }
 }

@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using NPOI.SS.Formula.Functions;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
@@ -535,6 +536,45 @@ public class ProgramServiceTests
     }
 
     [Fact]
+    public async Task UpdateTenantProgramStatusAsync_ActiveProgramStatusAndProgramId_UpdatedProgram()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var tenantProgram = TestData.TestTenantProgram.Generate();
+        var currentDate = DateTime.UtcNow;
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.TenantsPrograms.AddAsync(tenantProgram);
+        await _dbContextMock.SaveChangesAsync();
+
+        _dateTimeServiceMock
+            .Setup(ds => ds.UtcNow)
+            .Returns(currentDate);
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantRoles)
+            .Returns(Array.Empty<string>());
+
+        _currentUserServiceMock
+            .Setup(s => s.Roles)
+            .Returns(Array.Empty<string>());
+
+        //Act
+        var actualResult = await _programService.UpdateTenantProgramStatusAsync(tenantProgram.ProgramId, Status.Active);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out var programDetails, out _).Should().BeTrue();
+            programDetails.Status.Should().Be(Status.Active);
+            programDetails.DeactivationDateTimeUtc.Should().BeNull();
+            programDetails.ReactivationDateTimeUtc.Should().Be(currentDate);
+        }
+    }
+
+    [Fact]
+
     public async Task UpdateProgramAsync_ProgramDoesNotExist_ReturnsNotFound()
     {
         // Arrange
@@ -554,8 +594,73 @@ public class ProgramServiceTests
         }
     }
 
+    [Fact]
+    public async Task UpdateTenantProgramStatusAsync_DeactivatedProgramStatusAndProgramId_UpdatedTenantProgram()
+    {
+        //Arrange
+        var tenant = TestData.TestTenant.Generate();
+        var tenantProgram = TestData.TestTenantProgram.Generate();
+        var currentDate = DateTime.UtcNow;
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.TenantsPrograms.AddAsync(tenantProgram);
+        await _dbContextMock.SaveChangesAsync();
+
+        _dateTimeServiceMock
+            .Setup(ds => ds.UtcNow)
+            .Returns(currentDate);
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantRoles)
+            .Returns(Array.Empty<string>());
+
+        _currentUserServiceMock
+            .Setup(s => s.Roles)
+            .Returns(Array.Empty<string>());
+
+        //Act
+        var actualResult = await _programService.UpdateTenantProgramStatusAsync(tenantProgram.ProgramId, Status.Deactivated);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out var programDetails, out _).Should().BeTrue();
+            programDetails.Status.Should().Be(Status.Deactivated);
+            programDetails.ReactivationDateTimeUtc.Should().BeNull();
+            programDetails.DeactivationDateTimeUtc.Should().Be(currentDate);
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(TestData.UpdatedStatusInvalidData), MemberType = typeof(TestData))]
+    public async Task UpdateTenantProgramStatusAsync_ProgramStatusAndProgramIdNotInDb_ReturnNotFound(Status status, Guid programId)
+    {
+        //Act
+        var actualResult = await _programService.UpdateTenantProgramStatusAsync(programId, status);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT1(out _, out _).Should().BeTrue();
+        }
+    }
+
     private static class TestData
     {
+        public static readonly Faker<Tenant> TestTenant =
+          new Faker<Tenant>()
+              .RuleFor(t => t.Id, _ => Guid.NewGuid())
+              .RuleFor(t => t.Name, f => f.Company.CompanyName())
+              .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
+
+        public static IEnumerable<object[]> UpdatedStatusInvalidData =>
+          new List<object[]>
+          {
+                new object[] { Status.Active, Guid.NewGuid() },
+                new object[] { Status.Deactivated, Guid.Empty }
+          };
+
         public static readonly Faker<Program> TestProgram = new Faker<Program>()
             .RuleFor(p => p.Id, f => Guid.NewGuid())
             .RuleFor(p => p.Name, f => f.Name.FirstName());
@@ -563,6 +668,8 @@ public class ProgramServiceTests
         public static readonly Faker<TenantProgram> TestTenantProgram = new Faker<TenantProgram>()
             .RuleFor(p => p.TenantId, f => TenantId)
             .RuleFor(p => p.Status, f => f.PickRandom<Status>())
+            .RuleFor(u => u.ReactivationDateTimeUtc, f => DateTime.UtcNow)
+            .RuleFor(u => u.DeactivationDateTimeUtc, f => DateTime.UtcNow)
             .RuleFor(p => p.Program, f => TestProgram.Generate());
 
         public static readonly Faker<User> TestUser =

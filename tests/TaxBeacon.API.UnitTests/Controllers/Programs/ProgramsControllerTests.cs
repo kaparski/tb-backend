@@ -14,6 +14,7 @@ using TaxBeacon.API.Controllers.Programs;
 using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Programs;
 using TaxBeacon.UserManagement.Services;
@@ -24,6 +25,8 @@ public class ProgramsControllerTests
 {
     private readonly Mock<IProgramService> _programServiceMock;
     private readonly ProgramsController _controller;
+
+    public static readonly Guid TenantId = Guid.NewGuid();
 
     public ProgramsControllerTests()
     {
@@ -278,6 +281,40 @@ public class ProgramsControllerTests
         {
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Theory]
+    [InlineData(Status.Deactivated)]
+    [InlineData(Status.Active)]
+    public async Task UpdateTenantProgramStatusAsync_NewProgramStatus_ReturnsUpdatedTenantProgram(Status status)
+    {
+        // Arrange
+        var tenantProgramDto = TestData.TestTenantProgram.Generate();
+        tenantProgramDto.Status = Status.Deactivated;
+        tenantProgramDto.DeactivationDateTimeUtc = DateTime.UtcNow;
+
+        _programServiceMock
+            .Setup(service => service.UpdateTenantProgramStatusAsync(
+                It.Is<Guid>(id => id == tenantProgramDto.Id),
+                It.IsAny<Status>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(tenantProgramDto);
+
+        // Act
+        var actualResponse = await _controller.UpdateProgramStatusAsync(tenantProgramDto.Id, status, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse.Result as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<ActionResult<TenantProgramDetailsResponse>>();
+            actualResponse.Result.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<TenantProgramDetailsResponse>();
+            (actualResult?.Value as TenantProgramDetailsResponse)?.Id.Should().Be(tenantProgramDto.Id);
         }
     }
 
@@ -579,5 +616,14 @@ public class ProgramsControllerTests
                 f.Lorem.Word(),
                 f.Date.Past(),
                 f.Date.Future()));
+
+        public static readonly Faker<Program> TestProgram = new Faker<Program>()
+            .RuleFor(p => p.Id, f => Guid.NewGuid())
+            .RuleFor(p => p.Name, f => f.Name.FirstName());
+
+        public static readonly Faker<TenantProgramDetailsDto> TestTenantProgram = new Faker<TenantProgramDetailsDto>()
+            .RuleFor(p => p.Status, f => f.PickRandom<Status>())
+            .RuleFor(u => u.ReactivationDateTimeUtc, f => DateTime.UtcNow)
+            .RuleFor(u => u.DeactivationDateTimeUtc, f => DateTime.UtcNow);
     }
 }

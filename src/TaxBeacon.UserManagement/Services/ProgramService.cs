@@ -11,6 +11,8 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -187,6 +189,85 @@ public class ProgramService: IProgramService
         return program.Adapt<ProgramDetailsDto>();
     }
 
+    public async Task<OneOf<TenantProgramDetailsDto, NotFound>> UpdateTenantProgramStatusAsync(Guid id, Status status,
+        CancellationToken cancellationToken = default)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        // TODO: Move the same code into separated method
+        var tenantProgram = await _context
+                       .TenantsPrograms
+                       .FirstOrDefaultAsync(p => p.ProgramId == id && p.TenantId == tenantId, cancellationToken);
+
+        if (tenantProgram is null)
+        {
+            return new NotFound();
+        }
+
+        var now = _dateTimeService.UtcNow;
+
+        switch (status)
+        {
+            case Status.Deactivated:
+                tenantProgram.DeactivationDateTimeUtc = now;
+                tenantProgram.ReactivationDateTimeUtc = null;
+                tenantProgram.Status = Status.Deactivated;
+                break;
+            case Status.Active:
+                tenantProgram.ReactivationDateTimeUtc = now;
+                tenantProgram.DeactivationDateTimeUtc = null;
+                tenantProgram.Status = Status.Active;
+                break;
+        }
+
+        tenantProgram.Status = status;
+
+        var (currentUserFullName, currentUserRoles) = _currentUserService.UserInfo;
+
+        var programActivityLog = status switch
+        {
+            Status.Active => new ProgramActivityLog
+            {
+                TenantId = tenantId,
+                ProgramId = tenantProgram.ProgramId,
+                Date = now,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new ProgramReactivatedEvent(_currentUserService.UserId,
+                        now,
+                        currentUserFullName,
+                        currentUserRoles
+                        )),
+                EventType = ProgramEventType.ProgramReactivatedEvent
+            },
+            Status.Deactivated => new ProgramActivityLog
+            {
+                TenantId = tenantId,
+                ProgramId = tenantProgram.ProgramId,
+                Date = _dateTimeService.UtcNow,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new ProgramDeactivatedEvent(_currentUserService.UserId,
+                        now,
+                        currentUserFullName,
+                        currentUserRoles)),
+                EventType = ProgramEventType.ProgramDeactivatedEvent
+            },
+            _ => throw new InvalidOperationException()
+        };
+
+        await _context.ProgramActivityLogs.AddAsync(programActivityLog, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Program ({createdProgramId}) status was changed to {newUserStatus} by {@userId}",
+            _dateTimeService.UtcNow,
+            tenantProgram.ProgramId,
+            status,
+            _currentUserService.UserId);
+
+        return await GetTenantProgramDetailsAsync(id, cancellationToken);
+    }
+
     public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
         =>
             _context.TenantsPrograms
@@ -265,6 +346,8 @@ public class ProgramService: IProgramService
 
         var programDetailsDto = program.Program.Adapt<TenantProgramDetailsDto>();
         programDetailsDto.Status = program.Status;
+        programDetailsDto.DeactivationDateTimeUtc = program.DeactivationDateTimeUtc;
+        programDetailsDto.ReactivationDateTimeUtc = program.ReactivationDateTimeUtc;
         programDetailsDto.Jurisdiction = program.Program.Jurisdiction.ToString();
 
         return programDetailsDto;
