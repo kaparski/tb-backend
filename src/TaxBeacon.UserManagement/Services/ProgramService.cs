@@ -147,8 +147,47 @@ public class ProgramService: IProgramService
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
-    public Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public async Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateProgramDto,
+        CancellationToken cancellationToken = default)
+    {
+        var program = await _context.Programs.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+        if (program is null)
+        {
+            return new NotFound();
+        }
+
+        var (userFullName, userRoles) = _currentUserService.UserInfo;
+        var previousValues = JsonSerializer.Serialize(program.Adapt<UpdateProgramDto>());
+
+        var eventDateTime = _dateTimeService.UtcNow;
+
+        await _context.ProgramActivityLogs.AddAsync(new ProgramActivityLog
+        {
+            ProgramId = program.Id,
+            Date = eventDateTime,
+            Revision = 1,
+            EventType = ProgramEventType.ProgramUpdatedEvent,
+            Event = JsonSerializer.Serialize(new ProgramUpdatedEvent(
+                _currentUserService.UserId,
+                userFullName,
+                userRoles ?? string.Empty,
+                eventDateTime,
+                previousValues,
+                JsonSerializer.Serialize(updateProgramDto)))
+        }, cancellationToken);
+
+        updateProgramDto.Adapt(program);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Program ({program}) was updated by {@userId}",
+            eventDateTime,
+            id,
+            _currentUserService.UserId);
+
+        return program.Adapt<ProgramDetailsDto>();
+    }
 
     public async Task<OneOf<TenantProgramDetailsDto, NotFound>> UpdateTenantProgramStatusAsync(Guid id, Status status,
         CancellationToken cancellationToken = default)

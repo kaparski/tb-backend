@@ -19,7 +19,7 @@ public interface IProgramService
     Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateTenantDto,
+    Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateProgramDto,
         CancellationToken cancellationToken = default);
 
     Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery,

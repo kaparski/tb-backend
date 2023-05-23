@@ -243,6 +243,32 @@ public class ProgramsController: BaseController
     }
 
     /// <summary>
+    /// Update program details
+    /// </summary>
+    /// <response code="200">Returns updated program details</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Program is not found</response>
+    /// <returns>Updated program details</returns>
+    [HasPermissions(Common.Permissions.Programs.ReadWrite)]
+    [HttpPatch("{id:guid}", Name = "UpdateProgram")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(ProgramDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateProgramAsync([FromRoute] Guid id, [FromBody] UpdateProgramRequest request,
+        CancellationToken cancellationToken)
+    {
+        var resultOneOf = await _programService.UpdateProgramAsync(
+            id, request.Adapt<UpdateProgramDto>(), cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            result => Ok(result.Adapt<ProgramDetailsResponse>()),
+            notFound => NotFound());
+    }
+
+    /// <summary>
     /// Endpoint to update program status
     /// </summary>
     /// <param name="id">Program id</param>

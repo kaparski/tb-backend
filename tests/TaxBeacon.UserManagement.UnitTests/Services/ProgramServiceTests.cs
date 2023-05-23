@@ -487,6 +487,43 @@ public class ProgramServiceTests
     }
 
     [Fact]
+    public async Task UpdateProgramAsync_ProgramExists_ReturnsUpdatedProgramDetailsAndCapturesActivityLog()
+    {
+        // Arrange
+        var updateProgramDto = TestData.UpdateProgramDtoFaker.Generate();
+        var program = TestData.TestProgram.Generate();
+        await _dbContextMock.Programs.AddAsync(program);
+        await _dbContextMock.SaveChangesAsync();
+
+        var currentDate = DateTime.UtcNow;
+        _dateTimeServiceMock
+            .Setup(service => service.UtcNow)
+            .Returns(currentDate);
+
+        // Act
+        var actualResult = await _programService.UpdateProgramAsync(program.Id, updateProgramDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out var programDetailsDto, out _);
+            programDetailsDto.Should().NotBeNull();
+            programDetailsDto.Should().BeEquivalentTo(program,
+                opt => opt.ExcludingMissingMembers());
+
+            var actualActivityLog = await _dbContextMock.ProgramActivityLogs.LastOrDefaultAsync();
+            actualActivityLog.Should().NotBeNull();
+            actualActivityLog?.Date.Should().Be(currentDate);
+            actualActivityLog?.EventType.Should().Be(ProgramEventType.ProgramUpdatedEvent);
+            actualActivityLog?.ProgramId.Should().Be(program.Id);
+
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Once);
+        }
+    }
+
+    [Fact]
     public async Task UpdateTenantProgramStatusAsync_ActiveProgramStatusAndProgramId_UpdatedProgram()
     {
         //Arrange
@@ -521,6 +558,27 @@ public class ProgramServiceTests
             programDetails.Status.Should().Be(Status.Active);
             programDetails.DeactivationDateTimeUtc.Should().BeNull();
             programDetails.ReactivationDateTimeUtc.Should().Be(currentDate);
+        }
+    }
+
+    [Fact]
+
+    public async Task UpdateProgramAsync_ProgramDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var updateProgramDto = TestData.UpdateProgramDtoFaker.Generate();
+        var program = TestData.TestProgram.Generate();
+        await _dbContextMock.Programs.AddAsync(program);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _programService.UpdateProgramAsync(Guid.NewGuid(), updateProgramDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeTrue();
         }
     }
 
@@ -627,5 +685,21 @@ public class ProgramServiceTests
             .RuleFor(x => x.Event, (f, x) => JsonSerializer.Serialize(
                 new ProgramCreatedEvent(Guid.NewGuid(), x.Date, f.Name.FullName(), f.Name.JobTitle())
             ));
+
+        public static readonly Faker<UpdateProgramDto> UpdateProgramDtoFaker =
+            new Faker<UpdateProgramDto>()
+                .RuleFor(dto => dto.Name, f => f.Name.FirstName())
+                .RuleFor(dto => dto.Reference, f => f.Company.CompanyName())
+                .RuleFor(dto => dto.Overview, f => f.Lorem.Text())
+                .RuleFor(dto => dto.LegalAuthority, f => f.Lorem.Word())
+                .RuleFor(dto => dto.Agency, f => f.Internet.Url())
+                .RuleFor(dto => dto.Jurisdiction, f => f.PickRandom<Jurisdiction>())
+                .RuleFor(dto => dto.State, f => f.Address.State())
+                .RuleFor(dto => dto.County, f => f.Address.County())
+                .RuleFor(dto => dto.City, f => f.Address.City())
+                .RuleFor(dto => dto.IncentivesArea, f => f.Lorem.Word())
+                .RuleFor(dto => dto.IncentivesType, f => f.Lorem.Word())
+                .RuleFor(dto => dto.StartDateTimeUtc, f => f.Date.Past())
+                .RuleFor(dto => dto.EndDateTimeUtc, f => f.Date.Future());
     }
 }
