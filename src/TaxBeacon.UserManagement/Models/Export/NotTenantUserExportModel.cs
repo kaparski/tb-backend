@@ -48,7 +48,7 @@ public sealed class NotTenantUserExportModel: IRegister
         config.NewConfig<User, NotTenantUserExportModel>()
             .Map(dest => dest.Roles, src =>
                 src.UserRoles
-                    .SelectMany(ur => ur.Role.Name)
+                    .Select(ur => ur.Role.Name)
                     .GroupBy(r => 1, name => name)
                     .Select(group => string.Join(", ", group.Select(name => name)))
                     .FirstOrDefault());
