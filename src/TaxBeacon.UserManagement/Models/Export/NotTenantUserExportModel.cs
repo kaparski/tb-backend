@@ -12,8 +12,6 @@ public sealed class NotTenantUserExportModel: IRegister
 
     public string FullName { get; set; } = string.Empty;
 
-    public string Department { get; set; } = string.Empty;
-
     public string Roles { get; set; } = string.Empty;
 
     [Ignore]
