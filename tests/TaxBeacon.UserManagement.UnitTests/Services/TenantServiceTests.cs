@@ -136,15 +136,15 @@ public class TenantServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 123, OrderBy = "name desc" };
 
         // Act
-        var tenantsPage = await _tenantService.GetTenantsAsync(query);
+        var pageOfTenants = await _tenantService.GetTenantsAsync(query);
 
         // Assert
         using (new AssertionScope())
         {
-            tenantsPage.Should().NotBeNull();
-            var listOfTenants = tenantsPage.Query.ToList();
+            pageOfTenants.Should().NotBeNull();
+            var listOfTenants = pageOfTenants.Query.ToList();
             listOfTenants.Count.Should().Be(0);
-            tenantsPage.Count.Should().Be(0);
+            pageOfTenants.Count.Should().Be(0);
         }
     }
 
