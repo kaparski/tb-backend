@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using NPOI.Util;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
@@ -89,12 +90,11 @@ public class JobTitleServiceTests
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
 
         // Act
-        var actualResult = await _serviceAreaService.GetJobTitlesAsync(query, default);
+        var pageOfJobTitles = await _serviceAreaService.GetJobTitlesAsync(query, default);
 
         // Arrange
         using (new AssertionScope())
         {
-            actualResult.TryPickT0(out var pageOfJobTitles, out _);
             pageOfJobTitles.Should().NotBeNull();
             pageOfJobTitles.Count.Should().Be(5);
             var listOfJobTitles = pageOfJobTitles.Query.ToList();
@@ -115,12 +115,11 @@ public class JobTitleServiceTests
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
 
         // Act
-        var actualResult = await _serviceAreaService.GetJobTitlesAsync(query, default);
+        var pageOfJobTitles = await _serviceAreaService.GetJobTitlesAsync(query, default);
 
         // Arrange
         using (new AssertionScope())
         {
-            actualResult.TryPickT0(out var pageOfJobTitles, out _);
             pageOfJobTitles.Should().NotBeNull();
             pageOfJobTitles.Count.Should().Be(5);
             var listOfJobTitles = pageOfJobTitles.Query.ToList();
@@ -144,8 +143,7 @@ public class JobTitleServiceTests
         var actualResult = await _serviceAreaService.GetJobTitlesAsync(query, default);
 
         // Arrange
-        actualResult.IsT1.Should().BeTrue();
-        actualResult.IsT0.Should().BeFalse();
+        actualResult.Query.Count().Should().Be(0);
     }
 
     [Fact]

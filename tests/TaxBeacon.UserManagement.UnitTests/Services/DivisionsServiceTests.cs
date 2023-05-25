@@ -116,17 +116,16 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
+            var divisionsResult = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
             {
-                divisionsOneOf.TryPickT0(out var pageOfDivisions, out _);
-                pageOfDivisions.Should().NotBeNull();
-                var listOfDivisions = pageOfDivisions.Query.ToList();
+                divisionsResult.Should().NotBeNull();
+                var listOfDivisions = divisionsResult.Query.ToList();
                 listOfDivisions.Count.Should().Be(5);
                 listOfDivisions.Select(x => x.Name).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
-                pageOfDivisions.Count.Should().Be(5);
+                divisionsResult.Count.Should().Be(5);
             }
         }
 
@@ -145,12 +144,11 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
+            var pageOfDivisions = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
             {
-                divisionsOneOf.TryPickT0(out var pageOfDivisions, out _);
                 pageOfDivisions.Should().NotBeNull();
                 var listOfDivisions = pageOfDivisions.Query.ToList();
                 listOfDivisions.Count.Should().Be(4);
@@ -171,12 +169,11 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
+            var pageOfDivisions = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
             {
-                divisionsOneOf.TryPickT0(out var pageOfDivisions, out _);
                 pageOfDivisions.Should().NotBeNull();
                 var listOfDivisions = pageOfDivisions.Query.ToList();
                 listOfDivisions.Count.Should().Be(0);
@@ -201,11 +198,10 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
+            var pageOfDivisions = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
-            divisionsOneOf.TryPickT0(out var pageOfDivisions, out _);
-            pageOfDivisions.Should().BeNull();
+            pageOfDivisions.Query.Count().Should().Be(0);
         }
 
         [Theory]

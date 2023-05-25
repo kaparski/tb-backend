@@ -50,21 +50,11 @@ public class TenantService: ITenantService
                                    ?? ImmutableDictionary<(TenantEventType, uint), ITenantActivityFactory>.Empty;
     }
 
-    public async Task<OneOf<QueryablePaging<TenantDto>, NotFound>> GetTenantsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var tenants = await _context
+    public async Task<QueryablePaging<TenantDto>> GetTenantsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default) => await _context
             .Tenants
             .ProjectToType<TenantDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        if (gridifyQuery.Page == 1 || tenants.Query.Any())
-        {
-            return tenants;
-        }
-
-        return new NotFound();
-    }
 
     public async Task<byte[]> ExportTenantsAsync(FileType fileType,
         CancellationToken cancellationToken)

@@ -52,11 +52,9 @@ public class TenantsController: BaseController
             return BadRequest();
         }
 
-        var tenantsOneOf = await _tenantService.GetTenantsAsync(query, cancellationToken);
-        return tenantsOneOf.Match<IActionResult>(
-            tenants => Ok(new QueryablePaging<TenantResponse>(tenants.Count,
-                tenants.Query.ProjectToType<TenantResponse>())),
-            notFound => NotFound());
+        var tenants = await _tenantService.GetTenantsAsync(query, cancellationToken);
+        return Ok(new QueryablePaging<TenantResponse>(tenants.Count,
+            tenants.Query.ProjectToType<TenantResponse>()));
     }
 
     /// <summary>

@@ -56,12 +56,10 @@ public class ServiceAreasController: BaseController
             return BadRequest();
         }
 
-        var serviceAreasOneOf = await _serviceAreaService.GetServiceAreasAsync(query, cancellationToken);
+        var serviceAreas = await _serviceAreaService.GetServiceAreasAsync(query, cancellationToken);
 
-        return serviceAreasOneOf.Match<IActionResult>(
-            serviceAreas => Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count,
-                serviceAreas.Query.ProjectToType<ServiceAreaResponse>())),
-            notFound => NotFound());
+        return Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count,
+            serviceAreas.Query.ProjectToType<ServiceAreaResponse>()));
     }
 
     /// <summary>

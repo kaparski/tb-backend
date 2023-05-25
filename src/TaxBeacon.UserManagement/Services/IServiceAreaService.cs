@@ -8,7 +8,7 @@ namespace TaxBeacon.UserManagement.Services;
 
 public interface IServiceAreaService
 {
-    Task<OneOf<QueryablePaging<ServiceAreaDto>, NotFound>> GetServiceAreasAsync(GridifyQuery gridifyQuery,
+    Task<QueryablePaging<ServiceAreaDto>> GetServiceAreasAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken);
 
     Task<byte[]> ExportServiceAreasAsync(FileType fileType,

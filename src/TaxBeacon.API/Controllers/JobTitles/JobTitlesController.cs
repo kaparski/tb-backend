@@ -54,12 +54,10 @@ public class JobTitlesController: BaseController
             return BadRequest();
         }
 
-        var jobTitlesOneOf = await _jobTitleService.GetJobTitlesAsync(query, cancellationToken);
+        var jobTitles = await _jobTitleService.GetJobTitlesAsync(query, cancellationToken);
 
-        return jobTitlesOneOf.Match<IActionResult>(
-            jobTitles => Ok(new QueryablePaging<JobTitleResponse>(jobTitles.Count,
-                jobTitles.Query.ProjectToType<JobTitleResponse>())),
-            notFound => NotFound());
+        return Ok(new QueryablePaging<JobTitleResponse>(jobTitles.Count,
+            jobTitles.Query.ProjectToType<JobTitleResponse>()));
     }
 
     /// <summary>

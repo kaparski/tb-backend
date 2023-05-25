@@ -52,10 +52,8 @@ public class TeamsController: BaseController
             return BadRequest();
         }
 
-        var teamOneOf = await _teamService.GetTeamsAsync(query, cancellationToken);
-        return teamOneOf.Match<IActionResult>(
-            teams => Ok(new QueryablePaging<TeamResponse>(teams.Count, teams.Query.ProjectToType<TeamResponse>())),
-            notFound => NotFound());
+        var teams = await _teamService.GetTeamsAsync(query, cancellationToken);
+        return Ok(new QueryablePaging<TeamResponse>(teams.Count, teams.Query.ProjectToType<TeamResponse>()));
     }
 
     /// <summary>

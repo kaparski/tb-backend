@@ -50,10 +50,9 @@ public class DepartmentService: IDepartmentService
                                    ?? ImmutableDictionary<(DepartmentEventType, uint), IDepartmentActivityFactory>.Empty;
     }
 
-    public async Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var departments = await _context
+    public async Task<QueryablePaging<DepartmentDto>> GetDepartmentsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default) =>
+        await _context
             .Departments
             .Where(d => d.TenantId == _currentUserService.TenantId)
             .Select(d => new DepartmentDto
@@ -70,14 +69,6 @@ public class DepartmentService: IDepartmentService
                     .FirstOrDefault() ?? string.Empty
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        if (gridifyQuery.Page == 1 || departments.Query.Any())
-        {
-            return departments;
-        }
-
-        return new NotFound();
-    }
 
     public async Task<byte[]> ExportDepartmentsAsync(FileType fileType,
         CancellationToken cancellationToken)

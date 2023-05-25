@@ -90,28 +90,6 @@ public class ServiceAreasControllerTest
         }
     }
 
-    [Fact]
-    public async Task GetServiceAreaList_TenantIdDoesNotExist_ReturnNotFoundStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _serviceAreaServiceMock.Setup(p => p.GetServiceAreasAsync(query, default))
-            .ReturnsAsync(new NotFound());
-
-        // Act
-        var actualResponse = await _controller.GetServiceAreaList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as NotFoundResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<NotFoundResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-        }
-    }
-
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]

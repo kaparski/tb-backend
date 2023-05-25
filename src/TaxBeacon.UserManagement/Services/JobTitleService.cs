@@ -50,10 +50,9 @@ public class JobTitleService: IJobTitleService
                             ?? ImmutableDictionary<(JobTitleEventType, uint), IJobTitleActivityFactory>.Empty;
     }
 
-    public async Task<OneOf<QueryablePaging<JobTitleDto>, NotFound>> GetJobTitlesAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var jobTitles = await _context
+    public async Task<QueryablePaging<JobTitleDto>> GetJobTitlesAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default) =>
+        await _context
             .JobTitles
             .Where(d => d.TenantId == _currentUserService.TenantId)
             .Select(d => new JobTitleDto()
@@ -66,14 +65,6 @@ public class JobTitleService: IJobTitleService
                 Department = d.Department == null ? string.Empty : d.Department.Name
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        if (gridifyQuery.Page == 1 || jobTitles.Query.Any())
-        {
-            return jobTitles;
-        }
-
-        return new NotFound();
-    }
 
     public async Task<byte[]> ExportJobTitlesAsync(FileType fileType,
         CancellationToken cancellationToken)

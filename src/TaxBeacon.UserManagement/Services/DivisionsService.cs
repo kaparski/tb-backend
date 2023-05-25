@@ -48,13 +48,10 @@ namespace TaxBeacon.UserManagement.Services
                                          ?? ImmutableDictionary<(DivisionEventType, uint), IDivisionActivityFactory>.Empty;
         }
 
-        public async Task<OneOf<QueryablePaging<DivisionDto>, NotFound>> GetDivisionsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-        {
-            var tenantId = _currentUserService.TenantId;
-            var divisions = await _context
+        public async Task<QueryablePaging<DivisionDto>> GetDivisionsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default) => await _context
                 .Divisions
-                .Where(div => div.TenantId == tenantId)
+                .Where(div => div.TenantId == _currentUserService.TenantId)
                 .Select(div => new DivisionDto
                 {
                     Id = div.Id,
@@ -69,14 +66,6 @@ namespace TaxBeacon.UserManagement.Services
                     .FirstOrDefault() ?? string.Empty
                 })
                 .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-            if (gridifyQuery.Page == 1 || divisions.Query.Any())
-            {
-                return divisions;
-            }
-
-            return new NotFound();
-        }
 
         public async Task<byte[]> ExportDivisionsAsync(FileType fileType,
         CancellationToken cancellationToken)

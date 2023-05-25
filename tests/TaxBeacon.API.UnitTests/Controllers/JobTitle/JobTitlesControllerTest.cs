@@ -87,28 +87,6 @@ public class JobTitlesControllerTest
         }
     }
 
-    [Fact]
-    public async Task GetJobTitleList_TenantIdDoesNotExist_ReturnNotFoundStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _jobTitleServiceMock.Setup(p => p.GetJobTitlesAsync(query, default))
-            .ReturnsAsync(new NotFound());
-
-        // Act
-        var actualResponse = await _controller.GetJobTitleList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as NotFoundResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<NotFoundResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-        }
-    }
-
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
