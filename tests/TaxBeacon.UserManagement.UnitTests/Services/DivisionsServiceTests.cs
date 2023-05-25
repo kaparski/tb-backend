@@ -116,16 +116,16 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsResult = await _divisionsService.GetDivisionsAsync(query, default);
+            var pageOfDivisions = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
             {
-                divisionsResult.Should().NotBeNull();
-                var listOfDivisions = divisionsResult.Query.ToList();
+                pageOfDivisions.Should().NotBeNull();
+                var listOfDivisions = pageOfDivisions.Query.ToList();
                 listOfDivisions.Count.Should().Be(5);
                 listOfDivisions.Select(x => x.Name).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
-                divisionsResult.Count.Should().Be(5);
+                pageOfDivisions.Count.Should().Be(5);
             }
         }
 

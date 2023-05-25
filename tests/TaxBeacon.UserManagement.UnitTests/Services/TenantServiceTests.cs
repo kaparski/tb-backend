@@ -96,14 +96,14 @@ public class TenantServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "name asc" };
 
         // Act
-        var tenantsPage = await _tenantService.GetTenantsAsync(query);
+        var pageOfTenants = await _tenantService.GetTenantsAsync(query);
 
         // Assert
-        tenantsPage.Should().NotBeNull();
-        var listOfTenants = tenantsPage.Query.ToList();
+        pageOfTenants.Should().NotBeNull();
+        var listOfTenants = pageOfTenants.Query.ToList();
         listOfTenants.Count.Should().Be(5);
         listOfTenants.Select(x => x.Name).Should().BeInAscendingOrder();
-        tenantsPage.Count.Should().Be(5);
+        pageOfTenants.Count.Should().Be(5);
     }
 
     [Fact]
@@ -116,16 +116,16 @@ public class TenantServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "name desc" };
 
         // Act
-        var tenantsPage = await _tenantService.GetTenantsAsync(query);
+        var pageOfTenants = await _tenantService.GetTenantsAsync(query);
 
         // Assert
         using (new AssertionScope())
         {
-            tenantsPage.Should().NotBeNull();
-            var listOfTenants = tenantsPage.Query.ToList();
+            pageOfTenants.Should().NotBeNull();
+            var listOfTenants = pageOfTenants.Query.ToList();
             listOfTenants.Count.Should().Be(4);
             listOfTenants.Select(x => x.Name).Should().BeInDescendingOrder();
-            tenantsPage.Count.Should().Be(7);
+            pageOfTenants.Count.Should().Be(7);
         }
     }
 
