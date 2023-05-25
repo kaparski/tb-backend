@@ -104,7 +104,9 @@ public class ServiceAreaService: IServiceAreaService
 
     public async Task<OneOf<ServiceAreaDetailsDto, NotFound>> GetServiceAreaDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        var serviceArea = await _context.ServiceAreas.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        var serviceArea = await _context.ServiceAreas
+            .Include(sa => sa.Department)
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
         return serviceArea is null || serviceArea.TenantId != _currentUserService.TenantId
             ? new NotFound()
@@ -120,6 +122,16 @@ public class ServiceAreaService: IServiceAreaService
         if (serviceArea is null)
         {
             return new NotFound();
+        }
+
+        if (updateServiceAreaDto.DepartmentId != Guid.Empty)
+        {
+            var departmentToAdd = await _context.Departments.FirstOrDefaultAsync(d => d.Id == updateServiceAreaDto.DepartmentId);
+
+            if (departmentToAdd != null && departmentToAdd.TenantId != serviceArea.TenantId)
+            {
+                return new NotFound();
+            }
         }
 
         var (userFullName, userRoles) = _currentUserService.UserInfo;
@@ -152,7 +164,7 @@ public class ServiceAreaService: IServiceAreaService
             id,
             _currentUserService.UserId);
 
-        return serviceArea.Adapt<ServiceAreaDetailsDto>();
+        return await GetServiceAreaDetailsByIdAsync(id, cancellationToken);
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
@@ -181,5 +193,34 @@ public class ServiceAreaService: IServiceAreaService
 
         return new ActivityDto(pageCount,
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
+    }
+
+    public async Task<OneOf<QueryablePaging<ServiceAreaUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId, GridifyQuery gridifyQuery, CancellationToken cancellationToken)
+    {
+        var currentTenantId = _currentUserService.TenantId;
+        var serviceArea = await _context.ServiceAreas
+            .FirstOrDefaultAsync(sa => sa.Id == serviceAreaId && sa.TenantId == currentTenantId,
+                cancellationToken);
+
+        if (serviceArea is null)
+        {
+            return new NotFound();
+        }
+
+        var users = await _context
+            .Users
+            .AsNoTracking()
+            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.ServiceAreaId == serviceAreaId)
+            .Select(d => new ServiceAreaUserDto()
+            {
+                Id = d.Id,
+                FullName = d.FullName,
+                Email = d.Email,
+                Team = d.Team != null ? d.Team.Name : string.Empty,
+                JobTitle = d.JobTitle != null ? d.JobTitle.Name : string.Empty,
+            })
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
     }
 }

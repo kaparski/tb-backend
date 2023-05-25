@@ -42,7 +42,6 @@ public class UsersController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -52,10 +51,8 @@ public class UsersController: BaseController
             return BadRequest();
         }
 
-        var usersOneOf = await _userService.GetUsersAsync(query, cancellationToken);
-        return usersOneOf.Match<IActionResult>(
-            users => Ok(new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>())),
-            notFound => NotFound());
+        var users = await _userService.GetUsersAsync(query, cancellationToken);
+        return Ok(new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>()));
     }
 
     /// <summary>
@@ -77,6 +74,7 @@ public class UsersController: BaseController
     /// <response code="201">Returns created user</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
+    /// <response code="409">A user with such an email already exists</response>
     /// <returns>User</returns>
     [HasPermissions(Common.Permissions.Users.ReadWrite)]
     [HttpPost(Name = "CreateUser")]
@@ -84,12 +82,16 @@ public class UsersController: BaseController
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest,
         CancellationToken cancellationToken)
     {
-        var newUser = await _userService.CreateUserAsync(createUserRequest.Adapt<UserDto>(), cancellationToken);
+        var createUserResult = await _userService
+            .CreateUserAsync(createUserRequest.Adapt<UserDto>(), cancellationToken);
 
-        return Created($"/users/{newUser.Id}", newUser.Adapt<UserResponse>());
+        return createUserResult.Match<IActionResult>(
+            newUser => Created($"/users/{newUser.Id}", newUser.Adapt<UserResponse>()),
+            _ => Conflict());
     }
 
     /// <summary>
@@ -111,7 +113,7 @@ public class UsersController: BaseController
     {
         var mimeType = exportUsersRequest.FileType.ToMimeType();
 
-        var users = await _userService.ExportUsersAsync(Guid.Empty, exportUsersRequest.FileType, cancellationToken);
+        var users = await _userService.ExportUsersAsync(exportUsersRequest.FileType, cancellationToken);
 
         return File(users, mimeType, $"users.{exportUsersRequest.FileType.ToString().ToLowerInvariant()}");
     }

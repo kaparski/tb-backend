@@ -1,10 +1,12 @@
-﻿using Npoi.Mapper.Attributes;
+﻿using Mapster;
+using Npoi.Mapper.Attributes;
 using System.ComponentModel.DataAnnotations;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.DAL.Entities;
 
-namespace TaxBeacon.UserManagement.Models
+namespace TaxBeacon.UserManagement.Models.Export
 {
-    public sealed class UserExportModel
+    public sealed class TenantUserExportModel: IRegister
     {
         public string Email { get; set; } = string.Empty;
 
@@ -45,5 +47,14 @@ namespace TaxBeacon.UserManagement.Models
 
         [Column("Reactivation date")]
         public string ReactivationDateTimeView { get; set; } = string.Empty;
+
+        public void Register(TypeAdapterConfig config) =>
+            config.NewConfig<User, TenantUserExportModel>()
+                .Map(dest => dest.Roles, src =>
+                    src.TenantUsers
+                        .SelectMany(tu => tu.TenantUserRoles.Select(tur => tur.TenantRole.Role.Name))
+                        .GroupBy(r => 1, name => name)
+                        .Select(group => string.Join(", ", group.Select(name => name)))
+                        .FirstOrDefault());
     }
 }

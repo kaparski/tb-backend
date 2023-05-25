@@ -12,13 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Gridify" Version="2.8.2" />
-    <PackageReference Include="Gridify.EntityFramework" Version="2.8.2" />
-    <PackageReference Include="Mapster" Version="7.3.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Graph" Version="4.54.0" />
-    <PackageReference Include="OneOf" Version="3.0.243" />
-    <PackageReference Include="TimeZoneNames" Version="6.0.0" />
+    <PackageReference Include="Gridify.EntityFramework" Version="[2.8.4]" />
+    <PackageReference Include="Mapster" Version="[7.3.0]" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[7.0.0]" />
+    <PackageReference Include="Microsoft.Graph" Version="[4.54.0]" />
+    <PackageReference Include="OneOf" Version="[3.0.243]" />
   </ItemGroup>
 
 </Project>

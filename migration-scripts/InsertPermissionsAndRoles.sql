@@ -11,7 +11,7 @@ BEGIN TRANSACTION [Tran1];
 BEGIN TRY
   IF NOT EXISTS(SELECT Id FROM Roles WHERE Id = @RoleId)
   BEGIN
-    INSERT INTO Roles(Id, Name, CreatedDateUtc) VALUES (@RoleId, @RoleName, GETUTCDATE());
+    INSERT INTO Roles(Id, Name, CreatedDateTimeUtc) VALUES (@RoleId, @RoleName, GETUTCDATE());
   END;
 
   IF NOT EXISTS(SELECT RoleId FROM TenantRoles WHERE RoleId = @RoleId AND TenantId = @TenantId)

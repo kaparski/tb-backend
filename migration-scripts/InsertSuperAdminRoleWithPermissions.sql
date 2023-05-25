@@ -16,4 +16,4 @@ ELSE
 INSERT INTO RolePermissions(RoleId, PermissionId)
 SELECT @roleId, Id
 FROM Permissions p
-WHERE NOT EXISTS(SELECT 1 FROM RolePermissions WHERE RoleId = @roleId AND PermissionId = p.Id);
+WHERE NOT EXISTS(SELECT 1 FROM RolePermissions WHERE RoleId = @roleId AND PermissionId = p.Id)

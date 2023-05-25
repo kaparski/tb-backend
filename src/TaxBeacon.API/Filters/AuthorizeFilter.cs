@@ -35,28 +35,27 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
             return;
         }
 
-        try
-        {
-            var user = await _userService.GetUserByEmailAsync(new MailAddress(email), default);
+        var getUserResult = await _userService.GetUserByEmailAsync(new MailAddress(email));
 
-            if (user.DeactivationDateTimeUtc is not null || user.Status == Status.Deactivated)
-            {
-                context.Result = new UnauthorizedResult();
-                return;
-            }
-
-            if (!context.HttpContext.User.HasClaim(claim =>
-                    claim.Type.Equals(UserIdClaimName, StringComparison.OrdinalIgnoreCase)))
-            {
-                var claimsIdentity = new ClaimsIdentity();
-                claimsIdentity.AddClaim(new Claim(UserIdClaimName, user.Id.ToString()));
-                context.HttpContext.User.AddIdentity(claimsIdentity);
-            }
-        }
-        catch (NotFoundException ex)
+        if (!getUserResult.TryPickT0(out var user, out _))
         {
             context.Result = new UnauthorizedResult();
-            _logger.LogError(ex, "Failed to authenticate user with {@email}", email);
+            _logger.LogError("Failed to authenticate user with {@email}", email);
+            return;
+        }
+
+        if (user.DeactivationDateTimeUtc is not null || user.Status == Status.Deactivated)
+        {
+            context.Result = new UnauthorizedResult();
+            return;
+        }
+
+        if (!context.HttpContext.User.HasClaim(claim =>
+                claim.Type.Equals(UserIdClaimName, StringComparison.OrdinalIgnoreCase)))
+        {
+            var claimsIdentity = new ClaimsIdentity();
+            claimsIdentity.AddClaim(new Claim(UserIdClaimName, user.Id.ToString()));
+            context.HttpContext.User.AddIdentity(claimsIdentity);
         }
     }
 }

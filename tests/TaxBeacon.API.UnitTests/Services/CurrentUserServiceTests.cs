@@ -14,6 +14,7 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
+using RolesConstants = TaxBeacon.Common.Roles.Roles;
 
 namespace TaxBeacon.API.UnitTests.Services;
 
@@ -35,7 +36,7 @@ public class CurrentUserServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
-        _currentUserService = new CurrentUserService(_httpContextAccessorMock.Object, _dbContextMock);
+        _currentUserService = new CurrentUserService(_httpContextAccessorMock.Object);
     }
 
     [Fact]
@@ -130,8 +131,7 @@ public class CurrentUserServiceTests
         using (new AssertionScope())
         {
             act.Should()
-                .Throw<InvalidOperationException>()
-                .WithMessage("Sequence contains no elements");
+                .Throw<InvalidOperationException>();
         }
     }
 
@@ -139,42 +139,15 @@ public class CurrentUserServiceTests
     public void UserInfo_ExistingUser_Succeeds()
     {
         // Arrange
-
         var user = TestData.TestUser.Generate();
-        _dbContextMock.Users.Add(user);
-
-        var tenant = TestData.TestTenant.Generate();
-        _dbContextMock.Tenants.Add(tenant);
-
-        _dbContextMock.TenantUsers.Add(new TenantUser { TenantId = tenant.Id, UserId = user.Id });
-
-        var role1 = TestData.TestRole.Generate();
-        _dbContextMock.Roles.Add(role1);
-
-        var role2 = TestData.TestRole.Generate();
-        _dbContextMock.Roles.Add(role2);
-
-        _dbContextMock.TenantRoles.Add(new TenantRole { TenantId = tenant.Id, RoleId = role1.Id });
-        _dbContextMock.TenantRoles.Add(new TenantRole { TenantId = tenant.Id, RoleId = role2.Id });
-
-        _dbContextMock.TenantUserRoles.Add(new TenantUserRole
-        {
-            TenantId = tenant.Id,
-            UserId = user.Id,
-            RoleId = role1.Id
-        });
-        _dbContextMock.TenantUserRoles.Add(new TenantUserRole
-        {
-            TenantId = tenant.Id,
-            UserId = user.Id,
-            RoleId = role2.Id
-        });
-
-        _dbContextMock.SaveChangesAsync().Wait();
+        var rolesNames = TestData.TestRole.Generate(2)
+            .OrderBy(r => r.Name)
+            .Select(r => r.Name)
+            .ToList();
 
         var identity = new GenericIdentity("test", "test");
-        identity.AddClaim(new Claim(Claims.UserIdClaimName, user.Id.ToString()));
-        identity.AddClaim(new Claim(Claims.TenantId, tenant.Id.ToString()));
+        rolesNames.ForEach(roleName => identity.AddClaim(new Claim(Claims.TenantRoles, roleName)));
+        identity.AddClaim(new Claim(Claims.FullName, user.FullName));
         var contextUser = new ClaimsPrincipal(identity);
         var httpContext = new DefaultHttpContext { User = contextUser };
 
@@ -190,8 +163,53 @@ public class CurrentUserServiceTests
         using (new AssertionScope())
         {
             actualResult.FullName.Should().Be(user.FullName);
-            actualResult.Roles.Should().Be($"{role1.Name}, {role2.Name}");
+            actualResult.Roles.Should().Be(string.Join(", ", rolesNames));
         }
+    }
+
+    [Fact]
+    public void IsSuperAdmin_ContainsSuperAdminRole_ReturnsTrue()
+    {
+        // Arrange
+
+        var identity = new GenericIdentity("test", "test");
+        identity.AddClaim(new Claim(Claims.Roles, RolesConstants.SuperAdmin));
+        var contextUser = new ClaimsPrincipal(identity);
+        var httpContext = new DefaultHttpContext { User = contextUser };
+
+        _httpContextAccessorMock
+            .Setup(contextAccessor => contextAccessor.HttpContext)
+            .Returns(httpContext);
+
+        // Act
+
+        var actualResult = _currentUserService.IsSuperAdmin;
+
+        // Assert
+
+        actualResult.Should().Be(true);
+    }
+
+    [Fact]
+    public void IsSuperAdmin_DoesNotContainSuperAdminRole_ReturnsFalse()
+    {
+        // Arrange
+
+        var identity = new GenericIdentity("test", "test");
+        var contextUser = new ClaimsPrincipal(identity);
+        var httpContext = new DefaultHttpContext { User = contextUser };
+
+        _httpContextAccessorMock
+            .Setup(contextAccessor => contextAccessor.HttpContext)
+            .Returns(httpContext);
+
+        // Act
+
+        var actualResult = _currentUserService.IsSuperAdmin;
+
+        // Assert
+
+        actualResult.Should().Be(false);
     }
 
     private static class TestData
