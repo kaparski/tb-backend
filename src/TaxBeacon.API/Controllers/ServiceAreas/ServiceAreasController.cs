@@ -46,7 +46,6 @@ public class ServiceAreasController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetServiceAreaList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -56,12 +55,10 @@ public class ServiceAreasController: BaseController
             return BadRequest();
         }
 
-        var serviceAreasOneOf = await _serviceAreaService.GetServiceAreasAsync(query, cancellationToken);
+        var serviceAreas = await _serviceAreaService.GetServiceAreasAsync(query, cancellationToken);
 
-        return serviceAreasOneOf.Match<IActionResult>(
-            serviceAreas => Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count,
-                serviceAreas.Query.ProjectToType<ServiceAreaResponse>())),
-            notFound => NotFound());
+        return Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count,
+            serviceAreas.Query.ProjectToType<ServiceAreaResponse>()));
     }
 
     /// <summary>

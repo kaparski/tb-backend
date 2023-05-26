@@ -51,13 +51,10 @@ public class TeamService: ITeamService
                                         ?? ImmutableDictionary<(TeamEventType, uint), ITeamActivityFactory>.Empty;
     }
 
-    public async Task<OneOf<QueryablePaging<TeamDto>, NotFound>> GetTeamsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var currentTenantId = _currentUserService.TenantId;
-        var teams = await _context
+    public async Task<QueryablePaging<TeamDto>> GetTeamsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default) => await _context
             .Teams
-            .Where(x => x.TenantId == currentTenantId)
+            .Where(x => x.TenantId == _currentUserService.TenantId)
             .Select(t => new TeamDto()
             {
                 Id = t.Id,
@@ -68,14 +65,6 @@ public class TeamService: ITeamService
             })
             .AsNoTracking()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        if (gridifyQuery.Page == 1 || teams.Query.Any())
-        {
-            return teams;
-        }
-
-        return new NotFound();
-    }
 
     public async Task<byte[]> ExportTeamsAsync(FileType fileType, CancellationToken cancellationToken = default)
     {

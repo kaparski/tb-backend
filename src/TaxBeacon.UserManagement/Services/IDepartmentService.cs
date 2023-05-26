@@ -8,7 +8,7 @@ namespace TaxBeacon.UserManagement.Services;
 
 public interface IDepartmentService
 {
-    Task<OneOf<QueryablePaging<DepartmentDto>, NotFound>> GetDepartmentsAsync(GridifyQuery gridifyQuery,
+    Task<QueryablePaging<DepartmentDto>> GetDepartmentsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportDepartmentsAsync(FileType fileType,

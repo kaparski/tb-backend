@@ -98,10 +98,9 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "name asc" };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
+        var pageOfDepartments = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
-        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
         pageOfDepartments.Should().NotBeNull();
         var listOfDepartments = pageOfDepartments.Query.ToList();
         listOfDepartments.Count.Should().Be(5);
@@ -119,12 +118,11 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "name desc" };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
+        var pageOfDepartments = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
         using (new AssertionScope())
         {
-            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
             pageOfDepartments.Should().NotBeNull();
             var listOfDepartments = pageOfDepartments.Query.ToList();
             listOfDepartments.Count.Should().Be(4);
@@ -140,12 +138,11 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 123, OrderBy = "name desc" };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
+        var pageOfDepartments = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
         using (new AssertionScope())
         {
-            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
             pageOfDepartments.Should().NotBeNull();
             var listOfDepartments = pageOfDepartments.Query.ToList();
             listOfDepartments.Count.Should().Be(0);
@@ -168,8 +165,7 @@ public class DepartmentServiceTests
         // Assert
         using (new AssertionScope())
         {
-            actualResult.IsT0.Should().BeFalse();
-            actualResult.IsT1.Should().BeTrue();
+            actualResult.Query.Count().Should().Be(0);
         }
     }
 
@@ -188,8 +184,7 @@ public class DepartmentServiceTests
         // Assert
         using (new AssertionScope())
         {
-            actualResult.IsT0.Should().BeFalse();
-            actualResult.IsT1.Should().BeTrue();
+            actualResult.Query.Count().Should().Be(0);
         }
     }
 

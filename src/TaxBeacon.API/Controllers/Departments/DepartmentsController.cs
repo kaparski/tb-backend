@@ -54,11 +54,9 @@ public class DepartmentsController: BaseController
             return BadRequest();
         }
 
-        var departmentsOneOf = await _service.GetDepartmentsAsync(query, cancellationToken);
-        return departmentsOneOf.Match<IActionResult>(
-            departments => Ok(new QueryablePaging<DepartmentResponse>(departments.Count,
-                departments.Query.ProjectToType<DepartmentResponse>())),
-            notFound => NotFound());
+        var departments = await _service.GetDepartmentsAsync(query, cancellationToken);
+        return Ok(new QueryablePaging<DepartmentResponse>(departments.Count,
+            departments.Query.ProjectToType<DepartmentResponse>()));
     }
 
     /// <summary>

@@ -51,11 +51,9 @@ namespace TaxBeacon.API.Controllers.Tenants
                 return BadRequest();
             }
 
-            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, cancellationToken);
-            return divisionsOneOf.Match<IActionResult>(
-                divisions => Ok(new QueryablePaging<DivisionResponse>(divisions.Count,
-                    divisions.Query.ProjectToType<DivisionResponse>())),
-                notFound => NotFound());
+            var divisions = await _divisionsService.GetDivisionsAsync(query, cancellationToken);
+            return Ok(new QueryablePaging<DivisionResponse>(divisions.Count,
+                divisions.Query.ProjectToType<DivisionResponse>()));
         }
 
         /// <summary>

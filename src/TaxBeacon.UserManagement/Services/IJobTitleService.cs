@@ -8,7 +8,7 @@ namespace TaxBeacon.UserManagement.Services;
 
 public interface IJobTitleService
 {
-    Task<OneOf<QueryablePaging<JobTitleDto>, NotFound>> GetJobTitlesAsync(GridifyQuery gridifyQuery,
+    Task<QueryablePaging<JobTitleDto>> GetJobTitlesAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken);
 
     Task<byte[]> ExportJobTitlesAsync(FileType fileType,

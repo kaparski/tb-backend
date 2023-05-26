@@ -38,7 +38,6 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
                     }
                 }
             };
-            TypeAdapterConfig.GlobalSettings.Scan(typeof(DivisionMappingConfig).Assembly);
         }
         [Fact]
         public async Task GetDivisionsList_ValidQuery_ReturnSuccessStatusCode()

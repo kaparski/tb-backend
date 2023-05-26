@@ -8,7 +8,7 @@ namespace TaxBeacon.UserManagement.Services;
 
 public interface ITenantService
 {
-    Task<OneOf<QueryablePaging<TenantDto>, NotFound>> GetTenantsAsync(GridifyQuery gridifyQuery,
+    Task<QueryablePaging<TenantDto>> GetTenantsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportTenantsAsync(FileType fileType, CancellationToken cancellationToken);
