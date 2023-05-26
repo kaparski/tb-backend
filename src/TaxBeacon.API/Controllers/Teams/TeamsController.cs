@@ -43,7 +43,6 @@ public class TeamsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTeamList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {

@@ -46,7 +46,6 @@ public class ServiceAreasController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetServiceAreaList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {

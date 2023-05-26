@@ -44,7 +44,6 @@ public class JobTitlesController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetJobTitleList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
