@@ -222,7 +222,14 @@ namespace TaxBeacon.UserManagement.Services
             var users = await _context
                 .Users
                 .Where(u => u.DivisionId == divisionId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
-                .ProjectToType<DivisionUserDto>()
+                .Select(u => new DivisionUserDto()
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FullName = u.FullName,
+                    Department = u.Department == null ? string.Empty : u.Department.Name,
+                    JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
+                })
                 .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
             return users;
