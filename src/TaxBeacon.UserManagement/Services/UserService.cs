@@ -250,13 +250,13 @@ public class UserService: IUserService
             return error;
         }
 
-        /*if (!_domainsToSkipExternalStorageUserCreation.Contains(userEmail.Host))
+        if (!_domainsToSkipExternalStorageUserCreation.Contains(userEmail.Host))
         {
             _ = await _userExternalStore.CreateUserAsync(userEmail,
                 newUserData.FirstName,
                 newUserData.LastName,
                 cancellationToken);
-        }*/
+        }
 
         if (_currentUserService.TenantId != default)
         {

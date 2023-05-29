@@ -42,10 +42,6 @@ public class CreateUserRequestValidator: AbstractValidator<CreateUserRequest>
             .NotEmpty()
             .WithMessage("Division required");
 
-        RuleFor(x => x.DivisionId)
-            .NotEmpty()
-            .WithMessage("Division required");
-
         RuleFor(x => x.DepartmentId)
             .NotEmpty()
             .WithMessage("Department required");
