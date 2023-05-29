@@ -921,7 +921,16 @@ public class UserServiceTests
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
-        await _dbContextMock.Tenants.AddAsync(tenant);
+        TestData.TestUser.RuleFor(x => x.TenantUsers, _ =>
+            new List<TenantUser>()
+            {
+                new TenantUser()
+                {
+                    Tenant = tenant
+                }
+            });
+        var user = TestData.TestUser.Generate();
+        await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
 
         _currentUserServiceMock

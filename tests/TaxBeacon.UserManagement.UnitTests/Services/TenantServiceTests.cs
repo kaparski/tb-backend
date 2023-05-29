@@ -64,8 +64,6 @@ public class TenantServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TenantId);
-
         _currentUserServiceMock = new();
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(TenantId);
 

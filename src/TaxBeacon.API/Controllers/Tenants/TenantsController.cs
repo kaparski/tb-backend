@@ -189,11 +189,9 @@ public class TenantsController: BaseController
     /// <summary>
     /// Activate/Deactivate divisions from tenant
     /// </summary>
-    /// <response code="200">Returns updated division</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
-    /// <response code="404">Division is not found</response>
-    /// <returns>Updated division</returns>
+    /// <response code="404">Tenant is not found</response>
     [HasPermissions(Common.Permissions.Divisions.Activation)]
     [HttpPatch("toggle-divisions", Name = "ToggleDivisions")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]

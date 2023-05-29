@@ -450,11 +450,6 @@ public class UserService: IUserService
     {
         var tenant = await GetTenantAsync(mailAddress, cancellationToken);
 
-        if (tenant is null)
-        {
-            return null;
-        }
-
         var userQuery = from u in _context.Users
                         join ur in _context.UserRoles on u.Id equals ur.UserId into rolesGrouping
                         from userRole in rolesGrouping.DefaultIfEmpty()
