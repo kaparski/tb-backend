@@ -1,9 +1,11 @@
-﻿using Npoi.Mapper.Attributes;
+﻿using Mapster;
+using Npoi.Mapper.Attributes;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.UserManagement.Services.Program.Models;
 
-public class TenantProgramExportModel
+public class TenantProgramExportModel: IRegister
 {
     public string Reference { get; set; } = string.Empty;
 
@@ -56,4 +58,20 @@ public class TenantProgramExportModel
 
     [Column("Program Status")]
     public Status Status { get; set; }
+
+    public void Register(TypeAdapterConfig config) =>
+        config.NewConfig<TenantProgram, TenantProgramExportModel>()
+            .Map(dest => dest.Name, src => src.Program.Name)
+            .Map(dest => dest.Reference, src => src.Program.Reference)
+            .Map(dest => dest.Overview, src => src.Program.Overview)
+            .Map(dest => dest.LegalAuthority, src => src.Program.LegalAuthority)
+            .Map(dest => dest.Agency, src => src.Program.Agency)
+            .Map(dest => dest.Jurisdiction, src => src.Program.Jurisdiction)
+            .Map(dest => dest.JurisdictionName, src => src.Program.JurisdictionName)
+            .Map(dest => dest.IncentivesArea, src => src.Program.IncentivesArea)
+            .Map(dest => dest.IncentivesType, src => src.Program.IncentivesType)
+            .Map(dest => dest.StartDateTimeUtc, src => src.Program.StartDateTimeUtc)
+            .Map(dest => dest.EndDateTimeUtc, src => src.Program.EndDateTimeUtc)
+            .Map(dest => dest.CreatedDateTimeUtc, src => src.Program.CreatedDateTimeUtc)
+            .Map(dest => dest.Status, src => src.Status);
 }
