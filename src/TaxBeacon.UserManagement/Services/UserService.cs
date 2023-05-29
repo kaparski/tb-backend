@@ -70,7 +70,11 @@ public class UserService: IUserService
             .Users
             .FirstOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
 
-        if (user is null)
+        var tenant = await _context
+            .Tenants
+            .FirstOrDefaultAsync(t => t.Id == _currentUserService.TenantId, cancellationToken);
+
+        if (user is null || tenant is null)
         {
             return new NotFound();
         }
@@ -86,7 +90,8 @@ public class UserService: IUserService
             user.Id,
             user.FullName,
             await GetUserPermissionsAsync(user.Id, cancellationToken),
-            await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken));
+            await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken),
+            tenant.DivisionEnabled);
     }
 
     public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,

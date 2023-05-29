@@ -77,7 +77,6 @@ public class UserServiceTests
             _entitySaveChangesInterceptorMock.Object);
 
         _currentUser = TestData.TestUser.Generate();
-        _dbContextMock.Users.Add(_currentUser);
 
         _currentUserServiceMock.Setup(x => x.UserId).Returns(_currentUser.Id);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(_tenantId);
@@ -102,7 +101,10 @@ public class UserServiceTests
         var user = TestData.TestUser.Generate();
         var mailAddress = new MailAddress(user.Email);
         var currentDate = DateTime.UtcNow;
+        var tenant = TestData.TestTenant.Generate();
+        tenant.Id = _tenantId;
 
+        await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
 
@@ -133,6 +135,7 @@ public class UserServiceTests
     {
         //Arrange
         var tenant = TestData.TestTenant.Generate();
+        tenant.Id = _tenantId;
         var user = TestData.TestUser.Generate();
         var supeAdminRole = new Role
         {
