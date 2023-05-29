@@ -305,7 +305,7 @@ public class ProgramsController: BaseController
     /// <returns>Updated program</returns>
     [HasPermissions(Common.Permissions.Programs.ReadWrite)]
     [HttpPut(Name = "CreateProgram")]
-    [ProducesResponseType(typeof(TenantProgramDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProgramDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -316,7 +316,7 @@ public class ProgramsController: BaseController
             await _programService.CreateProgramAsync(createProgramRequest.Adapt<CreateProgramDto>(), cancellationToken);
 
         return createProgramResult.Match<IActionResult>(
-            newProgram => Ok(newProgram.Adapt<TenantProgramDetailsResponse>()),
+            newProgram => Ok(newProgram.Adapt<ProgramDetailsResponse>()),
             _ => Conflict());
     }
 }

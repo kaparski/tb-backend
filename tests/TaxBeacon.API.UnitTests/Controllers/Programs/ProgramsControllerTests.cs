@@ -14,6 +14,7 @@ using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs;
 using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services.Program;
 using TaxBeacon.UserManagement.Services.Program.Models;
@@ -99,11 +100,11 @@ public class ProgramsControllerTests
     public void GetAllProgramsAsync_HasAppropriatePermissions()
     {
         // Arrange
-        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetAllProgramsAsync).Method;
+        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetAllProgramsAsync)
+            .Method;
         var permissions = new object[]
         {
-            Common.Permissions.Programs.Read,
-            Common.Permissions.Programs.ReadWrite,
+            Common.Permissions.Programs.Read, Common.Permissions.Programs.ReadWrite,
             Common.Permissions.Programs.ReadExport
         };
 
@@ -114,7 +115,8 @@ public class ProgramsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -154,11 +156,10 @@ public class ProgramsControllerTests
     public void ExportProgramsAsync_HasAppropriatePermissions()
     {
         // Arrange
-        var methodInfo = ((Func<ExportProgramsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportProgramsAsync).Method;
-        var permissions = new object[]
-        {
-            Common.Permissions.Programs.ReadExport
-        };
+        var methodInfo =
+            ((Func<ExportProgramsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportProgramsAsync)
+            .Method;
+        var permissions = new object[] { Common.Permissions.Programs.ReadExport };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -167,7 +168,8 @@ public class ProgramsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -211,7 +213,6 @@ public class ProgramsControllerTests
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-
         }
     }
 
@@ -264,11 +265,11 @@ public class ProgramsControllerTests
     public void GetProgramDetailsAsync_HasAppropriatePermissions()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetProgramDetailsAsync).Method;
+        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetProgramDetailsAsync)
+            .Method;
         var permissions = new object[]
         {
-            Common.Permissions.Programs.Read,
-            Common.Permissions.Programs.ReadWrite,
+            Common.Permissions.Programs.Read, Common.Permissions.Programs.ReadWrite,
             Common.Permissions.Programs.ReadExport
         };
 
@@ -279,7 +280,8 @@ public class ProgramsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -368,11 +370,11 @@ public class ProgramsControllerTests
     public void GetAllTenantProgramsAsync_HasAppropriatePermissions()
     {
         // Arrange
-        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetAllProgramsAsync).Method;
+        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetAllProgramsAsync)
+            .Method;
         var permissions = new object[]
         {
-            Common.Permissions.Programs.Read,
-            Common.Permissions.Programs.ReadWrite,
+            Common.Permissions.Programs.Read, Common.Permissions.Programs.ReadWrite,
             Common.Permissions.Programs.ReadExport
         };
 
@@ -383,7 +385,8 @@ public class ProgramsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -423,11 +426,10 @@ public class ProgramsControllerTests
     public void ExportTenantProgramsAsync_HasAppropriatePermissions()
     {
         // Arrange
-        var methodInfo = ((Func<ExportProgramsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportTenantProgramsAsync).Method;
-        var permissions = new object[]
-        {
-            Common.Permissions.Programs.ReadExport
-        };
+        var methodInfo =
+            ((Func<ExportProgramsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportTenantProgramsAsync)
+            .Method;
+        var permissions = new object[] { Common.Permissions.Programs.ReadExport };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -436,7 +438,8 @@ public class ProgramsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -480,7 +483,6 @@ public class ProgramsControllerTests
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-
         }
     }
 
@@ -488,11 +490,11 @@ public class ProgramsControllerTests
     public void GetTenantProgramDetailsAsync_HasAppropriatePermissions()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetTenantProgramDetailsAsync).Method;
+        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetTenantProgramDetailsAsync)
+            .Method;
         var permissions = new object[]
         {
-            Common.Permissions.Programs.Read,
-            Common.Permissions.Programs.ReadWrite,
+            Common.Permissions.Programs.Read, Common.Permissions.Programs.ReadWrite,
             Common.Permissions.Programs.ReadExport
         };
 
@@ -503,7 +505,8 @@ public class ProgramsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -511,11 +514,12 @@ public class ProgramsControllerTests
     public void GetProgramActivityHistoryAsync_HasAppropriatePermissions()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, ProgramActivityHistoryRequest, CancellationToken, Task<IActionResult>>)_controller.GetProgramActivityHistoryAsync).Method;
+        var methodInfo =
+            ((Func<Guid, ProgramActivityHistoryRequest, CancellationToken, Task<IActionResult>>)_controller
+                .GetProgramActivityHistoryAsync).Method;
         var permissions = new object[]
         {
-            Common.Permissions.Programs.Read,
-            Common.Permissions.Programs.ReadWrite,
+            Common.Permissions.Programs.Read, Common.Permissions.Programs.ReadWrite,
             Common.Permissions.Programs.ReadExport
         };
 
@@ -526,7 +530,8 @@ public class ProgramsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -536,7 +541,8 @@ public class ProgramsControllerTests
         // Arrange
         var request = TestData.UpdateProgramRequestFaker.Generate();
         var program = TestData.ProgramDetailsDtoFaker.Generate();
-        _programServiceMock.Setup(x => x.UpdateProgramAsync(It.Is<Guid>(id => id == program.Id), It.IsAny<UpdateProgramDto>(), default))
+        _programServiceMock.Setup(x =>
+                x.UpdateProgramAsync(It.Is<Guid>(id => id == program.Id), It.IsAny<UpdateProgramDto>(), default))
             .ReturnsAsync(program);
 
         // Act
@@ -578,7 +584,9 @@ public class ProgramsControllerTests
     public void UpdateProgramAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, UpdateProgramRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateProgramAsync).Method;
+        var methodInfo =
+            ((Func<Guid, UpdateProgramRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateProgramAsync)
+            .Method;
         var permissions = new object[] { Common.Permissions.Programs.ReadWrite };
 
         // Act
@@ -588,7 +596,73 @@ public class ProgramsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public async Task CreateProgramAsync_ProgramDoesNotExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        var request = TestData.CreateProgramRequestFaker.Generate();
+        var program = TestData.ProgramDetailsDtoFaker.Generate();
+        _programServiceMock.Setup(x => x.CreateProgramAsync(It.IsAny<CreateProgramDto>(), default))
+            .ReturnsAsync(program);
+
+        // Act
+        var actualResponse = await _controller.CreateProgramAsync(request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<ProgramDetailsResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task CreateProgramAsync_ProgramWithNameAlreadyExists_ShouldReturnConflictStatusCode()
+    {
+        // Arrange
+        var request = TestData.CreateProgramRequestFaker.Generate();
+        _programServiceMock.Setup(x => x.CreateProgramAsync(It.IsAny<CreateProgramDto>(), default))
+            .ReturnsAsync(new NameAlreadyExists());
+
+        // Act
+        var actualResponse = await _controller.CreateProgramAsync(request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as ConflictResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status409Conflict);
+        }
+    }
+
+    [Fact]
+    public void CreateProgramAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo =
+            ((Func<CreateProgramRequest, CancellationToken, Task<IActionResult>>)_controller.CreateProgramAsync)
+            .Method;
+        var permissions = new object[] { Common.Permissions.Programs.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -603,6 +677,22 @@ public class ProgramsControllerTests
 
         public static readonly Faker<UpdateProgramRequest> UpdateProgramRequestFaker =
             new Faker<UpdateProgramRequest>().CustomInstantiator(f => new UpdateProgramRequest(
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Text(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.PickRandom<Jurisdiction>(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Date.Past(),
+                f.Date.Future()));
+
+        public static readonly Faker<CreateProgramRequest> CreateProgramRequestFaker =
+            new Faker<CreateProgramRequest>().CustomInstantiator(f => new CreateProgramRequest(
                 f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.Lorem.Text(),

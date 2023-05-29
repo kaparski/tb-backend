@@ -18,9 +18,9 @@ public record CreateProgramRequest(
     DateTime? StartDateTimeUtc,
     DateTime? EndDateTimeUtc);
 
-public class CrateProgramRequestValidator: AbstractValidator<CreateProgramRequest>
+public class CreateProgramRequestValidator: AbstractValidator<CreateProgramRequest>
 {
-    public CrateProgramRequestValidator()
+    public CreateProgramRequestValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty()
