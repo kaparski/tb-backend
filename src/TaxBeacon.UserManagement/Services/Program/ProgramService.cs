@@ -59,7 +59,7 @@ public class ProgramService: IProgramService
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<OneOf<ProgramDetailsDto, NameAlreadyExists>> CreateProgramAsync(CreateProgramDto createProgramDto,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         if (await _context.Programs.AnyAsync(p => p.Name == createProgramDto.Name, cancellationToken))
         {
@@ -89,7 +89,7 @@ public class ProgramService: IProgramService
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - Program ({programId} was created by {@userId}",
-            _dateTimeService.UtcNow,
+            eventDateTime,
             newProgram.Id,
             _currentUserService.UserId);
 

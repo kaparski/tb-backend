@@ -19,14 +19,14 @@ public class CreateProgramRequestValidatorTests
         var createProgramRequest = new Faker<CreateProgramRequest>()
             .CustomInstantiator(f => new CreateProgramRequest(
                 f.Lorem.Word(),
+                f.Company.CompanyName(),
                 f.Lorem.Word(),
                 f.Lorem.Word(),
-                f.Lorem.Word(),
-                f.Lorem.Word(),
+                f.Internet.Url(),
                 f.PickRandom<Jurisdiction>(),
-                f.Lorem.Word(),
-                f.Lorem.Word(),
-                f.Lorem.Word(),
+                f.Address.State(),
+                f.Address.Country(),
+                f.Address.City(),
                 f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.Date.Past(),
@@ -64,14 +64,14 @@ public class CreateProgramRequestValidatorTests
         var createProgramRequest = new Faker<CreateProgramRequest>()
             .CustomInstantiator(f => new CreateProgramRequest(
                 name,
+                f.Company.CompanyName(),
                 f.Lorem.Word(),
                 f.Lorem.Word(),
-                f.Lorem.Word(),
-                f.Lorem.Word(),
+                f.Internet.Url(),
                 f.PickRandom<Jurisdiction>(),
-                f.Lorem.Word(),
-                f.Lorem.Word(),
-                f.Lorem.Word(),
+                f.Address.State(),
+                f.Address.Country(),
+                f.Address.City(),
                 f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.Date.Past(),
@@ -108,14 +108,14 @@ public class CreateProgramRequestValidatorTests
         var createProgramRequest = new Faker<CreateProgramRequest>()
             .CustomInstantiator(f => new CreateProgramRequest(
                 name,
+                f.Company.CompanyName(),
                 f.Lorem.Word(),
                 f.Lorem.Word(),
-                f.Lorem.Word(),
-                f.Lorem.Word(),
+                f.Internet.Url(),
                 f.PickRandom<Jurisdiction>(),
-                f.Lorem.Word(),
-                f.Lorem.Word(),
-                f.Lorem.Word(),
+                f.Address.State(),
+                f.Address.Country(),
+                f.Address.City(),
                 f.Lorem.Word(),
                 f.Lorem.Word(),
                 f.Date.Past(),
@@ -151,19 +151,19 @@ public class CreateProgramRequestValidatorTests
         //Arrange
         var createProgramRequest = new Faker<CreateProgramRequest>()
             .CustomInstantiator(f => new CreateProgramRequest(
-            f.Lorem.Word(),
-            f.Lorem.Word(),
-            f.Lorem.Word(),
-            f.Lorem.Word(),
-            f.Lorem.Word(),
-            f.PickRandom<Jurisdiction>(),
-            f.Lorem.Word(),
-            f.Lorem.Word(),
-            f.Lorem.Word(),
-            f.Lorem.Word(),
-            f.Lorem.Word(),
-            f.Date.Future(),
-            f.Date.Past()))
+                f.Lorem.Word(),
+                f.Company.CompanyName(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Internet.Url(),
+                f.PickRandom<Jurisdiction>(),
+                f.Address.State(),
+                f.Address.Country(),
+                f.Address.City(),
+                f.Lorem.Word(),
+                f.Lorem.Word(),
+                f.Date.Future(),
+                f.Date.Past()))
             .Generate();
 
         //Act
