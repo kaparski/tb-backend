@@ -75,11 +75,13 @@ public class UserService: IUserService
             return new NotFound();
         }
 
-        user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
+        var now = _dateTimeService.UtcNow;
+
+        user.LastLoginDateTimeUtc = now;
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - User ({createdUserId}) has logged in",
-            _dateTimeService.UtcNow,
+            now,
             user.Id);
 
         return new LoginUserDto(
@@ -112,9 +114,11 @@ public class UserService: IUserService
         var users = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
             ? _context
                 .Users
+                .Include(u => u.Department)
                 .MapToUserDtoWithNoTenantRoleNames(_context)
             : _context
                 .Users
+                .Include(u => u.Department)
                 .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
                 .MapToUserDtoWithTenantRoleNames(_context, _currentUserService);
 
@@ -219,8 +223,8 @@ public class UserService: IUserService
         return user.Adapt<UserDto>();
     }
 
-    public async Task<OneOf<UserDto, EmailAlreadyExists>> CreateUserAsync(
-        UserDto newUserData,
+    public async Task<OneOf<UserDto, EmailAlreadyExists, InvalidOperation>> CreateUserAsync(
+        CreateUserDto newUserData,
         CancellationToken cancellationToken = default)
     {
         var user = newUserData.Adapt<User>();
@@ -229,18 +233,30 @@ public class UserService: IUserService
 
         var userEmail = new MailAddress(newUserData.Email);
 
-        if (!_domainsToSkipExternalStorageUserCreation.Contains(userEmail.Host))
+        if (await EmailExistsAsync(user.Email, cancellationToken))
+        {
+            return new EmailAlreadyExists();
+        }
+
+        var validationResult = await ValidateOrganizationUnitsAsync(
+            newUserData.DivisionId,
+            newUserData.DepartmentId,
+            newUserData.ServiceAreaId,
+            newUserData.JobTitleId,
+            newUserData.TeamId);
+
+        if (!validationResult.TryPickT0(out var ok, out var error))
+        {
+            return error;
+        }
+
+        /*if (!_domainsToSkipExternalStorageUserCreation.Contains(userEmail.Host))
         {
             _ = await _userExternalStore.CreateUserAsync(userEmail,
                 newUserData.FirstName,
                 newUserData.LastName,
                 cancellationToken);
-        }
-
-        if (await EmailExistsAsync(user.Email, cancellationToken))
-        {
-            return new EmailAlreadyExists();
-        }
+        }*/
 
         if (_currentUserService.TenantId != default)
         {
@@ -256,7 +272,7 @@ public class UserService: IUserService
         {
             TenantId = _currentUserService.TenantId,
             UserId = user.Id,
-            Date = _dateTimeService.UtcNow,
+            Date = now,
             Revision = 1,
             Event = JsonSerializer.Serialize(
                 new UserCreatedEvent(_currentUserService.UserId,
@@ -269,7 +285,7 @@ public class UserService: IUserService
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - User ({createdUserId}) was created by {@userId}",
-            _dateTimeService.UtcNow,
+            now,
             user.Id,
             _currentUserService.UserId);
 
@@ -651,5 +667,45 @@ public class UserService: IUserService
         }
 
         return addedRolesString;
+    }
+
+    private async Task<OneOf<Success, InvalidOperation>> ValidateOrganizationUnitsAsync(
+        Guid divisionId,
+        Guid departmentId,
+        Guid serviceAreaId,
+        Guid jobTitleId,
+        Guid? teamId)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        var divisionExists = await _context.Divisions
+            .AnyAsync(d => d.Id == divisionId && d.TenantId == tenantId);
+        if (!divisionExists)
+            return new InvalidOperation($"Division with the ID {divisionId} does not exist.");
+
+        var departmentExists = await _context.Departments
+            .AnyAsync(d => d.Id == departmentId && d.DivisionId == divisionId);
+        if (!departmentExists)
+            return new InvalidOperation($"Department with the ID {departmentId} does not exist.");
+
+        var serviceAreaExists = await _context.ServiceAreas
+            .AnyAsync(d => d.Id == serviceAreaId && d.DepartmentId == departmentId);
+        if (!serviceAreaExists)
+            return new InvalidOperation($"Service area with the ID {serviceAreaId} does not exist.");
+
+        var jobTitleExists = await _context.JobTitles
+            .AnyAsync(d => d.Id == jobTitleId && d.DepartmentId == departmentId);
+        if (!jobTitleExists)
+            return new InvalidOperation($"Job title with the ID {jobTitleId} does not exist.");
+
+        if (teamId is not null)
+        {
+            var teamExists = await _context.Teams
+                .AnyAsync(d => d.Id == teamId && d.TenantId == tenantId);
+            if (!teamExists)
+                return new InvalidOperation($"Team with the ID {teamId} does not exist.");
+        }
+
+        return new Success();
     }
 }
