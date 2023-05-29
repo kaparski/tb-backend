@@ -40,7 +40,6 @@ public class UserServiceTests
     private readonly Mock<IUserActivityFactory> _userCreatedActivityFactory;
     private readonly Mock<IEnumerable<IUserActivityFactory>> _activityFactories;
     private readonly Guid _tenantId = Guid.NewGuid();
-    private readonly User _currentUser;
 
     public UserServiceTests()
     {
@@ -77,10 +76,6 @@ public class UserServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
-        _currentUser = TestData.TestUser.Generate();
-        _dbContextMock.Users.Add(_currentUser);
-
-        _currentUserServiceMock.Setup(x => x.UserId).Returns(_currentUser.Id);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(_tenantId);
 
         _userService = new UserService(
@@ -157,18 +152,21 @@ public class UserServiceTests
         var actualResultOneOf = await _userService.LoginAsync(mailAddress);
 
         //Assert
-        (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-        var actualUser = await _dbContextMock.Users.LastAsync();
-        actualUser.LastLoginDateTimeUtc.Should().Be(currentDate);
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            var actualUser = await _dbContextMock.Users.FirstAsync(u => u.Id == user.Id);
+            actualUser.LastLoginDateTimeUtc.Should().Be(currentDate);
 
-        actualResultOneOf.TryPickT0(out var loginUserDto, out _).Should().BeTrue();
-        loginUserDto.UserId.Should().Be(user.Id);
-        loginUserDto.FullName.Should().Be(user.FullName);
-        loginUserDto.Permissions.Should().BeEquivalentTo(Enumerable.Empty<string>());
-        loginUserDto.IsSuperAdmin.Should().BeTrue();
+            actualResultOneOf.TryPickT0(out var loginUserDto, out _).Should().BeTrue();
+            loginUserDto.UserId.Should().Be(user.Id);
+            loginUserDto.FullName.Should().Be(user.FullName);
+            loginUserDto.Permissions.Should().BeEquivalentTo(Enumerable.Empty<string>());
+            loginUserDto.IsSuperAdmin.Should().BeTrue();
 
-        _dateTimeServiceMock
-            .Verify(ds => ds.UtcNow, Times.Once);
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Once);
+        }
     }
 
     [Fact]
@@ -944,9 +942,11 @@ public class UserServiceTests
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
+        var user = TestData.TestUser.Generate();
 
         await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.TenantUsers.AddAsync(new TenantUser { Tenant = tenant, User = _currentUser });
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser { Tenant = tenant, User = user });
 
         var roles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
         var tenantRoles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
@@ -967,14 +967,18 @@ public class UserServiceTests
             .Setup(service => service.IsSuperAdmin)
             .Returns(false);
 
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
+            .Returns(user.Id);
+
         // Act
-        var actualResult = await _userService.GetUserDetailsByIdAsync(_currentUser.Id);
+        var actualResult = await _userService.GetUserDetailsByIdAsync(user.Id);
 
         // Assert
         using (new AssertionScope())
         {
-            actualResult.TryPickT0(out var user, out _).Should().BeTrue();
-            var rolesResult = user.Roles.Split(",").Select(r => r.Trim()).ToList();
+            actualResult.TryPickT0(out var userDto, out _).Should().BeTrue();
+            var rolesResult = userDto.Roles.Split(",").Select(r => r.Trim()).ToList();
             rolesResult.Should().BeInAscendingOrder();
             rolesResult.Should().BeEquivalentTo(roles.Concat(tenantRoles).Order());
         }

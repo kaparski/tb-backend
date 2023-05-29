@@ -68,7 +68,7 @@ public class UserService: IUserService
     {
         var user = await _context
             .Users
-            .FirstOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
+            .SingleOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
 
         if (user is null)
         {
