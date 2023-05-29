@@ -158,7 +158,7 @@ public class UserServiceTests
 
         //Assert
         (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
-        var actualUser = await _dbContextMock.Users.FirstAsync(u => u.Id == user.Id);
+        var actualUser = await _dbContextMock.Users.LastAsync();
         actualUser.LastLoginDateTimeUtc.Should().Be(currentDate);
 
         actualResultOneOf.TryPickT0(out var loginUserDto, out _).Should().BeTrue();
