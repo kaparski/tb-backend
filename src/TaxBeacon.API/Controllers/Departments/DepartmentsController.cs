@@ -196,4 +196,54 @@ public class DepartmentsController: BaseController
                 result.Query.ProjectToType<DepartmentUserResponse>())),
             _ => NotFound());
     }
+
+    /// <summary>
+    /// Get service areas of a department
+    /// </summary>
+    /// <response code="200">Returns department's service areas</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Department is not found</response>
+    /// <returns>A collection of service areas associated with a particular department</returns>
+    [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
+    [HttpGet("{id:guid}/serviceareas", Name = "GetDepartmentServiceAreas")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<DepartmentServiceAreaResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetDepartmentServiceAreasAsync([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var activities = await _service.GetDepartmentServiceAreasAsync(id, cancellationToken);
+
+        return activities.Match<IActionResult>(
+            result => Ok(result.Adapt<DepartmentServiceAreaResponse[]>()),
+            notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Get job titles of a department
+    /// </summary>
+    /// <response code="200">Returns department's job titles</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Department is not found</response>
+    /// <returns>A collection of job titles associated with a particular department</returns>
+    [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
+    [HttpGet("{id:guid}/jobtitles", Name = "GetDepartmentJobTitles")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<DepartmentJobTitleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetDepartmentJobTitlesAsync([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var activities = await _service.GetDepartmentJobTitlesAsync(id, cancellationToken);
+
+        return activities.Match<IActionResult>(
+            result => Ok(result.Adapt<DepartmentJobTitleResponse[]>()),
+            notFound => NotFound());
+    }
 }

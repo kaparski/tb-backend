@@ -26,8 +26,8 @@ public interface IUserService
         Status status,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<UserDto, EmailAlreadyExists>> CreateUserAsync(
-        UserDto user,
+    Task<OneOf<UserDto, EmailAlreadyExists, InvalidOperation>> CreateUserAsync(
+        CreateUserDto user,
         CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportUsersAsync(FileType fileType, CancellationToken cancellationToken = default);
