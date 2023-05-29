@@ -2,6 +2,7 @@ using Gridify;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services.Program.Models;
 
@@ -9,6 +10,8 @@ namespace TaxBeacon.UserManagement.Services.Program;
 
 public interface IProgramService
 {
+    Task<OneOf<ProgramDetailsDto, NameAlreadyExists>> CreateProgramAsync(CreateProgramDto createProgramDto, CancellationToken cancellationToken);
+
     Task<byte[]> ExportProgramsAsync(FileType fileType, CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportTenantProgramsAsync(FileType fileType, CancellationToken cancellationToken = default);

@@ -11,12 +11,13 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.Activities.Program;
 using TaxBeacon.UserManagement.Services.Program.Activities;
+using TaxBeacon.UserManagement.Services.Program.Activities.Models;
 using TaxBeacon.UserManagement.Services.Program.Models;
 
 namespace TaxBeacon.UserManagement.Services.Program;
@@ -56,6 +57,44 @@ public class ProgramService: IProgramService
         _context.Programs
             .ProjectToType<ProgramDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+    public async Task<OneOf<ProgramDetailsDto, NameAlreadyExists>> CreateProgramAsync(CreateProgramDto createProgramDto,
+        CancellationToken cancellationToken)
+    {
+        if (await _context.Programs.AnyAsync(p => p.Name == createProgramDto.Name, cancellationToken))
+        {
+            return new NameAlreadyExists();
+        }
+
+        var newProgram = createProgramDto.Adapt<DAL.Entities.Program>();
+        await _context.Programs.AddAsync(newProgram, cancellationToken);
+
+        var (userFullName, userRoles) = _currentUserService.UserInfo;
+        var eventDateTime = _dateTimeService.UtcNow;
+
+        await _context.ProgramActivityLogs.AddAsync(
+            new ProgramActivityLog
+            {
+                TenantId = null,
+                Program = newProgram,
+                Date = eventDateTime,
+                Revision = 1,
+                EventType = ProgramEventType.ProgramCreatedEvent,
+                Event = JsonSerializer.Serialize(new ProgramCreatedEvent(
+                    _currentUserService.UserId,
+                    eventDateTime,
+                    userFullName,
+                    userRoles))
+            }, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Program ({programId} was created by {@userId}",
+            _dateTimeService.UtcNow,
+            newProgram.Id,
+            _currentUserService.UserId);
+
+        return newProgram.Adapt<ProgramDetailsDto>();
+    }
 
     public async Task<byte[]> ExportProgramsAsync(FileType fileType, CancellationToken cancellationToken = default)
     {
@@ -241,10 +280,10 @@ public class ProgramService: IProgramService
 
     public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default) =>
-            _context.TenantsPrograms
-                .Where(x => x.TenantId == _currentUserService.TenantId)
-                .ProjectToType<TenantProgramDto>()
-                .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+        _context.TenantsPrograms
+            .Where(x => x.TenantId == _currentUserService.TenantId)
+            .ProjectToType<TenantProgramDto>()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<byte[]> ExportTenantProgramsAsync(FileType fileType,
         CancellationToken cancellationToken = default)
