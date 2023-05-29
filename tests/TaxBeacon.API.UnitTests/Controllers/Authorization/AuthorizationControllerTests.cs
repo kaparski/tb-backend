@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
 using TaxBeacon.API.Controllers.Authorization;
 using TaxBeacon.API.Controllers.Authorization.Requests;
 using TaxBeacon.API.Controllers.Authorization.Responses;
-using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -82,6 +82,7 @@ public class AuthorizationControllerTests
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Faker<LoginUserDto> LoginUserDtoFaker =

@@ -6,11 +6,11 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
@@ -979,6 +979,7 @@ public class UserServiceTests
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Faker<Tenant> TestTenant =

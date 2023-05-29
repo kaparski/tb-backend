@@ -8,13 +8,12 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Principal;
 using TaxBeacon.API.Filters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Exceptions;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -152,6 +151,7 @@ public class AuthorizeFilterTests
         authorizationFilterContext.Result.Should().BeOfType<UnauthorizedResult>();
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Faker<UserDto> TestUser =

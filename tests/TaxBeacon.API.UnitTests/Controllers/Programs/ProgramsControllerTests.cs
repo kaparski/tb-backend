@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
@@ -13,9 +14,7 @@ using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs;
 using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Program;
 using TaxBeacon.UserManagement.Services.Program.Models;
 
@@ -290,7 +289,7 @@ public class ProgramsControllerTests
     public async Task UpdateTenantProgramStatusAsync_NewProgramStatus_ReturnsUpdatedTenantProgram(Status status)
     {
         // Arrange
-        var tenantProgramDto = TestData.TestTenantProgram.Generate();
+        var tenantProgramDto = TestData.TenantProgramFaker.Generate();
         tenantProgramDto.Status = Status.Deactivated;
         tenantProgramDto.DeactivationDateTimeUtc = DateTime.UtcNow;
 
@@ -535,8 +534,8 @@ public class ProgramsControllerTests
     public async Task UpdateProgramAsync_ProgramExistsAndRequestIsValid_ShouldReturnSuccessfulStatusCode()
     {
         // Arrange
-        var request = TestData.TestUpdateProgramRequest.Generate();
-        var program = TestData.TestProgramDetailsDto.Generate();
+        var request = TestData.UpdateProgramRequestFaker.Generate();
+        var program = TestData.ProgramDetailsDtoFaker.Generate();
         _programServiceMock.Setup(x => x.UpdateProgramAsync(It.Is<Guid>(id => id == program.Id), It.IsAny<UpdateProgramDto>(), default))
             .ReturnsAsync(program);
 
@@ -558,7 +557,7 @@ public class ProgramsControllerTests
     public async Task UpdateProgramAsync_ProgramDoesNotExists_ShouldReturnNotFoundStatusCode()
     {
         // Arrange
-        var request = TestData.TestUpdateProgramRequest.Generate();
+        var request = TestData.UpdateProgramRequestFaker.Generate();
         _programServiceMock.Setup(x => x.UpdateProgramAsync(It.IsAny<Guid>(), It.IsAny<UpdateProgramDto>(), default))
             .ReturnsAsync(new NotFound());
 
@@ -593,15 +592,16 @@ public class ProgramsControllerTests
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
-        public static readonly Faker<ProgramDetailsDto> TestProgramDetailsDto =
+        public static readonly Faker<ProgramDetailsDto> ProgramDetailsDtoFaker =
             new Faker<ProgramDetailsDto>()
-                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Id, _ => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+                .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
 
-        public static readonly Faker<UpdateProgramRequest> TestUpdateProgramRequest =
+        public static readonly Faker<UpdateProgramRequest> UpdateProgramRequestFaker =
             new Faker<UpdateProgramRequest>().CustomInstantiator(f => new UpdateProgramRequest(
                 f.Lorem.Word(),
                 f.Lorem.Word(),
@@ -617,13 +617,9 @@ public class ProgramsControllerTests
                 f.Date.Past(),
                 f.Date.Future()));
 
-        public static readonly Faker<Program> TestProgram = new Faker<Program>()
-            .RuleFor(p => p.Id, f => Guid.NewGuid())
-            .RuleFor(p => p.Name, f => f.Name.FirstName());
-
-        public static readonly Faker<TenantProgramDetailsDto> TestTenantProgram = new Faker<TenantProgramDetailsDto>()
+        public static readonly Faker<TenantProgramDetailsDto> TenantProgramFaker = new Faker<TenantProgramDetailsDto>()
             .RuleFor(p => p.Status, f => f.PickRandom<Status>())
-            .RuleFor(u => u.ReactivationDateTimeUtc, f => DateTime.UtcNow)
-            .RuleFor(u => u.DeactivationDateTimeUtc, f => DateTime.UtcNow);
+            .RuleFor(u => u.ReactivationDateTimeUtc, _ => DateTime.UtcNow)
+            .RuleFor(u => u.DeactivationDateTimeUtc, _ => DateTime.UtcNow);
     }
 }

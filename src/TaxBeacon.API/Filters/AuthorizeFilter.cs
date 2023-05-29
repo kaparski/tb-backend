@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using System.Net.Mail;
 using System.Security.Claims;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Exceptions;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Filters;

@@ -1,5 +1,4 @@
 using FluentValidation;
-using System.Security.Cryptography.Xml;
 using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Programs.Requests;

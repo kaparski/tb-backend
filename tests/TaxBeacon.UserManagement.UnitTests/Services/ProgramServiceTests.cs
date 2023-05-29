@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
@@ -633,6 +634,7 @@ public class ProgramServiceTests
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Faker<Tenant> TestTenant =
