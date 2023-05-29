@@ -1,6 +1,6 @@
 ﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.UserManagement.Models.Programs;
+namespace TaxBeacon.UserManagement.Services.Program.Models;
 
 public class TenantProgramDto
 {

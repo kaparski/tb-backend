@@ -3,9 +3,9 @@ using OneOf;
 using OneOf.Types;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.Programs;
+using TaxBeacon.UserManagement.Services.Program.Models;
 
-namespace TaxBeacon.UserManagement.Services;
+namespace TaxBeacon.UserManagement.Services.Program;
 
 public interface IProgramService
 {

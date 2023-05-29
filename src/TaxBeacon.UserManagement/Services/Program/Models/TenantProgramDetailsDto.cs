@@ -1,12 +1,12 @@
 ﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.UserManagement.Models.Programs;
+namespace TaxBeacon.UserManagement.Services.Program.Models;
 
 public class TenantProgramDetailsDto
 {
     public Guid Id { get; set; }
 
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = null!;
 
     public string Reference { get; set; } = string.Empty;
 

@@ -3,7 +3,7 @@ using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities.Program;
 
-namespace TaxBeacon.UserManagement.Services.Activities.Program;
+namespace TaxBeacon.UserManagement.Services.Program.Activities;
 
 public sealed class ProgramUpdatedEventFactory: IProgramActivityFactory
 {

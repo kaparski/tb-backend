@@ -15,8 +15,9 @@ using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.Programs;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Program;
+using TaxBeacon.UserManagement.Services.Program.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Programs;
 

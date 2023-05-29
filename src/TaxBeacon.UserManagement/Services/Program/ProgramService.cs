@@ -11,17 +11,15 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Exceptions;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities.Program;
-using TaxBeacon.UserManagement.Models.Programs;
-using TaxBeacon.UserManagement.Services.Activities.Program;
+using TaxBeacon.UserManagement.Services.Program.Activities;
+using TaxBeacon.UserManagement.Services.Program.Models;
 
-namespace TaxBeacon.UserManagement.Services;
+namespace TaxBeacon.UserManagement.Services.Program;
 
 public class ProgramService: IProgramService
 {
@@ -171,7 +169,7 @@ public class ProgramService: IProgramService
             Event = JsonSerializer.Serialize(new ProgramUpdatedEvent(
                 _currentUserService.UserId,
                 userFullName,
-                userRoles ?? string.Empty,
+                userRoles,
                 eventDateTime,
                 previousValues,
                 JsonSerializer.Serialize(updateProgramDto)))
@@ -361,12 +359,12 @@ public class ProgramService: IProgramService
         _context.ProgramActivityLogs
             .Where(log => log.ProgramId == programId && log.TenantId == tenantId);
 
-    private Task<Program?> GetProgramByIdAsync(Guid programId, CancellationToken cancellationToken)
+    private Task<DAL.Entities.Program?> GetProgramByIdAsync(Guid programId, CancellationToken cancellationToken)
     {
-        Expression<Func<Program, bool>> predicate = _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
-            ? (Program program) => program.Id == programId
-            : (Program program) => program.Id == programId &&
-                                   program.TenantsPrograms.Any(tp => tp.TenantId == _currentUserService.TenantId);
+        Expression<Func<DAL.Entities.Program, bool>> predicate = _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
+            ? (DAL.Entities.Program program) => program.Id == programId
+            : (DAL.Entities.Program program) => program.Id == programId &&
+                                                program.TenantsPrograms.Any(tp => tp.TenantId == _currentUserService.TenantId);
 
         return _context.Programs.FirstOrDefaultAsync(predicate, cancellationToken);
     }

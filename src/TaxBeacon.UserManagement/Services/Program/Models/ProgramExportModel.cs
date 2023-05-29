@@ -1,6 +1,6 @@
 using Npoi.Mapper.Attributes;
 
-namespace TaxBeacon.UserManagement.Models.Programs;
+namespace TaxBeacon.UserManagement.Services.Program.Models;
 
 public class ProgramExportModel
 {

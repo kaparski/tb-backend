@@ -1,9 +1,11 @@
 using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.UserManagement.Models.Programs;
+namespace TaxBeacon.UserManagement.Services.Program.Models;
 
-public class UpdateProgramDto
+public class ProgramDetailsDto
 {
+    public Guid Id { get; set; }
+
     public string Name { get; set; } = string.Empty;
 
     public string? Reference { get; set; }
@@ -26,7 +28,9 @@ public class UpdateProgramDto
 
     public string? IncentivesType { get; set; }
 
-    public DateTime? StartDateTimeUtc { get; set; }
+    public DateTime StartDateTimeUtc { get; set; }
 
-    public DateTime? EndDateTimeUtc { get; set; }
+    public DateTime EndDateTimeUtc { get; set; }
+
+    public DateTime CreatedDateTimeUtc { get; set; }
 }
