@@ -1,10 +1,9 @@
-using FluentValidation;
-using System.Security.Cryptography.Xml;
+﻿using FluentValidation;
 using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Programs.Requests;
 
-public record UpdateProgramRequest(
+public record CreateProgramRequest(
     string Name,
     string? Reference,
     string? Overview,
@@ -19,9 +18,9 @@ public record UpdateProgramRequest(
     DateTime? StartDateTimeUtc,
     DateTime? EndDateTimeUtc);
 
-public class UpdateProgramRequestValidator: AbstractValidator<UpdateProgramRequest>
+public class CrateProgramRequestValidator: AbstractValidator<CreateProgramRequest>
 {
-    public UpdateProgramRequestValidator()
+    public CrateProgramRequestValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -72,3 +71,4 @@ public class UpdateProgramRequestValidator: AbstractValidator<UpdateProgramReque
             .IsInEnum();
     }
 }
+
