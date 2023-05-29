@@ -219,4 +219,20 @@ public class TenantService: ITenantService
             oldTenantId,
             newTenantId);
     }
+
+    public async Task<OneOf<Success, NotFound>> ToggleDivisionsAsync(bool divisionEnabled, CancellationToken cancellationToken = default)
+    {
+        var tenant = await _context.Tenants
+            .FirstOrDefaultAsync(t => t.Id == _currentUserService.TenantId, cancellationToken);
+
+        if (tenant is null)
+        {
+            return new NotFound();
+        }
+
+        tenant.DivisionEnabled = divisionEnabled;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new Success();
+    }
 }

@@ -185,4 +185,29 @@ public class TenantsController: BaseController
 
         return Ok();
     }
+
+    /// <summary>
+    /// Activate/Deactivate divisions from tenant
+    /// </summary>
+    /// <response code="200">Returns updated division</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Division is not found</response>
+    /// <returns>Updated division</returns>
+    [HasPermissions(Common.Permissions.Divisions.Activation)]
+    [HttpPatch("toggle-divisions", Name = "ToggleDivisions")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ToggleDivisionsAsync([FromQuery] bool enable, CancellationToken cancellationToken)
+    {
+        var resultOneOf =
+            await _tenantService.ToggleDivisionsAsync(enable, cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            _ => Ok(),
+            _ => NotFound());
+    }
 }
