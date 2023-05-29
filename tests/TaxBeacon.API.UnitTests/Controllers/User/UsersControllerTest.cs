@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users;
@@ -187,7 +188,8 @@ public class UsersControllerTest
         }
     }
 
-    public static class TestData
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    private static class TestData
     {
         public static readonly Faker<CreateUserRequest> NewUser = new Faker<CreateUserRequest>()
             .CustomInstantiator(f => new CreateUserRequest(
