@@ -16,8 +16,8 @@ public record UpdateProgramRequest(
     string? City,
     string? IncentivesArea,
     string? IncentivesType,
-    DateTime StartDateTimeUtc,
-    DateTime EndDateTimeUtc);
+    DateTime? StartDateTimeUtc,
+    DateTime? EndDateTimeUtc);
 
 public class UpdateProgramRequestValidator: AbstractValidator<UpdateProgramRequest>
 {

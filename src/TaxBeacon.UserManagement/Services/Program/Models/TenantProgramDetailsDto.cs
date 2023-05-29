@@ -18,7 +18,7 @@ public class TenantProgramDetailsDto: IRegister
 
     public string? Agency { get; set; }
 
-    public string? Jurisdiction { get; set; }
+    public Jurisdiction Jurisdiction { get; set; }
 
     public string? State { get; set; }
 
@@ -30,9 +30,9 @@ public class TenantProgramDetailsDto: IRegister
 
     public string? IncentivesType { get; set; }
 
-    public DateTime StartDateTimeUtc { get; set; }
+    public DateTime? StartDateTimeUtc { get; set; }
 
-    public DateTime EndDateTimeUtc { get; set; }
+    public DateTime? EndDateTimeUtc { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
 

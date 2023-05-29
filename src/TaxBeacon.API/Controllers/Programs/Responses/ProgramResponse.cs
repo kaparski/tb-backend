@@ -24,9 +24,9 @@ public class ProgramResponse
 
     public string IncentivesType { get; set; } = string.Empty;
 
-    public DateTime StartDateTimeUtc { get; set; }
+    public DateTime? StartDateTimeUtc { get; set; }
 
-    public DateTime EndDateTimeUtc { get; set; }
+    public DateTime? EndDateTimeUtc { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
 }

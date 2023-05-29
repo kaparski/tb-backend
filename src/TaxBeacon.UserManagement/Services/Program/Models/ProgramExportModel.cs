@@ -30,13 +30,13 @@ public class ProgramExportModel
     public string IncentivesType { get; set; } = string.Empty;
 
     [Ignore]
-    public DateTime StartDateTimeUtc { get; set; }
+    public DateTime? StartDateTimeUtc { get; set; }
 
     [Column("Program Start Date")]
     public string StartDateView { get; set; } = string.Empty;
 
     [Ignore]
-    public DateTime EndDateTimeUtc { get; set; }
+    public DateTime? EndDateTimeUtc { get; set; }
 
     [Column("Program End Date")]
     public string EndDateView { get; set; } = string.Empty;
