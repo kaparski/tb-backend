@@ -1,22 +1,21 @@
 ﻿using Gridify;
 using Gridify.EntityFramework;
 using Mapster;
-using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
-using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Services;
-using TaxBeacon.Common.Converters;
 using System.Collections.Immutable;
-using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Services.Activities.Department;
 using System.Text.Json;
+using TaxBeacon.Common.Converters;
+using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
+using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities;
-using TaxBeacon.UserManagement.Extensions;
+using TaxBeacon.UserManagement.Services.Activities.Department;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -121,9 +120,13 @@ public class DepartmentService: IDepartmentService
     {
         var item = await _context
             .Departments
-            .GetDepartmentDetailsAsync(id, _currentUserService.TenantId);
+            .Include(x => x.Division)
+            .Include(x => x.JobTitles.OrderBy(dep => dep.Name))
+            .Include(x => x.ServiceAreas.OrderBy(dep => dep.Name))
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == id, cancellationToken);
 
-        return item is null ? new NotFound() : item;
+        return item is null ? new NotFound() : item.Adapt<DepartmentDetailsDto>();
     }
 
     public async Task<OneOf<DepartmentDetailsDto, NotFound>> UpdateDepartmentAsync(Guid id, UpdateDepartmentDto updatedEntity,
@@ -131,9 +134,44 @@ public class DepartmentService: IDepartmentService
     {
         var entity = await _context
             .Departments
+            .Include(dep => dep.Division)
+            .Include(dep => dep.ServiceAreas)
+            .Include(dep => dep.JobTitles)
             .SingleOrDefaultAsync(t => t.Id == id && t.TenantId == _currentUserService.TenantId, cancellationToken);
 
         if (entity is null)
+        {
+            return new NotFound();
+        }
+
+        if (updatedEntity.DivisionId != Guid.Empty)
+        {
+            var departmentToAdd = await _context.Departments.FirstOrDefaultAsync(d => d.Id == updatedEntity.DivisionId);
+
+            if (departmentToAdd != null && departmentToAdd.TenantId != entity.TenantId)
+            {
+                return new NotFound();
+            }
+        }
+
+        var isUpdateSABlocked = await _context.ServiceAreas
+                .Where(d => updatedEntity.ServiceAreasIds.Contains(d.Id)
+                    && d.DepartmentId != null
+                    && d.DepartmentId != entity.Id)
+                .AnyAsync();
+
+        if (isUpdateSABlocked)
+        {
+            return new NotFound();
+        }
+
+        var isUpdateJTBlocked = await _context.JobTitles
+                .Where(d => updatedEntity.ServiceAreasIds.Contains(d.Id)
+                    && d.DepartmentId != null
+                    && d.DepartmentId != entity.Id)
+                .AnyAsync();
+
+        if (isUpdateJTBlocked)
         {
             return new NotFound();
         }
@@ -143,6 +181,30 @@ public class DepartmentService: IDepartmentService
         var previousValues = JsonSerializer.Serialize(entity.Adapt<UpdateDepartmentDto>());
 
         var (currentUserFullName, currentUserRoles) = _currentUserService.UserInfo;
+
+        var currentSAIds = entity.ServiceAreas.Select(sa => sa.Id).ToList();
+
+        // Removes association with serviceAreas
+        await _context.ServiceAreas
+            .Where(sa => currentSAIds.Except(updatedEntity.ServiceAreasIds).Contains(sa.Id))
+            .ForEachAsync(sa => sa.DepartmentId = null);
+
+        // Set up association with freshly added service areas
+        await _context.ServiceAreas
+            .Where(sa => updatedEntity.ServiceAreasIds.Except(currentSAIds).Contains(sa.Id))
+            .ForEachAsync(sa => sa.DepartmentId = id);
+
+        var currentJTIds = entity.JobTitles.Select(jt => jt.Id).ToList();
+
+        // Removes association with job titles
+        await _context.JobTitles
+            .Where(jt => currentJTIds.Except(updatedEntity.JobTitlesIds).Contains(jt.Id))
+            .ForEachAsync(jt => jt.DepartmentId = null);
+
+        // Set up association with freshly added job titles
+        await _context.JobTitles
+            .Where(jt => updatedEntity.JobTitlesIds.Except(currentJTIds).Contains(jt.Id))
+            .ForEachAsync(jt => jt.DepartmentId = id);
 
         await _context.DepartmentActivityLogs.AddAsync(new DepartmentActivityLog
         {
@@ -169,9 +231,7 @@ public class DepartmentService: IDepartmentService
             id,
             _currentUserService.UserId);
 
-        return (await _context
-            .Departments
-            .GetDepartmentDetailsAsync(id, _currentUserService.TenantId))!;
+        return await GetDepartmentDetailsAsync(id, cancellationToken);
     }
 
     public async Task<OneOf<QueryablePaging<DepartmentUserDto>, NotFound>> GetDepartmentUsersAsync(Guid departmentId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
