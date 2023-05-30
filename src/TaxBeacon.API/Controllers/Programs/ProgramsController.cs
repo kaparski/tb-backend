@@ -301,11 +301,11 @@ public class ProgramsController: BaseController
     /// </summary>
     /// <param name="createProgramRequest">New program data</param>
     /// <param name="cancellationToken"></param>
-    /// <response code="200">Returns updated program</response>
+    /// <response code="200">Returns created program</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="409">A program with such name already exists</response>
-    /// <returns>Updated program</returns>
+    /// <returns>Created program</returns>
     [HasPermissions(Common.Permissions.Programs.ReadWrite)]
     [HttpPost(Name = "CreateProgram")]
     [ProducesResponseType(typeof(ProgramDetailsResponse), StatusCodes.Status200OK)]
