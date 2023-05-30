@@ -539,6 +539,31 @@ public class ProgramServiceTests
         {
             actualResult.IsT0.Should().BeFalse();
             actualResult.IsT1.Should().BeTrue();
+            actualResult.IsT2.Should().BeFalse();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateProgramAsync_ProgramWithNameAlreadyExists_ReturnsNameAlreadyExists()
+    {
+        // Arrange
+        var existingProgram = TestData.ProgramFaker.Generate();
+        var updateProgramDto = TestData.UpdateProgramDtoFaker
+            .RuleFor(p => p.Name, _ => existingProgram.Name)
+            .Generate();
+
+        await _dbContextMock.Programs.AddAsync(existingProgram);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _programService.UpdateProgramAsync(Guid.NewGuid(), updateProgramDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeFalse();
+            actualResult.IsT2.Should().BeTrue();
         }
     }
 

@@ -581,6 +581,27 @@ public class ProgramsControllerTests
     }
 
     [Fact]
+    public async Task UpdateProgramAsync_ProgramWithNameAlreadyExists_ShouldReturnConflictStatusCode()
+    {
+        // Arrange
+        var request = TestData.UpdateProgramRequestFaker.Generate();
+        _programServiceMock.Setup(x => x.UpdateProgramAsync(It.IsAny<Guid>(), It.IsAny<UpdateProgramDto>(), default))
+            .ReturnsAsync(new NameAlreadyExists());
+
+        // Act
+        var actualResponse = await _controller.UpdateProgramAsync(Guid.NewGuid(), request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as ConflictResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status409Conflict);
+        }
+    }
+
+    [Fact]
     public void UpdateProgramAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
