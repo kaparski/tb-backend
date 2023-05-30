@@ -15,7 +15,16 @@ public class CreateUserRequestValidatorTest
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), f.Name.LastName(), f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()))
             .Generate();
 
         //Act
@@ -36,7 +45,16 @@ public class CreateUserRequestValidatorTest
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), f.Name.LastName(), email))
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                email,
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()))
             .Generate();
 
         //Act
@@ -55,7 +73,16 @@ public class CreateUserRequestValidatorTest
         //Arrange
         var email = $"{new Faker().Random.String2(200)}@email.com";
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), f.Name.LastName(), email))
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                email,
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()))
             .Generate();
 
         //Act
@@ -77,7 +104,16 @@ public class CreateUserRequestValidatorTest
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(firstName, f.Name.FirstName(), f.Name.LastName(), f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(
+                firstName,
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()))
             .Generate();
 
         //Act
@@ -96,7 +132,16 @@ public class CreateUserRequestValidatorTest
         //Arrange
         var firstName = new Faker().Random.String2(115);
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(firstName, f.Name.FirstName(), f.Name.LastName(), f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(
+                firstName,
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()))
             .Generate();
 
         //Act
@@ -118,7 +163,16 @@ public class CreateUserRequestValidatorTest
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), legalName, f.Name.LastName(), f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                legalName,
+                f.Name.LastName(),
+                f.Internet.Email(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()))
             .Generate();
 
         //Act
@@ -137,7 +191,16 @@ public class CreateUserRequestValidatorTest
         //Arrange
         var legalName = new Faker().Random.String2(115);
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), legalName, f.Name.LastName(), f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                legalName,
+                f.Name.LastName(),
+                f.Internet.Email(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()))
             .Generate();
 
         //Act
@@ -159,7 +222,16 @@ public class CreateUserRequestValidatorTest
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), lastName, f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                lastName,
+                f.Internet.Email(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()))
             .Generate();
 
         //Act
@@ -178,7 +250,16 @@ public class CreateUserRequestValidatorTest
         //Arrange
         var lastName = new Faker().Random.String2(115);
         var createUserRequest = new Faker<CreateUserRequest>()
-            .CustomInstantiator(f => new CreateUserRequest(f.Name.FirstName(), f.Name.FirstName(), lastName, f.Internet.Email()))
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                lastName,
+                f.Internet.Email(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()))
             .Generate();
 
         //Act

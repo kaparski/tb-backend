@@ -1,4 +1,5 @@
-﻿using TaxBeacon.Common.Services;
+﻿using Microsoft.EntityFrameworkCore;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
@@ -34,12 +35,13 @@ public static class UserIQueryableExtension
         ITaxBeaconDbContext context) =>
         source
             .GroupJoin(context.Roles.OrderBy(r => r.Name),
-                ur => new { ur.RoleId },
-                role => new { RoleId = (Guid?)role.Id },
-                (ur, roles) => new { ur.User, Roles = roles })
+             ur => new { ur.RoleId },
+             role => new { RoleId = (Guid?)role.Id },
+             (ur, roles) => new { ur.User, Roles = roles })
             .SelectMany(ur => ur.Roles.DefaultIfEmpty(),
-                (ur, role) => new { ur.User, Name = "|" + role!.Name + "|" })
-            .GroupBy(z => z.User).Select(group => new UserDto
+             (ur, role) => new { ur.User, RoleName = "|" + role!.Name + "|" })
+            .GroupBy(z => z.User)
+            .Select(group => new UserDto
             {
                 Id = group.Key.Id,
                 FirstName = group.Key.FirstName,
@@ -52,7 +54,7 @@ public static class UserIQueryableExtension
                 FullName = group.Key.FullName,
                 DeactivationDateTimeUtc = group.Key.DeactivationDateTimeUtc,
                 ReactivationDateTimeUtc = group.Key.ReactivationDateTimeUtc,
-                Roles = string.Join(", ", group.Select(c => c.Name))
+                Roles = string.Join(", ", group.Select(c => c.RoleName)),
             });
 
     private class UserWithRoleId

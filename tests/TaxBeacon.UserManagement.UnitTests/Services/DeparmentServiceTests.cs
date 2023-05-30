@@ -523,6 +523,132 @@ public class DepartmentServiceTests
         resultOneOf.IsT1.Should().BeTrue();
     }
 
+    [Fact]
+    public async Task GetDepartmentServiceAreasAsync_DepartmentExists_ShouldReturnDepartmentServiceAreas()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var serviceAreas = TestData.TestServiceArea.Generate(5);
+        department.ServiceAreas = serviceAreas;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentServiceAreasAsync(department.Id);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            resultOneOf.TryPickT0(out var serviceAreaDtos, out _).Should().BeTrue();
+            serviceAreaDtos.Should().AllBeOfType<DepartmentServiceAreaDto>();
+            serviceAreaDtos.Length.Should().Be(5);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentServiceAreasAsync_DepartmentDoesNotExist_ShouldReturnNotFound()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var serviceAreas = TestData.TestServiceArea.Generate(5);
+        department.ServiceAreas = serviceAreas;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentServiceAreasAsync(Guid.NewGuid());
+
+        //Assert
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetDepartmentServiceAreasAsync_UserIsFromDifferentTenant_ShouldReturnNotFound()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var serviceAreas = TestData.TestServiceArea.Generate(5);
+        department.ServiceAreas = serviceAreas;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentServiceAreasAsync(department.Id);
+
+        //Assert
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetDepartmentJobTitlesAsync_DepartmentExists_ShouldReturnDepartmentJobTitles()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var jobTitles = TestData.TestJobTitle.Generate(5);
+        department.JobTitles = jobTitles;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentJobTitlesAsync(department.Id);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            resultOneOf.TryPickT0(out var jobTitleDtos, out _).Should().BeTrue();
+            jobTitleDtos.Should().AllBeOfType<DepartmentJobTitleDto>();
+            jobTitleDtos.Length.Should().Be(5);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentJobTitlesAsync_DepartmentDoesNotExist_ShouldReturnNotFound()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var jobTitles = TestData.TestJobTitle.Generate(5);
+        department.JobTitles = jobTitles;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentJobTitlesAsync(Guid.NewGuid());
+
+        //Assert
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetDepartmentJobTitlesAsync_UserIsFromDifferentTenant_ShouldReturnNotFound()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var jobTitles = TestData.TestJobTitle.Generate(5);
+        department.JobTitles = jobTitles;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentJobTitlesAsync(department.Id);
+
+        //Assert
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
+    }
+
     private static class TestData
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();
@@ -558,15 +684,9 @@ public class DepartmentServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>())
                 .RuleFor(u => u.Team, f =>
-                    new Team
-                    {
-                        Name = f.Name.FirstName()
-                    })
+                    new Team { Name = f.Name.FirstName() })
                 .RuleFor(u => u.JobTitle, f =>
-                    new JobTitle
-                    {
-                        Name = f.Name.FirstName()
-                    });
+                    new JobTitle { Name = f.Name.FirstName() });
 
         public static readonly Faker<Division> TestDivision =
             new Faker<Division>()
@@ -579,5 +699,10 @@ public class DepartmentServiceTests
         public static readonly Faker<UpdateDepartmentDto> UpdateDepartmentDtoFaker =
             new Faker<UpdateDepartmentDto>()
                 .RuleFor(dto => dto.Name, f => f.Company.CompanyName());
+
+        public static readonly Faker<JobTitle> TestJobTitle = new Faker<JobTitle>()
+            .RuleFor(jt => jt.Id, f => Guid.NewGuid())
+            .RuleFor(jt => jt.Name, f => f.Name.JobTitle())
+            .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
     }
 }

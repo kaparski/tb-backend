@@ -16,7 +16,7 @@ using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
-namespace TaxBeacon.API.UnitTests.Controllers.Tenant;
+namespace TaxBeacon.API.UnitTests.Controllers.Department;
 
 public class DepartmentsControllerTest
 {
@@ -355,6 +355,98 @@ public class DepartmentsControllerTest
 
         // Act
         var actualResponse = await _controller.GetDepartmentUsers(query, Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentServiceAreasAsync_DepartmentExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _serviceMock
+            .Setup(p => p.GetDepartmentServiceAreasAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(new DepartmentServiceAreaDto[] { });
+
+        // Act
+        var actualResponse = await _controller
+            .GetDepartmentServiceAreasAsync(Guid.NewGuid(), default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<DepartmentServiceAreaResponse[]>();
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentServiceAreasAsync_DepartmentDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        _serviceMock
+            .Setup(p => p.GetDepartmentServiceAreasAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller
+            .GetDepartmentServiceAreasAsync(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentJobTitlesAsync_DepartmentExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _serviceMock
+            .Setup(p => p.GetDepartmentJobTitlesAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(new DepartmentJobTitleDto[] { });
+
+        // Act
+        var actualResponse = await _controller
+            .GetDepartmentJobTitlesAsync(Guid.NewGuid(), default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<DepartmentJobTitleResponse[]>();
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentJobTitlesAsync_DepartmentDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        _serviceMock
+            .Setup(p => p.GetDepartmentJobTitlesAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller
+            .GetDepartmentJobTitlesAsync(Guid.NewGuid(), default);
 
         // Assert
         using (new AssertionScope())

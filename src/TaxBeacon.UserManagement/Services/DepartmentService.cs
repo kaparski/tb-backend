@@ -263,4 +263,32 @@ public class DepartmentService: IDepartmentService
 
         return users;
     }
+
+    public async Task<OneOf<DepartmentServiceAreaDto[], NotFound>> GetDepartmentServiceAreasAsync(Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var department = await _context.Departments.SingleOrDefaultAsync(
+                t => t.Id == id && t.TenantId == _currentUserService.TenantId, cancellationToken);
+
+        return department is null
+            ? new NotFound()
+            : await _context.ServiceAreas
+                .Where(sa => sa.DepartmentId == id)
+                .ProjectToType<DepartmentServiceAreaDto>()
+                .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<OneOf<DepartmentJobTitleDto[], NotFound>> GetDepartmentJobTitlesAsync(Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var department = await _context.Departments.SingleOrDefaultAsync(
+            t => t.Id == id && t.TenantId == _currentUserService.TenantId, cancellationToken);
+
+        return department is null
+            ? new NotFound()
+            : await _context.JobTitles
+                .Where(sa => sa.DepartmentId == id)
+                .ProjectToType<DepartmentJobTitleDto>()
+                .ToArrayAsync(cancellationToken);
+    }
 }
