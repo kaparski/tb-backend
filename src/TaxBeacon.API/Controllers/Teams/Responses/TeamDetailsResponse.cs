@@ -1,6 +1,4 @@
-﻿using TaxBeacon.API.Controllers.Departments.Responses;
-
-namespace TaxBeacon.API.Controllers.Teams.Responses
+﻿namespace TaxBeacon.API.Controllers.Teams.Responses
 {
     public class TeamDetailsResponse
     {

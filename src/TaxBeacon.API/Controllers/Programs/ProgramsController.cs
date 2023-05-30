@@ -4,12 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs.Responses;
-using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models.Programs;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Program;
+using TaxBeacon.UserManagement.Services.Program.Models;
 
 namespace TaxBeacon.API.Controllers.Programs;
 
@@ -113,7 +112,7 @@ public class ProgramsController: BaseController
 
         return oneOfProgramDetails.Match<IActionResult>(
             program => Ok(program.Adapt<ProgramDetailsResponse>()),
-            notFound => NotFound());
+            _ => NotFound());
     }
 
     /// <summary>
@@ -143,7 +142,7 @@ public class ProgramsController: BaseController
 
         return oneOfActivities.Match<IActionResult>(
             result => Ok(result.Adapt<ProgramActivityHistoryResponse>()),
-            notFound => NotFound());
+            _ => NotFound());
     }
 
     /// <summary>
@@ -208,7 +207,8 @@ public class ProgramsController: BaseController
     {
         var mimeType = exportProgramsRequest.FileType.ToMimeType();
 
-        var programs = await _programService.ExportTenantProgramsAsync(exportProgramsRequest.FileType, cancellationToken);
+        var programs =
+            await _programService.ExportTenantProgramsAsync(exportProgramsRequest.FileType, cancellationToken);
 
         return File(programs, mimeType,
             $"programs.{exportProgramsRequest.FileType.ToString().ToLowerInvariant()}");
@@ -239,7 +239,7 @@ public class ProgramsController: BaseController
 
         return oneOfProgramDetails.Match<IActionResult>(
             program => Ok(program.Adapt<TenantProgramDetailsResponse>()),
-            notFound => NotFound());
+            _ => NotFound());
     }
 
     /// <summary>
@@ -249,6 +249,7 @@ public class ProgramsController: BaseController
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Program is not found</response>
+    /// <response code="409">A program with such name already exists</response>
     /// <returns>Updated program details</returns>
     [HasPermissions(Common.Permissions.Programs.ReadWrite)]
     [HttpPatch("{id:guid}", Name = "UpdateProgram")]
@@ -257,7 +258,9 @@ public class ProgramsController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateProgramAsync([FromRoute] Guid id, [FromBody] UpdateProgramRequest request,
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> UpdateProgramAsync([FromRoute] Guid id,
+        [FromBody] UpdateProgramRequest request,
         CancellationToken cancellationToken)
     {
         var resultOneOf = await _programService.UpdateProgramAsync(
@@ -265,7 +268,8 @@ public class ProgramsController: BaseController
 
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<ProgramDetailsResponse>()),
-            notFound => NotFound());
+            _ => NotFound(),
+            _ => Conflict());
     }
 
     /// <summary>
@@ -283,12 +287,39 @@ public class ProgramsController: BaseController
     [ProducesResponseType(typeof(TenantProgramDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<TenantProgramDetailsResponse>> UpdateProgramStatusAsync(Guid id, [FromBody] Status programStatus,
+    public async Task<ActionResult<TenantProgramDetailsResponse>> UpdateProgramStatusAsync(Guid id,
+        [FromBody] Status programStatus,
         CancellationToken cancellationToken)
     {
-
         var user = await _programService.UpdateTenantProgramStatusAsync(id, programStatus, cancellationToken);
 
         return Ok(user.Adapt<TenantProgramDetailsResponse>());
+    }
+
+    /// <summary>
+    /// Endpoint to create a new program
+    /// </summary>
+    /// <param name="createProgramRequest">New program data</param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns created program</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="409">A program with such name already exists</response>
+    /// <returns>Created program</returns>
+    [HasPermissions(Common.Permissions.Programs.ReadWrite)]
+    [HttpPost(Name = "CreateProgram")]
+    [ProducesResponseType(typeof(ProgramDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CreateProgramAsync([FromBody] CreateProgramRequest createProgramRequest,
+        CancellationToken cancellationToken)
+    {
+        var createProgramResult =
+            await _programService.CreateProgramAsync(createProgramRequest.Adapt<CreateProgramDto>(), cancellationToken);
+
+        return createProgramResult.Match<IActionResult>(
+            newProgram => Ok(newProgram.Adapt<ProgramDetailsResponse>()),
+            _ => Conflict());
     }
 }

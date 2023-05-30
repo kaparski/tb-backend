@@ -2,11 +2,11 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
-using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
@@ -15,7 +15,6 @@ using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.MappingConfigs;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Divisions
@@ -357,6 +356,7 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
             }
         }
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static class TestData
         {
             public static readonly Faker<DivisionDto> DivisionFaker =

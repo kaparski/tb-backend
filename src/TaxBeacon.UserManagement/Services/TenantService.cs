@@ -16,7 +16,6 @@ using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Tenant;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.UserManagement.Models.Activities.Tenant;
-using TaxBeacon.UserManagement.Models.Export;
 
 namespace TaxBeacon.UserManagement.Services;
 
