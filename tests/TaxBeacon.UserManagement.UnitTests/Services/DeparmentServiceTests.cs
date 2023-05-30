@@ -324,7 +324,7 @@ public class DepartmentServiceTests
             departmentDetailsResult.Name.Should().Be(department.Name);
             departmentDetailsResult.Description.Should().Be(department.Description);
             departmentDetailsResult.DivisionId.Should().Be(division.Id);
-            departmentDetailsResult.Division.Should().Be(division.Name);
+            departmentDetailsResult.Division.Name.Should().Be(division.Name);
             departmentDetailsResult.ServiceAreas.Count.Should().Be(serviceAreas.Count);
         }
     }
@@ -348,7 +348,7 @@ public class DepartmentServiceTests
             departmentDetailsResult.Id.Should().Be(department.Id);
             departmentDetailsResult.Name.Should().Be(department.Name);
             departmentDetailsResult.Description.Should().Be(department.Description);
-            departmentDetailsResult.Division.Should().BeEmpty();
+            departmentDetailsResult.Division.Should().BeNull();
             departmentDetailsResult.ServiceAreas.Should().BeEmpty();
         }
     }
@@ -698,7 +698,10 @@ public class DepartmentServiceTests
 
         public static readonly Faker<UpdateDepartmentDto> UpdateDepartmentDtoFaker =
             new Faker<UpdateDepartmentDto>()
-                .RuleFor(dto => dto.Name, f => f.Company.CompanyName());
+                .RuleFor(dto => dto.Name, f => f.Company.CompanyName())
+                .RuleFor(dto => dto.ServiceAreasIds, f => f.Make(3, Guid.NewGuid))
+                .RuleFor(dto => dto.JobTitlesIds, f => f.Make(3, Guid.NewGuid))
+                .RuleFor(dto => dto.DivisionId, Guid.NewGuid());
 
         public static readonly Faker<JobTitle> TestJobTitle = new Faker<JobTitle>()
             .RuleFor(jt => jt.Id, f => Guid.NewGuid())
