@@ -33,7 +33,7 @@ public interface IProgramService
     Task<OneOf<TenantProgramDetailsDto, NotFound>> GetTenantProgramDetailsAsync(Guid id,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id,
+    Task<OneOf<ProgramDetailsDto, NotFound, NameAlreadyExists>> UpdateProgramAsync(Guid id,
         UpdateProgramDto updateProgramDto,
         CancellationToken cancellationToken = default);
 

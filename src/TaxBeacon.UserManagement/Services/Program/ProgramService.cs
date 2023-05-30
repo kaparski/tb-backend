@@ -156,7 +156,7 @@ public class ProgramService: IProgramService
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
-    public async Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateProgramDto,
+    public async Task<OneOf<ProgramDetailsDto, NotFound, NameAlreadyExists>> UpdateProgramAsync(Guid id, UpdateProgramDto updateProgramDto,
         CancellationToken cancellationToken = default)
     {
         var program = await _context.Programs.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
@@ -164,6 +164,11 @@ public class ProgramService: IProgramService
         if (program is null)
         {
             return new NotFound();
+        }
+
+        if (await _context.Programs.AnyAsync(p => p.Name == updateProgramDto.Name && p.Id != id, cancellationToken))
+        {
+            return new NameAlreadyExists();
         }
 
         var (userFullName, userRoles) = _currentUserService.UserInfo;
