@@ -449,16 +449,11 @@ public class UserService: IUserService
     public async Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken)
     {
         var tenant = await GetTenantAsync(mailAddress, cancellationToken);
-
-        if (tenant is null)
-        {
-            return null;
-        }
-
+        var tenantId = tenant?.Id ?? Guid.Empty;
         var userQuery = from u in _context.Users
                         join ur in _context.UserRoles on u.Id equals ur.UserId into rolesGrouping
                         from userRole in rolesGrouping.DefaultIfEmpty()
-                        join tur in _context.TenantUserRoles on new { UserId = u.Id, TenantId = tenant.Id } equals new
+                        join tur in _context.TenantUserRoles on new { UserId = u.Id, TenantId = tenantId } equals new
                         {
                             tur.UserId,
                             tur.TenantId
@@ -477,8 +472,8 @@ public class UserService: IUserService
             .GroupBy(z => new { z.Id, z.FullName })
             .Select(g => new UserInfo
             (
-                tenant.Id,
-                tenant.DivisionEnabled,
+                tenantId,
+                tenant?.DivisionEnabled ?? false,
                 g.Key.Id,
                 g.Key.FullName,
                 g.Where(r => !string.IsNullOrEmpty(r.Role)).Select(r => r.Role).Distinct().ToList(),
@@ -521,7 +516,7 @@ public class UserService: IUserService
             .UserRoles
             .AnyAsync(ur => ur.UserId == id && ur.Role.Name == roleName, cancellationToken);
 
-    private Task<Tenant> GetTenantAsync(MailAddress mail, CancellationToken cancellationToken) =>
+    private Task<Tenant?> GetTenantAsync(MailAddress mail, CancellationToken cancellationToken) =>
         _context.TenantUsers
             .Where(tu => tu.User.Email == mail.Address)
             .Select(tu => tu.Tenant)

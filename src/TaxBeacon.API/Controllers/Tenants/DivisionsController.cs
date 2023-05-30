@@ -35,8 +35,7 @@ namespace TaxBeacon.API.Controllers.Tenants
         [HasPermissions(
             Common.Permissions.Divisions.Read,
             Common.Permissions.Divisions.ReadWrite,
-            Common.Permissions.Divisions.ReadExport,
-            Common.Permissions.Divisions.Activation)]
+            Common.Permissions.Divisions.ReadExport)]
         [HttpGet(Name = "GetDivisions")]
         [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
         [ProducesResponseType(typeof(QueryablePaging<DivisionResponse>), StatusCodes.Status200OK)]
