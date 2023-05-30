@@ -10,6 +10,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -129,7 +130,7 @@ public class DepartmentService: IDepartmentService
         return item is null ? new NotFound() : item.Adapt<DepartmentDetailsDto>();
     }
 
-    public async Task<OneOf<DepartmentDetailsDto, NotFound>> UpdateDepartmentAsync(Guid id, UpdateDepartmentDto updatedEntity,
+    public async Task<OneOf<DepartmentDetailsDto, NotFound, InvalidOperation>> UpdateDepartmentAsync(Guid id, UpdateDepartmentDto updatedEntity,
         CancellationToken cancellationToken = default)
     {
         var entity = await _context
@@ -154,26 +155,26 @@ public class DepartmentService: IDepartmentService
             }
         }
 
-        var isUpdateSABlocked = await _context.ServiceAreas
+        var alreadyAssignedSAs = await _context.ServiceAreas
                 .Where(d => updatedEntity.ServiceAreasIds.Contains(d.Id)
                     && d.DepartmentId != null
                     && d.DepartmentId != entity.Id)
-                .AnyAsync();
+                .Select(sa => sa.Name).ToListAsync(cancellationToken);
 
-        if (isUpdateSABlocked)
+        if (alreadyAssignedSAs.Any())
         {
-            return new NotFound();
+            return new InvalidOperation($"Service area(s) {string.Join(", ", alreadyAssignedSAs)} have been assigned to another department");
         }
 
-        var isUpdateJTBlocked = await _context.JobTitles
-                .Where(d => updatedEntity.ServiceAreasIds.Contains(d.Id)
-                    && d.DepartmentId != null
-                    && d.DepartmentId != entity.Id)
-                .AnyAsync();
+        var alreadyAssignedJTs = await _context.JobTitles
+               .Where(d => updatedEntity.ServiceAreasIds.Contains(d.Id)
+                   && d.DepartmentId != null
+                   && d.DepartmentId != entity.Id)
+               .Select(jt => jt.Name).ToListAsync(cancellationToken);
 
-        if (isUpdateJTBlocked)
+        if (alreadyAssignedJTs.Any())
         {
-            return new NotFound();
+            return new InvalidOperation($"Job title(s) {string.Join(", ", alreadyAssignedJTs)} have been assigned to another department");
         }
 
         var eventDateTime = _dateTimeService.UtcNow;
@@ -231,7 +232,15 @@ public class DepartmentService: IDepartmentService
             id,
             _currentUserService.UserId);
 
-        return await GetDepartmentDetailsAsync(id, cancellationToken);
+        var departmentDetails = await _context
+           .Departments
+           .Include(x => x.Division)
+           .Include(x => x.JobTitles.OrderBy(dep => dep.Name))
+           .Include(x => x.ServiceAreas.OrderBy(dep => dep.Name))
+           .AsNoTracking()
+           .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == id, cancellationToken);
+
+        return departmentDetails is null ? new NotFound() : departmentDetails.Adapt<DepartmentDetailsDto>();
     }
 
     public async Task<OneOf<QueryablePaging<DepartmentUserDto>, NotFound>> GetDepartmentUsersAsync(Guid departmentId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
