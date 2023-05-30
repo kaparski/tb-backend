@@ -275,7 +275,7 @@ public class ProgramService: IProgramService
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
-            "{dateTime} - Program ({createdProgramId}) status was changed to {newUserStatus} by {@userId}",
+            "{dateTime} - Program ({createdProgramId}) status was changed to {newProgramStatus } by {@userId}",
             _dateTimeService.UtcNow,
             tenantProgram.ProgramId,
             status,
