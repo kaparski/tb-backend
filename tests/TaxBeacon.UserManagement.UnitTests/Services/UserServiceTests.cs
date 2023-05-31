@@ -24,6 +24,7 @@ using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using System.Diagnostics;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -1306,6 +1307,8 @@ public class UserServiceTests
         // Arrange
 
         var usersViewScript = File.ReadAllText("../../../../../migration-scripts/UsersView.sql");
+
+        Assert.NotEmpty(usersViewScript);
 
         var fieldsAsString = new Regex(@"select((.|\n)*)from", RegexOptions.IgnoreCase | RegexOptions.Multiline)
             .Match(usersViewScript)
