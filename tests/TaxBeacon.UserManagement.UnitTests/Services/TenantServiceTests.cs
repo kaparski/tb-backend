@@ -6,6 +6,7 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
@@ -36,6 +37,7 @@ public class TenantServiceTests
     private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
     private readonly TenantService _tenantService;
     private readonly Mock<IEnumerable<ITenantActivityFactory>> _activityFactoriesMock;
+    public static readonly Guid TenantId = Guid.NewGuid();
 
     public TenantServiceTests()
     {
@@ -62,6 +64,9 @@ public class TenantServiceTests
                 .UseInMemoryDatabase($"{nameof(UserServiceTests)}-InMemoryDb-{Guid.NewGuid()}")
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
+
+        _currentUserServiceMock = new();
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TenantId);
 
         var currentUser = TestData.TestUser.Generate();
         _dbContextMock.Users.Add(currentUser);
@@ -486,6 +491,53 @@ public class TenantServiceTests
             enterEvt?.ExecutorId.Should().Be(currentUserId);
             enterEvt?.ExecutorFullName.Should().Be(currentUser.FullName);
         }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ToggleDivisionsAsync_DivisionsState_ShouldToggleDivision(bool divisionEnabled)
+    {
+        //Arrange
+        var currentTenantId = _currentUserServiceMock.Object.TenantId;
+        var currentTenant = new Tenant()
+        {
+            Id = TenantId,
+            Name = "TestTenant",
+            DivisionEnabled = divisionEnabled,
+        };
+        _dbContextMock.Tenants.Add(currentTenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        await _tenantService.ToggleDivisionsAsync(!divisionEnabled, default);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            currentTenant = await _dbContextMock.Tenants.Where(x => x.Id == currentTenantId).FirstAsync();
+            currentTenant.DivisionEnabled.Should().Be(!divisionEnabled);
+        }
+    }
+
+    [Fact]
+    public async Task ToggleDivisionsAsync_TenantDoesNotExist_ShouldReturnNotFound()
+    {
+        //Arrange
+        _dbContextMock.Tenants.Add(new Tenant()
+        {
+            Id = TenantId,
+            Name = "TestTenant",
+        });
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
+
+        //Act
+        var oneOfNotFound = await _tenantService.ToggleDivisionsAsync(false, default);
+
+        //Assert
+        oneOfNotFound.IsT1.Should().BeTrue();
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming")]

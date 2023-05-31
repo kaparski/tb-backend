@@ -21,4 +21,6 @@ public interface ITenantService
         CancellationToken cancellationToken);
 
     Task SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId, CancellationToken cancellationToken = default);
+
+    Task<OneOf<Success, NotFound>> ToggleDivisionsAsync(bool divisionEnabled, CancellationToken cancellationToken);
 }

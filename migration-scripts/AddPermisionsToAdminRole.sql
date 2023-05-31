@@ -40,7 +40,8 @@ VALUES ('Users.Read'),
        ('JobTitles.ReadExport'),
        ('Programs.Read'),
        ('Programs.ReadWrite'),
-       ('Programs.ReadExport')
+       ('Programs.ReadExport'),
+       ('Divisions.Activation')
 
 INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 SELECT NEWID(),
