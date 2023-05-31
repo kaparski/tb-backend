@@ -6,11 +6,11 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
@@ -649,6 +649,7 @@ public class DepartmentServiceTests
         resultOneOf.IsT1.Should().BeTrue();
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();

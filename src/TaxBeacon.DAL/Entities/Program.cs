@@ -30,9 +30,9 @@ namespace TaxBeacon.DAL.Entities
 
         public string? IncentivesType { get; set; }
 
-        public DateTime StartDateTimeUtc { get; set; }
+        public DateTime? StartDateTimeUtc { get; set; }
 
-        public DateTime EndDateTimeUtc { get; set; }
+        public DateTime? EndDateTimeUtc { get; set; }
 
         public ICollection<TenantProgram> TenantsPrograms { get; set; } = new HashSet<TenantProgram>();
 

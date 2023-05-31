@@ -28,5 +28,5 @@ public class UserDto
 
     public DateTime? ReactivationDateTimeUtc { get; set; }
 
-    public string Roles { get; set; } = null!;
+    public string Roles { get; set; } = string.Empty;
 }

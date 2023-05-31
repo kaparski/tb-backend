@@ -1,6 +1,6 @@
 ﻿using TaxBeacon.Common.Models;
 
-namespace TaxBeacon.UserManagement.Models.Activities.Program;
+namespace TaxBeacon.UserManagement.Services.Program.Activities.Models;
 
 public sealed class ProgramAssignmentUpdatedEvent: EventBase
 {

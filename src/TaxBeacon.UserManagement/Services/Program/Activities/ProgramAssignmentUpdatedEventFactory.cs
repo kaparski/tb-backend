@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.Activities.Program;
+using TaxBeacon.UserManagement.Services.Program.Activities.Models;
 
-namespace TaxBeacon.UserManagement.Services.Activities.Program;
+namespace TaxBeacon.UserManagement.Services.Program.Activities;
 
 public sealed class ProgramAssignmentUpdatedEventFactory: IProgramActivityFactory
 {

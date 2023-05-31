@@ -4,6 +4,7 @@ using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using System.Security.Principal;
 using TaxBeacon.API.Authentication;
@@ -212,6 +213,7 @@ public class CurrentUserServiceTests
         actualResult.Should().Be(false);
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Faker<User> TestUser =

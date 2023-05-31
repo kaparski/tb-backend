@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
@@ -16,7 +17,6 @@ using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
-using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services
 {
@@ -542,6 +542,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             resultOneOf.IsT1.Should().BeTrue();
         }
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static class TestData
         {
             public static readonly Faker<User> TestUser =
