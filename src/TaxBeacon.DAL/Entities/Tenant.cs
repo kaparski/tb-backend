@@ -10,6 +10,8 @@ public class Tenant: BaseEntity
 
     public Status Status { get; set; }
 
+    public bool DivisionEnabled { get; set; }
+
     public ICollection<TenantUser> TenantUsers { get; set; } = new HashSet<TenantUser>();
 
     public ICollection<TenantPermission> TenantPermissions { get; set; } = new HashSet<TenantPermission>();

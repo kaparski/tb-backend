@@ -30,5 +30,9 @@ public class TenantConfiguration: IEntityTypeConfiguration<Tenant>
             .HasConversion<string>()
             .HasColumnType("nvarchar")
             .HasMaxLength(100);
+
+        tenant
+            .Property(t => t.DivisionEnabled)
+            .HasDefaultValue(true);
     }
 }

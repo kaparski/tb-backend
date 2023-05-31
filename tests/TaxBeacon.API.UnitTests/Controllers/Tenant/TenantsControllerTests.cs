@@ -335,6 +335,64 @@ public class TenantsControllerTests
         }
     }
 
+    [Fact]
+    public async Task ToggleDivisionsAsync_TenantExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock
+            .Setup(x => x.ToggleDivisionsAsync(It.IsAny<bool>(), default))
+            .ReturnsAsync(new Success());
+
+        // Act
+        var actualResponse = await _controller.ToggleDivisionsAsync(true, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkResult;
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+        }
+    }
+
+    [Fact]
+    public async Task ToggleDivisionsAsync_TenantDoesNotExists_ShouldReturnNotFound()
+    {
+        // Arrange
+        _tenantServiceMock
+            .Setup(x => x.ToggleDivisionsAsync(It.IsAny<bool>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.ToggleDivisionsAsync(true, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void ToggleDivisionsAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<bool, CancellationToken, Task<IActionResult>>)_controller.ToggleDivisionsAsync).Method;
+        var permissions = new object[] { Common.Permissions.Divisions.Activation };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {

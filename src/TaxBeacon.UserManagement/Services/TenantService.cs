@@ -76,7 +76,7 @@ public class TenantService: ITenantService
     public async Task<OneOf<TenantDto, NotFound>> GetTenantByIdAsync(Guid id,
         CancellationToken cancellationToken = default)
     {
-        var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        var tenant = await _context.Tenants.SingleOrDefaultAsync(t => t.Id == id, cancellationToken);
 
         return tenant is null ? new NotFound() : tenant.Adapt<TenantDto>();
     }
@@ -217,5 +217,21 @@ public class TenantService: ITenantService
             currentUserId,
             oldTenantId,
             newTenantId);
+    }
+
+    public async Task<OneOf<Success, NotFound>> ToggleDivisionsAsync(bool divisionEnabled, CancellationToken cancellationToken = default)
+    {
+        var tenant = await _context.Tenants
+            .SingleOrDefaultAsync(t => t.Id == _currentUserService.TenantId, cancellationToken);
+
+        if (tenant is null)
+        {
+            return new NotFound();
+        }
+
+        tenant.DivisionEnabled = divisionEnabled;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new Success();
     }
 }
