@@ -10,6 +10,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -132,18 +133,18 @@ namespace TaxBeacon.UserManagement.Services
         public async Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId,
             CancellationToken cancellationToken = default)
         {
-            var division = await _context
-                .Divisions
-                .Include(x => x.Departments.OrderBy(dep => dep.Name))
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == divisionId, cancellationToken);
+            var divisionDetails = await _context
+               .Divisions
+               .Include(x => x.Departments.OrderBy(dep => dep.Name))
+               .Where(x => x.TenantId == _currentUserService.TenantId && x.Id == divisionId)
+               .ProjectToType<DivisionDetailsDto>()
+               .AsNoTracking()
+               .FirstOrDefaultAsync(cancellationToken);
 
-            return division is null
-                ? new NotFound()
-                : division.Adapt<DivisionDetailsDto>();
+            return divisionDetails is null ? new NotFound() : divisionDetails;
         }
 
-        public async Task<OneOf<DivisionDetailsDto, NotFound>> UpdateDivisionAsync(Guid id,
+        public async Task<OneOf<DivisionDetailsDto, NotFound, InvalidOperation>> UpdateDivisionAsync(Guid id,
             UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default)
         {
             var division = await _context.Divisions.Include(d => d.Departments).FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
@@ -153,15 +154,17 @@ namespace TaxBeacon.UserManagement.Services
                 return new NotFound();
             }
 
-            var isUpdateBlocked = await _context.Departments
+            var alreadyAssignedDepartments = await _context.Departments
                 .Where(d => updateDivisionDto.DepartmentIds.Contains(d.Id)
                     && d.DivisionId != null
-                    && d.DivisionId != division.Id)
-                .AnyAsync(cancellationToken);
+                    && d.DivisionId != division.Id
+                    && d.TenantId == _currentUserService.TenantId)
+                .Select(d => d.Name)
+                .ToListAsync(cancellationToken);
 
-            if (isUpdateBlocked)
+            if (alreadyAssignedDepartments.Any())
             {
-                return new NotFound();
+                return new InvalidOperation($"Department(s) {string.Join(", ", alreadyAssignedDepartments)} have been assigned to another division");
             }
 
             var previousValues = JsonSerializer.Serialize(division.Adapt<UpdateDivisionDto>());
@@ -196,7 +199,8 @@ namespace TaxBeacon.UserManagement.Services
                     JsonSerializer.Serialize(updateDivisionDto)))
             }, cancellationToken);
 
-            updateDivisionDto.Adapt(division);
+            division.Name = updateDivisionDto.Name;
+            division.Description = updateDivisionDto.Description;
 
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -205,7 +209,7 @@ namespace TaxBeacon.UserManagement.Services
                 id,
                 _currentUserService.UserId);
 
-            return await GetDivisionDetailsAsync(id, cancellationToken);
+            return (await GetDivisionDetailsAsync(id, cancellationToken)).AsT0;
         }
 
         public async Task<OneOf<DivisionDepartmentDto[], NotFound>> GetDivisionDepartmentsAsync(Guid id,

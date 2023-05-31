@@ -303,8 +303,8 @@ public class DepartmentServiceTests
         // Arrange
         var department = TestData.TestDepartment.Generate();
 
-        var serviceAreas = TestData.TestServiceArea.Generate(3);
-        serviceAreas.ForEach(department.ServiceAreas.Add);
+        var jobTitles = TestData.TestJobTitle.Generate(3);
+        jobTitles.ForEach(department.JobTitles.Add);
 
         var division = TestData.TestDivision.Generate();
         department.Division = division;
@@ -323,9 +323,10 @@ public class DepartmentServiceTests
             departmentDetailsResult.Id.Should().Be(department.Id);
             departmentDetailsResult.Name.Should().Be(department.Name);
             departmentDetailsResult.Description.Should().Be(department.Description);
-            departmentDetailsResult.DivisionId.Should().Be(division.Id);
-            departmentDetailsResult.Division.Should().Be(division.Name);
-            departmentDetailsResult.ServiceAreas.Count.Should().Be(serviceAreas.Count);
+            departmentDetailsResult.Division.Id.Should().Be(division.Id);
+            departmentDetailsResult.Division.Name.Should().Be(division.Name);
+            departmentDetailsResult.ServiceAreas.Should().BeEmpty();
+            departmentDetailsResult.JobTitles.Count.Should().Be(jobTitles.Count);
         }
     }
 
@@ -334,6 +335,13 @@ public class DepartmentServiceTests
     {
         // Arrange
         var department = TestData.TestDepartment.Generate();
+
+        var serviceAreas = TestData.TestServiceArea.Generate(3);
+        serviceAreas.ForEach(department.ServiceAreas.Add);
+
+        var jobTitles = TestData.TestJobTitle.Generate(3);
+        jobTitles.ForEach(department.JobTitles.Add);
+
         await _dbContextMock.Departments.AddAsync(department);
         await _dbContextMock.SaveChangesAsync();
 
@@ -348,8 +356,9 @@ public class DepartmentServiceTests
             departmentDetailsResult.Id.Should().Be(department.Id);
             departmentDetailsResult.Name.Should().Be(department.Name);
             departmentDetailsResult.Description.Should().Be(department.Description);
-            departmentDetailsResult.Division.Should().BeEmpty();
-            departmentDetailsResult.ServiceAreas.Should().BeEmpty();
+            departmentDetailsResult.Division.Should().BeNull();
+            departmentDetailsResult.ServiceAreas.Count().Should().Be(serviceAreas.Count);
+            departmentDetailsResult.JobTitles.Count().Should().Be(jobTitles.Count);
         }
     }
 
@@ -699,7 +708,10 @@ public class DepartmentServiceTests
 
         public static readonly Faker<UpdateDepartmentDto> UpdateDepartmentDtoFaker =
             new Faker<UpdateDepartmentDto>()
-                .RuleFor(dto => dto.Name, f => f.Company.CompanyName());
+                .RuleFor(dto => dto.Name, f => f.Company.CompanyName())
+                .RuleFor(dto => dto.ServiceAreasIds, f => f.Make(3, Guid.NewGuid))
+                .RuleFor(dto => dto.JobTitlesIds, f => f.Make(3, Guid.NewGuid))
+                .RuleFor(dto => dto.DivisionId, Guid.NewGuid());
 
         public static readonly Faker<JobTitle> TestJobTitle = new Faker<JobTitle>()
             .RuleFor(jt => jt.Id, f => Guid.NewGuid())
