@@ -192,7 +192,7 @@ namespace TaxBeacon.API.Controllers.Tenants
             return resultOneOf.Match<IActionResult>(
                 result => Ok(result.Adapt<DivisionDetailsResponse>()),
                 notFound => NotFound(),
-                error => BadRequest(error.Message));
+                error => Conflict(error.Message));
         }
 
         /// <summary>

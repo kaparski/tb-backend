@@ -162,7 +162,7 @@ public class DepartmentsController: BaseController
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<DepartmentDetailsResponse>()),
             notFound => NotFound(),
-            error => BadRequest(error.Message));
+            error => Conflict(error.Message));
     }
 
     /// <summary>

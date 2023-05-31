@@ -157,7 +157,8 @@ namespace TaxBeacon.UserManagement.Services
             var alreadyAssignedDepartments = await _context.Departments
                 .Where(d => updateDivisionDto.DepartmentIds.Contains(d.Id)
                     && d.DivisionId != null
-                    && d.DivisionId != division.Id)
+                    && d.DivisionId != division.Id
+                    && d.TenantId == _currentUserService.TenantId)
                 .Select(d => d.Name)
                 .ToListAsync(cancellationToken);
 
