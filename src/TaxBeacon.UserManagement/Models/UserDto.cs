@@ -38,13 +38,23 @@ public class UserDto
 
     public IEnumerable<string>? RoleNames { get; set; }
 
+    public Guid? DepartmentId { get; set; }
+
     public string? Department { get; set; }
+
+    public Guid? DivisionId { get; set; }
 
     public string? Division { get; set; }
 
+    public Guid? JobTitleId { get; set; }
+
     public string? JobTitle { get; set; }
 
+    public Guid? ServiceAreaId { get; set; }
+
     public string? ServiceArea { get; set; }
+
+    public Guid? TeamId { get; set; }
 
     public string? Team { get; set; }
 }

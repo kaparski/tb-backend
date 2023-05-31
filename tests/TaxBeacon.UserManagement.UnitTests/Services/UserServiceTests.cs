@@ -1366,24 +1366,7 @@ public class UserServiceTests
             {
                 var userView = userViews.Single(u => u.Id == user.Id);
 
-                user.Id.Should().Be(userView.Id);
-                user.FirstName.Should().Be(userView.FirstName);
-                user.LegalName.Should().Be(userView.LegalName);
-                user.LastName.Should().Be(userView.LastName);
-                user.CreatedDateTimeUtc.Should().Be(userView.CreatedDateTimeUtc);
-                user.Email.Should().Be(userView.Email);
-                user.Status.Should().Be(userView.Status);
-                user.LastLoginDateTimeUtc.Should().Be(userView.LastLoginDateTimeUtc);
-                user.FullName.Should().Be(userView.FullName);
-                user.DeactivationDateTimeUtc.Should().Be(userView.DeactivationDateTimeUtc);
-                user.ReactivationDateTimeUtc.Should().Be(userView.ReactivationDateTimeUtc);
-                user.Roles.Should().Be(userView.Roles);
-                user.RoleNamesAsString.Should().Be(userView.RoleNamesAsString);
-                user.RoleIdsAsString.Should().Be(userView.RoleIdsAsString);
-                user.Department.Should().Be(userView.Department);
-                user.Division.Should().Be(userView.Division);
-                user.JobTitle.Should().Be(userView.JobTitle);
-                user.Team.Should().Be(userView.Team);
+                user.Should().BeEquivalentTo(userView, opt => opt.ExcludingMissingMembers());
             }
         }
     }
@@ -1415,25 +1398,7 @@ public class UserServiceTests
             {
                 var userView = userViews.Single(u => u.Id == user.Id);
 
-                user.Id.Should().Be(userView.Id);
-                user.FirstName.Should().Be(userView.FirstName);
-                user.LegalName.Should().Be(userView.LegalName);
-                user.LastName.Should().Be(userView.LastName);
-                user.CreatedDateTimeUtc.Should().Be(userView.CreatedDateTimeUtc);
-                user.Email.Should().Be(userView.Email);
-                user.Status.Should().Be(userView.Status);
-                user.LastLoginDateTimeUtc.Should().Be(userView.LastLoginDateTimeUtc);
-                user.FullName.Should().Be(userView.FullName);
-                user.DeactivationDateTimeUtc.Should().Be(userView.DeactivationDateTimeUtc);
-                user.ReactivationDateTimeUtc.Should().Be(userView.ReactivationDateTimeUtc);
-                user.Roles.Should().Be(userView.Roles);
-                user.RoleNamesAsString.Should().Be(userView.RoleNamesAsString);
-                user.RoleIdsAsString.Should().Be(userView.RoleIdsAsString);
-                user.Department.Should().Be(userView.Department);
-                user.Division.Should().Be(userView.Division);
-                user.JobTitle.Should().Be(userView.JobTitle);
-                user.ServiceArea.Should().Be(userView.ServiceArea);
-                user.Team.Should().Be(userView.Team);
+                user.Should().BeEquivalentTo(userView, opt => opt.ExcludingMissingMembers());
             }
         }
     }
