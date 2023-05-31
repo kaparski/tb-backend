@@ -68,6 +68,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
 
     public DbSet<ProgramActivityLog> ProgramActivityLogs => Set<ProgramActivityLog>();
 
+    public DbSet<UserView> UsersView => Set<UserView>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

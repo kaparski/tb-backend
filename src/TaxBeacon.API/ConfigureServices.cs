@@ -4,11 +4,15 @@ using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.API.Services;
@@ -28,7 +32,15 @@ public static class ConfigureServices
     {
         services.AddRouting(options => options.LowercaseUrls = true);
         services.AddControllers(/*options => options.Filters.Add<AuthorizeFilter>()*/)
-            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+            // Configuring OData. Routing to OData endpoints is separate from normal Web API routing.
+            .AddOData(options => options
+                .EnableQueryFeatures(null)
+                .AddRouteComponents(
+                    routePrefix: "api/odata",
+                    model: GetODataEdmModel()
+                )
+            );
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
@@ -62,5 +74,20 @@ public static class ConfigureServices
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
         return services;
+    }
+
+    /// <summary>
+    /// Builds EDM model for OData endpoints (this model needs to be different from EF model, since exposed entities are different)
+    /// </summary>
+    private static IEdmModel GetODataEdmModel()
+    {
+        var modelBuilder = new ODataConventionModelBuilder();
+
+        // EntitySet name here should match controller's name
+        modelBuilder.EntitySet<UserResponse>("Users");
+
+        modelBuilder.EnableLowerCamelCase();
+
+        return modelBuilder.GetEdmModel();
     }
 }

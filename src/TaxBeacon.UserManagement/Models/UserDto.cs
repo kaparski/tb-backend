@@ -26,5 +26,21 @@ public class UserDto
 
     public DateTime? ReactivationDateTimeUtc { get; set; }
 
-    public string Roles { get; set; } = string.Empty;
+    public string? Roles { get; set; }
+
+    public string? RoleNamesAsString { get; set; }
+
+    public string? RoleIdsAsString { get; set; }
+
+    public IEnumerable<Guid>? RoleIds { get; set; }
+
+    public IEnumerable<string>? RoleNames { get; set; }
+
+    public string? Department { get; set; }
+
+    public string? Division { get; set; }
+
+    public string? JobTitle { get; set; }
+
+    public string? TeamName { get; set; }
 }
