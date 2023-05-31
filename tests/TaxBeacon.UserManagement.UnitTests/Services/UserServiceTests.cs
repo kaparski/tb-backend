@@ -1464,7 +1464,6 @@ public class UserServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
                 .RuleFor(u => u.LastModifiedDateTimeUtc, _ => DateTime.UtcNow)
                 .RuleFor(u => u.Id, _ => Guid.NewGuid())
-//                .RuleFor(u => u.TenantId, _ => TestTenantId)
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
