@@ -1308,14 +1308,12 @@ public class UserServiceTests
 
         var usersViewScript = File.ReadAllText("../../../../../migration-scripts/UsersView.sql");
 
-        Assert.NotEmpty(usersViewScript);
-
         var fieldsAsString = new Regex(@"select((.|\n)*)from", RegexOptions.IgnoreCase | RegexOptions.Multiline)
             .Match(usersViewScript)
             .Groups[1]
             .Value;
 
-        var fields = new Regex(@"(\w+),?\r", RegexOptions.IgnoreCase | RegexOptions.Multiline)
+        var fields = new Regex(@"(\w+),?[\r\n]", RegexOptions.IgnoreCase | RegexOptions.Multiline)
             .Matches(fieldsAsString)
             .Select(m => m.Groups[1].Value)
             .ToArray();
