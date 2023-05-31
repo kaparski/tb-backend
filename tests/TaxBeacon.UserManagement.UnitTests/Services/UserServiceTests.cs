@@ -1300,9 +1300,8 @@ public class UserServiceTests
         return (division.Id, department.Id, serviceArea.Id, jobTitle.Id);
     }
 
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     [Fact]
-    public async Task UserView_ListOfColumnsMatchesUserViewEntity()
+    public void UserView_ListOfColumnsMatchesUserViewEntity()
     {
         // Arrange
 
