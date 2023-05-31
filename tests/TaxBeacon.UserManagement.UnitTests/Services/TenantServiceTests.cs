@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
@@ -539,6 +540,7 @@ public class TenantServiceTests
         oneOfNotFound.IsT1.Should().BeTrue();
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();

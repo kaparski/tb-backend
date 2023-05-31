@@ -1,4 +1,6 @@
-﻿using TaxBeacon.Common.Enums;
+﻿using Mapster;
+using TaxBeacon.Common.Enums;
+using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.UserManagement.Models;
 
@@ -20,7 +22,7 @@ public class UserDto
 
     public DateTime? LastLoginDateTimeUtc { get; set; }
 
-    public string FullName { get; init; } = string.Empty;
+    public string FullName { get; init; } = null!;
 
     public DateTime? DeactivationDateTimeUtc { get; set; }
 

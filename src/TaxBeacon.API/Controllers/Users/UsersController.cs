@@ -83,15 +83,16 @@ public class UsersController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> CreateUser(CreateUserRequest createUserRequest,
+    public async Task<IActionResult> CreateUserAsync(CreateUserRequest createUserRequest,
         CancellationToken cancellationToken)
     {
         var createUserResult = await _userService
-            .CreateUserAsync(createUserRequest.Adapt<UserDto>(), cancellationToken);
+            .CreateUserAsync(createUserRequest.Adapt<CreateUserDto>(), cancellationToken);
 
         return createUserResult.Match<IActionResult>(
             newUser => Created($"/users/{newUser.Id}", newUser.Adapt<UserResponse>()),
-            _ => Conflict());
+            _ => Conflict(),
+            error => BadRequest(error.Message));
     }
 
     /// <summary>

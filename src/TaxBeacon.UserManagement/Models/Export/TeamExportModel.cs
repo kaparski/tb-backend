@@ -1,5 +1,4 @@
 ﻿using Npoi.Mapper.Attributes;
-using System.ComponentModel.DataAnnotations;
 
 namespace TaxBeacon.UserManagement.Models.Export;
 

@@ -11,17 +11,16 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Exceptions;
-using TaxBeacon.Common.Permissions;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.Activities.Program;
-using TaxBeacon.UserManagement.Models.Programs;
-using TaxBeacon.UserManagement.Services.Activities.Program;
+using TaxBeacon.UserManagement.Services.Program.Activities;
+using TaxBeacon.UserManagement.Services.Program.Activities.Models;
+using TaxBeacon.UserManagement.Services.Program.Models;
 
-namespace TaxBeacon.UserManagement.Services;
+namespace TaxBeacon.UserManagement.Services.Program;
 
 public class ProgramService: IProgramService
 {
@@ -56,45 +55,52 @@ public class ProgramService: IProgramService
     public Task<QueryablePaging<ProgramDto>> GetAllProgramsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default) =>
         _context.Programs
-            .AsNoTracking()
-            .Select(p => new ProgramDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Reference = p.Reference ?? string.Empty,
-                Overview = p.Overview ?? string.Empty,
-                LegalAuthority = p.LegalAuthority ?? string.Empty,
-                Agency = p.Agency ?? string.Empty,
-                Jurisdiction = p.Jurisdiction,
-                JurisdictionName = p.JurisdictionName ?? string.Empty,
-                IncentivesArea = p.IncentivesArea ?? string.Empty,
-                IncentivesType = p.IncentivesType ?? string.Empty,
-                StartDateTimeUtc = p.StartDateTimeUtc,
-                EndDateTimeUtc = p.EndDateTimeUtc,
-                CreatedDateTimeUtc = p.CreatedDateTimeUtc
-            })
+            .ProjectToType<ProgramDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+    public async Task<OneOf<ProgramDetailsDto, NameAlreadyExists>> CreateProgramAsync(CreateProgramDto createProgramDto,
+        CancellationToken cancellationToken = default)
+    {
+        if (await _context.Programs.AnyAsync(p => p.Name == createProgramDto.Name, cancellationToken))
+        {
+            return new NameAlreadyExists();
+        }
+
+        var newProgram = createProgramDto.Adapt<DAL.Entities.Program>();
+        await _context.Programs.AddAsync(newProgram, cancellationToken);
+
+        var (userFullName, userRoles) = _currentUserService.UserInfo;
+        var eventDateTime = _dateTimeService.UtcNow;
+
+        await _context.ProgramActivityLogs.AddAsync(
+            new ProgramActivityLog
+            {
+                TenantId = null,
+                Program = newProgram,
+                Date = eventDateTime,
+                Revision = 1,
+                EventType = ProgramEventType.ProgramCreatedEvent,
+                Event = JsonSerializer.Serialize(new ProgramCreatedEvent(
+                    _currentUserService.UserId,
+                    eventDateTime,
+                    userFullName,
+                    userRoles))
+            }, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Program ({programId} was created by {@userId}",
+            eventDateTime,
+            newProgram.Id,
+            _currentUserService.UserId);
+
+        return newProgram.Adapt<ProgramDetailsDto>();
+    }
 
     public async Task<byte[]> ExportProgramsAsync(FileType fileType, CancellationToken cancellationToken = default)
     {
         var exportPrograms = await _context
             .Programs
-            .AsNoTracking()
-            .Select(p => new ProgramExportModel
-            {
-                Name = p.Name,
-                Reference = p.Reference ?? string.Empty,
-                Overview = p.Overview ?? string.Empty,
-                LegalAuthority = p.LegalAuthority ?? string.Empty,
-                Agency = p.Agency ?? string.Empty,
-                Jurisdiction = p.Jurisdiction.ToString(),
-                JurisdictionName = p.JurisdictionName ?? string.Empty,
-                IncentivesArea = p.IncentivesArea ?? string.Empty,
-                IncentivesType = p.IncentivesType ?? string.Empty,
-                StartDateTimeUtc = p.StartDateTimeUtc,
-                EndDateTimeUtc = p.EndDateTimeUtc,
-                CreatedDateTimeUtc = p.CreatedDateTimeUtc
-            })
+            .ProjectToType<ProgramExportModel>()
             .ToListAsync(cancellationToken);
 
         exportPrograms.ForEach(p =>
@@ -114,9 +120,12 @@ public class ProgramService: IProgramService
     public async Task<OneOf<ProgramDetailsDto, NotFound>> GetProgramDetailsAsync(Guid id,
         CancellationToken cancellationToken = default)
     {
-        var program = await _context.Programs.SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
+        var program = await _context.Programs
+            .Where(p => p.Id == id)
+            .ProjectToType<ProgramDetailsDto>()
+            .SingleOrDefaultAsync(cancellationToken);
 
-        return program is not null ? program.Adapt<ProgramDetailsDto>() : new NotFound();
+        return program is not null ? program : new NotFound();
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistoryAsync(
@@ -147,9 +156,15 @@ public class ProgramService: IProgramService
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
-    public async Task<OneOf<ProgramDetailsDto, NotFound>> UpdateProgramAsync(Guid id, UpdateProgramDto updateProgramDto,
+    public async Task<OneOf<ProgramDetailsDto, NotFound, NameAlreadyExists>> UpdateProgramAsync(Guid id,
+        UpdateProgramDto updateProgramDto,
         CancellationToken cancellationToken = default)
     {
+        if (await _context.Programs.AnyAsync(p => p.Name == updateProgramDto.Name && p.Id != id, cancellationToken))
+        {
+            return new NameAlreadyExists();
+        }
+
         var program = await _context.Programs.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
         if (program is null)
@@ -171,7 +186,7 @@ public class ProgramService: IProgramService
             Event = JsonSerializer.Serialize(new ProgramUpdatedEvent(
                 _currentUserService.UserId,
                 userFullName,
-                userRoles ?? string.Empty,
+                userRoles,
                 eventDateTime,
                 previousValues,
                 JsonSerializer.Serialize(updateProgramDto)))
@@ -196,8 +211,8 @@ public class ProgramService: IProgramService
 
         // TODO: Move the same code into separated method
         var tenantProgram = await _context
-                       .TenantsPrograms
-                       .FirstOrDefaultAsync(p => p.ProgramId == id && p.TenantId == tenantId, cancellationToken);
+            .TenantsPrograms
+            .FirstOrDefaultAsync(p => p.ProgramId == id && p.TenantId == tenantId, cancellationToken);
 
         if (tenantProgram is null)
         {
@@ -237,7 +252,7 @@ public class ProgramService: IProgramService
                         now,
                         currentUserFullName,
                         currentUserRoles
-                        )),
+                    )),
                 EventType = ProgramEventType.ProgramReactivatedEvent
             },
             Status.Deactivated => new ProgramActivityLog
@@ -259,7 +274,8 @@ public class ProgramService: IProgramService
         await _context.ProgramActivityLogs.AddAsync(programActivityLog, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Program ({createdProgramId}) status was changed to {newUserStatus} by {@userId}",
+        _logger.LogInformation(
+            "{dateTime} - Program ({createdProgramId}) status was changed to {newProgramStatus } by {@userId}",
             _dateTimeService.UtcNow,
             tenantProgram.ProgramId,
             status,
@@ -268,54 +284,20 @@ public class ProgramService: IProgramService
         return await GetTenantProgramDetailsAsync(id, cancellationToken);
     }
 
-    public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
-        =>
-            _context.TenantsPrograms
-                .AsNoTracking()
-                .Where(x => x.TenantId == _currentUserService.TenantId)
-                .Select(p => new TenantProgramDto
-                {
-                    Id = p.ProgramId,
-                    Name = p.Program.Name,
-                    Reference = p.Program.Reference ?? string.Empty,
-                    Overview = p.Program.Overview ?? string.Empty,
-                    LegalAuthority = p.Program.LegalAuthority ?? string.Empty,
-                    Agency = p.Program.Agency ?? string.Empty,
-                    Jurisdiction = p.Program.Jurisdiction,
-                    JurisdictionName = p.Program.JurisdictionName ?? string.Empty,
-                    IncentivesArea = p.Program.IncentivesArea ?? string.Empty,
-                    IncentivesType = p.Program.IncentivesType ?? string.Empty,
-                    Department = string.Empty,
-                    ServiceArea = string.Empty,
-                    StartDateTimeUtc = p.Program.StartDateTimeUtc,
-                    EndDateTimeUtc = p.Program.EndDateTimeUtc,
-                    CreatedDateTimeUtc = p.Program.CreatedDateTimeUtc,
-                    Status = p.Status
-                })
-                .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+    public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default) =>
+        _context.TenantsPrograms
+            .Where(x => x.TenantId == _currentUserService.TenantId)
+            .ProjectToType<TenantProgramDto>()
+            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
-    public async Task<byte[]> ExportTenantProgramsAsync(FileType fileType, CancellationToken cancellationToken = default)
+    public async Task<byte[]> ExportTenantProgramsAsync(FileType fileType,
+        CancellationToken cancellationToken = default)
     {
         var exportPrograms = await _context
             .TenantsPrograms
             .Where(x => x.TenantId == _currentUserService.TenantId)
-            .AsNoTracking()
-            .Select(p => new TenantProgramExportModel()
-            {
-                Name = p.Program.Name,
-                Reference = p.Program.Reference ?? string.Empty,
-                Overview = p.Program.Overview ?? string.Empty,
-                LegalAuthority = p.Program.LegalAuthority ?? string.Empty,
-                Agency = p.Program.Agency ?? string.Empty,
-                Jurisdiction = p.Program.Jurisdiction.ToString(),
-                JurisdictionName = p.Program.JurisdictionName ?? string.Empty,
-                IncentivesArea = p.Program.IncentivesArea ?? string.Empty,
-                IncentivesType = p.Program.IncentivesType ?? string.Empty,
-                StartDateTimeUtc = p.Program.StartDateTimeUtc,
-                EndDateTimeUtc = p.Program.EndDateTimeUtc,
-                CreatedDateTimeUtc = p.Program.CreatedDateTimeUtc,
-                Status = p.Status,
-            })
+            .ProjectToType<TenantProgramExportModel>()
             .ToListAsync(cancellationToken);
 
         exportPrograms.ForEach(p =>
@@ -336,21 +318,11 @@ public class ProgramService: IProgramService
         CancellationToken cancellationToken = default)
     {
         var program = await _context.TenantsPrograms
-            .Include(x => x.Program)
-            .FirstOrDefaultAsync(p => p.ProgramId == id && p.TenantId == _currentUserService.TenantId, cancellationToken);
+            .Where(p => p.ProgramId == id && p.TenantId == _currentUserService.TenantId)
+            .ProjectToType<TenantProgramDetailsDto>()
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (program is null)
-        {
-            return new NotFound();
-        }
-
-        var programDetailsDto = program.Program.Adapt<TenantProgramDetailsDto>();
-        programDetailsDto.Status = program.Status;
-        programDetailsDto.DeactivationDateTimeUtc = program.DeactivationDateTimeUtc;
-        programDetailsDto.ReactivationDateTimeUtc = program.ReactivationDateTimeUtc;
-        programDetailsDto.Jurisdiction = program.Program.Jurisdiction.ToString();
-
-        return programDetailsDto;
+        return program is not null ? program : new NotFound();
     }
 
     private IQueryable<ProgramActivityLog> GetProgramActivityLogsQuery(Guid programId) =>
@@ -361,12 +333,13 @@ public class ProgramService: IProgramService
         _context.ProgramActivityLogs
             .Where(log => log.ProgramId == programId && log.TenantId == tenantId);
 
-    private Task<Program?> GetProgramByIdAsync(Guid programId, CancellationToken cancellationToken)
+    private Task<DAL.Entities.Program?> GetProgramByIdAsync(Guid programId, CancellationToken cancellationToken)
     {
-        Expression<Func<Program, bool>> predicate = _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
-            ? (Program program) => program.Id == programId
-            : (Program program) => program.Id == programId &&
-                                   program.TenantsPrograms.Any(tp => tp.TenantId == _currentUserService.TenantId);
+        Expression<Func<DAL.Entities.Program, bool>> predicate =
+            _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
+                ? program => program.Id == programId
+                : program => program.Id == programId &&
+                             program.TenantsPrograms.Any(tp => tp.TenantId == _currentUserService.TenantId);
 
         return _context.Programs.FirstOrDefaultAsync(predicate, cancellationToken);
     }

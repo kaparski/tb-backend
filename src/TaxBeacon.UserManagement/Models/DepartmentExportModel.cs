@@ -1,6 +1,4 @@
 ﻿using Npoi.Mapper.Attributes;
-using System.ComponentModel.DataAnnotations;
-using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.UserManagement.Models
 {
