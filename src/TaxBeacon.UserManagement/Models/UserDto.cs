@@ -42,5 +42,7 @@ public class UserDto
 
     public string? JobTitle { get; set; }
 
-    public string? TeamName { get; set; }
+    public string? ServiceArea { get; set; }
+
+    public string? Team { get; set; }
 }

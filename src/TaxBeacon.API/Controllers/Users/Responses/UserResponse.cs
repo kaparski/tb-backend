@@ -34,7 +34,9 @@ public class UserResponse
 
     public string? JobTitle { get; set; }
 
-    public string? TeamName { get; set; }
+    public string? ServiceArea { get; set; }
+
+    public string? Team { get; set; }
 
     public string? RoleNamesAsString { get; set; }
 

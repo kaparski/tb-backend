@@ -167,8 +167,11 @@ public class UserService: IUserService
                 Division = u.Division,
                 Department = u.Department,
                 JobTitle = u.JobTitle,
+                ServiceArea = u.ServiceArea,
+                Team = u.Team,
                 Roles = u.Roles,
                 RoleIdsAsString = u.RoleIdsAsString,
+                RoleNamesAsString = u.RoleNamesAsString,
                 RoleIds = roles.Select(r => r.RoleId),
                 RoleNames = roles.Select(r => r.RoleName)
             })

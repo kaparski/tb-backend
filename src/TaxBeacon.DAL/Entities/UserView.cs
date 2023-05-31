@@ -37,7 +37,7 @@ public class UserView: BaseEntity
 
     public string? JobTitle { get; set; }
 
-    public string? TeamName { get; set; }
+    public string? Team { get; set; }
 
     public string? Roles { get; set; }
 
