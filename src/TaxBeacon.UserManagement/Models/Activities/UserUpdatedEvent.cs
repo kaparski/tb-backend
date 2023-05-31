@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace TaxBeacon.UserManagement.Models.Activities;
+﻿namespace TaxBeacon.UserManagement.Models.Activities;
 
 public sealed class UserUpdatedEvent: UserEventBase
 {

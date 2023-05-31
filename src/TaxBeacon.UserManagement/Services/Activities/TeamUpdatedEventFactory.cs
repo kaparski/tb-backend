@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Models.Activities.Tenant;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities;
 

@@ -1,9 +1,11 @@
-﻿using FluentAssertions;
+﻿using Bogus;
+using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
@@ -11,6 +13,7 @@ using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -113,6 +116,93 @@ public class UsersControllerTest
                 _ => throw new InvalidOperationException()
             });
         }
+    }
+
+    [Fact]
+    public async Task CreateUserAsync_ValidRequest_ReturnsCreatedStatusCode()
+    {
+        // Arrange
+        var request = TestData.NewUser.Generate();
+        _userServiceMock
+            .Setup(x => x.CreateUserAsync(It.IsAny<CreateUserDto>(), default))
+            .ReturnsAsync(new UserDto());
+
+        // Act
+        var actualResponse = await _controller.CreateUserAsync(request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as CreatedResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<CreatedResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status201Created);
+            actualResult?.Value.Should().BeOfType<UserResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task CreateUserAsync_EmailExists_ReturnsConflictStatusCode()
+    {
+        // Arrange
+        var request = TestData.NewUser.Generate();
+        _userServiceMock
+            .Setup(x => x.CreateUserAsync(It.IsAny<CreateUserDto>(), default))
+            .ReturnsAsync(new EmailAlreadyExists());
+
+        // Act
+        var actualResponse = await _controller.CreateUserAsync(request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as ConflictResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<ConflictResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status409Conflict);
+        }
+    }
+
+    [Fact]
+    public async Task CreateUserAsync_InvalidOperation_ReturnsBadRequestStatusCode()
+    {
+        // Arrange
+        var request = TestData.NewUser.Generate();
+        _userServiceMock
+            .Setup(x => x.CreateUserAsync(It.IsAny<CreateUserDto>(), default))
+            .ReturnsAsync(new InvalidOperation(string.Empty));
+
+        // Act
+        var actualResponse = await _controller.CreateUserAsync(request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as BadRequestObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<BadRequestObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            actualResult?.Value.Should().BeOfType<string>();
+        }
+    }
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    private static class TestData
+    {
+        public static readonly Faker<CreateUserRequest> NewUser = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid()));
     }
 
     [Fact]

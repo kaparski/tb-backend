@@ -30,9 +30,9 @@ public class TenantProgramDetailsResponse
 
     public Status Status { get; set; }
 
-    public DateTime StartDateTimeUtc { get; set; }
+    public DateTime? StartDateTimeUtc { get; set; }
 
-    public DateTime EndDateTimeUtc { get; set; }
+    public DateTime? EndDateTimeUtc { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
 

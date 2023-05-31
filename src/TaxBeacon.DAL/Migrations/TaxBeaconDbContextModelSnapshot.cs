@@ -309,7 +309,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("DeletedDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("EndDateTimeUtc")
+                    b.Property<DateTime?>("EndDateTimeUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("IncentivesArea")
@@ -352,7 +352,7 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<DateTime>("StartDateTimeUtc")
+                    b.Property<DateTime?>("StartDateTimeUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("State")

@@ -1,5 +1,4 @@
 using FluentValidation;
-using System.Security.Cryptography.Xml;
 using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Programs.Requests;
@@ -16,8 +15,8 @@ public record UpdateProgramRequest(
     string? City,
     string? IncentivesArea,
     string? IncentivesType,
-    DateTime StartDateTimeUtc,
-    DateTime EndDateTimeUtc);
+    DateTime? StartDateTimeUtc,
+    DateTime? EndDateTimeUtc);
 
 public class UpdateProgramRequestValidator: AbstractValidator<UpdateProgramRequest>
 {
@@ -66,6 +65,11 @@ public class UpdateProgramRequestValidator: AbstractValidator<UpdateProgramReque
 
         RuleFor(x => x.EndDateTimeUtc)
             .GreaterThanOrEqualTo(x => x.StartDateTimeUtc)
+            .When(x => x.StartDateTimeUtc is not null && x.EndDateTimeUtc is not null,
+                ApplyConditionTo.CurrentValidator)
             .WithMessage("The program end date must be greater than or equal to the program start date");
+
+        RuleFor(x => x.Jurisdiction)
+            .IsInEnum();
     }
 }

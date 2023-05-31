@@ -129,7 +129,8 @@ namespace TaxBeacon.UserManagement.Services
                 activities.Select(x => _divisionActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
         }
 
-        public async Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId, CancellationToken cancellationToken = default)
+        public async Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId,
+            CancellationToken cancellationToken = default)
         {
             var division = await _context
                 .Divisions
@@ -142,8 +143,8 @@ namespace TaxBeacon.UserManagement.Services
                 : division.Adapt<DivisionDetailsDto>();
         }
 
-        public async Task<OneOf<DivisionDetailsDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto,
-        CancellationToken cancellationToken = default)
+        public async Task<OneOf<DivisionDetailsDto, NotFound>> UpdateDivisionAsync(Guid id,
+            UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default)
         {
             var division = await _context.Divisions.Include(d => d.Departments).FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
@@ -156,7 +157,7 @@ namespace TaxBeacon.UserManagement.Services
                 .Where(d => updateDivisionDto.DepartmentIds.Contains(d.Id)
                     && d.DivisionId != null
                     && d.DivisionId != division.Id)
-                .AnyAsync();
+                .AnyAsync(cancellationToken);
 
             if (isUpdateBlocked)
             {
@@ -172,12 +173,12 @@ namespace TaxBeacon.UserManagement.Services
             // Removes association with departments
             await _context.Departments
                 .Where(dep => currentDepsIds.Except(updateDivisionDto.DepartmentIds).Contains(dep.Id))
-                .ForEachAsync(dep => dep.DivisionId = null);
+                .ForEachAsync(dep => dep.DivisionId = null, cancellationToken);
 
             // Set up association with freshly added departments
             await _context.Departments
                 .Where(dep => updateDivisionDto.DepartmentIds.Except(currentDepsIds).Contains(dep.Id))
-                .ForEachAsync(dep => dep.DivisionId = id);
+                .ForEachAsync(dep => dep.DivisionId = id, cancellationToken);
 
             await _context.DivisionActivityLogs.AddAsync(new DivisionActivityLog
             {
@@ -207,7 +208,22 @@ namespace TaxBeacon.UserManagement.Services
             return await GetDivisionDetailsAsync(id, cancellationToken);
         }
 
-        public async Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
+        public async Task<OneOf<DivisionDepartmentDto[], NotFound>> GetDivisionDepartmentsAsync(Guid id,
+            CancellationToken cancellationToken = default)
+        {
+            var department = await _context.Divisions.SingleOrDefaultAsync(
+                t => t.Id == id && t.TenantId == _currentUserService.TenantId, cancellationToken);
+
+            return department is null
+                ? new NotFound()
+                : await _context.Departments
+                    .Where(sa => sa.DivisionId == id)
+                    .ProjectToType<DivisionDepartmentDto>()
+                    .ToArrayAsync(cancellationToken);
+        }
+
+        public async Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId,
+            GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
         {
             var tenantId = _currentUserService.TenantId;
 

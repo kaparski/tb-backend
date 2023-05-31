@@ -5,7 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NPOI.SS.Formula.Functions;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
@@ -15,10 +15,10 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Models.Activities.Program;
-using TaxBeacon.UserManagement.Models.Programs;
-using TaxBeacon.UserManagement.Services;
-using TaxBeacon.UserManagement.Services.Activities.Program;
+using TaxBeacon.UserManagement.Services.Program;
+using TaxBeacon.UserManagement.Services.Program.Activities;
+using TaxBeacon.UserManagement.Services.Program.Activities.Models;
+using TaxBeacon.UserManagement.Services.Program.Models;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -30,8 +30,7 @@ public class ProgramServiceTests
     private readonly Mock<IDateTimeService> _dateTimeServiceMock;
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly ProgramService _programService;
-
-    public static readonly Guid TenantId = Guid.NewGuid();
+    private static readonly Guid TenantId = Guid.NewGuid();
 
     public ProgramServiceTests()
     {
@@ -94,7 +93,7 @@ public class ProgramServiceTests
     public async Task GetAllProgramsAsync_QueryIsValidOrderByNameAscending_ReturnsListOfPrograms()
     {
         // Arrange
-        var programs = TestData.TestProgram.Generate(10);
+        var programs = TestData.ProgramFaker.Generate(10);
         await _dbContextMock.Programs.AddRangeAsync(programs);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name asc", };
@@ -107,9 +106,9 @@ public class ProgramServiceTests
         {
             actualResult.Should().NotBeNull();
             actualResult.Count.Should().Be(10);
-            var listOfprograms = actualResult.Query.ToList();
-            listOfprograms.Count.Should().Be(5);
-            listOfprograms.Select(x => x.Name).Should().BeInAscendingOrder();
+            var listOfPrograms = actualResult.Query.ToList();
+            listOfPrograms.Count.Should().Be(5);
+            listOfPrograms.Select(x => x.Name).Should().BeInAscendingOrder();
         }
     }
 
@@ -117,7 +116,7 @@ public class ProgramServiceTests
     public async Task GetAllProgramsAsync_QueryIsValidOrderByNameDescending_ReturnsListOfPrograms()
     {
         // Arrange
-        var programs = TestData.TestProgram.Generate(10);
+        var programs = TestData.ProgramFaker.Generate(10);
         await _dbContextMock.Programs.AddRangeAsync(programs);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name desc", };
@@ -130,9 +129,9 @@ public class ProgramServiceTests
         {
             actualResult.Should().NotBeNull();
             actualResult.Count.Should().Be(10);
-            var listOfprograms = actualResult.Query.ToList();
-            listOfprograms.Count.Should().Be(5);
-            listOfprograms.Select(x => x.Name).Should().BeInDescendingOrder();
+            var listOfPrograms = actualResult.Query.ToList();
+            listOfPrograms.Count.Should().Be(5);
+            listOfPrograms.Select(x => x.Name).Should().BeInDescendingOrder();
         }
     }
 
@@ -140,7 +139,7 @@ public class ProgramServiceTests
     public async Task GetAllProgramsAsync_PageNumberIsOutOfRange_ReturnsEmptyList()
     {
         // Arrange
-        var programs = TestData.TestProgram.Generate(10);
+        var programs = TestData.ProgramFaker.Generate(10);
         await _dbContextMock.Programs.AddRangeAsync(programs);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
@@ -153,8 +152,8 @@ public class ProgramServiceTests
         {
             actualResult.Should().NotBeNull();
             actualResult.Count.Should().Be(10);
-            var listOfprograms = actualResult.Query.ToList();
-            listOfprograms.Count.Should().Be(0);
+            var listOfPrograms = actualResult.Query.ToList();
+            listOfPrograms.Count.Should().Be(0);
         }
     }
 
@@ -164,7 +163,7 @@ public class ProgramServiceTests
     public async Task ExportProgramsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
     {
         //Arrange
-        var programs = TestData.TestProgram.Generate(5);
+        var programs = TestData.ProgramFaker.Generate(5);
 
         await _dbContextMock.Programs.AddRangeAsync(programs);
         await _dbContextMock.SaveChangesAsync();
@@ -192,7 +191,7 @@ public class ProgramServiceTests
     public async Task GetProgramDetailsAsync_ProgramExists_ReturnsProgramDetailsDto()
     {
         // Arrange
-        var program = TestData.TestProgram.Generate();
+        var program = TestData.ProgramFaker.Generate();
 
         await _dbContextMock.Programs.AddAsync(program);
         await _dbContextMock.SaveChangesAsync();
@@ -209,7 +208,7 @@ public class ProgramServiceTests
     public async Task GetProgramDetailsAsync_ProgramDoesNotExist_ReturnsNotFound()
     {
         // Arrange
-        var program = TestData.TestProgram.Generate();
+        var program = TestData.ProgramFaker.Generate();
 
         await _dbContextMock.Programs.AddAsync(program);
         await _dbContextMock.SaveChangesAsync();
@@ -226,7 +225,7 @@ public class ProgramServiceTests
     public async Task GetAllTenantProgramsAsync_QueryIsValidOrderByNameAscending_ReturnsListOfPrograms()
     {
         // Arrange
-        var programs = TestData.TestTenantProgram.Generate(10);
+        var programs = TestData.TenantProgramFaker.Generate(10);
         await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name asc", };
@@ -249,7 +248,7 @@ public class ProgramServiceTests
     public async Task GetAllTenantProgramsAsync_QueryIsValidOrderByNameDescending_ReturnsListOfPrograms()
     {
         // Arrange
-        var programs = TestData.TestTenantProgram.Generate(10);
+        var programs = TestData.TenantProgramFaker.Generate(10);
         await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name desc", };
@@ -272,7 +271,7 @@ public class ProgramServiceTests
     public async Task GetAllTenantProgramsAsync_PageNumberIsOutOfRange_ReturnsEmptyList()
     {
         // Arrange
-        var programs = TestData.TestTenantProgram.Generate(10);
+        var programs = TestData.TenantProgramFaker.Generate(10);
         await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
@@ -296,7 +295,7 @@ public class ProgramServiceTests
     public async Task ExportTenantProgramsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
     {
         //Arrange
-        var programs = TestData.TestTenantProgram.Generate(5);
+        var programs = TestData.TenantProgramFaker.Generate(5);
 
         await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
         await _dbContextMock.SaveChangesAsync();
@@ -324,7 +323,7 @@ public class ProgramServiceTests
     public async Task GetTenantProgramDetailsAsync_ProgramExists_ReturnsProgramDetailsDto()
     {
         // Arrange
-        var program = TestData.TestTenantProgram.Generate();
+        var program = TestData.TenantProgramFaker.Generate();
 
         await _dbContextMock.TenantsPrograms.AddAsync(program);
         await _dbContextMock.SaveChangesAsync();
@@ -341,7 +340,7 @@ public class ProgramServiceTests
     public async Task GetTenantProgramDetailsAsync_ProgramDoesNotExist_ReturnsNotFound()
     {
         // Arrange
-        var program = TestData.TestTenantProgram.Generate();
+        var program = TestData.TenantProgramFaker.Generate();
 
         await _dbContextMock.TenantsPrograms.AddAsync(program);
         await _dbContextMock.SaveChangesAsync();
@@ -359,15 +358,15 @@ public class ProgramServiceTests
     {
         // Arrange
         var tenant = await _dbContextMock.Tenants.FirstOrDefaultAsync();
-        var program = TestData.TestProgram.Generate();
+        var program = TestData.ProgramFaker.Generate();
         program.TenantsPrograms = new List<TenantProgram> { new() { TenantId = tenant!.Id } };
-        var programActivities = TestData.TestProgramActivityLog
+        var programActivities = TestData.ProgramActivityLogFaker
             .RuleFor(x => x.ProgramId, _ => program.Id)
             .RuleFor(x => x.TenantId, _ => null)
             .Generate(2);
-        var tenantProgramActivities = TestData.TestProgramActivityLog
+        var tenantProgramActivities = TestData.ProgramActivityLogFaker
             .RuleFor(x => x.ProgramId, _ => program.Id)
-            .RuleFor(x => x.TenantId, _ => tenant!.Id)
+            .RuleFor(x => x.TenantId, _ => tenant.Id)
             .Generate(3);
 
         await _dbContextMock.Programs.AddAsync(program);
@@ -400,15 +399,15 @@ public class ProgramServiceTests
     {
         // Arrange
         var tenant = await _dbContextMock.Tenants.FirstOrDefaultAsync();
-        var program = TestData.TestProgram.Generate();
+        var program = TestData.ProgramFaker.Generate();
         program.TenantsPrograms = new List<TenantProgram> { new() { TenantId = tenant!.Id } };
-        var programActivities = TestData.TestProgramActivityLog
+        var programActivities = TestData.ProgramActivityLogFaker
             .RuleFor(x => x.ProgramId, _ => program.Id)
             .RuleFor(x => x.TenantId, _ => null)
             .Generate(2);
-        var tenantProgramActivities = TestData.TestProgramActivityLog
+        var tenantProgramActivities = TestData.ProgramActivityLogFaker
             .RuleFor(x => x.ProgramId, _ => program.Id)
-            .RuleFor(x => x.TenantId, _ => tenant!.Id)
+            .RuleFor(x => x.TenantId, _ => tenant.Id)
             .Generate(3);
 
         await _dbContextMock.Programs.AddAsync(program);
@@ -440,7 +439,7 @@ public class ProgramServiceTests
         bool isSuperAdmin, bool isUserInTenant)
     {
         // Arrange
-        var program = TestData.TestProgram.Generate();
+        var program = TestData.ProgramFaker.Generate();
 
         await _dbContextMock.Programs.AddAsync(program);
         await _dbContextMock.SaveChangesAsync();
@@ -467,7 +466,7 @@ public class ProgramServiceTests
         bool isSuperAdmin, bool isUserInTenant)
     {
         // Arrange
-        var program = TestData.TestProgram.Generate();
+        var program = TestData.ProgramFaker.Generate();
 
         await _dbContextMock.Programs.AddAsync(program);
         await _dbContextMock.SaveChangesAsync();
@@ -491,7 +490,7 @@ public class ProgramServiceTests
     {
         // Arrange
         var updateProgramDto = TestData.UpdateProgramDtoFaker.Generate();
-        var program = TestData.TestProgram.Generate();
+        var program = TestData.ProgramFaker.Generate();
         await _dbContextMock.Programs.AddAsync(program);
         await _dbContextMock.SaveChangesAsync();
 
@@ -524,11 +523,56 @@ public class ProgramServiceTests
     }
 
     [Fact]
+    public async Task UpdateProgramAsync_ProgramDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var updateProgramDto = TestData.UpdateProgramDtoFaker.Generate();
+        var program = TestData.ProgramFaker.Generate();
+        await _dbContextMock.Programs.AddAsync(program);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _programService.UpdateProgramAsync(Guid.NewGuid(), updateProgramDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeTrue();
+            actualResult.IsT2.Should().BeFalse();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateProgramAsync_ProgramWithNameAlreadyExists_ReturnsNameAlreadyExists()
+    {
+        // Arrange
+        var existingProgram = TestData.ProgramFaker.Generate();
+        var updateProgramDto = TestData.UpdateProgramDtoFaker
+            .RuleFor(p => p.Name, _ => existingProgram.Name)
+            .Generate();
+
+        await _dbContextMock.Programs.AddAsync(existingProgram);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _programService.UpdateProgramAsync(Guid.NewGuid(), updateProgramDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeFalse();
+            actualResult.IsT2.Should().BeTrue();
+        }
+    }
+
+    [Fact]
     public async Task UpdateTenantProgramStatusAsync_ActiveProgramStatusAndProgramId_UpdatedProgram()
     {
         //Arrange
-        var tenant = TestData.TestTenant.Generate();
-        var tenantProgram = TestData.TestTenantProgram.Generate();
+        var tenant = TestData.TenantFaker.Generate();
+        var tenantProgram = TestData.TenantProgramFaker.Generate();
         var currentDate = DateTime.UtcNow;
 
         await _dbContextMock.Tenants.AddAsync(tenant);
@@ -562,32 +606,11 @@ public class ProgramServiceTests
     }
 
     [Fact]
-
-    public async Task UpdateProgramAsync_ProgramDoesNotExist_ReturnsNotFound()
-    {
-        // Arrange
-        var updateProgramDto = TestData.UpdateProgramDtoFaker.Generate();
-        var program = TestData.TestProgram.Generate();
-        await _dbContextMock.Programs.AddAsync(program);
-        await _dbContextMock.SaveChangesAsync();
-
-        // Act
-        var actualResult = await _programService.UpdateProgramAsync(Guid.NewGuid(), updateProgramDto);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            actualResult.IsT0.Should().BeFalse();
-            actualResult.IsT1.Should().BeTrue();
-        }
-    }
-
-    [Fact]
     public async Task UpdateTenantProgramStatusAsync_DeactivatedProgramStatusAndProgramId_UpdatedTenantProgram()
     {
         //Arrange
-        var tenant = TestData.TestTenant.Generate();
-        var tenantProgram = TestData.TestTenantProgram.Generate();
+        var tenant = TestData.TenantFaker.Generate();
+        var tenantProgram = TestData.TenantProgramFaker.Generate();
         var currentDate = DateTime.UtcNow;
 
         await _dbContextMock.Tenants.AddAsync(tenant);
@@ -607,7 +630,8 @@ public class ProgramServiceTests
             .Returns(Array.Empty<string>());
 
         //Act
-        var actualResult = await _programService.UpdateTenantProgramStatusAsync(tenantProgram.ProgramId, Status.Deactivated);
+        var actualResult =
+            await _programService.UpdateTenantProgramStatusAsync(tenantProgram.ProgramId, Status.Deactivated);
 
         //Assert
         using (new AssertionScope())
@@ -622,7 +646,8 @@ public class ProgramServiceTests
 
     [Theory]
     [MemberData(nameof(TestData.UpdatedStatusInvalidData), MemberType = typeof(TestData))]
-    public async Task UpdateTenantProgramStatusAsync_ProgramStatusAndProgramIdNotInDb_ReturnNotFound(Status status, Guid programId)
+    public async Task UpdateTenantProgramStatusAsync_ProgramStatusAndProgramIdNotInDb_ReturnNotFound(Status status,
+        Guid programId)
     {
         //Act
         var actualResult = await _programService.UpdateTenantProgramStatusAsync(programId, status);
@@ -634,53 +659,93 @@ public class ProgramServiceTests
         }
     }
 
+    [Fact]
+    public async Task CreateProgramAsync_CreateProgramDto_ReturnsProgramDetailsAndCapturesActivityLog()
+    {
+        // Arrange
+        var createProgramDto = TestData.CreateProgramDtoFaker.Generate();
+
+        var currentDate = DateTime.UtcNow;
+        _dateTimeServiceMock
+            .Setup(service => service.UtcNow)
+            .Returns(currentDate);
+
+        // Act
+        var actualResult = await _programService.CreateProgramAsync(createProgramDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out var programDetailsDto, out _);
+            programDetailsDto.Should().NotBeNull();
+            programDetailsDto.Should().BeEquivalentTo(createProgramDto,
+                opt => opt.ExcludingMissingMembers());
+
+            var actualActivityLog = await _dbContextMock.ProgramActivityLogs.LastOrDefaultAsync();
+            actualActivityLog.Should().NotBeNull();
+            actualActivityLog?.TenantId.Should().BeNull();
+            actualActivityLog?.Date.Should().Be(currentDate);
+            actualActivityLog?.EventType.Should().Be(ProgramEventType.ProgramCreatedEvent);
+            actualActivityLog?.ProgramId.Should().Be(programDetailsDto.Id);
+
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Exactly(1));
+        }
+    }
+
+    [Fact]
+    public async Task CreateProgramAsync_ProgramWithNameAlreadyExists_ReturnsNameAlreadyExists()
+    {
+        // Arrange
+        var existingProgram = TestData.ProgramFaker.Generate();
+        var createProgramDto = TestData.CreateProgramDtoFaker
+            .RuleFor(p => p.Name, _ => existingProgram.Name)
+            .Generate();
+
+        await _dbContextMock.Programs.AddAsync(existingProgram);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _programService.CreateProgramAsync(createProgramDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeTrue();
+        }
+    }
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
-        public static readonly Faker<Tenant> TestTenant =
-          new Faker<Tenant>()
-              .RuleFor(t => t.Id, _ => Guid.NewGuid())
-              .RuleFor(t => t.Name, f => f.Company.CompanyName())
-              .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
+        public static readonly Faker<Tenant> TenantFaker =
+            new Faker<Tenant>()
+                .RuleFor(t => t.Id, _ => Guid.NewGuid())
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
 
         public static IEnumerable<object[]> UpdatedStatusInvalidData =>
-          new List<object[]>
-          {
-                new object[] { Status.Active, Guid.NewGuid() },
-                new object[] { Status.Deactivated, Guid.Empty }
-          };
+            new List<object[]>
+            {
+                new object[] { Status.Active, Guid.NewGuid() }, new object[] { Status.Deactivated, Guid.Empty }
+            };
 
-        public static readonly Faker<Program> TestProgram = new Faker<Program>()
-            .RuleFor(p => p.Id, f => Guid.NewGuid())
+        public static readonly Faker<Program> ProgramFaker = new Faker<Program>()
+            .RuleFor(p => p.Id, _ => Guid.NewGuid())
             .RuleFor(p => p.Name, f => f.Name.FirstName());
 
-        public static readonly Faker<TenantProgram> TestTenantProgram = new Faker<TenantProgram>()
-            .RuleFor(p => p.TenantId, f => TenantId)
+        public static readonly Faker<TenantProgram> TenantProgramFaker = new Faker<TenantProgram>()
+            .RuleFor(p => p.TenantId, _ => TenantId)
             .RuleFor(p => p.Status, f => f.PickRandom<Status>())
-            .RuleFor(u => u.ReactivationDateTimeUtc, f => DateTime.UtcNow)
-            .RuleFor(u => u.DeactivationDateTimeUtc, f => DateTime.UtcNow)
-            .RuleFor(p => p.Program, f => TestProgram.Generate());
+            .RuleFor(u => u.ReactivationDateTimeUtc, _ => DateTime.UtcNow)
+            .RuleFor(u => u.DeactivationDateTimeUtc, _ => DateTime.UtcNow)
+            .RuleFor(p => p.Program, _ => ProgramFaker.Generate());
 
-        public static readonly Faker<User> TestUser =
-            new Faker<User>()
-                .RuleFor(u => u.Id, f => Guid.NewGuid())
-                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
-                .RuleFor(u => u.LastName, f => f.Name.LastName())
-                .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
-                .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
-                .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
-                .RuleFor(u => u.TenantUsers, f => new List<TenantUser>()
-                {
-                    new TenantUser()
-                    {
-                        TenantId = TenantId,
-                    }
-                })
-                .RuleFor(u => u.Status, f => f.PickRandom<Status>());
-
-        public static readonly Faker<ProgramActivityLog> TestProgramActivityLog = new Faker<ProgramActivityLog>()
+        public static readonly Faker<ProgramActivityLog> ProgramActivityLogFaker = new Faker<ProgramActivityLog>()
             .RuleFor(x => x.Date, f => f.Date.Recent())
-            .RuleFor(x => x.Revision, f => (uint)1)
+            .RuleFor(x => x.Revision, _ => (uint)1)
             .RuleFor(x => x.EventType, _ => ProgramEventType.ProgramCreatedEvent)
             .RuleFor(x => x.Event, (f, x) => JsonSerializer.Serialize(
                 new ProgramCreatedEvent(Guid.NewGuid(), x.Date, f.Name.FullName(), f.Name.JobTitle())
@@ -688,18 +753,36 @@ public class ProgramServiceTests
 
         public static readonly Faker<UpdateProgramDto> UpdateProgramDtoFaker =
             new Faker<UpdateProgramDto>()
-                .RuleFor(dto => dto.Name, f => f.Name.FirstName())
-                .RuleFor(dto => dto.Reference, f => f.Company.CompanyName())
-                .RuleFor(dto => dto.Overview, f => f.Lorem.Text())
-                .RuleFor(dto => dto.LegalAuthority, f => f.Lorem.Word())
-                .RuleFor(dto => dto.Agency, f => f.Internet.Url())
-                .RuleFor(dto => dto.Jurisdiction, f => f.PickRandom<Jurisdiction>())
-                .RuleFor(dto => dto.State, f => f.Address.State())
-                .RuleFor(dto => dto.County, f => f.Address.County())
-                .RuleFor(dto => dto.City, f => f.Address.City())
-                .RuleFor(dto => dto.IncentivesArea, f => f.Lorem.Word())
-                .RuleFor(dto => dto.IncentivesType, f => f.Lorem.Word())
-                .RuleFor(dto => dto.StartDateTimeUtc, f => f.Date.Past())
-                .RuleFor(dto => dto.EndDateTimeUtc, f => f.Date.Future());
+                .CustomInstantiator(f => new UpdateProgramDto(
+                    f.Lorem.Word(),
+                    f.Company.CompanyName(),
+                    f.Lorem.Text(),
+                    f.Lorem.Word(),
+                    f.Internet.Url(),
+                    f.PickRandom<Jurisdiction>(),
+                    f.Address.State(),
+                    f.Address.Country(),
+                    f.Address.City(),
+                    f.Lorem.Word(),
+                    f.Lorem.Word(),
+                    f.Date.Past(),
+                    f.Date.Past()));
+
+        public static readonly Faker<CreateProgramDto> CreateProgramDtoFaker =
+            new Faker<CreateProgramDto>()
+                .CustomInstantiator(f => new CreateProgramDto(
+                    f.Lorem.Word(),
+                    f.Company.CompanyName(),
+                    f.Lorem.Text(),
+                    f.Lorem.Word(),
+                    f.Internet.Url(),
+                    f.PickRandom<Jurisdiction>(),
+                    f.Address.State(),
+                    f.Address.Country(),
+                    f.Address.City(),
+                    f.Lorem.Word(),
+                    f.Lorem.Word(),
+                    f.Date.Past(),
+                    f.Date.Future()));
     }
 }
