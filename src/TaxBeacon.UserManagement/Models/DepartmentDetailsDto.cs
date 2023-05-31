@@ -14,7 +14,5 @@ public class DepartmentDetailsDto
 
     public IList<JobTitleDto> JobTitles { get; set; } = null!;
 
-    public Guid? DivisionId { get; set; }
-
     public DivisionDto Division { get; set; } = null!;
 }

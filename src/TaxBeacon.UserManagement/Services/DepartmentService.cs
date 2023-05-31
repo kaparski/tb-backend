@@ -124,10 +124,12 @@ public class DepartmentService: IDepartmentService
             .Include(x => x.Division)
             .Include(x => x.JobTitles.OrderBy(dep => dep.Name))
             .Include(x => x.ServiceAreas.OrderBy(dep => dep.Name))
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.Id == id)
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == id, cancellationToken);
+            .ProjectToType<DepartmentDetailsDto>()
+            .FirstOrDefaultAsync(cancellationToken);
 
-        return item is null ? new NotFound() : item.Adapt<DepartmentDetailsDto>();
+        return item is null ? new NotFound() : item;
     }
 
     public async Task<OneOf<DepartmentDetailsDto, NotFound, InvalidOperation>> UpdateDepartmentAsync(Guid id, UpdateDepartmentDto updatedEntity,
@@ -148,7 +150,7 @@ public class DepartmentService: IDepartmentService
         if (updatedEntity.DivisionId != Guid.Empty)
         {
             var departmentToAdd = await _context.Departments
-                .FirstOrDefaultAsync(d => d.Id == updatedEntity.DivisionId && d.TenantId != entity.TenantId);
+                .FirstOrDefaultAsync(d => d.Id == updatedEntity.DivisionId && d.TenantId != entity.TenantId, cancellationToken);
 
             if (departmentToAdd != null)
             {
@@ -226,7 +228,9 @@ public class DepartmentService: IDepartmentService
                 JsonSerializer.Serialize(updatedEntity)))
         }, cancellationToken);
 
-        updatedEntity.Adapt(entity);
+        entity.Name = updatedEntity.Name;
+        entity.Description = updatedEntity.Description;
+        entity.DivisionId = updatedEntity.DivisionId;
 
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -235,15 +239,7 @@ public class DepartmentService: IDepartmentService
             id,
             _currentUserService.UserId);
 
-        var departmentDetails = await _context
-           .Departments
-           .Include(x => x.Division)
-           .Include(x => x.JobTitles.OrderBy(dep => dep.Name))
-           .Include(x => x.ServiceAreas.OrderBy(dep => dep.Name))
-           .AsNoTracking()
-           .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == id, cancellationToken);
-
-        return departmentDetails is null ? new NotFound() : departmentDetails.Adapt<DepartmentDetailsDto>();
+        return (await GetDepartmentDetailsAsync(id, cancellationToken)).AsT0;
     }
 
     public async Task<OneOf<QueryablePaging<DepartmentUserDto>, NotFound>> GetDepartmentUsersAsync(Guid departmentId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)

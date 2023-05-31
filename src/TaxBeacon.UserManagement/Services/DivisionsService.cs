@@ -133,15 +133,15 @@ namespace TaxBeacon.UserManagement.Services
         public async Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId,
             CancellationToken cancellationToken = default)
         {
-            var division = await _context
-                .Divisions
-                .Include(x => x.Departments.OrderBy(dep => dep.Name))
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == divisionId, cancellationToken);
+            var divisionDetails = await _context
+               .Divisions
+               .Include(x => x.Departments.OrderBy(dep => dep.Name))
+               .Where(x => x.TenantId == _currentUserService.TenantId && x.Id == divisionId)
+               .ProjectToType<DivisionDetailsDto>()
+               .AsNoTracking()
+               .FirstOrDefaultAsync(cancellationToken);
 
-            return division is null
-                ? new NotFound()
-                : division.Adapt<DivisionDetailsDto>();
+            return divisionDetails is null ? new NotFound() : divisionDetails;
         }
 
         public async Task<OneOf<DivisionDetailsDto, NotFound, InvalidOperation>> UpdateDivisionAsync(Guid id,
@@ -199,7 +199,8 @@ namespace TaxBeacon.UserManagement.Services
                     JsonSerializer.Serialize(updateDivisionDto)))
             }, cancellationToken);
 
-            updateDivisionDto.Adapt(division);
+            division.Name = updateDivisionDto.Name;
+            division.Description = updateDivisionDto.Description;
 
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -208,13 +209,7 @@ namespace TaxBeacon.UserManagement.Services
                 id,
                 _currentUserService.UserId);
 
-            var divisionDetails = await _context
-                .Divisions
-                .Include(x => x.Departments.OrderBy(dep => dep.Name))
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == id, cancellationToken);
-
-            return divisionDetails is null ? new NotFound() : divisionDetails.Adapt<DivisionDetailsDto>();
+            return (await GetDivisionDetailsAsync(id, cancellationToken)).AsT0;
         }
 
         public async Task<OneOf<DivisionDepartmentDto[], NotFound>> GetDivisionDepartmentsAsync(Guid id,

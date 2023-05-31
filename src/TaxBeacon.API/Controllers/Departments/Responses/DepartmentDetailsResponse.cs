@@ -13,8 +13,6 @@ public class DepartmentDetailsResponse
 
     public string Description { get; set; } = null!;
 
-    public Guid? DivisionId { get; set; }
-
     public DivisionResponse Division { get; set; } = null!;
 
     public IList<ServiceAreaResponse> ServiceAreas { get; set; } = null!;
