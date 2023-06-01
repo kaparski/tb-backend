@@ -754,33 +754,45 @@ public class UserService: IUserService
     }
 
     private async Task<OneOf<Success, InvalidOperation>> ValidateOrganizationUnitsAsync(
-        Guid divisionId,
-        Guid departmentId,
-        Guid serviceAreaId,
-        Guid jobTitleId,
+        Guid? divisionId,
+        Guid? departmentId,
+        Guid? serviceAreaId,
+        Guid? jobTitleId,
         Guid? teamId)
     {
         var tenantId = _currentUserService.TenantId;
 
-        var divisionExists = await _context.Divisions
-            .AnyAsync(d => d.Id == divisionId && d.TenantId == tenantId);
-        if (!divisionExists)
-            return new InvalidOperation($"Division with the ID {divisionId} does not exist.");
+        if (divisionId is not null)
+        {
+            var divisionExists = await _context.Divisions
+                        .AnyAsync(d => d.Id == divisionId && d.TenantId == tenantId);
+            if (!divisionExists)
+                return new InvalidOperation($"Division with the ID {divisionId} does not exist.");
+        }
 
-        var departmentExists = await _context.Departments
-            .AnyAsync(d => d.Id == departmentId && d.DivisionId == divisionId);
-        if (!departmentExists)
-            return new InvalidOperation($"Department with the ID {departmentId} does not exist.");
+        if (departmentId is not null && divisionId is not null)
+        {
+            var departmentExists = await _context.Departments
+                        .AnyAsync(d => d.Id == departmentId && d.DivisionId == divisionId);
+            if (!departmentExists)
+                return new InvalidOperation($"Department with the ID {departmentId} does not exist.");
+        }
 
-        var serviceAreaExists = await _context.ServiceAreas
-            .AnyAsync(d => d.Id == serviceAreaId && d.DepartmentId == departmentId);
-        if (!serviceAreaExists)
-            return new InvalidOperation($"Service area with the ID {serviceAreaId} does not exist.");
+        if (serviceAreaId is not null && departmentId is not null)
+        {
+            var serviceAreaExists = await _context.ServiceAreas
+                        .AnyAsync(d => d.Id == serviceAreaId && d.DepartmentId == departmentId);
+            if (!serviceAreaExists)
+                return new InvalidOperation($"Service area with the ID {serviceAreaId} does not exist.");
+        }
 
-        var jobTitleExists = await _context.JobTitles
-            .AnyAsync(d => d.Id == jobTitleId && d.DepartmentId == departmentId);
-        if (!jobTitleExists)
-            return new InvalidOperation($"Job title with the ID {jobTitleId} does not exist.");
+        if (jobTitleId is not null && departmentId is not null)
+        {
+            var jobTitleExists = await _context.JobTitles
+                        .AnyAsync(d => d.Id == jobTitleId && d.DepartmentId == departmentId);
+            if (!jobTitleExists)
+                return new InvalidOperation($"Job title with the ID {jobTitleId} does not exist.");
+        }
 
         if (teamId is not null)
         {

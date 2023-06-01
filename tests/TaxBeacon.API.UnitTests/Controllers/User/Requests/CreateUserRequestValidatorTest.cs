@@ -273,4 +273,103 @@ public class CreateUserRequestValidatorTest
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
     }
+
+    [Fact]
+    public void Validation_DepartmentWithNoDivision_ShouldHaveDepartmentIdError()
+    {
+        //Arrange
+        var createUserRequest = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                null,
+                Guid.NewGuid(),
+                null,
+                null,
+                null))
+            .Generate();
+
+        //Act
+        var actualResult = _createUserRequestValidator.TestValidate(createUserRequest);
+
+        //Assert
+        actualResult.ShouldHaveValidationErrorFor(r => r.DepartmentId)
+            .WithErrorMessage("Cannot set a department without a division.");
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DivisionId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.ServiceAreaId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.JobTitleId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.TeamId);
+    }
+
+    [Fact]
+    public void Validation_ServiceAreaWithNoDepartment_ShouldHaveServiceAreaIdError()
+    {
+        //Arrange
+        var createUserRequest = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                null,
+                null,
+                null,
+                Guid.NewGuid(),
+                null))
+            .Generate();
+
+        //Act
+        var actualResult = _createUserRequestValidator.TestValidate(createUserRequest);
+
+        //Assert
+        actualResult.ShouldHaveValidationErrorFor(r => r.JobTitleId)
+            .WithErrorMessage("Cannot set a job title without a department.");
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DivisionId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.ServiceAreaId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.TeamId);
+    }
+
+    [Fact]
+    public void Validation_JobTitleWithNoDepartment_ShouldHaveJobTitleIdError()
+    {
+        //Arrange
+        var createUserRequest = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                null,
+                null,
+                Guid.NewGuid(),
+                null,
+                null))
+            .Generate();
+
+        //Act
+        var actualResult = _createUserRequestValidator.TestValidate(createUserRequest);
+
+        //Assert
+        actualResult.ShouldHaveValidationErrorFor(r => r.ServiceAreaId)
+            .WithErrorMessage("Cannot set a service area without a department.");
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DivisionId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.JobTitleId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.TeamId);
+    }
 }
