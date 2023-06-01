@@ -1,4 +1,5 @@
 using FluentValidation;
+using TaxBeacon.Common.Services;
 
 namespace TaxBeacon.API.Controllers.Departments.Requests;
 
@@ -6,7 +7,7 @@ public record UpdateDepartmentRequest(string Name, string Description, Guid Divi
 
 public class UpdateDepartmentRequestValidator: AbstractValidator<UpdateDepartmentRequest>
 {
-    public UpdateDepartmentRequestValidator()
+    public UpdateDepartmentRequestValidator(ICurrentUserService currentUserService)
     {
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -18,9 +19,12 @@ public class UpdateDepartmentRequestValidator: AbstractValidator<UpdateDepartmen
             .MaximumLength(200)
             .WithMessage("The department description must contain no more than 200 characters");
 
-        RuleFor(x => x.DivisionId)
-            .NotEmpty()
-            .WithMessage("Required field");
+        if (currentUserService.DivisionEnabled)
+        {
+            RuleFor(x => x.DivisionId)
+                .NotEmpty()
+                .WithMessage("Required field");
+        }
 
         RuleFor(x => x.ServiceAreasIds)
             .NotEmpty()

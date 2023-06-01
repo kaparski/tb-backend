@@ -15,4 +15,6 @@ public interface ICurrentUserService
     IReadOnlyCollection<string> TenantRoles { get; }
 
     bool IsUserInTenant { get; }
+
+    bool DivisionEnabled { get; }
 }
