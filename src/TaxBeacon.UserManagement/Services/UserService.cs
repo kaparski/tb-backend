@@ -770,10 +770,10 @@ public class UserService: IUserService
                 return new InvalidOperation($"Division with the ID {divisionId} does not exist.");
         }
 
-        if (departmentId is not null && divisionId is not null)
+        if (departmentId is not null && (divisionId is not null || !_currentUserService.DivisionEnabled))
         {
             var departmentExists = await _context.Departments
-                        .AnyAsync(d => d.Id == departmentId && d.DivisionId == divisionId);
+                        .AnyAsync(d => d.Id == departmentId && (d.DivisionId == divisionId || !_currentUserService.DivisionEnabled));
             if (!departmentExists)
                 return new InvalidOperation($"Department with the ID {departmentId} does not exist.");
         }
