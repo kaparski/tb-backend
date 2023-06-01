@@ -76,7 +76,7 @@ public class UserService: IUserService
             .Tenants
             .FirstOrDefaultAsync(t => t.Id == _currentUserService.TenantId, cancellationToken);
 
-        if (user is null || tenant is null)
+        if (user is null)
         {
             return new NotFound();
         }
@@ -95,7 +95,7 @@ public class UserService: IUserService
             user.FullName,
             await GetUserPermissionsAsync(user.Id, cancellationToken),
             await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken),
-            tenant.DivisionEnabled);
+            tenant?.DivisionEnabled);
     }
 
     public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
