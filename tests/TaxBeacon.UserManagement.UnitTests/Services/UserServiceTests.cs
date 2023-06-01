@@ -1407,6 +1407,7 @@ public class UserServiceTests
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();
