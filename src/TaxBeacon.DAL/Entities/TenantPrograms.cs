@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.DAL.Entities
 {
-    public class TenantProgram
+    public class TenantProgram: IDeletableEntity
     {
         public Guid TenantId { get; set; }
 
@@ -10,12 +10,16 @@ namespace TaxBeacon.DAL.Entities
 
         public Guid ProgramId { get; set; }
 
+        public Program Program { get; set; } = null!;
+
         public DateTime? DeactivationDateTimeUtc { get; set; }
 
         public DateTime? ReactivationDateTimeUtc { get; set; }
 
-        public Program Program { get; set; } = null!;
-
         public Status Status { get; set; }
+
+        public bool? IsDeleted { get; set; }
+
+        public DateTime? DeletedDateTimeUtc { get; set; }
     }
 }
