@@ -5,8 +5,8 @@ public record CreateUserDto(
     string LegalName,
     string LastName,
     string Email,
-    Guid DivisionId,
-    Guid DepartmentId,
-    Guid ServiceAreaId,
-    Guid JobTitleId,
+    Guid? DivisionId,
+    Guid? DepartmentId,
+    Guid? ServiceAreaId,
+    Guid? JobTitleId,
     Guid? TeamId);
