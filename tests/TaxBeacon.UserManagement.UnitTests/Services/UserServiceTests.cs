@@ -507,9 +507,8 @@ public class UserServiceTests
             .Ignore(dest => dest.Team);
         var tenant = TestData.TestTenant.Generate();
         var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
-        var userView = TestData.TestUserView
-            .RuleFor(u => u.TenantId, tenant.Id)
-            .Generate();
+        var userView = TestData.TestUserView.Generate();
+        userView.TenantId = tenant.Id;
         var user = userView.Adapt<User>();
         updateUserDto.Adapt(userView);
         var oldFirstName = user.FirstName;
@@ -965,12 +964,11 @@ public class UserServiceTests
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
-        var user = TestData.TestUserView
-            .RuleFor(u => u.TenantId, tenant.Id)
-            .Generate();
+        var userView = TestData.TestUserView.Generate();
+        userView.TenantId = tenant.Id;
 
         await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.UsersView.AddAsync(user);
+        await _dbContextMock.UsersView.AddAsync(userView);
 
         var roles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
         var tenantRoles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
@@ -993,10 +991,10 @@ public class UserServiceTests
 
         _currentUserServiceMock
             .Setup(service => service.UserId)
-            .Returns(user.Id);
+            .Returns(userView.Id);
 
         // Act
-        var actualResult = await _userService.GetUserDetailsByIdAsync(user.Id);
+        var actualResult = await _userService.GetUserDetailsByIdAsync(userView.Id);
 
         // Assert
         using (new AssertionScope())
@@ -1403,6 +1401,10 @@ public class UserServiceTests
         _currentUserServiceMock
             .Setup(service => service.IsSuperAdmin)
             .Returns(true);
+
+        _currentUserServiceMock
+            .Setup(service => service.IsUserInTenant)
+            .Returns(false);
 
         // Act
         var query = _userService.QueryUsers();
