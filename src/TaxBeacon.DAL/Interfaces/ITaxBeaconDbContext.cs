@@ -58,5 +58,7 @@ public interface ITaxBeaconDbContext
 
     DbSet<ProgramActivityLog> ProgramActivityLogs { get; }
 
+    DbSet<UserView> UsersView { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users;
@@ -202,5 +203,22 @@ public class UsersControllerTest
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void Get_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<IQueryable<UserResponse>>)_controller.Get).Method;
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be("Users.Read;Users.ReadWrite;Users.ReadExport");
+        }
     }
 }

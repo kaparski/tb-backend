@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using NPOI.Util.ArrayExtensions;
 using System.Net.Mail;
+using System.Text.RegularExpressions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
@@ -22,6 +24,7 @@ using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using System.Diagnostics;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -1302,12 +1305,115 @@ public class UserServiceTests
         return (division.Id, department.Id, serviceArea.Id, jobTitle.Id);
     }
 
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [Fact]
+    public void UserView_ListOfColumnsMatchesUserViewEntity()
+    {
+        // Arrange
+
+        var usersViewScript = File.ReadAllText("../../../../../migration-scripts/UsersView.sql");
+
+        var fieldsAsString = new Regex(@"select((.|\n)*)from", RegexOptions.IgnoreCase | RegexOptions.Multiline)
+            .Match(usersViewScript)
+            .Groups[1]
+            .Value;
+
+        var fields = new Regex(@"(\w+),?[\r\n]", RegexOptions.IgnoreCase | RegexOptions.Multiline)
+            .Matches(fieldsAsString)
+            .Select(m => m.Groups[1].Value)
+            .ToArray();
+
+        var props = typeof(UserView).GetProperties()
+            .Select(p => p.Name)
+            .Where(p => p != "IsDeleted" && p != "DeletedDateTimeUtc")
+            .ToArray();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            foreach (var prop in props)
+            {
+                fields.Should().Contain(prop);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task QueryUsers_ReturnsTenantUsers()
+    {
+        // Arrange
+        var userViews = TestData.TestUserView.Generate(5);
+
+        userViews.ForEach(u => u.TenantId = TestData.TestTenantId);
+
+        await _dbContextMock.UsersView.AddRangeAsync(userViews);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(TestData.TestTenantId);
+
+        _currentUserServiceMock
+            .Setup(service => service.IsSuperAdmin)
+            .Returns(false);
+
+        // Act
+        var query = _userService.QueryUsers();
+        var result = query.ToArray();
+
+        // Assert
+
+        using (new AssertionScope())
+        {
+            result.Should().HaveCount(5);
+
+            foreach (var user in result)
+            {
+                var userView = userViews.Single(u => u.Id == user.Id);
+
+                user.Should().BeEquivalentTo(userView, opt => opt.ExcludingMissingMembers());
+            }
+        }
+    }
+
+    [Fact]
+    public async Task QueryUsers_ReturnsNonTenantUsers()
+    {
+        // Arrange
+        var userViews = TestData.TestUserView.Generate(5);
+
+        await _dbContextMock.UsersView.AddRangeAsync(userViews);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.IsSuperAdmin)
+            .Returns(true);
+
+        // Act
+        var query = _userService.QueryUsers();
+        var result = query.ToArray();
+
+        // Assert
+
+        using (new AssertionScope())
+        {
+            result.Should().HaveCount(5);
+
+            foreach (var user in result)
+            {
+                var userView = userViews.Single(u => u.Id == user.Id);
+
+                user.Should().BeEquivalentTo(userView, opt => opt.ExcludingMissingMembers());
+            }
+        }
+    }
+
     private static class TestData
     {
+        public static readonly Guid TestTenantId = Guid.NewGuid();
+
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
-                .RuleFor(t => t.Id, _ => Guid.NewGuid())
+                .RuleFor(t => t.Id, _ => TestTenantId)
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
                 .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
 
@@ -1321,6 +1427,31 @@ public class UserServiceTests
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
+
+        public static readonly Faker<UserView> TestUserView =
+            new Faker<UserView>()
+                .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.LastModifiedDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.Id, _ => Guid.NewGuid())
+                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+                .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
+                .RuleFor(u => u.LastName, f => f.Name.LastName())
+                .RuleFor(u => u.Email, f => f.Internet.Email())
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>())
+                .RuleFor(u => u.LastLoginDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
+                .RuleFor(u => u.DeactivationDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.ReactivationDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.Division, f => f.Commerce.Department())
+                .RuleFor(u => u.Department, f => f.Commerce.Department())
+                .RuleFor(u => u.ServiceArea, f => f.Name.JobArea())
+                .RuleFor(u => u.JobTitle, f => f.Name.JobTitle())
+                .RuleFor(u => u.Team, f => f.Commerce.Department())
+                .RuleFor(u => u.Roles, f => f.Name.JobTitle())
+                .RuleFor(u => u.RoleIdsAsString, f => f.Name.JobTitle())
+                .RuleFor(u => u.RoleNamesAsString, f => f.Name.JobTitle())
+                .RuleFor(u => u.UserIdPlusTenantId, _ => Guid.NewGuid().ToString() + TestTenantId.ToString())
+        ;
 
         public static readonly Faker<UpdateUserDto> UpdateUserDtoFaker =
             new Faker<UpdateUserDto>()

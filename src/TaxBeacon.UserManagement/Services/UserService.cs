@@ -3,6 +3,7 @@ using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npoi.Mapper;
 using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
@@ -12,6 +13,7 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -111,6 +113,83 @@ public class UserService: IUserService
                 .MapToUserDtoWithTenantRoleNames(_context, _currentUserService);
 
         return await users.GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+    }
+
+    class UserRoleContainer
+    {
+        /// <summary>
+        /// Concatenation of UserId and TenantId. If user is tenant-free, then it is just UserId.
+        /// Needed for optimization purposes.
+        /// </summary>
+        public string UserIdPlusTenantId { get; set; } = null!;
+        public Guid RoleId { get; set; }
+        public string RoleName { get; set; } = null!;
+    }
+
+    public IQueryable<UserDto> QueryUsers()
+    {
+        var nonTenantUsers = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true };
+
+        var userRoles = nonTenantUsers ?
+            _context.UserRoles
+                .Select(ur => new UserRoleContainer
+                {
+                    UserIdPlusTenantId = ur.UserId.ToString(),
+                    RoleId = ur.RoleId,
+                    RoleName = ur.Role.Name
+                }) :
+            _context.TenantUserRoles
+                .Select(tur => new UserRoleContainer
+                {
+                    UserIdPlusTenantId = tur.UserId.ToString() + tur.TenantId.ToString(),
+                    RoleId = tur.RoleId,
+                    RoleName = tur.TenantRole.Role.Name
+                });
+
+        Guid? tenantId = nonTenantUsers ?
+            null :
+            _currentUserService.TenantId;
+
+        // Need to use a view here. Main reason is because EF fails to construct a query when
+        // an array-like field (Roles in this case) must be both sortable and filterable.
+        // Also a view allows to optimize fetching relative fields like Department, JobTitle etc.
+        var users = _context.UsersView.Where(u => u.TenantId == tenantId);
+
+        var userDtos = users.GroupJoin(userRoles,
+            u => u.UserIdPlusTenantId,
+            tur => tur.UserIdPlusTenantId,
+            (u, roles) => new UserDto
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email,
+                Status = u.Status,
+                CreatedDateTimeUtc = u.CreatedDateTimeUtc,
+                LastLoginDateTimeUtc = u.LastLoginDateTimeUtc,
+                DeactivationDateTimeUtc = u.DeactivationDateTimeUtc,
+                ReactivationDateTimeUtc = u.ReactivationDateTimeUtc,
+                FullName = u.FullName,
+                LegalName = u.LegalName,
+                DivisionId = u.DivisionId,
+                Division = u.Division,
+                DepartmentId = u.DepartmentId,
+                Department = u.Department,
+                JobTitleId = u.JobTitleId,
+                JobTitle = u.JobTitle,
+                ServiceAreaId = u.ServiceAreaId,
+                ServiceArea = u.ServiceArea,
+                TeamId = u.TeamId,
+                Team = u.Team,
+                Roles = u.Roles,
+                RoleIdsAsString = u.RoleIdsAsString,
+                RoleNamesAsString = u.RoleNamesAsString,
+                RoleIds = roles.Select(r => r.RoleId),
+                RoleNames = roles.Select(r => r.RoleName)
+            })
+        ;
+
+        return userDtos;
     }
 
     public async Task<OneOf<UserDto, NotFound>> GetUserDetailsByIdAsync(Guid id,

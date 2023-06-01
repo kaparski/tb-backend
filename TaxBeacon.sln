@@ -29,9 +29,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migration-scripts", "{E149189A-4D39-48F3-9B5A-DBDA8D351B70}"
 	ProjectSection(SolutionItems) = preProject
 		migration-scripts\AddPermisionsToAdminRole.sql = migration-scripts\AddPermisionsToAdminRole.sql
+		migration-scripts\AddPermissionsToSuperAdminRole.sql = migration-scripts\AddPermissionsToSuperAdminRole.sql
 		migration-scripts\InsertPermissionsAndRoles.sql = migration-scripts\InsertPermissionsAndRoles.sql
 		migration-scripts\InsertSuperAdminRoleWithPermissions.sql = migration-scripts\InsertSuperAdminRoleWithPermissions.sql
-		migration-scripts\AddPermissionsToSuperAdminRole.sql = migration-scripts\AddPermissionsToSuperAdminRole.sql
+		migration-scripts\UsersView.sql = migration-scripts\UsersView.sql
 	EndProjectSection
 EndProject
 Global

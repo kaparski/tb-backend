@@ -2,6 +2,7 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
@@ -18,6 +19,34 @@ public class UsersController: BaseController
     private readonly IUserService _userService;
 
     public UsersController(IUserService userService) => _userService = userService;
+
+    /// <summary>
+    /// Queryable list of users (as OData endpoint).
+    /// </summary>
+    /// <response code="200">Returns users</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>List of users</returns>
+    [HasPermissions(
+        Common.Permissions.Users.Read,
+        Common.Permissions.Users.ReadWrite,
+        Common.Permissions.Users.ReadExport)]
+    [EnableQuery]
+    [HttpGet("api/odata/users")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IQueryable<UserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public IQueryable<UserResponse> Get()
+    {
+        // Note that this method's name is predefined
+
+        var query = _userService.QueryUsers();
+
+        return query.ProjectToType<UserResponse>();
+    }
 
     /// <summary>
     /// List of users
