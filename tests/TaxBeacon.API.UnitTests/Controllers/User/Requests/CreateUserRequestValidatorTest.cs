@@ -1,14 +1,21 @@
 ﻿using Bogus;
 using FluentValidation.TestHelper;
+using Moq;
 using TaxBeacon.API.Controllers.Users.Requests;
+using TaxBeacon.Common.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.User.Requests;
 
 public class CreateUserRequestValidatorTest
 {
     private readonly CreateUserRequestValidator _createUserRequestValidator;
-
-    public CreateUserRequestValidatorTest() => _createUserRequestValidator = new CreateUserRequestValidator();
+    private readonly Mock<ICurrentUserService> _currentUserServiceMock;
+    public CreateUserRequestValidatorTest()
+    {
+        _currentUserServiceMock = new();
+        _currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(true);
+        _createUserRequestValidator = new CreateUserRequestValidator(_currentUserServiceMock.Object);
+    }
 
     [Fact]
     public void Validation_ValidRequest_ShouldHaveNoErrors()
@@ -369,6 +376,41 @@ public class CreateUserRequestValidatorTest
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.DivisionId);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.JobTitleId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.TeamId);
+    }
+
+    [Fact]
+    public void Validation_DepartmentWithNoDivisionButDivisionsDisabled_ShouldHaveDepartmentIdError()
+    {
+        //Arrange
+        var createUserRequest = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                null,
+                Guid.NewGuid(),
+                null,
+                null,
+                null))
+            .Generate();
+        var currentUserServiceMock = new Mock<ICurrentUserService>();
+        currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
+        var createUserRequestValidator = new CreateUserRequestValidator(currentUserServiceMock.Object);
+
+        //Act
+        var actualResult = createUserRequestValidator.TestValidate(createUserRequest);
+
+        //Assert
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DivisionId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.ServiceAreaId);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.JobTitleId);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.TeamId);
     }
