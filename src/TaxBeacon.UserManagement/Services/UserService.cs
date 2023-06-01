@@ -72,7 +72,11 @@ public class UserService: IUserService
             .Users
             .SingleOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
 
-        if (user is null)
+        var tenant = await _context
+            .Tenants
+            .FirstOrDefaultAsync(t => t.Id == _currentUserService.TenantId, cancellationToken);
+
+        if (user is null || tenant is null)
         {
             return new NotFound();
         }
@@ -90,7 +94,8 @@ public class UserService: IUserService
             user.Id,
             user.FullName,
             await GetUserPermissionsAsync(user.Id, cancellationToken),
-            await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken));
+            await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken),
+            tenant.DivisionEnabled);
     }
 
     public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
@@ -538,8 +543,8 @@ public class UserService: IUserService
 
     public async Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken)
     {
-        var tenantId = await GetTenantIdAsync(mailAddress, cancellationToken);
-
+        var tenant = await GetTenantAsync(mailAddress, cancellationToken);
+        var tenantId = tenant?.Id ?? Guid.Empty;
         var userQuery = from u in _context.Users
                         join ur in _context.UserRoles on u.Id equals ur.UserId into rolesGrouping
                         from userRole in rolesGrouping.DefaultIfEmpty()
@@ -563,11 +568,11 @@ public class UserService: IUserService
             .Select(g => new UserInfo
             (
                 tenantId,
+                tenant?.DivisionEnabled ?? false,
                 g.Key.Id,
                 g.Key.FullName,
                 g.Where(r => !string.IsNullOrEmpty(r.Role)).Select(r => r.Role).Distinct().ToList(),
-                g.Where(tr => !string.IsNullOrEmpty(tr.TenantRole)).Select(tr => tr.TenantRole).Distinct().ToList()
-            ))
+                g.Where(tr => !string.IsNullOrEmpty(tr.TenantRole)).Select(tr => tr.TenantRole).Distinct().ToList()))
             .SingleOrDefault();
     }
 
@@ -606,10 +611,10 @@ public class UserService: IUserService
             .UserRoles
             .AnyAsync(ur => ur.UserId == id && ur.Role.Name == roleName, cancellationToken);
 
-    private Task<Guid> GetTenantIdAsync(MailAddress mail, CancellationToken cancellationToken) =>
+    private Task<Tenant?> GetTenantAsync(MailAddress mail, CancellationToken cancellationToken) =>
         _context.TenantUsers
             .Where(tu => tu.User.Email == mail.Address)
-            .Select(tu => tu.TenantId)
+            .Select(tu => tu.Tenant)
             .SingleOrDefaultAsync(cancellationToken);
 
     private async Task<OneOf<User, NotFound>> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)

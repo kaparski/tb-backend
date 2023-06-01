@@ -91,6 +91,7 @@ public class AuthorizationControllerTests
                     Guid.NewGuid(),
                     f.Name.FullName(),
                     f.Random.WordsArray(4).AsReadOnly(),
+                    f.Random.Bool(),
                     f.Random.Bool()));
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230526105953_AddDivisionEnableToTenantTable")]
+    partial class AddDivisionEnableToTenantTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -309,7 +312,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("DeletedDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EndDateTimeUtc")
+                    b.Property<DateTime>("EndDateTimeUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("IncentivesArea")
@@ -352,7 +355,7 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<DateTime?>("StartDateTimeUtc")
+                    b.Property<DateTime>("StartDateTimeUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("State")
