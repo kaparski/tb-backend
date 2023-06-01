@@ -38,7 +38,7 @@ public interface IUserService
         Guid[] roleIds,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid userId,
+    Task<OneOf<UserDto, NotFound, InvalidOperation>> UpdateUserByIdAsync(Guid userId,
         UpdateUserDto updateUserDto,
         CancellationToken cancellationToken = default);
 
