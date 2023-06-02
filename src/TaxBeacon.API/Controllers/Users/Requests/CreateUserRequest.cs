@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using TaxBeacon.Common.Services;
 
 namespace TaxBeacon.API.Controllers.Users.Requests;
 
@@ -15,7 +16,7 @@ public record CreateUserRequest(
 
 public class CreateUserRequestValidator: AbstractValidator<CreateUserRequest>
 {
-    public CreateUserRequestValidator()
+    public CreateUserRequestValidator(ICurrentUserService currentUserService)
     {
         RuleFor(x => x.Email)
             .NotEmpty()
@@ -40,7 +41,7 @@ public class CreateUserRequestValidator: AbstractValidator<CreateUserRequest>
 
         RuleFor(x => x.DepartmentId)
             .Empty()
-            .When(x => x.DivisionId is null, ApplyConditionTo.CurrentValidator)
+            .When(x => x.DivisionId is null && currentUserService.DivisionEnabled, ApplyConditionTo.CurrentValidator)
             .WithMessage("Cannot set a department without a division.");
 
         RuleFor(x => x.ServiceAreaId)

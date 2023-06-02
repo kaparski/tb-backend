@@ -62,5 +62,8 @@ public class CurrentUserService: ICurrentUserService
                                                      .Select(c => c.Value)
                                                  ?? Enumerable.Empty<string>()).ToArray();
 
+    public bool DivisionEnabled => bool.TryParse(UserClaims?.SingleOrDefault(c => c.Type == Claims.DivisionEnabled)?.Value, out var divisionEnabled)
+        && divisionEnabled;
+
     private IEnumerable<Claim>? UserClaims => _httpContextAccessor?.HttpContext?.User?.Claims;
 }
