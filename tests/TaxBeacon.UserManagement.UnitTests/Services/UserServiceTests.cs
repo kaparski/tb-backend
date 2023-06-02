@@ -498,16 +498,27 @@ public class UserServiceTests
     public async Task UpdateUserByIdAsync_ValidUserIdAndUpdateUserDto_ReturnsUpdatedUser()
     {
         // Arrange
+        TypeAdapterConfig<UserView, User>
+            .ForType()
+            .Ignore(dest => dest.Division)
+            .Ignore(dest => dest.Department)
+            .Ignore(dest => dest.ServiceArea)
+            .Ignore(dest => dest.JobTitle)
+            .Ignore(dest => dest.Team);
+        var tenant = TestData.TestTenant.Generate();
         var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
-        var user = TestData.TestUser.Generate();
+        var userView = TestData.TestUserView.Generate();
+        userView.TenantId = tenant.Id;
+        var user = userView.Adapt<User>();
+        updateUserDto.Adapt(userView);
         var oldFirstName = user.FirstName;
         var oldLastName = user.LastName;
         var oldLegalName = user.LegalName;
-        var tenant = TestData.TestTenant.Generate();
         var currentDate = DateTime.UtcNow;
 
         await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.UsersView.AddAsync(userView);
         await _dbContextMock.TenantUsers.AddAsync(new TenantUser
         {
             Tenant = tenant,
@@ -546,12 +557,15 @@ public class UserServiceTests
             usersOneOf.TryPickT0(out var userDto, out _);
             userDto.Should().NotBeNull();
             userDto.Id.Should().Be(user.Id);
-            userDto.FirstName.Should().Be(updateUserDto.FirstName);
-            userDto.FirstName.Should().NotBe(oldFirstName);
-            userDto.LegalName.Should().Be(updateUserDto.LegalName);
-            userDto.LegalName.Should().NotBe(oldLegalName);
-            userDto.LastName.Should().Be(updateUserDto.LastName);
-            userDto.LastName.Should().NotBe(oldLastName);
+
+            var updatedUser = await _dbContextMock.Users.SingleOrDefaultAsync(u => u.Id == user.Id);
+            updatedUser.Should().NotBeNull();
+            updatedUser?.FirstName.Should().Be(updateUserDto.FirstName);
+            updatedUser?.FirstName.Should().NotBe(oldFirstName);
+            updatedUser?.LegalName.Should().Be(updateUserDto.LegalName);
+            updatedUser?.LegalName.Should().NotBe(oldLegalName);
+            updatedUser?.LastName.Should().Be(updateUserDto.LastName);
+            updatedUser?.LastName.Should().NotBe(oldLastName);
 
             var actualActivityLog = await _dbContextMock.UserActivityLogs.LastOrDefaultAsync();
             actualActivityLog.Should().NotBeNull();
@@ -950,11 +964,11 @@ public class UserServiceTests
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
-        var user = TestData.TestUser.Generate();
+        var userView = TestData.TestUserView.Generate();
+        userView.TenantId = tenant.Id;
 
         await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.Users.AddAsync(user);
-        await _dbContextMock.TenantUsers.AddAsync(new TenantUser { Tenant = tenant, User = user });
+        await _dbContextMock.UsersView.AddAsync(userView);
 
         var roles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
         var tenantRoles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
@@ -977,10 +991,10 @@ public class UserServiceTests
 
         _currentUserServiceMock
             .Setup(service => service.UserId)
-            .Returns(user.Id);
+            .Returns(userView.Id);
 
         // Act
-        var actualResult = await _userService.GetUserDetailsByIdAsync(user.Id);
+        var actualResult = await _userService.GetUserDetailsByIdAsync(userView.Id);
 
         // Assert
         using (new AssertionScope())
@@ -1387,6 +1401,10 @@ public class UserServiceTests
         _currentUserServiceMock
             .Setup(service => service.IsSuperAdmin)
             .Returns(true);
+
+        _currentUserServiceMock
+            .Setup(service => service.IsUserInTenant)
+            .Returns(false);
 
         // Act
         var query = _userService.QueryUsers();

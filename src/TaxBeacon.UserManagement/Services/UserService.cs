@@ -192,18 +192,7 @@ public class UserService: IUserService
     public async Task<OneOf<UserDto, NotFound>> GetUserDetailsByIdAsync(Guid id,
         CancellationToken cancellationToken = default)
     {
-        var users = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
-            ? _context
-                .Users
-                .Include(u => u.Department)
-                .MapToUserDtoWithNoTenantRoleNames(_context)
-            : _context
-                .Users
-                .Include(u => u.Department)
-                .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
-                .MapToUserDtoWithTenantRoleNames(_context, _currentUserService);
-
-        var user = await users.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var user = await QueryUsers().SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (user is null)
         {
