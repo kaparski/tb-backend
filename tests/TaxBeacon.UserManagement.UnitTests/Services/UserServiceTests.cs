@@ -1449,8 +1449,6 @@ public class UserServiceTests
                 .RuleFor(u => u.JobTitle, f => f.Name.JobTitle())
                 .RuleFor(u => u.Team, f => f.Commerce.Department())
                 .RuleFor(u => u.Roles, f => f.Name.JobTitle())
-                .RuleFor(u => u.RoleIdsAsString, f => f.Name.JobTitle())
-                .RuleFor(u => u.RoleNamesAsString, f => f.Name.JobTitle())
                 .RuleFor(u => u.UserIdPlusTenantId, _ => Guid.NewGuid().ToString() + TestTenantId.ToString())
         ;
 

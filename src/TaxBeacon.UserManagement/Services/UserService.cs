@@ -182,10 +182,7 @@ public class UserService: IUserService
                 TeamId = u.TeamId,
                 Team = u.Team,
                 Roles = u.Roles,
-                RoleIdsAsString = u.RoleIdsAsString,
-                RoleNamesAsString = u.RoleNamesAsString,
-                RoleIds = roles.Select(r => r.RoleId),
-                RoleNames = roles.Select(r => r.RoleName)
+                RoleIds = roles.Select(r => r.RoleId)
             })
         ;
 
