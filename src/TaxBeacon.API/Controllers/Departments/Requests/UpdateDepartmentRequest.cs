@@ -19,12 +19,10 @@ public class UpdateDepartmentRequestValidator: AbstractValidator<UpdateDepartmen
             .MaximumLength(200)
             .WithMessage("The department description must contain no more than 200 characters");
 
-        if (currentUserService.DivisionEnabled)
-        {
-            RuleFor(x => x.DivisionId)
-                .NotEmpty()
-                .WithMessage("Required field");
-        }
+        RuleFor(x => x.DivisionId)
+            .NotEmpty()
+            .When(x => currentUserService.DivisionEnabled, ApplyConditionTo.CurrentValidator)
+            .WithMessage("Required field");
 
         RuleFor(x => x.ServiceAreasIds)
             .NotEmpty()

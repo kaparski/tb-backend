@@ -39,13 +39,10 @@ public class CreateUserRequestValidator: AbstractValidator<CreateUserRequest>
             .MaximumLength(100)
             .WithMessage("The last name must contain no more than 100 characters");
 
-        if (currentUserService.DivisionEnabled)
-        {
-            RuleFor(x => x.DepartmentId)
-                .Empty()
-                .When(x => x.DivisionId is null, ApplyConditionTo.CurrentValidator)
-                .WithMessage("Cannot set a department without a division.");
-        }
+        RuleFor(x => x.DepartmentId)
+            .Empty()
+            .When(x => x.DivisionId is null && currentUserService.DivisionEnabled, ApplyConditionTo.CurrentValidator)
+            .WithMessage("Cannot set a department without a division.");
 
         RuleFor(x => x.ServiceAreaId)
             .Empty()
