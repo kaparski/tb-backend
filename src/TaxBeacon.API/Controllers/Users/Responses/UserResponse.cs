@@ -48,11 +48,5 @@ public class UserResponse
 
     public string? Team { get; set; }
 
-    public string? RoleNamesAsString { get; set; }
-
-    public string? RoleIdsAsString { get; set; }
-
     public IEnumerable<Guid>? RoleIds { get; set; }
-
-    public IEnumerable<string>? RoleNames { get; set; }
 }
