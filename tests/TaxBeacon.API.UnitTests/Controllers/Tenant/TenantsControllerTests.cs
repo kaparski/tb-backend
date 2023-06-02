@@ -17,6 +17,8 @@ using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Tenants;
+using TaxBeacon.UserManagement.Services.Tenants.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Tenant;
 

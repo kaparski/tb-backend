@@ -1,6 +1,6 @@
 using TaxBeacon.Common.Models;
 
-namespace TaxBeacon.UserManagement.Models.Activities.Tenant;
+namespace TaxBeacon.UserManagement.Services.Tenants.Activities.Models;
 
 public sealed class TenantUpdatedEvent: EventBase
 {

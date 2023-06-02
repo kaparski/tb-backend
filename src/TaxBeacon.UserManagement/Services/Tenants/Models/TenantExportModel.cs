@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.UserManagement.Models
+namespace TaxBeacon.UserManagement.Services.Tenants.Models
 {
     public sealed class TenantExportModel
     {

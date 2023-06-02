@@ -1,23 +1,24 @@
 ﻿using Gridify;
 using Gridify.EntityFramework;
 using Mapster;
-using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
-using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Services;
-using TaxBeacon.Common.Converters;
 using System.Collections.Immutable;
 using System.Text.Json;
+using TaxBeacon.Common.Converters;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Services.Activities.Tenant;
+using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
-using TaxBeacon.UserManagement.Models.Activities.Tenant;
+using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.UserManagement.Models;
+using TaxBeacon.UserManagement.Services.Tenants.Activities;
+using TaxBeacon.UserManagement.Services.Tenants.Activities.Models;
+using TaxBeacon.UserManagement.Services.Tenants.Models;
 
-namespace TaxBeacon.UserManagement.Services;
+namespace TaxBeacon.UserManagement.Services.Tenants;
 
 public class TenantService: ITenantService
 {
@@ -51,9 +52,9 @@ public class TenantService: ITenantService
 
     public async Task<QueryablePaging<TenantDto>> GetTenantsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default) => await _context
-            .Tenants
-            .ProjectToType<TenantDto>()
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+        .Tenants
+        .ProjectToType<TenantDto>()
+        .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<byte[]> ExportTenantsAsync(FileType fileType,
         CancellationToken cancellationToken)
@@ -118,7 +119,8 @@ public class TenantService: ITenantService
         }
 
         var previousValues = JsonSerializer.Serialize(tenant.Adapt<UpdateTenantDto>());
-        var currentUserFullName = (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
+        var currentUserFullName =
+            (await _context.Users.FindAsync(_currentUserService.UserId, cancellationToken))!.FullName;
         var currentUserRoles = await _context
             .TenantUserRoles
             .Where(x => x.UserId == _currentUserService.UserId && x.TenantId == _currentUserService.TenantId)
@@ -154,7 +156,8 @@ public class TenantService: ITenantService
         return tenant.Adapt<TenantDto>();
     }
 
-    public async Task SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId, CancellationToken cancellationToken = default)
+    public async Task SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId,
+        CancellationToken cancellationToken = default)
     {
         var currentUserId = _currentUserService.UserId;
 
@@ -162,12 +165,8 @@ public class TenantService: ITenantService
         var currentUser = await _context
             .Users
             .Where(u => u.Id == currentUserId && u.UserRoles.Any(ur => ur.Role.Name == "Super admin"))
-            .Select(u => new
-            {
-                u.FullName,
-                Roles = string.Join(", ", u.UserRoles.Select(r => r.Role.Name))
-            })
-            .SingleAsync();
+            .Select(u => new { u.FullName, Roles = string.Join(", ", u.UserRoles.Select(r => r.Role.Name)) })
+            .SingleAsync(cancellationToken);
 
         var now = _dateTimeService.UtcNow;
 
@@ -212,14 +211,16 @@ public class TenantService: ITenantService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - User ({userId}) has switched from tenant ({oldTenantId}) to tenant ({newTenantId})",
+        _logger.LogInformation(
+            "{dateTime} - User ({userId}) has switched from tenant ({oldTenantId}) to tenant ({newTenantId})",
             now,
             currentUserId,
             oldTenantId,
             newTenantId);
     }
 
-    public async Task<OneOf<Success, NotFound>> ToggleDivisionsAsync(bool divisionEnabled, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success, NotFound>> ToggleDivisionsAsync(bool divisionEnabled,
+        CancellationToken cancellationToken = default)
     {
         var tenant = await _context.Tenants
             .SingleOrDefaultAsync(t => t.Id == _currentUserService.TenantId, cancellationToken);
@@ -233,5 +234,141 @@ public class TenantService: ITenantService
         await _context.SaveChangesAsync(cancellationToken);
 
         return new Success();
+    }
+
+    public async Task<OneOf<List<AssignedTenantProgramDto>, NotFound>> GetTenantPrograms(Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        if (!await _context.Tenants.AnyAsync(t => t.Id == tenantId, cancellationToken))
+        {
+            return new NotFound();
+        }
+
+        return await _context.TenantsPrograms
+            .Where(tp => tp.TenantId == tenantId)
+            .Select(tp => tp.Program)
+            .ProjectToType<AssignedTenantProgramDto>()
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<OneOf<Success, NotFound>> ChangeTenantProgramsAsync(Guid tenantId,
+        IEnumerable<Guid> programsIds,
+        CancellationToken cancellationToken)
+    {
+        if (!await _context.Tenants.AnyAsync(t => t.Id == tenantId, cancellationToken))
+        {
+            return new NotFound();
+        }
+
+        var existingPrograms = await _context.TenantsPrograms
+            .Where(tp => tp.TenantId == tenantId)
+            .ToArrayAsync(cancellationToken);
+
+        var currentUserInfo = _currentUserService.UserInfo;
+        var assignedProgramsIds = await AssignProgramsAsync(tenantId, existingPrograms, programsIds, currentUserInfo, cancellationToken);
+        var unassignProgramsIds = await UnassignProgramsAsync(tenantId, existingPrograms, programsIds, currentUserInfo, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        if (assignedProgramsIds.Any())
+        {
+            _logger.LogInformation("{dateTime} - To tenant ({tenantId}) were assigned the programs: {programsIds} by user({userId})",
+                _dateTimeService.UtcNow,
+                tenantId,
+                assignedProgramsIds,
+                _currentUserService.UserId);
+        }
+
+        if (unassignProgramsIds.Any())
+        {
+            _logger.LogInformation("{dateTime} - From tenant ({tenantId}) were unassigned the programs: {programsIds} by user({userId})",
+                _dateTimeService.UtcNow,
+                tenantId,
+                unassignProgramsIds,
+                _currentUserService.UserId);
+        }
+
+        return new Success();
+    }
+
+    private async Task<List<Guid>> AssignProgramsAsync(Guid tenantId,
+        IEnumerable<TenantProgram> existingPrograms,
+        IEnumerable<Guid> newProgramsIds,
+        (string currentUserFullName, string currentUserRoles) currentUserInfo,
+        CancellationToken cancellationToken)
+    {
+        var addedProgramsIds = newProgramsIds
+            .Except(existingPrograms.Select(ep => ep.ProgramId))
+            .ToList();
+
+        await _context.TenantsPrograms.AddRangeAsync(
+            addedProgramsIds.Select(id =>
+                new TenantProgram { TenantId = tenantId, ProgramId = id, Status = Status.Active, }),
+            cancellationToken);
+
+        var currentDate = _dateTimeService.UtcNow;
+
+        if (addedProgramsIds.Any())
+        {
+            await _context.TenantActivityLogs.AddAsync(new TenantActivityLog
+            {
+                TenantId = tenantId,
+                Revision = 1,
+                Date = currentDate,
+                EventType = TenantEventType.TenantAssignProgramsEvent,
+                Event = JsonSerializer.Serialize(
+                    new TenantAssignProgramsEvent(
+                        _currentUserService.UserId,
+                        currentUserInfo.currentUserRoles,
+                        currentUserInfo.currentUserFullName,
+                        string.Join(", ", _context.Programs
+                            .Where(p => addedProgramsIds.Contains(p.Id))
+                            .Select(p => p.Name)
+                            .ToListAsync(cancellationToken)),
+                        currentDate
+                    ))
+            }, cancellationToken);
+        }
+
+        return addedProgramsIds;
+    }
+
+    private async Task<List<Guid>> UnassignProgramsAsync(Guid tenantId,
+        IEnumerable<TenantProgram> existingPrograms,
+        IEnumerable<Guid> newProgramsIds,
+        (string currentUserFullName, string currentUserRoles) currentUserInfo,
+        CancellationToken cancellationToken)
+    {
+        var deletedProgramsIds = existingPrograms
+            .Where(tp => !newProgramsIds.Contains(tp.ProgramId))
+            .Select(tp => tp.ProgramId)
+            .ToList();
+
+        _context.TenantsPrograms.RemoveRange(existingPrograms.Where(tp => deletedProgramsIds.Contains(tp.ProgramId)));
+
+        var currentDate = _dateTimeService.UtcNow;
+
+        if (deletedProgramsIds.Any())
+        {
+            await _context.TenantActivityLogs.AddAsync(new TenantActivityLog
+            {
+                TenantId = tenantId,
+                Revision = 1,
+                Date = currentDate,
+                EventType = TenantEventType.TenantUnassignProgramEvent,
+                Event = JsonSerializer.Serialize(
+                    new TenantUnassignProgramsEvent(
+                        _currentUserService.UserId,
+                        currentUserInfo.currentUserRoles,
+                        currentUserInfo.currentUserFullName,
+                        string.Join(", ", _context.Programs
+                            .Where(p => deletedProgramsIds.Contains(p.Id))
+                            .Select(p => p.Name)
+                            .ToListAsync(cancellationToken)),
+                        currentDate
+                    ))
+            }, cancellationToken);
+        }
+
+        return deletedProgramsIds;
     }
 }

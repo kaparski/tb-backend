@@ -1,7 +1,7 @@
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Models;
 
-namespace TaxBeacon.UserManagement.Services.Activities.Tenant;
+namespace TaxBeacon.UserManagement.Services.Tenants.Activities;
 
 public interface ITenantActivityFactory
 {
