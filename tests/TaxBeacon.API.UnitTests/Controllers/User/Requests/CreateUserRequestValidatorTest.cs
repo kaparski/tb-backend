@@ -381,7 +381,7 @@ public class CreateUserRequestValidatorTest
     }
 
     [Fact]
-    public void Validation_DepartmentWithNoDivisionButDivisionsDisabled_ShouldHaveDepartmentIdError()
+    public void Validation_DepartmentWithNoDivisionButDivisionsDisabled_ShouldNotHaveDepartmentIdError()
     {
         //Arrange
         var createUserRequest = new Faker<CreateUserRequest>()
@@ -409,6 +409,111 @@ public class CreateUserRequestValidatorTest
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DivisionId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.ServiceAreaId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.JobTitleId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.TeamId);
+    }
+
+    [Fact]
+    public void Validation_DepartmentIsNullButDivisionsDisabled_ShouldNotHaveDepartmentIdError()
+    {
+        //Arrange
+        var createUserRequest = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                null,
+                null,
+                null,
+                null,
+                new Guid()))
+            .Generate();
+        var currentUserServiceMock = new Mock<ICurrentUserService>();
+        currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
+        var createUserRequestValidator = new CreateUserRequestValidator(currentUserServiceMock.Object);
+
+        //Act
+        var actualResult = createUserRequestValidator.TestValidate(createUserRequest);
+
+        //Assert
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DivisionId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.ServiceAreaId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.JobTitleId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.TeamId);
+    }
+
+    [Fact]
+    public void Validation_ServiceAreaWithoutDepartmentButDivisionsDisabled_ShouldServiceIdHaveError()
+    {
+        //Arrange
+        var createUserRequest = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(
+                f.Name.FirstName(),
+                f.Name.FirstName(),
+                f.Name.LastName(),
+                f.Internet.Email(),
+                null,
+                null,
+                new Guid(),
+                null,
+                new Guid()))
+            .Generate();
+        var currentUserServiceMock = new Mock<ICurrentUserService>();
+        currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
+        var createUserRequestValidator = new CreateUserRequestValidator(currentUserServiceMock.Object);
+
+        //Act
+        var actualResult = createUserRequestValidator.TestValidate(createUserRequest);
+
+        //Assert
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Email);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LegalName);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DivisionId);
+        actualResult.ShouldHaveValidationErrorFor(r => r.ServiceAreaId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.JobTitleId);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.TeamId);
+    }
+
+    [Fact]
+    public void Validation_AllRequiredValuesAreNullButDivisionsDisabled_ShouldAllRequiredFieldsHaveError()
+    {
+        //Arrange
+        var createUserRequest = new Faker<CreateUserRequest>()
+            .CustomInstantiator(f => new CreateUserRequest(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null))
+            .Generate();
+        var currentUserServiceMock = new Mock<ICurrentUserService>();
+        currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
+        var createUserRequestValidator = new CreateUserRequestValidator(currentUserServiceMock.Object);
+
+        //Act
+        var actualResult = createUserRequestValidator.TestValidate(createUserRequest);
+
+        //Assert
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
+        actualResult.ShouldHaveValidationErrorFor(r => r.LastName);
+        actualResult.ShouldHaveValidationErrorFor(r => r.Email);
+        actualResult.ShouldHaveValidationErrorFor(r => r.FirstName);
+        actualResult.ShouldHaveValidationErrorFor(r => r.LegalName);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.DivisionId);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.ServiceAreaId);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.JobTitleId);
