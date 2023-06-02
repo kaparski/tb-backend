@@ -396,12 +396,10 @@ public class CreateUserRequestValidatorTest
                 null,
                 null))
             .Generate();
-        var currentUserServiceMock = new Mock<ICurrentUserService>();
-        currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
-        var createUserRequestValidator = new CreateUserRequestValidator(currentUserServiceMock.Object);
+        _currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
 
         //Act
-        var actualResult = createUserRequestValidator.TestValidate(createUserRequest);
+        var actualResult = _createUserRequestValidator.TestValidate(createUserRequest);
 
         //Assert
         actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
@@ -431,12 +429,10 @@ public class CreateUserRequestValidatorTest
                 null,
                 new Guid()))
             .Generate();
-        var currentUserServiceMock = new Mock<ICurrentUserService>();
-        currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
-        var createUserRequestValidator = new CreateUserRequestValidator(currentUserServiceMock.Object);
+        _currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
 
         //Act
-        var actualResult = createUserRequestValidator.TestValidate(createUserRequest);
+        var actualResult = _createUserRequestValidator.TestValidate(createUserRequest);
 
         //Assert
         actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
@@ -466,12 +462,10 @@ public class CreateUserRequestValidatorTest
                 null,
                 new Guid()))
             .Generate();
-        var currentUserServiceMock = new Mock<ICurrentUserService>();
-        currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
-        var createUserRequestValidator = new CreateUserRequestValidator(currentUserServiceMock.Object);
+        _currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
 
         //Act
-        var actualResult = createUserRequestValidator.TestValidate(createUserRequest);
+        var actualResult = _createUserRequestValidator.TestValidate(createUserRequest);
 
         //Assert
         actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
@@ -501,12 +495,10 @@ public class CreateUserRequestValidatorTest
                 null,
                 null))
             .Generate();
-        var currentUserServiceMock = new Mock<ICurrentUserService>();
-        currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
-        var createUserRequestValidator = new CreateUserRequestValidator(currentUserServiceMock.Object);
+        _currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(false);
 
         //Act
-        var actualResult = createUserRequestValidator.TestValidate(createUserRequest);
+        var actualResult = _createUserRequestValidator.TestValidate(createUserRequest);
 
         //Assert
         actualResult.ShouldNotHaveValidationErrorFor(r => r.DepartmentId);
