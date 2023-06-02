@@ -28,9 +28,7 @@ CREATE VIEW dbo.UsersView AS
 		t.Name as Team,
 		tu.TenantId,
 		CAST(u.Id as varchar(50)) + ISNULL(CAST(tu.TenantId as varchar(50)), '') as UserIdPlusTenantId,
-		STRING_AGG(r.Name, ', ') as Roles,
-		STRING_AGG(r.Name, '|') as RoleNamesAsString,
-		STRING_AGG(CAST(r.Id as varchar(255)), '|') as RoleIdsAsString
+		STRING_AGG(r.Name, ', ') as Roles
 	from 
 		dbo.Users u
 		left join

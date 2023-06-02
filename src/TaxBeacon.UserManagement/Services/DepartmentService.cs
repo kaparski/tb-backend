@@ -230,7 +230,10 @@ public class DepartmentService: IDepartmentService
 
         entity.Name = updatedEntity.Name;
         entity.Description = updatedEntity.Description;
-        entity.DivisionId = updatedEntity.DivisionId;
+        if (updatedEntity.DivisionId != Guid.Empty)
+        {
+            entity.DivisionId = updatedEntity.DivisionId;
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 
