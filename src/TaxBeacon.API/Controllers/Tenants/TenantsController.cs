@@ -217,7 +217,10 @@ public class TenantsController: BaseController
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Tenant is not found</response>
-    [HasPermissions(Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite)]
+    [HasPermissions(
+        Common.Permissions.Tenants.Read,
+        Common.Permissions.Tenants.ReadWrite,
+        Common.Permissions.Tenants.ReadExport)]
     [HttpGet("{id:guid}/programs", Name = "GetAssignedPrograms")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(List<AssignedTenantProgramResponse>), StatusCodes.Status200OK)]

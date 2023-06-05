@@ -5,7 +5,7 @@ using TaxBeacon.UserManagement.Services.Tenants.Activities.Models;
 
 namespace TaxBeacon.UserManagement.Services.Tenants.Activities;
 
-public class TenantUnAssignProgramsEventFactory: ITenantActivityFactory
+public class TenantUnassignProgramsEventFactory: ITenantActivityFactory
 {
     public uint Revision => 1;
 

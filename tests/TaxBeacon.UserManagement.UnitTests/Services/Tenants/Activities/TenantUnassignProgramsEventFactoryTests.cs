@@ -6,14 +6,14 @@ using TaxBeacon.UserManagement.Services.Tenants.Activities.Models;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services.Tenants.Activities;
 
-public class TenantUnAssignProgramsEventFactoryTests
+public class TenantUnassignProgramsEventFactoryTests
 {
     private readonly ITenantActivityFactory _activityFactory;
 
-    public TenantUnAssignProgramsEventFactoryTests() => _activityFactory = new TenantUnAssignProgramsEventFactory();
+    public TenantUnassignProgramsEventFactoryTests() => _activityFactory = new TenantUnassignProgramsEventFactory();
 
     [Fact]
-    public void Create_heckMapping()
+    public void Create_ValidateMapping()
     {
         //Arrange
         var date = DateTime.UtcNow;

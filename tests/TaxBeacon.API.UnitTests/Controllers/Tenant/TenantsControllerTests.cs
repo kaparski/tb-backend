@@ -443,7 +443,12 @@ public class TenantsControllerTests
     {
         // Arrange
         var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetAssignedProgramsAsync).Method;
-        var permissions = new object[] { Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite };
+        var permissions = new object[]
+        {
+            Common.Permissions.Tenants.Read,
+            Common.Permissions.Tenants.ReadWrite,
+            Common.Permissions.Tenants.ReadExport
+        };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();

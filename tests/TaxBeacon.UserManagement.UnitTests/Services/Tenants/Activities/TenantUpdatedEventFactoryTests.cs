@@ -13,7 +13,7 @@ public sealed class TenantUpdatedEventFactoryTests
     public TenantUpdatedEventFactoryTests() => _activityFactory = new TenantUpdatedEventFactory();
 
     [Fact]
-    public void Create_heckMapping()
+    public void Create_ValidateMapping()
     {
         //Arrange
         var date = DateTime.UtcNow;
