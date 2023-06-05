@@ -11,6 +11,6 @@ public class UserViewConfiguration: IEntityTypeConfiguration<UserView>
             .Property(u => u.Status)
             .HasConversion<string>();
 
-        user.ToTable("UsersView");
+        user.ToTable("UsersView", t => t.ExcludeFromMigrations());
     }
 }

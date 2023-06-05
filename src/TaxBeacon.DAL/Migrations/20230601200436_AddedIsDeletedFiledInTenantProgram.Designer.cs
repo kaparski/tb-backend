@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230601200436_AddedIsDeletedFiledInTenantProgram")]
+    partial class AddedIsDeletedFiledInTenantProgram
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -733,9 +736,7 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("ReactivationDateTimeUtc")
                         .HasColumnType("datetime2");
@@ -960,7 +961,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.ToTable("UserRoles");
                 });
-
+            
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Department", b =>
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.Division", "Division")
