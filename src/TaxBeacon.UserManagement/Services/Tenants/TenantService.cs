@@ -334,7 +334,7 @@ public class TenantService: ITenantService
                         _currentUserService.UserId,
                         currentUserInfo.currentUserRoles,
                         currentUserInfo.currentUserFullName,
-                        string.Join(", ", _context.Programs
+                        string.Join(", ", await _context.Programs
                             .Where(p => resultProgramsIds.Contains(p.Id))
                             .Select(p => p.Name)
                             .ToListAsync(cancellationToken)),
@@ -373,7 +373,7 @@ public class TenantService: ITenantService
                         _currentUserService.UserId,
                         currentUserInfo.currentUserRoles,
                         currentUserInfo.currentUserFullName,
-                        string.Join(", ", _context.Programs
+                        string.Join(", ", await _context.Programs
                             .Where(p => deletedProgramsIds.Contains(p.Id))
                             .Select(p => p.Name)
                             .ToListAsync(cancellationToken)),

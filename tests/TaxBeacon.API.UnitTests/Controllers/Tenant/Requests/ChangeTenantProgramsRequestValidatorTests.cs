@@ -22,12 +22,11 @@ public sealed class ChangeTenantProgramsRequestValidatorTests
         actualResult.ShouldNotHaveValidationErrorFor(x => x.ProgramsIds);
     }
 
-    [Theory]
-    [MemberData(nameof(TestData.InvalidProgramsIds), MemberType = typeof(TestData))]
-    public void ChangeTenantProgramsRequest_ValidProgramsIds_ShouldReturnsError(Guid[] programsIds)
+    [Fact]
+    public void ChangeTenantProgramsRequest_ValidProgramsIds_ShouldReturnsError()
     {
         // Arrange
-        var request = new ChangeTenantProgramsRequest(programsIds);
+        var request = new ChangeTenantProgramsRequest(null!);
 
         // Act
         var actualResult = _changeTenantProgramsRequestValidator.TestValidate(request);
@@ -43,12 +42,7 @@ public sealed class ChangeTenantProgramsRequestValidatorTests
         {
             new object[] { new[] { Guid.NewGuid() } },
             new object[] { new[] { Guid.NewGuid(), Guid.NewGuid() } },
-        };
-
-        public static IEnumerable<object?[]> InvalidProgramsIds = new List<object?[]>
-        {
-            new object?[] { null },
-            new object[] { Array.Empty<Guid>() },
+            new object[] { Array.Empty<Guid>()}
         };
     }
 }

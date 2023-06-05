@@ -8,5 +8,5 @@ public class ChangeTenantProgramsRequestValidator: AbstractValidator<ChangeTenan
 {
     public ChangeTenantProgramsRequestValidator() =>
         RuleFor(r => r.ProgramsIds)
-            .NotEmpty();
+            .NotNull();
 }
