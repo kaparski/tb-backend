@@ -51,9 +51,5 @@ public class UserView: BaseEntity
 
     public string? Roles { get; set; }
 
-    public string? RoleIdsAsString { get; set; }
-
-    public string? RoleNamesAsString { get; set; }
-
     public string? UserIdPlusTenantId { get; set; }
 }
