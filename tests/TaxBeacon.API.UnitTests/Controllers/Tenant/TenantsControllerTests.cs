@@ -395,6 +395,125 @@ public class TenantsControllerTests
         }
     }
 
+    [Fact]
+    public async Task GetAssignedProgramsAsync_TenantExists_ReturnSuccessStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock
+            .Setup(p => p.GetTenantProgramsAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(Enumerable.Empty<AssignedTenantProgramDto>().ToList());
+
+        // Act
+        var actualResponse = await _controller.GetAssignedProgramsAsync(Guid.NewGuid(), default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<List<AssignedTenantProgramResponse>>();
+        }
+    }
+
+    [Fact]
+    public async Task GetAssignedProgramsAsync_TenantDoesNotExists_ReturnSuccessStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock
+            .Setup(p => p.GetTenantProgramsAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetAssignedProgramsAsync(Guid.NewGuid(), default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void GetAssignedProgramsAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetAssignedProgramsAsync).Method;
+        var permissions = new object[] { Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public async Task ChangeProgramsAsync_TenantExists_ReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock
+            .Setup(x => x.ChangeTenantProgramsAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<Guid>>(), default))
+            .ReturnsAsync(new Success());
+
+        // Act
+        var actualResponse = await _controller.ChangeProgramsAsync(Guid.NewGuid(), new ChangeTenantProgramsRequest(Array.Empty<Guid>()), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkResult;
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+        }
+    }
+
+    [Fact]
+    public async Task ChangeProgramsAsync_TenantDoesNotExists_ShouldReturnNotFound()
+    {
+        // Arrange
+        _tenantServiceMock
+            .Setup(x => x.ChangeTenantProgramsAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<Guid>>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.ChangeProgramsAsync(Guid.NewGuid(), new ChangeTenantProgramsRequest(Array.Empty<Guid>()), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void ChangeProgramsAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, ChangeTenantProgramsRequest, CancellationToken, Task<IActionResult>>)_controller.ChangeProgramsAsync).Method;
+        var permissions = new object[] { Common.Permissions.Tenants.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
