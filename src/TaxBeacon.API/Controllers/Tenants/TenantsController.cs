@@ -226,7 +226,7 @@ public class TenantsController: BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAssignedProgramsAsync([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var changeProgramsResult = await _tenantService.GetTenantPrograms(id, cancellationToken);
+        var changeProgramsResult = await _tenantService.GetTenantProgramsAsync(id, cancellationToken);
 
         return changeProgramsResult.Match<IActionResult>(
             programs => Ok(programs.Adapt<List<AssignedTenantProgramResponse>>()),

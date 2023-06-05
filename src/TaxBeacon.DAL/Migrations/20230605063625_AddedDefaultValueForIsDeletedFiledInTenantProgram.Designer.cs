@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230605063625_AddedDefaultValueForIsDeletedFiledInTenantProgram")]
+    partial class AddedDefaultValueForIsDeletedFiledInTenantProgram
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -959,110 +962,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles");
-                });
-
-            modelBuilder.Entity("TaxBeacon.DAL.Entities.UserView", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDateTimeUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeactivationDateTimeUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedDateTimeUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Department")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Division")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("DivisionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("JobTitle")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("JobTitleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("LastLoginDateTimeUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LegalName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ReactivationDateTimeUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RoleIdsAsString")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoleNamesAsString")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Roles")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ServiceArea")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ServiceAreaId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Team")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("TeamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UserIdPlusTenantId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UsersView", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Department", b =>

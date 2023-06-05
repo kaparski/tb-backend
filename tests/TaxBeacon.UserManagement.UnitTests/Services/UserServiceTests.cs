@@ -986,7 +986,7 @@ public class UserServiceTests
         using (new AssertionScope())
         {
             actualResult.TryPickT0(out var userDto, out _).Should().BeTrue();
-            var rolesResult = userDto.Roles.Split(",").Select(r => r.Trim()).ToList();
+            var rolesResult = userDto.Roles!.Split(",").Select(r => r.Trim()).ToList();
             rolesResult.Should().BeInAscendingOrder();
             rolesResult.Should().BeEquivalentTo(roles.Concat(tenantRoles).Order());
         }

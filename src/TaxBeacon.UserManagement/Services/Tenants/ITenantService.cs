@@ -27,7 +27,7 @@ public interface ITenantService
 
     Task<OneOf<Success, NotFound>> ToggleDivisionsAsync(bool divisionEnabled, CancellationToken cancellationToken);
 
-    Task<OneOf<List<AssignedTenantProgramDto>, NotFound>> GetTenantPrograms(Guid tenantId, CancellationToken cancellationToken);
+    Task<OneOf<List<AssignedTenantProgramDto>, NotFound>> GetTenantProgramsAsync(Guid tenantId, CancellationToken cancellationToken);
 
     Task<OneOf<Success, NotFound>> ChangeTenantProgramsAsync(Guid tenantId,
         IEnumerable<Guid> programsIds,

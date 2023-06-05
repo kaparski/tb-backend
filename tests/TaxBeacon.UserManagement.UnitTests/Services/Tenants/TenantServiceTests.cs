@@ -12,6 +12,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Roles;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
@@ -39,7 +40,6 @@ public class TenantServiceTests
     private readonly Mock<IDateTimeFormatter> _dateTimeFormatterMock;
     private readonly TenantService _tenantService;
     private readonly Mock<IEnumerable<ITenantActivityFactory>> _activityFactoriesMock;
-    public static readonly Guid TenantId = Guid.NewGuid();
 
     public TenantServiceTests()
     {
@@ -67,14 +67,6 @@ public class TenantServiceTests
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
-        _currentUserServiceMock = new();
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TenantId);
-
-        var currentUser = TestData.TestUser.Generate();
-        _dbContextMock.Users.Add(currentUser);
-        _dbContextMock.SaveChangesAsync().Wait();
-        _currentUserServiceMock.Setup(x => x.UserId).Returns(currentUser.Id);
-
         _activityFactoriesMock
             .Setup(x => x.GetEnumerator())
             .Returns(new ITenantActivityFactory[]
@@ -98,7 +90,7 @@ public class TenantServiceTests
     public async Task GetTenantsAsync_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfTenantsAndCorrectPage()
     {
         // Arrange
-        var tenants = TestData.TestTenant.Generate(5);
+        var tenants = TestData.TenantFaker.Generate(5);
         await _dbContextMock.Tenants.AddRangeAsync(tenants);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "name asc" };
@@ -115,10 +107,11 @@ public class TenantServiceTests
     }
 
     [Fact]
-    public async Task GetTenantsAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfTenantsInDescendingOrder()
+    public async Task
+        GetTenantsAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfTenantsInDescendingOrder()
     {
         // Arrange
-        var tenants = TestData.TestTenant.Generate(7);
+        var tenants = TestData.TenantFaker.Generate(7);
         await _dbContextMock.Tenants.AddRangeAsync(tenants);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "name desc" };
@@ -160,7 +153,7 @@ public class TenantServiceTests
     public async Task GetTenantsAsync_PageNumberOutsideOfTotalRange_TenantListIsEmpty()
     {
         // Arrange
-        var tenants = TestData.TestTenant.Generate(7);
+        var tenants = TestData.TenantFaker.Generate(7);
         await _dbContextMock.Tenants.AddRangeAsync(tenants);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc" };
@@ -176,7 +169,7 @@ public class TenantServiceTests
     public async Task GetTenantsAsync_PageNumberRightOutsideOfTotalRange_TenantListIsEmpty()
     {
         // Arrange
-        var tenants = TestData.TestTenant.Generate(10);
+        var tenants = TestData.TenantFaker.Generate(10);
         await _dbContextMock.Tenants.AddRangeAsync(tenants);
         await _dbContextMock.SaveChangesAsync();
         var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc" };
@@ -194,7 +187,7 @@ public class TenantServiceTests
     public async Task ExportTenantsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
     {
         //Arrange
-        var tenants = TestData.TestTenant.Generate(5);
+        var tenants = TestData.TenantFaker.Generate(5);
 
         await _dbContextMock.Tenants.AddRangeAsync(tenants);
         await _dbContextMock.SaveChangesAsync();
@@ -221,7 +214,7 @@ public class TenantServiceTests
     public async Task GetTenantByIdAsync_ExistingTenantId_ReturnsTenantDto()
     {
         // Arrange
-        var tenant = TestData.TestTenant.Generate();
+        var tenant = TestData.TenantFaker.Generate();
 
         await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.SaveChangesAsync();
@@ -238,7 +231,7 @@ public class TenantServiceTests
     public async Task GetTenantByIdAsync_NonExistingTenantId_ReturnsNotFound()
     {
         // Arrange
-        var tenant = TestData.TestTenant.Generate();
+        var tenant = TestData.TenantFaker.Generate();
 
         await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.SaveChangesAsync();
@@ -253,8 +246,8 @@ public class TenantServiceTests
     [Fact]
     public async Task GetActivityHistoryAsync_TenantExists_ReturnListOfActivityLogsInDescendingOrderByDate()
     {
-        var tenant = TestData.TestTenant.Generate();
-        var user = TestData.TestUser.Generate();
+        var tenant = TestData.TenantFaker.Generate();
+        var user = TestData.UserFaker.Generate();
         var activities = new[]
         {
             new TenantActivityLog
@@ -322,7 +315,7 @@ public class TenantServiceTests
     [Fact]
     public async Task GetActivityHistoryAsync_TenantDoesNotExist_ReturnsNotFound()
     {
-        var tenant = TestData.TestTenant.Generate();
+        var tenant = TestData.TenantFaker.Generate();
 
         await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.SaveChangesAsync();
@@ -342,7 +335,7 @@ public class TenantServiceTests
     {
         // Arrange
         var updateTenantDto = TestData.UpdateTenantDtoFaker.Generate();
-        var tenant = TestData.TestTenant.Generate();
+        var tenant = TestData.TenantFaker.Generate();
         await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.SaveChangesAsync();
 
@@ -379,7 +372,7 @@ public class TenantServiceTests
     {
         // Arrange
         var updateTenantDto = TestData.UpdateTenantDtoFaker.Generate();
-        var tenant = TestData.TestTenant.Generate();
+        var tenant = TestData.TenantFaker.Generate();
         await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.SaveChangesAsync();
 
@@ -413,10 +406,14 @@ public class TenantServiceTests
     public async Task SwitchToTenantAsync_NoOldTenant_ProducesTenantEnteredEvent()
     {
         //Arrange
-        var currentUserId = _currentUserServiceMock.Object.UserId;
-        var currentUser = await _dbContextMock.Users.SingleAsync(u => u.Id == currentUserId);
-        currentUser.UserRoles.Add(new UserRole { Role = new Role { Name = "Super admin" } });
+        var user = TestData.UserFaker.Generate();
+        user.UserRoles.Add(new UserRole { Role = new Role { Name = Roles.SuperAdmin } });
+        await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(s => s.UserId)
+            .Returns(user.Id);
 
         //Act
         await _tenantService.SwitchToTenantAsync(null, TestData.TestTenantId);
@@ -429,8 +426,8 @@ public class TenantServiceTests
 
             item.TenantId.Should().Be(TestData.TestTenantId);
             item.EventType.Should().Be(TenantEventType.TenantEnteredEvent);
-            evt?.ExecutorId.Should().Be(currentUserId);
-            evt?.ExecutorFullName.Should().Be(currentUser.FullName);
+            evt?.ExecutorId.Should().Be(user.Id);
+            evt?.ExecutorFullName.Should().Be(user.FullName);
         }
     }
 
@@ -438,10 +435,14 @@ public class TenantServiceTests
     public async Task SwitchToTenantAsync_NoNewTenant_ProducesTenantEnteredEvent()
     {
         //Arrange
-        var currentUserId = _currentUserServiceMock.Object.UserId;
-        var currentUser = await _dbContextMock.Users.SingleAsync(u => u.Id == currentUserId);
-        currentUser.UserRoles.Add(new UserRole { Role = new Role { Name = "Super admin" } });
+        var user = TestData.UserFaker.Generate();
+        user.UserRoles.Add(new UserRole { Role = new Role { Name = Roles.SuperAdmin } });
+        await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(s => s.UserId)
+            .Returns(user.Id);
 
         //Act
         await _tenantService.SwitchToTenantAsync(TestData.TestTenantId, null);
@@ -454,8 +455,8 @@ public class TenantServiceTests
 
             item.TenantId.Should().Be(TestData.TestTenantId);
             item.EventType.Should().Be(TenantEventType.TenantExitedEvent);
-            evt?.ExecutorId.Should().Be(currentUserId);
-            evt?.ExecutorFullName.Should().Be(currentUser.FullName);
+            evt?.ExecutorId.Should().Be(user.Id);
+            evt?.ExecutorFullName.Should().Be(user.FullName);
         }
     }
 
@@ -463,10 +464,14 @@ public class TenantServiceTests
     public async Task SwitchToTenantAsync_ProducesBothEvents()
     {
         //Arrange
-        var currentUserId = _currentUserServiceMock.Object.UserId;
-        var currentUser = await _dbContextMock.Users.SingleAsync(u => u.Id == currentUserId);
-        currentUser.UserRoles.Add(new UserRole { Role = new Role { Name = "Super admin" } });
+        var user = TestData.UserFaker.Generate();
+        user.UserRoles.Add(new UserRole { Role = new Role { Name = Roles.SuperAdmin } });
+        await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(s => s.UserId)
+            .Returns(user.Id);
 
         var oldTenantId = Guid.NewGuid();
         var newTenantId = Guid.NewGuid();
@@ -485,13 +490,13 @@ public class TenantServiceTests
 
             items[0].TenantId.Should().Be(oldTenantId);
             items[0].EventType.Should().Be(TenantEventType.TenantExitedEvent);
-            exitEvt?.ExecutorId.Should().Be(currentUserId);
-            exitEvt?.ExecutorFullName.Should().Be(currentUser.FullName);
+            exitEvt?.ExecutorId.Should().Be(user.Id);
+            exitEvt?.ExecutorFullName.Should().Be(user.FullName);
 
             items[1].TenantId.Should().Be(newTenantId);
             items[1].EventType.Should().Be(TenantEventType.TenantEnteredEvent);
-            enterEvt?.ExecutorId.Should().Be(currentUserId);
-            enterEvt?.ExecutorFullName.Should().Be(currentUser.FullName);
+            enterEvt?.ExecutorId.Should().Be(user.Id);
+            enterEvt?.ExecutorFullName.Should().Be(user.FullName);
         }
     }
 
@@ -500,46 +505,216 @@ public class TenantServiceTests
     [InlineData(false)]
     public async Task ToggleDivisionsAsync_DivisionsState_ShouldToggleDivision(bool divisionEnabled)
     {
-        //Arrange
-        var currentTenantId = _currentUserServiceMock.Object.TenantId;
-        var currentTenant = new Tenant()
-        {
-            Id = TenantId,
-            Name = "TestTenant",
-            DivisionEnabled = divisionEnabled,
-        };
-        _dbContextMock.Tenants.Add(currentTenant);
+        // Arrange
+        var tenant = TestData.TenantFaker.Generate();
+        tenant.DivisionEnabled = divisionEnabled;
+
+        _dbContextMock.Tenants.Add(tenant);
         await _dbContextMock.SaveChangesAsync();
 
-        //Act
-        await _tenantService.ToggleDivisionsAsync(!divisionEnabled, default);
+        // Act
+        await _tenantService.ToggleDivisionsAsync(divisionEnabled);
 
-        //Assert
+        // Assert
         using (new AssertionScope())
         {
-            currentTenant = await _dbContextMock.Tenants.Where(x => x.Id == currentTenantId).FirstAsync();
-            currentTenant.DivisionEnabled.Should().Be(!divisionEnabled);
+            var actualTenant = await _dbContextMock.Tenants.FirstAsync(x => x.Id == tenant.Id);
+            actualTenant.DivisionEnabled.Should().Be(divisionEnabled);
         }
     }
 
     [Fact]
     public async Task ToggleDivisionsAsync_TenantDoesNotExist_ShouldReturnNotFound()
     {
-        //Arrange
-        _dbContextMock.Tenants.Add(new Tenant()
-        {
-            Id = TenantId,
-            Name = "TestTenant",
-        });
-        await _dbContextMock.SaveChangesAsync();
-
+        // Arrange
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
 
-        //Act
-        var oneOfNotFound = await _tenantService.ToggleDivisionsAsync(false, default);
+        // Act
+        var oneOfNotFound = await _tenantService.ToggleDivisionsAsync(false);
 
-        //Assert
+        // Assert
         oneOfNotFound.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetAssignedTenantProgramsAsync_ExistingTenant_ReturnsListOfPrograms()
+    {
+        // Arrange
+        var tenants = TestData.TenantFaker.Generate(2);
+        tenants[0].TenantsPrograms.First().IsDeleted = true;
+        await _dbContextMock.Tenants.AddRangeAsync(tenants);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var actualResult = await _tenantService.GetTenantProgramsAsync(tenants[0].Id);
+
+        // Assert
+        actualResult.TryPickT0(out var actualPrograms, out _).Should().BeTrue();
+        var actualProgramsIds = actualPrograms.Select(ap => ap.Id);
+        actualProgramsIds.Should()
+            .BeEquivalentTo(tenants[0].TenantsPrograms
+                .Where(tp => tp.IsDeleted == false)
+                .Select(tp => tp.ProgramId));
+    }
+
+    [Fact]
+    public async Task GetAssignedTenantProgramsAsync_NotExistingTenantId_ReturnsNotFound()
+    {
+        // Act
+        var actualResult = await _tenantService.GetTenantProgramsAsync(Guid.NewGuid());
+
+        // Assert
+        actualResult.IsT0.Should().BeFalse();
+        actualResult.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ChangeTenantProgramsAsync_TenantWithoutProgramsAndNewProgramsIds_ReturnsSuccess()
+    {
+        // Arrange
+        var tenant = TestData.TenantFaker
+            .RuleFor(t => t.TenantsPrograms, _ => Enumerable.Empty<TenantProgram>().ToList())
+            .Generate();
+        var programs = TestData.ProgramFaker.Generate(3);
+        var programsIds = programs.Select(p => p.Id).ToList();
+
+        await _dbContextMock.Tenants.AddRangeAsync(tenant);
+        await _dbContextMock.Programs.AddRangeAsync(programs);
+        await _dbContextMock.SaveChangesAsync();
+
+        var currentDate = DateTime.UtcNow;
+
+        _dateTimeServiceMock
+            .Setup(s => s.UtcNow)
+            .Returns(currentDate);
+
+        // Act
+        var actualResult = await _tenantService.ChangeTenantProgramsAsync(tenant.Id, programsIds);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out _, out _).Should().BeTrue();
+
+            var actualTenantProgramsId = await _dbContextMock.TenantsPrograms
+                .Where(tp => tp.TenantId == tenant.Id && tp.IsDeleted == false)
+                .Select(tp => tp.ProgramId)
+                .ToListAsync();
+            actualTenantProgramsId.Count.Should().Be(3);
+            actualTenantProgramsId.Should().Contain(programsIds);
+
+            var actualActivityLog = await _dbContextMock.TenantActivityLogs.LastOrDefaultAsync();
+            actualActivityLog.Should().NotBeNull();
+            actualActivityLog?.Date.Should().Be(currentDate);
+            actualActivityLog?.EventType.Should().Be(TenantEventType.TenantAssignProgramsEvent);
+            actualActivityLog?.TenantId.Should().Be(tenant.Id);
+
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Exactly(2));
+        }
+    }
+
+    [Fact]
+    public async Task ChangeTenantProgramsAsync_TenantWithDisabledProgramsAndReactivateProgramsIds_ReturnsSuccess()
+    {
+        // Arrange
+        var tenant = TestData.TenantFaker.Generate();
+        foreach (var tenantTenantsProgram in tenant.TenantsPrograms)
+        {
+            tenantTenantsProgram.IsDeleted = true;
+            tenantTenantsProgram.DeletedDateTimeUtc = DateTime.UtcNow;
+        }
+
+        await _dbContextMock.Tenants.AddRangeAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        var reactivateProgramIds = new[] { tenant.TenantsPrograms.First().ProgramId };
+        var currentDate = DateTime.UtcNow;
+
+        _dateTimeServiceMock
+            .Setup(s => s.UtcNow)
+            .Returns(currentDate);
+
+        // Act
+        var actualResult = await _tenantService.ChangeTenantProgramsAsync(tenant.Id, reactivateProgramIds);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out _, out _).Should().BeTrue();
+
+            var actualTenantProgramsId = await _dbContextMock.TenantsPrograms
+                .Where(tp => tp.TenantId == tenant.Id && tp.IsDeleted == false)
+                .Select(tp => tp.ProgramId)
+                .ToListAsync();
+            actualTenantProgramsId.Count.Should().Be(1);
+            actualTenantProgramsId.Should().BeEquivalentTo(reactivateProgramIds);
+
+            var actualActivityLog = await _dbContextMock.TenantActivityLogs.LastOrDefaultAsync();
+            actualActivityLog.Should().NotBeNull();
+            actualActivityLog?.Date.Should().Be(currentDate);
+            actualActivityLog?.EventType.Should().Be(TenantEventType.TenantAssignProgramsEvent);
+            actualActivityLog?.TenantId.Should().Be(tenant.Id);
+
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Exactly(2));
+        }
+    }
+
+    [Fact]
+    public async Task ChangeTenantProgramsAsync_TenantWithProgramsAndNewProgramsIds_ReturnsSuccess()
+    {
+        // Arrange
+        var tenant = TestData.TenantFaker.Generate();
+
+        await _dbContextMock.Tenants.AddRangeAsync(tenant);
+        await _dbContextMock.SaveChangesAsync();
+
+        var programsIds = new[] { tenant.TenantsPrograms.First().ProgramId };
+        var currentDate = DateTime.UtcNow;
+
+        _dateTimeServiceMock
+            .SetupSequence(s => s.UtcNow)
+            .Returns(currentDate);
+
+        // Act
+        var actualResult = await _tenantService.ChangeTenantProgramsAsync(tenant.Id, programsIds);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            (await _dbContextMock.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out _, out _).Should().BeTrue();
+
+            var actualTenantProgramsId = await _dbContextMock.TenantsPrograms
+                .Where(tp => tp.TenantId == tenant.Id && tp.IsDeleted == false)
+                .Select(tp => tp.ProgramId)
+                .ToListAsync();
+            actualTenantProgramsId.Count.Should().Be(1);
+            actualTenantProgramsId.Should().Contain(programsIds);
+
+            var actualActivityLog = await _dbContextMock.TenantActivityLogs.LastOrDefaultAsync();
+            actualActivityLog.Should().NotBeNull();
+            actualActivityLog?.Date.Should().Be(currentDate);
+            actualActivityLog?.EventType.Should().Be(TenantEventType.TenantUnassignProgramEvent);
+            actualActivityLog?.TenantId.Should().Be(tenant.Id);
+
+            _dateTimeServiceMock
+                .Verify(ds => ds.UtcNow, Times.Exactly(2));
+        }
+    }
+
+    [Fact]
+    public async Task ChangeTenantProgramsAsync_NotExistingTenantId_ReturnsNotFound()
+    {
+        // Act
+        var actualResult = await _tenantService.ChangeTenantProgramsAsync(Guid.NewGuid(), Array.Empty<Guid>());
+
+        // Assert
+        actualResult.IsT0.Should().BeFalse();
+        actualResult.IsT1.Should().BeTrue();
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -547,20 +722,15 @@ public class TenantServiceTests
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();
 
-        public static readonly Faker<Department> TestDepartment =
-            new Faker<Department>()
-                .RuleFor(t => t.Id, f => Guid.NewGuid())
-                .RuleFor(t => t.TenantId, f => TestTenantId)
-                .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
-
-        public static readonly Faker<Tenant> TestTenant =
+        public static Faker<Tenant> TenantFaker =>
             new Faker<Tenant>()
                 .RuleFor(t => t.Id, _ => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
+                .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(t => t.TenantsPrograms, _ => ProgramFaker.Generate(3)
+                    .Select(p => new TenantProgram { Program = p, IsDeleted = false }).ToList());
 
-        public static readonly Faker<User> TestUser =
+        public static Faker<User> UserFaker =>
             new Faker<User>()
                 .RuleFor(u => u.Id, _ => Guid.NewGuid())
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
@@ -571,8 +741,12 @@ public class TenantServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>());
 
-        public static readonly Faker<UpdateTenantDto> UpdateTenantDtoFaker =
+        public static Faker<UpdateTenantDto> UpdateTenantDtoFaker =>
             new Faker<UpdateTenantDto>()
-                .RuleFor(dto => dto.Name, f => f.Company.CompanyName());
+                .CustomInstantiator(f => new UpdateTenantDto(f.Company.CompanyName()));
+
+        public static Faker<Program> ProgramFaker => new Faker<Program>()
+            .RuleFor(p => p.Id, _ => Guid.NewGuid())
+            .RuleFor(p => p.Name, f => f.Name.FirstName());
     }
 }
