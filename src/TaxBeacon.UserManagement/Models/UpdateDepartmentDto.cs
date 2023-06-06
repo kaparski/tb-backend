@@ -6,9 +6,9 @@ public sealed class UpdateDepartmentDto
 
     public string Description { get; set; } = null!;
 
-    public Guid DivisionId { get; set; }
+    public Guid? DivisionId { get; set; }
 
-    public IEnumerable<Guid> ServiceAreasIds { get; set; } = null!;
+    public IEnumerable<Guid>? ServiceAreasIds { get; set; } = null!;
 
-    public IEnumerable<Guid> JobTitlesIds { get; set; } = null!;
+    public IEnumerable<Guid>? JobTitlesIds { get; set; } = null!;
 }
