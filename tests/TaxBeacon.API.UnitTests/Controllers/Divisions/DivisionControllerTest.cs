@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.Tenants;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
@@ -114,6 +115,30 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
                     FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     _ => throw new InvalidOperationException()
                 });
+            }
+        }
+
+        [Fact]
+        public void Get_MarkedWithCorrectHasPermissionsAttribute()
+        {
+            // Arrange
+
+            var methodInfo = ((Func<IQueryable<DivisionResponse>>)_controller.Get).Method;
+            var permissions = new object[]
+            {
+                Common.Permissions.Divisions.Read,
+                Common.Permissions.Divisions.ReadWrite,
+                Common.Permissions.Divisions.ReadExport
+            };
+
+            // Act
+            var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                hasPermissionsAttribute.Should().NotBeNull();
+                hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
             }
         }
 

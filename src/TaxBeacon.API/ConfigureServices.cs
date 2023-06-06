@@ -12,6 +12,8 @@ using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Extensions.SwaggerServices;
@@ -85,6 +87,8 @@ public static class ConfigureServices
 
         // EntitySet name here should match controller's name
         modelBuilder.EntitySet<UserResponse>("Users");
+        modelBuilder.EntitySet<DepartmentResponse>("Departments");
+        modelBuilder.EntitySet<DivisionResponse>("Divisions");
 
         modelBuilder.EnableLowerCamelCase();
 

@@ -15,5 +15,7 @@
         public string Departments { get; set; } = string.Empty;
 
         public string Department { get; set; } = string.Empty;
+
+        public IEnumerable<Guid>? DepartmentIds { get; set; }
     }
 }

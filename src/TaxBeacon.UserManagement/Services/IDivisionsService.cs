@@ -9,6 +9,8 @@ namespace TaxBeacon.UserManagement.Services
 {
     public interface IDivisionsService
     {
+        IQueryable<DivisionDto> QueryDivisions();
+
         Task<QueryablePaging<DivisionDto>> GetDivisionsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 

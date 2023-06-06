@@ -12,7 +12,11 @@ public class DepartmentDto
 
     public int AssignedUsersCount { get; set; }
 
-    public string ServiceArea { get; set; } = null!;
+    public string? ServiceArea { get; set; }
 
-    public string Division { get; set; } = null!;
+    public IEnumerable<Guid>? ServiceAreaIds { get; set; }
+
+    public Guid? DivisionId { get; set; }
+
+    public string? Division { get; set; }
 }
