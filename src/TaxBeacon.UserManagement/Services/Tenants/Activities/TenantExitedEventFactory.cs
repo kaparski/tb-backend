@@ -1,9 +1,9 @@
 using System.Text.Json;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.Activities.Tenant;
+using TaxBeacon.UserManagement.Services.Tenants.Activities.Models;
 
-namespace TaxBeacon.UserManagement.Services.Activities.Tenant;
+namespace TaxBeacon.UserManagement.Services.Tenants.Activities;
 
 public class TenantExitedEventFactory: ITenantActivityFactory
 {
