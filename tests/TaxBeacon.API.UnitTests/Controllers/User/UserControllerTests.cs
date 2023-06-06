@@ -12,6 +12,7 @@ using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -128,6 +129,34 @@ public class UserControllerTests
         }
     }
 
+    [Fact]
+    public async Task UpdateUserAsync_InvalidOrganisationUnitIds_ReturnsBadRequest()
+    {
+        // Arrange
+        var userDto = TestData.UserFaker.Generate();
+        var request = TestData.UpdateUserFaker.Generate();
+        _userServiceMock
+            .Setup(service => service.UpdateUserByIdAsync(
+                It.Is<Guid>(id => id == userDto.Id),
+                It.IsAny<UpdateUserDto>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new InvalidOperation("Error"));
+
+        // Act
+        var actualResponse = await _controller.UpdateUserAsync(userDto.Id, request, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as BadRequestObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            actualResult?.Value.Should().BeOfType<string>();
+            actualResult?.Value.Should().Be("Error");
+        }
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
@@ -145,6 +174,14 @@ public class UserControllerTests
 
         public static readonly Faker<UpdateUserRequest> UpdateUserFaker =
             new Faker<UpdateUserRequest>()
-                .CustomInstantiator(f => new UpdateUserRequest(f.Name.FirstName(), f.Name.FirstName(), f.Name.LastName()));
+                .CustomInstantiator(f => new UpdateUserRequest(
+                    f.Name.FirstName(),
+                    f.Name.FirstName(),
+                    f.Name.LastName(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid()));
     }
 }
