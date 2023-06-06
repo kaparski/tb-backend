@@ -74,12 +74,14 @@ public class DepartmentService: IDepartmentService
         CancellationToken cancellationToken)
     {
         byte[] result;
+        var exportDepartmentsQuery = _context
+            .Departments
+            .AsNoTracking()
+            .Where(d => d.TenantId == _currentUserService.TenantId);
+
         if (_currentUserService.DivisionEnabled)
         {
-            var exportDepartmentsWithDivision = await _context
-                .Departments
-                .AsNoTracking()
-                .Where(d => d.TenantId == _currentUserService.TenantId)
+            var exportDepartmentsWithDivision = await exportDepartmentsQuery
                 .Select(d => new DepartmentWithDivisionExportModel()
                 {
                     Name = d.Name,
@@ -98,10 +100,7 @@ public class DepartmentService: IDepartmentService
         }
         else
         {
-            var exportDepartments = await _context
-                .Departments
-                .AsNoTracking()
-                .Where(d => d.TenantId == _currentUserService.TenantId)
+            var exportDepartments = await exportDepartmentsQuery
                 .Select(d => new DepartmentExportModel()
                 {
                     Name = d.Name,
