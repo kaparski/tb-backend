@@ -73,29 +73,55 @@ public class DepartmentService: IDepartmentService
     public async Task<byte[]> ExportDepartmentsAsync(FileType fileType,
         CancellationToken cancellationToken)
     {
-        var exportDepartments = await _context
+        byte[] result;
+        var exportDepartmentsQuery = _context
             .Departments
             .AsNoTracking()
-            .Where(d => d.TenantId == _currentUserService.TenantId)
-            .Select(d => new DepartmentExportModel
-            {
-                Name = d.Name,
-                Description = d.Description,
-                Division = d.Division == null ? string.Empty : d.Division.Name,
-                ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
-                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count()
-            })
-            .OrderBy(dep => dep.Name)
-            .ToListAsync(cancellationToken);
+            .Where(d => d.TenantId == _currentUserService.TenantId);
 
-        exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+        if (_currentUserService.DivisionEnabled)
+        {
+            var exportDepartmentsWithDivision = await exportDepartmentsQuery
+                .Select(d => new DepartmentWithDivisionExportModel()
+                {
+                    Name = d.Name,
+                    Description = d.Description,
+                    Division = d.Division == null ? string.Empty : d.Division.Name,
+                    ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
+                    CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                    AssignedUsersCount = d.Users.Count()
+                })
+                .OrderBy(dep => dep.Name)
+                .ToListAsync(cancellationToken);
+
+            exportDepartmentsWithDivision.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+
+            result = _listToFileConverters[fileType].Convert(exportDepartmentsWithDivision);
+        }
+        else
+        {
+            var exportDepartments = await exportDepartmentsQuery
+                .Select(d => new DepartmentExportModel()
+                {
+                    Name = d.Name,
+                    Description = d.Description,
+                    ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
+                    CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                    AssignedUsersCount = d.Users.Count()
+                })
+                .OrderBy(dep => dep.Name)
+                .ToListAsync(cancellationToken);
+
+            exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+
+            result = _listToFileConverters[fileType].Convert(exportDepartments);
+        }
 
         _logger.LogInformation("{dateTime} - Departments export was executed by {@userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
-        return _listToFileConverters[fileType].Convert(exportDepartments);
+        return result;
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
