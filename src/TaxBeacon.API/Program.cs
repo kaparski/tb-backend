@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.OData;
 using Microsoft.IdentityModel.Logging;
 using TaxBeacon.API;
 using TaxBeacon.API.Extensions.Logging;
