@@ -34,6 +34,30 @@ public class RoleService: IRoleService
         _currentUserService = currentUserService;
     }
 
+    public IQueryable<RoleDto> QueryRoles()
+    {
+        var roles = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
+            ? GetNotTenantRolesQuery()
+            : GetTenantRolesQuery();
+
+        return roles.ProjectToType<RoleDto>();
+    }
+
+    public async Task<IQueryable<RoleAssignedUserDto>> QueryRoleAssignedUsersAsync(Guid roleId)
+    {
+        var getRoleResult = await GetRoleByIdAsync(roleId);
+        if (!getRoleResult.TryPickT0(out var role, out var notFound))
+        {
+            throw new ArgumentException(nameof(roleId));
+        }
+
+        var users = role.Type == SourceType.Tenant
+            ? GetTenantRoleAssignedUsersQuery(roleId)
+            : GetNotTenantRoleAssignedUsersQuery(roleId);
+
+        return users.ProjectToType<RoleAssignedUserDto>();
+    }
+
     public async Task<QueryablePaging<RoleDto>> GetRolesAsync(IGridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default)
     {
