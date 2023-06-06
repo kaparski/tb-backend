@@ -39,6 +39,7 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
                 }
             };
         }
+
         [Fact]
         public async Task GetDivisionsList_ValidQuery_ReturnSuccessStatusCode()
         {

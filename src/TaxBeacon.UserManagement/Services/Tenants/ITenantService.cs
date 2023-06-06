@@ -10,6 +10,7 @@ namespace TaxBeacon.UserManagement.Services.Tenants;
 
 public interface ITenantService
 {
+    IQueryable<TenantDto> QueryTenants();
     Task<QueryablePaging<TenantDto>> GetTenantsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 

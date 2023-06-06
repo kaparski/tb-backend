@@ -2,14 +2,13 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Tenants;
 using TaxBeacon.UserManagement.Services.Tenants.Models;
 
@@ -21,6 +20,32 @@ public class TenantsController: BaseController
     private readonly ITenantService _tenantService;
 
     public TenantsController(ITenantService tenantService) => _tenantService = tenantService;
+
+    /// <summary>
+    /// Queryable list of tenants
+    /// </summary>
+    /// <response code="200">Returns tenants</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>List of tenants</returns>
+    [HasPermissions(
+        Common.Permissions.Tenants.Read,
+        Common.Permissions.Tenants.ReadWrite,
+        Common.Permissions.Tenants.ReadExport)]
+    [EnableQuery]
+    [HttpGet("api/odata/tenants")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IQueryable<TenantResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public IQueryable<TenantResponse> Get()
+    {
+        var query = _tenantService.QueryTenants();
+
+        return query.ProjectToType<TenantResponse>();
+    }
 
     /// <summary>
     /// List of tenants

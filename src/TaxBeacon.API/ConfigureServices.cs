@@ -89,6 +89,7 @@ public static class ConfigureServices
         modelBuilder.EntitySet<UserResponse>("Users");
         modelBuilder.EntitySet<DepartmentResponse>("Departments");
         modelBuilder.EntitySet<DivisionResponse>("Divisions");
+        modelBuilder.EntitySet<TenantResponse>("Tenants");
 
         modelBuilder.EnableLowerCamelCase();
 

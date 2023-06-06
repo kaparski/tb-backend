@@ -52,6 +52,10 @@ public class TenantService: ITenantService
                                    ?? ImmutableDictionary<(TenantEventType, uint), ITenantActivityFactory>.Empty;
     }
 
+    public IQueryable<TenantDto> QueryTenants() => _context
+        .Tenants
+        .ProjectToType<TenantDto>();
+
     public async Task<QueryablePaging<TenantDto>> GetTenantsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default) => await _context
         .Tenants
