@@ -34,6 +34,4 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapDefaultControllerRoute();
 
-app.UseODataRouteDebug();
-
 app.Run();

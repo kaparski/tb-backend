@@ -211,7 +211,7 @@ public class RoleService: IRoleService
         return permissionsWithCategory;
     }
 
-    private async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
+    public async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
         CancellationToken cancellationToken = default)
     {
         var role = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }

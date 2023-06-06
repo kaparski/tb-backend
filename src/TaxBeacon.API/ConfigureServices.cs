@@ -46,6 +46,10 @@ public static class ConfigureServices
                     routePrefix: "api/odata",
                     model: GetODataEdmModel()
                 )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/roles/{id}",
+                    model: GetODataEdmModelForRoleAssignedUsers()
+                )
             );
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -98,6 +102,22 @@ public static class ConfigureServices
         modelBuilder.EntitySet<RoleResponse>("Roles");
         modelBuilder.EntitySet<ServiceAreaResponse>("ServiceAreas");
         modelBuilder.EntitySet<TeamResponse>("Teams");
+
+        modelBuilder.EnableLowerCamelCase();
+
+        return modelBuilder.GetEdmModel();
+    }
+
+    /// <summary>
+    /// Builds a dedicated EDM model for api/odata/roles/{id:guid}/roleassignedusers endpoint.
+    /// TODO: find a better way to make this custom routing work.
+    /// </summary>
+    /// <returns></returns>
+    private static IEdmModel GetODataEdmModelForRoleAssignedUsers()
+    {
+        var modelBuilder = new ODataConventionModelBuilder();
+
+        modelBuilder.EntitySet<RoleAssignedUserResponse>("RoleAssignedUsers");
 
         modelBuilder.EnableLowerCamelCase();
 
