@@ -50,6 +50,24 @@ public class ServiceAreaService: IServiceAreaService
                             ?? ImmutableDictionary<(ServiceAreaEventType, uint), IServiceAreaActivityFactory>.Empty;
     }
 
+    public IQueryable<ServiceAreaDto> QueryServiceAreas()
+    {
+        var items = _context.ServiceAreas.Where(d => d.TenantId == _currentUserService.TenantId);
+
+        var itemDtos = items.Select(d => new ServiceAreaDto()
+        {
+            Id = d.Id,
+            Name = d.Name,
+            Description = d.Description,
+            CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+            AssignedUsersCount = d.Users.Count(),
+            DepartmentId = d.DepartmentId,
+            Department = d.Department == null ? null : d.Department.Name
+        });
+
+        return itemDtos;
+    }
+
     public async Task<QueryablePaging<ServiceAreaDto>> GetServiceAreasAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default) =>
         await _context

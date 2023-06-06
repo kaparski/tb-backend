@@ -2,7 +2,9 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Exceptions;
@@ -18,6 +20,32 @@ public class TeamsController: BaseController
     private readonly ITeamService _teamService;
 
     public TeamsController(ITeamService teamService) => _teamService = teamService;
+
+    /// <summary>
+    /// Queryable list of teams
+    /// </summary>
+    /// <response code="200">Returns teams</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>List of teams</returns>
+    [HasPermissions(
+        Common.Permissions.Teams.Read,
+        Common.Permissions.Teams.ReadExport,
+        Common.Permissions.Teams.ReadWrite)]
+    [EnableQuery]
+    [HttpGet("api/odata/teams")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IQueryable<TeamResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public IQueryable<TeamResponse> Get()
+    {
+        var query = _teamService.QueryTeams();
+
+        return query.ProjectToType<TeamResponse>();
+    }
 
     /// <summary>
     /// Get teams for Table
