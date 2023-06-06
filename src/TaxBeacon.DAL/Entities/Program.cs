@@ -14,7 +14,7 @@ namespace TaxBeacon.DAL.Entities
 
         public string? LegalAuthority { get; set; }
 
-        public string? Agency { get; set; }
+        public string Agency { get; set; } = string.Empty;
 
         public Jurisdiction Jurisdiction { get; set; }
 

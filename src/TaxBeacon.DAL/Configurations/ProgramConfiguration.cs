@@ -50,7 +50,8 @@ namespace TaxBeacon.DAL.Configurations
 
             program
                 .Property(p => p.Agency)
-                .HasMaxLength(200);
+                .HasMaxLength(200)
+                .IsRequired();
 
             program
                 .Property(p => p.State)

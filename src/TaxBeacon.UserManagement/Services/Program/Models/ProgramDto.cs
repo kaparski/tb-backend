@@ -14,7 +14,7 @@ public class ProgramDto
 
     public string? LegalAuthority { get; set; }
 
-    public string? Agency { get; set; }
+    public string Agency { get; set; } = null!;
 
     public Jurisdiction Jurisdiction { get; set; }
 
