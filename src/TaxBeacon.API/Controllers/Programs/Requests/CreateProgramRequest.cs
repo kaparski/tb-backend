@@ -8,7 +8,7 @@ public record CreateProgramRequest(
     string? Reference,
     string? Overview,
     string? LegalAuthority,
-    string? Agency,
+    string Agency,
     Jurisdiction Jurisdiction,
     string? State,
     string? County,
@@ -40,6 +40,7 @@ public class CreateProgramRequestValidator: AbstractValidator<CreateProgramReque
             .WithMessage("The legal authority must contain no more than 200 characters");
 
         RuleFor(x => x.Agency)
+            .NotEmpty()
             .MaximumLength(200)
             .WithMessage("The program agency must contain no more than 200 characters");
 
