@@ -50,6 +50,24 @@ public class JobTitleService: IJobTitleService
                             ?? ImmutableDictionary<(JobTitleEventType, uint), IJobTitleActivityFactory>.Empty;
     }
 
+    public IQueryable<JobTitleDto> QueryJobTitles()
+    {
+        var items = _context.JobTitles.Where(d => d.TenantId == _currentUserService.TenantId);
+
+        var itemDtos = items.Select(d => new JobTitleDto()
+        {
+            Id = d.Id,
+            Name = d.Name,
+            Description = d.Description,
+            CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+            AssignedUsersCount = d.Users.Count(),
+            DepartmentId = d.DepartmentId,
+            Department = d.Department == null ? null : d.Department.Name
+        });
+
+        return itemDtos;
+    }
+
     public async Task<QueryablePaging<JobTitleDto>> GetJobTitlesAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default) =>
         await _context

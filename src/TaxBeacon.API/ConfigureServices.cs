@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Extensions.GridifyServices;
@@ -90,6 +91,7 @@ public static class ConfigureServices
         modelBuilder.EntitySet<DepartmentResponse>("Departments");
         modelBuilder.EntitySet<DivisionResponse>("Divisions");
         modelBuilder.EntitySet<TenantResponse>("Tenants");
+        modelBuilder.EntitySet<JobTitleResponse>("JobTitles");
 
         modelBuilder.EnableLowerCamelCase();
 
