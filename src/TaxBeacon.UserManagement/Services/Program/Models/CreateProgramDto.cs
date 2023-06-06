@@ -7,7 +7,7 @@ public record CreateProgramDto(
     string? Reference,
     string? Overview,
     string? LegalAuthority,
-    string? Agency,
+    string Agency,
     Jurisdiction Jurisdiction,
     string? State,
     string? County,
