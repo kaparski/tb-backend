@@ -446,7 +446,7 @@ public class UserService: IUserService
         return new Success();
     }
 
-    public async Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid userId,
+    public async Task<OneOf<UserDto, NotFound, InvalidOperation>> UpdateUserByIdAsync(Guid userId,
         UpdateUserDto updateUserDto,
         CancellationToken cancellationToken = default)
     {
@@ -457,10 +457,21 @@ public class UserService: IUserService
             return notFound;
         }
 
+        var validationResult = await ValidateOrganizationUnitsAsync(
+            updateUserDto.DivisionId,
+            updateUserDto.DepartmentId,
+            updateUserDto.ServiceAreaId,
+            updateUserDto.JobTitleId,
+            updateUserDto.TeamId);
+
+        if (!validationResult.TryPickT0(out var ok, out var error))
+        {
+            return error;
+        }
+
         var previousUserValues = JsonSerializer.Serialize(user.Adapt<UpdateUserDto>());
-        user.FirstName = updateUserDto.FirstName;
-        user.LegalName = updateUserDto.LegalName;
-        user.LastName = updateUserDto.LastName;
+
+        updateUserDto.Adapt(user);
 
         var now = _dateTimeService.UtcNow;
         var currentUserInfo = _currentUserService.UserInfo;
@@ -484,12 +495,14 @@ public class UserService: IUserService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - User ({createdUserId}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - User ({updatedUserId}) was updated by {@userId}",
             now,
             user.Id,
             _currentUserService.UserId);
 
-        return await GetUserDetailsByIdAsync(userId, cancellationToken);
+        var userDto = await GetUserDetailsByIdAsync(userId, cancellationToken);
+
+        return userDto.AsT0;
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1,
@@ -751,7 +764,7 @@ public class UserService: IUserService
         if (divisionId is not null)
         {
             var divisionExists = await _context.Divisions
-                        .AnyAsync(d => d.Id == divisionId && d.TenantId == tenantId);
+                .AnyAsync(d => d.Id == divisionId && d.TenantId == tenantId);
             if (!divisionExists)
                 return new InvalidOperation($"Division with the ID {divisionId} does not exist.");
         }

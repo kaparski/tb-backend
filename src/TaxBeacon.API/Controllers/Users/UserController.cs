@@ -80,7 +80,8 @@ public class UserController: BaseController
 
         return updatedUserResult.Match<IActionResult>(
             user => Ok(user.Adapt<UserResponse>()),
-            _ => NotFound());
+            _ => NotFound(),
+            error => BadRequest(error.Message));
     }
 
     /// <summary>

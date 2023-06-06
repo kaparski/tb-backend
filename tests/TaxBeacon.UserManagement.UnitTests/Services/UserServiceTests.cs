@@ -5,6 +5,7 @@ using Gridify;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Graph.SecurityNamespace;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using NPOI.Util.ArrayExtensions;
@@ -505,10 +506,15 @@ public class UserServiceTests
             .Ignore(dest => dest.ServiceArea)
             .Ignore(dest => dest.JobTitle)
             .Ignore(dest => dest.Team);
-        var tenant = TestData.TestTenant.Generate();
+
+        var (divisionId, departmentId, serviceAreaId, jobTitleId, tenantId) = await SeedOrganizationUnits(_dbContextMock);
         var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
+        updateUserDto.DivisionId = divisionId;
+        updateUserDto.DepartmentId = departmentId;
+        updateUserDto.ServiceAreaId = serviceAreaId;
+        updateUserDto.JobTitleId = jobTitleId;
         var userView = TestData.TestUserView.Generate();
-        userView.TenantId = tenant.Id;
+        userView.TenantId = tenantId;
         var user = userView.Adapt<User>();
         updateUserDto.Adapt(userView);
         var oldFirstName = user.FirstName;
@@ -516,12 +522,11 @@ public class UserServiceTests
         var oldLegalName = user.LegalName;
         var currentDate = DateTime.UtcNow;
 
-        await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.UsersView.AddAsync(userView);
         await _dbContextMock.TenantUsers.AddAsync(new TenantUser
         {
-            Tenant = tenant,
+            TenantId = tenantId,
             User = user
         });
 
@@ -541,7 +546,7 @@ public class UserServiceTests
 
         _currentUserServiceMock
             .Setup(service => service.TenantId)
-            .Returns(tenant.Id);
+            .Returns(tenantId);
 
         _currentUserServiceMock
             .Setup(service => service.IsSuperAdmin)
@@ -572,10 +577,216 @@ public class UserServiceTests
             actualActivityLog?.Date.Should().Be(currentDate);
             actualActivityLog?.EventType.Should().Be(UserEventType.UserUpdated);
             actualActivityLog?.UserId.Should().Be(user.Id);
-            actualActivityLog?.TenantId.Should().Be(tenant.Id);
+            actualActivityLog?.TenantId.Should().Be(tenantId);
 
             _dateTimeServiceMock
                 .Verify(ds => ds.UtcNow, Times.Once);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateUserByIdAsync_InvalidDivisionIdAndDivisionsEnabled_ReturnsInvalidOperation()
+    {
+        // Arrange
+        var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
+        updateUserDto.DivisionId = Guid.NewGuid();
+        var user = TestData.TestUser.Generate();
+        var tenant = TestData.TestTenant.Generate();
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser
+        {
+            TenantId = tenant.Id,
+            User = user
+        });
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(tenant.Id);
+
+        _currentUserServiceMock
+            .Setup(service => service.IsSuperAdmin)
+            .Returns(false);
+
+        _currentUserServiceMock
+            .Setup(service => service.DivisionEnabled)
+            .Returns(true);
+
+        // Act
+        var usersOneOf = await _userService.UpdateUserByIdAsync(user.Id, updateUserDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            usersOneOf.TryPickT2(out var error, out _).Should().BeTrue();
+            error?.Message.Should().Be($"Division with the ID {updateUserDto.DivisionId} does not exist.");
+        }
+    }
+
+    [Fact]
+    public async Task UpdateUserByIdAsync_InvalidDepartmentIdAndDivisionsEnabled_ReturnsInvalidOperation()
+    {
+        // Arrange
+        var (divisionId, _, serviceAreaId, jobTitleId, tenantId) = await SeedOrganizationUnits(_dbContextMock);
+        var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
+        updateUserDto.DivisionId = divisionId;
+        updateUserDto.DepartmentId = Guid.NewGuid();
+        updateUserDto.ServiceAreaId = serviceAreaId;
+        updateUserDto.JobTitleId = jobTitleId;
+        var user = TestData.TestUser.Generate();
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser
+        {
+            TenantId = tenantId,
+            User = user
+        });
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(tenantId);
+
+        _currentUserServiceMock
+            .Setup(service => service.IsSuperAdmin)
+            .Returns(false);
+
+        _currentUserServiceMock
+            .Setup(service => service.DivisionEnabled)
+            .Returns(true);
+
+        // Act
+        var usersOneOf = await _userService.UpdateUserByIdAsync(user.Id, updateUserDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            usersOneOf.TryPickT2(out var error, out _).Should().BeTrue();
+            error?.Message.Should().Be($"Department with the ID {updateUserDto.DepartmentId} does not exist.");
+        }
+    }
+
+    [Fact]
+    public async Task UpdateUserByIdAsync_InvalidServiceAreaIdAndDivisionsEnabled_ReturnsInvalidOperation()
+    {
+        // Arrange
+        var (divisionId, departmentId, _, jobTitleId, tenantId) = await SeedOrganizationUnits(_dbContextMock);
+        var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
+        updateUserDto.DivisionId = divisionId;
+        updateUserDto.DepartmentId = departmentId;
+        updateUserDto.ServiceAreaId = Guid.NewGuid();
+        updateUserDto.JobTitleId = jobTitleId;
+        var user = TestData.TestUser.Generate();
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser
+        {
+            TenantId = tenantId,
+            User = user
+        });
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(tenantId);
+
+        _currentUserServiceMock
+            .Setup(service => service.IsSuperAdmin)
+            .Returns(false);
+
+        _currentUserServiceMock
+            .Setup(service => service.DivisionEnabled)
+            .Returns(true);
+
+        // Act
+        var usersOneOf = await _userService.UpdateUserByIdAsync(user.Id, updateUserDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            usersOneOf.TryPickT2(out var error, out _).Should().BeTrue();
+            error?.Message.Should().Be($"Service area with the ID {updateUserDto.ServiceAreaId} does not exist.");
+        }
+    }
+
+    [Fact]
+    public async Task UpdateUserByIdAsync_InvalidJobTitleIdAndDivisionsEnabled_ReturnsInvalidOperation()
+    {
+        // Arrange
+        var (divisionId, departmentId, serviceAreaId, _, tenantId) = await SeedOrganizationUnits(_dbContextMock);
+        var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
+        updateUserDto.DivisionId = divisionId;
+        updateUserDto.DepartmentId = departmentId;
+        updateUserDto.ServiceAreaId = serviceAreaId;
+        updateUserDto.JobTitleId = Guid.NewGuid();
+        var user = TestData.TestUser.Generate();
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser
+        {
+            TenantId = tenantId,
+            User = user
+        });
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(tenantId);
+
+        _currentUserServiceMock
+            .Setup(service => service.IsSuperAdmin)
+            .Returns(false);
+
+        _currentUserServiceMock
+            .Setup(service => service.DivisionEnabled)
+            .Returns(true);
+
+        // Act
+        var usersOneOf = await _userService.UpdateUserByIdAsync(user.Id, updateUserDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            usersOneOf.TryPickT2(out var error, out _).Should().BeTrue();
+            error?.Message.Should().Be($"Job title with the ID {updateUserDto.JobTitleId} does not exist.");
+        }
+    }
+
+    [Fact]
+    public async Task UpdateUserByIdAsync_InvalidTeamIdAndDivisionsEnabled_ReturnsInvalidOperation()
+    {
+        // Arrange
+        var updateUserDto = TestData.UpdateUserDtoFaker.Generate();
+        updateUserDto.TeamId = Guid.NewGuid();
+        var user = TestData.TestUser.Generate();
+        var tenant = TestData.TestTenant.Generate();
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Users.AddAsync(user);
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser
+        {
+            TenantId = tenant.Id,
+            User = user
+        });
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(tenant.Id);
+
+        _currentUserServiceMock
+            .Setup(service => service.IsSuperAdmin)
+            .Returns(false);
+
+        _currentUserServiceMock
+            .Setup(service => service.DivisionEnabled)
+            .Returns(true);
+
+        // Act
+        var usersOneOf = await _userService.UpdateUserByIdAsync(user.Id, updateUserDto);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            usersOneOf.TryPickT2(out var error, out _).Should().BeTrue();
+            error?.Message.Should().Be($"Team with the ID {updateUserDto.TeamId} does not exist.");
         }
     }
 
@@ -1010,7 +1221,7 @@ public class UserServiceTests
     public async Task CreateUserAsync_DivisionDoesNotExist_ReturnsInvalidOperation()
     {
         // Arrange
-        var (_, departmentId, serviceAreaId, jobTitleId) = await SeedOrganizationUnits(_dbContextMock);
+        var (_, departmentId, serviceAreaId, jobTitleId, tenantId) = await SeedOrganizationUnits(_dbContextMock);
         var newUser = TestData.TestNewUser
             .CustomInstantiator(f => new CreateUserDto(
                 f.Name.FirstName(),
@@ -1028,6 +1239,8 @@ public class UserServiceTests
             .Setup(x => x.CreateUserAsync(
                 It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
             .ReturnsAsync(string.Empty);
+
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
         // Act
         var result = await _userService.CreateUserAsync(newUser);
@@ -1044,7 +1257,7 @@ public class UserServiceTests
     public async Task CreateUserAsync_DepartmentDoesNotExist_ReturnsInvalidOperation()
     {
         // Arrange
-        var (divisionId, _, serviceAreaId, jobTitleId) = await SeedOrganizationUnits(_dbContextMock);
+        var (divisionId, _, serviceAreaId, jobTitleId, tenantId) = await SeedOrganizationUnits(_dbContextMock);
         var newUser = TestData.TestNewUser
             .CustomInstantiator(f => new CreateUserDto(
                 f.Name.FirstName(),
@@ -1062,6 +1275,8 @@ public class UserServiceTests
             .Setup(x => x.CreateUserAsync(
                 It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
             .ReturnsAsync(string.Empty);
+
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
         // Act
         var result = await _userService.CreateUserAsync(newUser);
@@ -1078,7 +1293,7 @@ public class UserServiceTests
     public async Task CreateUserAsync_ServiceAreaDoesNotExist_ReturnsInvalidOperation()
     {
         // Arrange
-        var (divisionId, departmentId, _, jobTitleId) = await SeedOrganizationUnits(_dbContextMock);
+        var (divisionId, departmentId, _, jobTitleId, tenantId) = await SeedOrganizationUnits(_dbContextMock);
         var newUser = TestData.TestNewUser
             .CustomInstantiator(f => new CreateUserDto(
                 f.Name.FirstName(),
@@ -1097,6 +1312,8 @@ public class UserServiceTests
                 It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
             .ReturnsAsync(string.Empty);
 
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
+
         // Act
         var result = await _userService.CreateUserAsync(newUser);
 
@@ -1112,7 +1329,7 @@ public class UserServiceTests
     public async Task CreateUserAsync_JobTitleDoesNotExist_ReturnsInvalidOperation()
     {
         // Arrange
-        var (divisionId, departmentId, serviceAreaId, _) = await SeedOrganizationUnits(_dbContextMock);
+        var (divisionId, departmentId, serviceAreaId, _, tenantId) = await SeedOrganizationUnits(_dbContextMock);
         var newUser = TestData.TestNewUser
             .CustomInstantiator(f => new CreateUserDto(
                 f.Name.FirstName(),
@@ -1130,6 +1347,8 @@ public class UserServiceTests
             .Setup(x => x.CreateUserAsync(
                 It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
             .ReturnsAsync(string.Empty);
+
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
         // Act
         var result = await _userService.CreateUserAsync(newUser);
@@ -1178,7 +1397,7 @@ public class UserServiceTests
     public async Task CreateUserAsync_ValidationPassesAndTeamIdIsNull_ReturnsNewUserAndCapturesActivityLog()
     {
         // Arrange
-        var (divisionId, departmentId, serviceAreaId, jobTitleId) = await SeedOrganizationUnits(_dbContextMock);
+        var (divisionId, departmentId, serviceAreaId, jobTitleId, tenantId) = await SeedOrganizationUnits(_dbContextMock);
         var newUser = TestData.TestNewUser
             .CustomInstantiator(f => new CreateUserDto(
                 f.Name.FirstName(),
@@ -1202,6 +1421,8 @@ public class UserServiceTests
                 It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
             .ReturnsAsync(string.Empty);
 
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
+
         // Act
         var result = await _userService.CreateUserAsync(newUser);
 
@@ -1216,7 +1437,7 @@ public class UserServiceTests
             activityLog.Should().NotBeNull();
             activityLog!.Date.Should().Be(currentDate);
             activityLog.EventType.Should().Be(UserEventType.UserCreated);
-            activityLog.TenantId.Should().Be(_tenantId);
+            activityLog.TenantId.Should().Be(tenantId);
             activityLog.UserId.Should().Be(userDto.Id);
 
             var userCreatedEvent = JsonSerializer.Deserialize<UserCreatedEvent>(activityLog.Event);
@@ -1232,9 +1453,9 @@ public class UserServiceTests
     public async Task CreateUserAsync_ValidationPassesAndTeamIdIsNotNull_ReturnsNewUserAndCapturesActivityLog()
     {
         // Arrange
-        var (divisionId, departmentId, serviceAreaId, jobTitleId) = await SeedOrganizationUnits(_dbContextMock);
+        var (divisionId, departmentId, serviceAreaId, jobTitleId, tenantId) = await SeedOrganizationUnits(_dbContextMock);
         var team = TestData.TestTeam
-            .RuleFor(t => t.TenantId, _tenantId)
+            .RuleFor(t => t.TenantId, tenantId)
             .Generate();
         await _dbContextMock.Teams.AddAsync(team);
         await _dbContextMock.SaveChangesAsync();
@@ -1253,6 +1474,7 @@ public class UserServiceTests
             .Generate();
 
         var currentDate = DateTime.UtcNow;
+
         _dateTimeServiceMock
             .Setup(service => service.UtcNow)
             .Returns(currentDate);
@@ -1261,6 +1483,8 @@ public class UserServiceTests
             .Setup(x => x.CreateUserAsync(
                 It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
             .ReturnsAsync(string.Empty);
+
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
         // Act
         var result = await _userService.CreateUserAsync(newUser);
@@ -1276,7 +1500,7 @@ public class UserServiceTests
             activityLog.Should().NotBeNull();
             activityLog!.Date.Should().Be(currentDate);
             activityLog.EventType.Should().Be(UserEventType.UserCreated);
-            activityLog.TenantId.Should().Be(_tenantId);
+            activityLog.TenantId.Should().Be(tenantId);
             activityLog.UserId.Should().Be(userDto.Id);
 
             var userCreatedEvent = JsonSerializer.Deserialize<UserCreatedEvent>(activityLog.Event);
@@ -1288,25 +1512,26 @@ public class UserServiceTests
         }
     }
 
-    private async Task<(Guid, Guid, Guid, Guid)> SeedOrganizationUnits(ITaxBeaconDbContext context)
+    private async Task<(Guid divisionId, Guid departmentId, Guid serviceAreaId, Guid jobTitleId, Guid tenantId)>
+        SeedOrganizationUnits(ITaxBeaconDbContext context)
     {
         var tenant = TestData.TestTenant
-            .RuleFor(t => t.Id, _tenantId)
+            .RuleFor(t => t.Id, f => Guid.NewGuid())
             .Generate();
         var division = TestData.TestDivision
-            .RuleFor(d => d.TenantId, _tenantId)
+            .RuleFor(d => d.TenantId, f => tenant.Id)
             .Generate();
         var department = TestData.TestDepartment
             .RuleFor(d => d.DivisionId, division.Id)
-            .RuleFor(d => d.TenantId, _tenantId)
+            .RuleFor(d => d.TenantId, f => tenant.Id)
             .Generate();
         var serviceArea = TestData.TestServiceArea
             .RuleFor(sa => sa.DepartmentId, department.Id)
-            .RuleFor(sa => sa.TenantId, _tenantId)
+            .RuleFor(sa => sa.TenantId, f => tenant.Id)
             .Generate();
         var jobTitle = TestData.TestJobTitle
             .RuleFor(jt => jt.DepartmentId, department.Id)
-            .RuleFor(jt => jt.TenantId, _tenantId)
+            .RuleFor(jt => jt.TenantId, f => tenant.Id)
             .Generate();
 
         await context.Tenants.AddAsync(tenant);
@@ -1316,7 +1541,7 @@ public class UserServiceTests
         await context.JobTitles.AddAsync(jobTitle);
         await context.SaveChangesAsync();
 
-        return (division.Id, department.Id, serviceArea.Id, jobTitle.Id);
+        return (division.Id, department.Id, serviceArea.Id, jobTitle.Id, tenant.Id);
     }
 
     [Fact]
@@ -1474,7 +1699,12 @@ public class UserServiceTests
             new Faker<UpdateUserDto>()
                 .RuleFor(dto => dto.FirstName, f => f.Name.FirstName())
                 .RuleFor(dto => dto.LegalName, f => f.Name.FirstName())
-                .RuleFor(dto => dto.LastName, f => f.Name.LastName());
+                .RuleFor(dto => dto.LastName, f => f.Name.LastName())
+                .RuleFor(dto => dto.DivisionId, f => null)
+                .RuleFor(dto => dto.DepartmentId, f => null)
+                .RuleFor(dto => dto.ServiceAreaId, f => null)
+                .RuleFor(dto => dto.TeamId, f => null)
+                .RuleFor(dto => dto.JobTitleId, f => null);
 
         public static readonly Faker<Role> TestRoles =
             new Faker<Role>()
