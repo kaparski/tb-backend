@@ -14,25 +14,7 @@ public class Account: BaseEntity
 
     public string? City { get; set; }
 
-    public string? Address1 { get; set; }
+    public Client? Client { get; set; }
 
-    public string? Address2 { get; set; }
-
-    public string? DoingBusinessAs { get; set; }
-
-    public string? LinkedInURL { get; set; }
-
-    public string? Website { get; set; }
-
-    public string? Phone { get; set; }
-
-    public string? Extension { get; set; }
-
-    public string? Fax { get; set; }
-
-    public string? Country { get; set; }
-
-    public string? County { get; set; }
-
-    public ICollection<AccountType> AccountTypes { get; set; } = new HashSet<AccountType>();
+    public Referral? Referral { get; set; }
 }
