@@ -40,4 +40,11 @@ public interface IProgramService
     Task<OneOf<TenantProgramDetailsDto, NotFound>> UpdateTenantProgramStatusAsync(Guid id,
         Status status,
         CancellationToken cancellationToken = default);
+
+    Task<OneOf<TenantProgramOrgUnitsAssignmentDto, NotFound>> ChangeTenantProgramAssignmentAsync(Guid programId,
+        AssignTenantProgramDto assignTenantProgramDto,
+        CancellationToken cancellationToken = default);
+
+    Task<OneOf<TenantProgramOrgUnitsAssignmentDto, NotFound>> GetTenantProgramOrgUnitsAssignmentAsync(Guid programId,
+        CancellationToken cancellationToken = default);
 }

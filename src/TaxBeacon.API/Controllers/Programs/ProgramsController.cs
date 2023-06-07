@@ -322,4 +322,61 @@ public class ProgramsController: BaseController
             newProgram => Ok(newProgram.Adapt<ProgramDetailsResponse>()),
             _ => Conflict());
     }
+
+    /// <summary>
+    /// Endpoint to get tenant program assignment on org structure unit
+    /// </summary>
+    /// <param name="id">Program id</param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns tenant program assignment</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">The the tenant program with such Id was not found</response>
+    /// <returns>Updated program</returns>
+    [HasPermissions(Common.Permissions.Programs.Read, Common.Permissions.Programs.ReadWrite)]
+    [HttpGet("/api/tenants/programs/{id:guid}/assignment", Name = "GetTenantProgramOrgUnitsAssignment")]
+    [ProducesResponseType(typeof(TenantProgramOrgUnitsAssignmentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetTenantProgramOrgUnitsAssignmentAsync(Guid id,
+        CancellationToken cancellationToken)
+    {
+        var getTenantProgramOrgUnitsAssignmentResult = await _programService
+            .GetTenantProgramOrgUnitsAssignmentAsync(id, cancellationToken);
+
+        return getTenantProgramOrgUnitsAssignmentResult.Match<IActionResult>(
+            assignment => Ok(assignment.Adapt<TenantProgramOrgUnitsAssignmentResponse>()),
+            _ => NotFound());
+    }
+
+    /// <summary>
+    /// Endpoint to assign tenant program on org structure unit
+    /// </summary>
+    /// <param name="id">Program id</param>
+    /// <param name="assignTenantProgramRequest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns tenant program assignment</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">The the tenant program, department or service are with such Ids was not found </response>
+    /// <returns>Updated program</returns>
+    [HasPermissions(Common.Permissions.Programs.ReadWrite)]
+    [HttpPost("/api/tenants/programs/{id:guid}/assignment", Name = "GetTenantProgramOrgUnitsAssignment")]
+    [ProducesResponseType(typeof(TenantProgramOrgUnitsAssignmentResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ChangeTenantProgramAssignmentAsync(Guid id,
+        [FromBody] AssignTenantProgramRequest assignTenantProgramRequest,
+        CancellationToken cancellationToken)
+    {
+        var getTenantProgramOrgUnitsAssignmentResult = await _programService
+            .ChangeTenantProgramAssignmentAsync(id, assignTenantProgramRequest.Adapt<AssignTenantProgramDto>(),
+                cancellationToken);
+
+        return getTenantProgramOrgUnitsAssignmentResult.Match<IActionResult>(
+            assignment => Ok(assignment.Adapt<TenantProgramOrgUnitsAssignmentResponse>()),
+            _ => NotFound());
+    }
 }
