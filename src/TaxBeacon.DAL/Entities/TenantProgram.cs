@@ -21,5 +21,11 @@ namespace TaxBeacon.DAL.Entities
         public bool? IsDeleted { get; set; }
 
         public DateTime? DeletedDateTimeUtc { get; set; }
+
+        public ICollection<DepartmentTenantProgram> DepartmentTenantPrograms { get; set; } =
+            new HashSet<DepartmentTenantProgram>();
+
+        public ICollection<ServiceAreaTenantProgram> ServiceAreaTenantPrograms { get; set; } =
+            new HashSet<ServiceAreaTenantProgram>();
     }
 }
