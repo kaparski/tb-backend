@@ -6,5 +6,5 @@ public sealed class UpdateServiceAreaDto
 
     public string Description { get; set; } = string.Empty;
 
-    public Guid DepartmentId { get; set; }
+    public Guid? DepartmentId { get; set; }
 }

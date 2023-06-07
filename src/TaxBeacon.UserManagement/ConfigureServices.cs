@@ -58,7 +58,8 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IProgramActivityFactory, ProgramDeactivatedEventFactory>();
         serviceCollection.AddScoped<IProgramActivityFactory, ProgramReactivatedEventFactory>();
         serviceCollection.AddScoped<IProgramActivityFactory, ProgramUpdatedEventFactory>();
-        serviceCollection.AddScoped<IProgramActivityFactory, ProgramAssignmentUpdatedEventFactory>();
+        serviceCollection.AddScoped<IProgramActivityFactory, ProgramOrgUnitUnassignEventFactory>();
+        serviceCollection.AddScoped<IProgramActivityFactory, ProgramOrgUnitAssignEventFactory>();
 
         return serviceCollection;
     }

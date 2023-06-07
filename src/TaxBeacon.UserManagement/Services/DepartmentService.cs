@@ -97,29 +97,55 @@ public class DepartmentService: IDepartmentService
     public async Task<byte[]> ExportDepartmentsAsync(FileType fileType,
         CancellationToken cancellationToken)
     {
-        var exportDepartments = await _context
+        byte[] result;
+        var exportDepartmentsQuery = _context
             .Departments
             .AsNoTracking()
-            .Where(d => d.TenantId == _currentUserService.TenantId)
-            .Select(d => new DepartmentExportModel
-            {
-                Name = d.Name,
-                Description = d.Description,
-                Division = d.Division == null ? string.Empty : d.Division.Name,
-                ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
-                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count()
-            })
-            .OrderBy(dep => dep.Name)
-            .ToListAsync(cancellationToken);
+            .Where(d => d.TenantId == _currentUserService.TenantId);
 
-        exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+        if (_currentUserService.DivisionEnabled)
+        {
+            var exportDepartmentsWithDivision = await exportDepartmentsQuery
+                .Select(d => new DepartmentWithDivisionExportModel()
+                {
+                    Name = d.Name,
+                    Description = d.Description,
+                    Division = d.Division == null ? string.Empty : d.Division.Name,
+                    ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
+                    CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                    AssignedUsersCount = d.Users.Count()
+                })
+                .OrderBy(dep => dep.Name)
+                .ToListAsync(cancellationToken);
+
+            exportDepartmentsWithDivision.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+
+            result = _listToFileConverters[fileType].Convert(exportDepartmentsWithDivision);
+        }
+        else
+        {
+            var exportDepartments = await exportDepartmentsQuery
+                .Select(d => new DepartmentExportModel()
+                {
+                    Name = d.Name,
+                    Description = d.Description,
+                    ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
+                    CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                    AssignedUsersCount = d.Users.Count()
+                })
+                .OrderBy(dep => dep.Name)
+                .ToListAsync(cancellationToken);
+
+            exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+
+            result = _listToFileConverters[fileType].Convert(exportDepartments);
+        }
 
         _logger.LogInformation("{dateTime} - Departments export was executed by {@userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
-        return _listToFileConverters[fileType].Convert(exportDepartments);
+        return result;
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id, int page = 1, int pageSize = 10,
@@ -181,60 +207,77 @@ public class DepartmentService: IDepartmentService
                 return new NotFound();
             }
         }
+        var curServiceAreasIds = entity.ServiceAreas.Select(sa => sa.Id).ToList();
+        var curJobTitlesIds = entity.JobTitles.Select(jt => jt.Id).ToList();
 
-        var alreadyAssignedServiceAreas = await _context.ServiceAreas
-                .Where(sa => updatedEntity.ServiceAreasIds.Contains(sa.Id)
-                    && sa.DepartmentId != null
-                    && sa.DepartmentId != entity.Id
-                    && sa.TenantId == _currentUserService.TenantId)
-                .Select(sa => sa.Name).ToListAsync(cancellationToken);
-
-        if (alreadyAssignedServiceAreas.Any())
+        if (updatedEntity.ServiceAreasIds != null)
         {
-            return new InvalidOperation($"Service area(s) {string.Join(", ", alreadyAssignedServiceAreas)} have been assigned to another department");
+            var alreadyAssignedServiceAreas = await _context.ServiceAreas
+                    .Where(sa => updatedEntity.ServiceAreasIds.Contains(sa.Id)
+                        && sa.DepartmentId != null
+                        && sa.DepartmentId != entity.Id
+                        && sa.TenantId == _currentUserService.TenantId)
+                    .Select(sa => sa.Name).ToListAsync(cancellationToken);
+
+            if (alreadyAssignedServiceAreas.Any())
+            {
+                return new InvalidOperation($"Service area(s) {string.Join(", ", alreadyAssignedServiceAreas)} have been assigned to another department");
+            }
+
+            // Removes association with serviceAreas
+            await _context.ServiceAreas
+                .Where(sa => curServiceAreasIds.Except(updatedEntity.ServiceAreasIds!).Contains(sa.Id))
+                .ForEachAsync(sa => sa.DepartmentId = null, cancellationToken);
+
+            // Set up association with freshly added service areas
+            await _context.ServiceAreas
+                .Where(sa => updatedEntity.ServiceAreasIds.Except(curServiceAreasIds).Contains(sa.Id))
+                .ForEachAsync(sa => sa.DepartmentId = id, cancellationToken);
+        }
+        else
+        {
+            // Removes association with serviceAreas
+            await _context.ServiceAreas
+                .Where(sa => sa.DepartmentId == id && sa.TenantId == _currentUserService.TenantId)
+                .ForEachAsync(sa => sa.DepartmentId = null, cancellationToken);
         }
 
-        var alreadyAssignedJobTitles = await _context.JobTitles
-               .Where(jt => updatedEntity.ServiceAreasIds.Contains(jt.Id)
-                   && jt.DepartmentId != null
-                   && jt.DepartmentId != entity.Id
-                   && jt.TenantId == _currentUserService.TenantId)
-               .Select(jt => jt.Name).ToListAsync(cancellationToken);
-
-        if (alreadyAssignedJobTitles.Any())
+        if (updatedEntity.JobTitlesIds != null)
         {
-            return new InvalidOperation($"Job title(s) {string.Join(", ", alreadyAssignedJobTitles)} have been assigned to another department");
+            var alreadyAssignedJobTitles = await _context.JobTitles
+                   .Where(jt => updatedEntity.JobTitlesIds.Contains(jt.Id)
+                       && jt.DepartmentId != null
+                       && jt.DepartmentId != entity.Id
+                       && jt.TenantId == _currentUserService.TenantId)
+                   .Select(jt => jt.Name).ToListAsync(cancellationToken);
+
+            if (alreadyAssignedJobTitles.Any())
+            {
+                return new InvalidOperation($"Job title(s) {string.Join(", ", alreadyAssignedJobTitles)} have been assigned to another department");
+            }
+
+            // Removes association with serviceAreas
+            await _context.JobTitles
+                .Where(jt => curJobTitlesIds.Except(updatedEntity.JobTitlesIds).Contains(jt.Id))
+                .ForEachAsync(jt => jt.DepartmentId = null, cancellationToken);
+
+            // Set up association with freshly added job titles
+            await _context.JobTitles
+                .Where(jt => updatedEntity.JobTitlesIds.Except(curJobTitlesIds).Contains(jt.Id))
+                .ForEachAsync(jt => jt.DepartmentId = id, cancellationToken);
+        }
+        else
+        {
+
+            // Removes association with job titles
+            await _context.JobTitles
+                .Where(jt => jt.DepartmentId == id && jt.TenantId == _currentUserService.TenantId)
+                .ForEachAsync(jt => jt.DepartmentId = null, cancellationToken);
         }
 
         var eventDateTime = _dateTimeService.UtcNow;
-
         var previousValues = JsonSerializer.Serialize(entity.Adapt<UpdateDepartmentDto>());
-
         var (currentUserFullName, currentUserRoles) = _currentUserService.UserInfo;
-
-        var curServiceAreasIds = entity.ServiceAreas.Select(sa => sa.Id).ToList();
-
-        // Removes association with serviceAreas
-        await _context.ServiceAreas
-            .Where(sa => curServiceAreasIds.Except(updatedEntity.ServiceAreasIds).Contains(sa.Id))
-            .ForEachAsync(sa => sa.DepartmentId = null, cancellationToken);
-
-        // Set up association with freshly added service areas
-        await _context.ServiceAreas
-            .Where(sa => updatedEntity.ServiceAreasIds.Except(curServiceAreasIds).Contains(sa.Id))
-            .ForEachAsync(sa => sa.DepartmentId = id, cancellationToken);
-
-        var curJobTitlesIds = entity.JobTitles.Select(jt => jt.Id).ToList();
-
-        // Removes association with job titles
-        await _context.JobTitles
-            .Where(jt => curJobTitlesIds.Except(updatedEntity.JobTitlesIds).Contains(jt.Id))
-            .ForEachAsync(jt => jt.DepartmentId = null, cancellationToken);
-
-        // Set up association with freshly added job titles
-        await _context.JobTitles
-            .Where(jt => updatedEntity.JobTitlesIds.Except(curJobTitlesIds).Contains(jt.Id))
-            .ForEachAsync(jt => jt.DepartmentId = id, cancellationToken);
 
         await _context.DepartmentActivityLogs.AddAsync(new DepartmentActivityLog
         {

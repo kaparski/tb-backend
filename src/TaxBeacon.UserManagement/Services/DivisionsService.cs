@@ -176,34 +176,44 @@ namespace TaxBeacon.UserManagement.Services
                 return new NotFound();
             }
 
-            var alreadyAssignedDepartments = await _context.Departments
-                .Where(d => updateDivisionDto.DepartmentIds.Contains(d.Id)
-                    && d.DivisionId != null
-                    && d.DivisionId != division.Id
-                    && d.TenantId == _currentUserService.TenantId)
-                .Select(d => d.Name)
-                .ToListAsync(cancellationToken);
+            var currentDepsIds = division.Departments.Select(dep => dep.Id).ToList();
 
-            if (alreadyAssignedDepartments.Any())
+            if (updateDivisionDto.DepartmentIds != null)
             {
-                return new InvalidOperation($"Department(s) {string.Join(", ", alreadyAssignedDepartments)} have been assigned to another division");
+                var alreadyAssignedDepartments = await _context.Departments
+                    .Where(d => updateDivisionDto.DepartmentIds.Contains(d.Id)
+                        && d.DivisionId != null
+                        && d.DivisionId != division.Id
+                        && d.TenantId == _currentUserService.TenantId)
+                    .Select(d => d.Name)
+                    .ToListAsync(cancellationToken);
+
+                if (alreadyAssignedDepartments.Any())
+                {
+                    return new InvalidOperation($"Department(s) {string.Join(", ", alreadyAssignedDepartments)} have been assigned to another division");
+                }
+
+                // Removes association with departments
+                await _context.Departments
+                    .Where(dep => currentDepsIds.Except(updateDivisionDto.DepartmentIds).Contains(dep.Id))
+                    .ForEachAsync(dep => dep.DivisionId = null, cancellationToken);
+
+                // Set up association with freshly added departments
+                await _context.Departments
+                    .Where(dep => updateDivisionDto.DepartmentIds.Except(currentDepsIds).Contains(dep.Id))
+                    .ForEachAsync(dep => dep.DivisionId = id, cancellationToken);
+            }
+            else
+            {
+                // Removes association with departments
+                await _context.Departments
+                    .Where(dep => dep.DivisionId == id && dep.TenantId == _currentUserService.TenantId)
+                    .ForEachAsync(dep => dep.DivisionId = null, cancellationToken);
             }
 
             var previousValues = JsonSerializer.Serialize(division.Adapt<UpdateDivisionDto>());
             var userInfo = _currentUserService.UserInfo;
             var eventDateTime = _dateTimeService.UtcNow;
-
-            var currentDepsIds = division.Departments.Select(dep => dep.Id).ToList();
-
-            // Removes association with departments
-            await _context.Departments
-                .Where(dep => currentDepsIds.Except(updateDivisionDto.DepartmentIds).Contains(dep.Id))
-                .ForEachAsync(dep => dep.DivisionId = null, cancellationToken);
-
-            // Set up association with freshly added departments
-            await _context.Departments
-                .Where(dep => updateDivisionDto.DepartmentIds.Except(currentDepsIds).Contains(dep.Id))
-                .ForEachAsync(dep => dep.DivisionId = id, cancellationToken);
 
             await _context.DivisionActivityLogs.AddAsync(new DivisionActivityLog
             {
