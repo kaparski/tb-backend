@@ -741,7 +741,8 @@ public class ProgramServiceTests
             .RuleFor(p => p.Status, f => f.PickRandom<Status>())
             .RuleFor(u => u.ReactivationDateTimeUtc, _ => DateTime.UtcNow)
             .RuleFor(u => u.DeactivationDateTimeUtc, _ => DateTime.UtcNow)
-            .RuleFor(p => p.Program, _ => ProgramFaker.Generate());
+            .RuleFor(p => p.Program, _ => ProgramFaker.Generate())
+            .RuleFor(p => p.IsDeleted, _ => false);
 
         public static readonly Faker<ProgramActivityLog> ProgramActivityLogFaker = new Faker<ProgramActivityLog>()
             .RuleFor(x => x.Date, f => f.Date.Recent())
