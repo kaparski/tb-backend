@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using TaxBeacon.DAL.Entities.Account;
+using TaxBeacon.DAL.Entities.Accounts;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 
