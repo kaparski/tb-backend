@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace TaxBeacon.DAL.Configurations.Account;
-public class AccountConfiguration: IEntityTypeConfiguration<Entities.Account.Account>
+namespace TaxBeacon.DAL.Configurations.Accounts;
+public class AccountConfiguration: IEntityTypeConfiguration<Entities.Accounts.Account>
 {
-    public void Configure(EntityTypeBuilder<Entities.Account.Account> account)
+    public void Configure(EntityTypeBuilder<Entities.Accounts.Account> account)
     {
         account
             .Property(a => a.Name)
@@ -35,62 +35,62 @@ public class AccountConfiguration: IEntityTypeConfiguration<Entities.Account.Acc
 
         account
             .Property(a => a.Address1)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.Address2)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.City)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.Country)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.County)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.DoingBusinessAs)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.Extension)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.Fax)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.LinkedInURL)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.Phone)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.State)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         account
             .Property(a => a.Website)
-            .HasColumnType("ncarchar")
+            .HasColumnType("nvarchar")
             .HasMaxLength(100);
     }
 }

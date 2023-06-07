@@ -1,6 +1,6 @@
-﻿using TaxBeacon.Common.Account;
+﻿using TaxBeacon.Common.Accounts;
 
-namespace TaxBeacon.DAL.Entities.Account;
+namespace TaxBeacon.DAL.Entities.Accounts;
 
 public class AccountType: BaseEntity
 {
@@ -12,7 +12,7 @@ public class AccountType: BaseEntity
 
     public Account Account { get; set; } = null!;
 
-    public TaxBeacon.Common.Account.AccountType Type { get; set; }
+    public TaxBeacon.Common.Accounts.AccountType Type { get; set; }
 
     public AccountState State { get; set; }
 

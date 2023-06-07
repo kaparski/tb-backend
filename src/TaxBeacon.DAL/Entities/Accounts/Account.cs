@@ -1,4 +1,4 @@
-﻿namespace TaxBeacon.DAL.Entities.Account;
+﻿namespace TaxBeacon.DAL.Entities.Accounts;
 
 public class Account: BaseEntity
 {
