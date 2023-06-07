@@ -76,7 +76,6 @@ public class ProgramServiceTests
                 new ProgramDeactivatedEventFactory(),
                 new ProgramReactivatedEventFactory(),
                 new ProgramUpdatedEventFactory(),
-                new ProgramAssignmentUpdatedEventFactory()
             }.ToList().GetEnumerator());
 
         _programService = new ProgramService(
