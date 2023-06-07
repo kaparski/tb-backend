@@ -404,7 +404,7 @@ public class ProgramService: IProgramService
                           && dtp.TenantId == _currentUserService.TenantId)
             .SingleOrDefaultAsync(cancellationToken);
 
-        if (latestDepartmentAssigment != null)
+        if (latestDepartmentAssigment is not null)
         {
             _context.DepartmentTenantPrograms.Remove(latestDepartmentAssigment);
         }
@@ -415,7 +415,7 @@ public class ProgramService: IProgramService
                            && satp.TenantId == _currentUserService.TenantId)
             .SingleOrDefaultAsync(cancellationToken);
 
-        if (latestServiceAreaAssigment != null)
+        if (latestServiceAreaAssigment is not null)
         {
             _context.ServiceAreaTenantPrograms.Remove(latestServiceAreaAssigment);
         }
