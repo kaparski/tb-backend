@@ -48,4 +48,8 @@ public class Tenant: BaseEntity
 
     public ICollection<ProgramActivityLog> ProgramActivityLogs { get; set; } =
         new HashSet<ProgramActivityLog>();
+
+    public ICollection<Account.Account> Accounts { get; set; } = new HashSet<Account.Account>();
+
+    public ICollection<Account.AccountType> AccountsTypes { get; set; } = new HashSet<Account.AccountType>();
 }

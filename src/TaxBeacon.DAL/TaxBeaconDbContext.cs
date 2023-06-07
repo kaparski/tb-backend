@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using TaxBeacon.DAL.Entities.Account;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.DAL;
 
-public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
+public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbContext
 {
     private readonly EntitySaveChangesInterceptor _saveChangesInterceptor;
 
@@ -69,6 +70,10 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext
     public DbSet<ProgramActivityLog> ProgramActivityLogs => Set<ProgramActivityLog>();
 
     public DbSet<UserView> UsersView => Set<UserView>();
+
+    public DbSet<Account> Accounts => Set<Account>();
+
+    public DbSet<AccountType> AccountTypes => Set<AccountType>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
