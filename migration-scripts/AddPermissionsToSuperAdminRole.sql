@@ -8,14 +8,36 @@ where Name = @superAdminRoleName
 
 INSERT INTO @superAdminRolePermissions
     (Name)
-VALUES
-    ('Tenants.Read'),
-    ('Tenants.ReadWrite'),
-    ('Tenants.ReadExport'),
-    ('Programs.Read'),
-    ('Programs.ReadWrite'),
-    ('Programs.ReadExport')
-
+VALUES ('Departments.Read'),
+       ('Departments.ReadWrite'),
+       ('Departments.ReadExport'),
+       ('Divisions.Activation'),
+       ('Divisions.Read'),
+       ('Divisions.ReadWrite'),
+       ('Divisions.ReadExport'),
+       ('JobTitles.Read'),
+       ('JobTitles.ReadWrite'),
+       ('JobTitles.ReadExport'),
+       ('Programs.Read'),
+       ('Programs.ReadWrite'),
+       ('Programs.ReadExport'),
+       ('Roles.Read'),
+       ('Roles.ReadWrite'),
+       ('ServiceAreas.Read'),
+       ('ServiceAreas.ReadWrite'),
+       ('ServiceAreas.ReadExport'),
+       ('TableFilters.Read'),
+       ('TableFilters.ReadWrite'),
+       ('Teams.Read'),
+       ('Teams.ReadWrite'),
+       ('Teams.ReadExport'),
+       ('Tenants.Read'),
+       ('Tenants.ReadWrite'),
+       ('Tenants.ReadExport'),
+       ('Users.Read'),
+       ('Users.ReadWrite'),
+       ('Users.ReadExport')
+       
 INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 SELECT NEWID(),
        arp.Name,

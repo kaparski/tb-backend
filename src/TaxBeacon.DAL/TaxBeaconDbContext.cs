@@ -74,6 +74,9 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
     public DbSet<Account> Accounts => Set<Account>();
 
     public DbSet<AccountType> AccountTypes => Set<AccountType>();
+    public DbSet<DepartmentTenantProgram> DepartmentTenantPrograms => Set<DepartmentTenantProgram>();
+
+    public DbSet<ServiceAreaTenantProgram> ServiceAreaTenantPrograms => Set<ServiceAreaTenantProgram>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

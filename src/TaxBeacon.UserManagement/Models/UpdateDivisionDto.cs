@@ -6,6 +6,6 @@
 
         public string Description { get; set; } = string.Empty;
 
-        public IEnumerable<Guid> DepartmentIds { get; set; } = new List<Guid>();
+        public IEnumerable<Guid>? DepartmentIds { get; set; }
     }
 }

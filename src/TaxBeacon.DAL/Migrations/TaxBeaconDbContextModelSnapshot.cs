@@ -99,6 +99,34 @@ namespace TaxBeacon.DAL.Migrations
                     b.ToTable("DepartmentActivityLogs");
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Entities.DepartmentTenantProgram", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.HasKey("TenantId", "DepartmentId", "ProgramId");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("TenantId", "ProgramId");
+
+                    b.ToTable("DepartmentTenantPrograms");
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Division", b =>
                 {
                     b.Property<Guid>("Id")
@@ -526,6 +554,34 @@ namespace TaxBeacon.DAL.Migrations
                     b.ToTable("ServiceAreaActivityLogs");
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Entities.ServiceAreaTenantProgram", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ServiceAreaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.HasKey("TenantId", "ServiceAreaId", "ProgramId");
+
+                    b.HasIndex("ServiceAreaId");
+
+                    b.HasIndex("TenantId", "ProgramId");
+
+                    b.ToTable("ServiceAreaTenantPrograms");
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TableFilter", b =>
                 {
                     b.Property<Guid>("Id")
@@ -728,6 +784,14 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.Property<DateTime?>("DeactivationDateTimeUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime?>("ReactivationDateTimeUtc")
                         .HasColumnType("datetime2");
@@ -989,6 +1053,25 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Entities.DepartmentTenantProgram", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Entities.Department", "Department")
+                        .WithMany("DepartmentTenantPrograms")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Entities.TenantProgram", "TenantProgram")
+                        .WithMany("DepartmentTenantPrograms")
+                        .HasForeignKey("TenantId", "ProgramId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("TenantProgram");
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Division", b =>
                 {
                     b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
@@ -1126,6 +1209,25 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("ServiceArea");
 
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Entities.ServiceAreaTenantProgram", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Entities.ServiceArea", "ServiceArea")
+                        .WithMany("ServiceAreaTenantPrograms")
+                        .HasForeignKey("ServiceAreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Entities.TenantProgram", "TenantProgram")
+                        .WithMany("ServiceAreaTenantPrograms")
+                        .HasForeignKey("TenantId", "ProgramId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ServiceArea");
+
+                    b.Navigation("TenantProgram");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TableFilter", b =>
@@ -1367,6 +1469,8 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.Navigation("DepartmentActivityLogs");
 
+                    b.Navigation("DepartmentTenantPrograms");
+
                     b.Navigation("JobTitles");
 
                     b.Navigation("ServiceAreas");
@@ -1416,6 +1520,8 @@ namespace TaxBeacon.DAL.Migrations
             modelBuilder.Entity("TaxBeacon.DAL.Entities.ServiceArea", b =>
                 {
                     b.Navigation("ServiceAreaActivityLogs");
+
+                    b.Navigation("ServiceAreaTenantPrograms");
 
                     b.Navigation("Users");
                 });
@@ -1467,6 +1573,13 @@ namespace TaxBeacon.DAL.Migrations
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantPermission", b =>
                 {
                     b.Navigation("TenantRolePermissions");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantProgram", b =>
+                {
+                    b.Navigation("DepartmentTenantPrograms");
+
+                    b.Navigation("ServiceAreaTenantPrograms");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantRole", b =>

@@ -25,6 +25,10 @@ namespace TaxBeacon.DAL.Configurations
                 .HasIndex(tp => new { tp.TenantId, tp.Status, tp.ProgramId })
                 .IsUnique()
                 .IsClustered();
+
+            tenantProgram
+                .Property(tp => tp.IsDeleted)
+                .HasDefaultValue(false);
         }
     }
 }

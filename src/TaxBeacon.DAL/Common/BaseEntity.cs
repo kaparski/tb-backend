@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.DAL.Common;
 
-public abstract class BaseEntity
+public abstract class BaseEntity: IDeletableEntity
 {
     public DateTime CreatedDateTimeUtc { get; set; }
 

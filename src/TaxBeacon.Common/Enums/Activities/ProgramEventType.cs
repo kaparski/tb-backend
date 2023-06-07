@@ -7,5 +7,6 @@ public enum ProgramEventType
     ProgramUpdatedEvent = 2,
     ProgramDeactivatedEvent = 3,
     ProgramReactivatedEvent = 4,
-    ProgramAssignmentUpdatedEvent = 5,
+    ProgramOrgUnitAssignEvent = 5,
+    ProgramOrgUnitUnassignEvent = 6,
 }

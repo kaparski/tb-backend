@@ -52,7 +52,10 @@ public class EntitySaveChangesInterceptor: SaveChangesInterceptor
             {
                 entry.Entity.LastModifiedDateTimeUtc = DateTime.UtcNow;
             }
+        }
 
+        foreach (var entry in context.ChangeTracker.Entries<IDeletableEntity>())
+        {
             if (entry.State == EntityState.Deleted)
             {
                 entry.Entity.IsDeleted = true;

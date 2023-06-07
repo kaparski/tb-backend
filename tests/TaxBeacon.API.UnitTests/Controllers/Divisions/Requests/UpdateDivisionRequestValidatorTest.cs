@@ -80,24 +80,5 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions.Requests
                 .WithErrorMessage("The division description must contain no more than 200 characters");
             actualResult.ShouldNotHaveValidationErrorFor(r => r.Name);
         }
-
-        [Fact]
-        public void Validation_NoDepartments_ShouldHaveEmptyListError()
-        {
-            //Arrange
-            var updateDivisionRequest = new Faker<UpdateDivisionRequest>()
-                .CustomInstantiator(f => new UpdateDivisionRequest(f.Name.FirstName(), f.Name.JobDescriptor(), new List<Guid>()))
-                .Generate();
-
-            //Act
-            var actualResult = _updateDivisionRequestValidator.TestValidate(updateDivisionRequest);
-
-            //Assert
-            actualResult
-                .ShouldHaveValidationErrorFor(r => r.DepartmentIds)
-                .WithErrorMessage("The division must have at least 1 department");
-            actualResult.ShouldNotHaveValidationErrorFor(r => r.Name);
-            actualResult.ShouldNotHaveValidationErrorFor(r => r.Description);
-        }
     }
 }

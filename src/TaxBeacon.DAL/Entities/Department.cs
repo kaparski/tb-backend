@@ -23,5 +23,8 @@
         public ICollection<ServiceArea> ServiceAreas { get; set; } = new HashSet<ServiceArea>();
 
         public ICollection<DepartmentActivityLog> DepartmentActivityLogs { get; set; } = new HashSet<DepartmentActivityLog>();
+
+        public ICollection<DepartmentTenantProgram> DepartmentTenantPrograms { get; set; } =
+            new HashSet<DepartmentTenantProgram>();
     }
 }
