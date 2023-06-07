@@ -19,5 +19,5 @@ public sealed class TenantAssignProgramsEvent: EventBase
 
     public DateTime AssignDateTime { get; }
 
-    public override string ToString() => $"Program(s) access provided to Tenant: {AssignedProgramsNames}";
+    public override string ToString() => $"Access to the following program(s) provided: {AssignedProgramsNames}";
 }

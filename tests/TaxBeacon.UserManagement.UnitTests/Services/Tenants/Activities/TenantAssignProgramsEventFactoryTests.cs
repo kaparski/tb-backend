@@ -31,7 +31,7 @@ public sealed class TenantAssignProgramsEventFactoryTests
         {
             result.Date.Should().Be(date);
             result.FullName.Should().Be("Test");
-            result.Message.Should().Be("Program(s) access provided to Tenant: Test");
+            result.Message.Should().Be("Access to the following program(s) provided: Test");
         };
     }
 }
