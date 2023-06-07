@@ -73,7 +73,10 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<Account> Accounts => Set<Account>();
 
-    public DbSet<AccountType> AccountTypes => Set<AccountType>();
+    public DbSet<Client> Clients => Set<Client>();
+
+    public DbSet<Referral> Referrals => Set<Referral>();
+
     public DbSet<DepartmentTenantProgram> DepartmentTenantPrograms => Set<DepartmentTenantProgram>();
 
     public DbSet<ServiceAreaTenantProgram> ServiceAreaTenantPrograms => Set<ServiceAreaTenantProgram>();

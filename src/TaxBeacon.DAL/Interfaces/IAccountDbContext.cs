@@ -7,7 +7,9 @@ public interface IAccountDbContext
 {
     DbSet<Account> Accounts { get; }
 
-    DbSet<AccountType> AccountTypes { get; }
+    DbSet<Client> Clients { get; }
+
+    DbSet<Referral> Referrals { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
