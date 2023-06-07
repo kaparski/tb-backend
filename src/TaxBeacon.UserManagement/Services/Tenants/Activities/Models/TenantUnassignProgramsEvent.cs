@@ -19,5 +19,5 @@ public sealed class TenantUnassignProgramsEvent: EventBase
 
     public string UnassignedProgramsNames { get; }
 
-    public override string ToString() => $"Program(s) access removed from Tenant: {UnassignedProgramsNames}";
+    public override string ToString() => $"Access to the following program(s) removed: {UnassignedProgramsNames}";
 }
