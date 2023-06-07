@@ -24,7 +24,6 @@ public class DepartmentsController: BaseController
     /// <summary>
     /// Queryable list of tenant's departments
     /// </summary>
-    /// <remarks>
     /// <response code="200">Returns departments in a given tenant</response>
     /// <response code="400">Invalid filtering or sorting</response>
     /// <response code="401">User is unauthorized</response>
