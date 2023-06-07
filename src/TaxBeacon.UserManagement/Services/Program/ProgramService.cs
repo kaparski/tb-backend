@@ -287,7 +287,7 @@ public class ProgramService: IProgramService
     public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default) =>
         _context.TenantsPrograms
-            .Where(x => x.TenantId == _currentUserService.TenantId)
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.IsDeleted == false)
             .ProjectToType<TenantProgramDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
