@@ -25,6 +25,6 @@ public sealed class ProgramOrgUnitUnassignEvent: EventBase
 
     public override string ToString() =>
         string.IsNullOrEmpty(ServiceAreaName)
-            ? $"Program assigned from {DepartmentName} department"
-            : $"Program assigned from {DepartmentName} department, {ServiceAreaName} service area";
+            ? $"Program unassigned from {DepartmentName} department"
+            : $"Program unassigned from {DepartmentName} department, {ServiceAreaName} service area";
 }
