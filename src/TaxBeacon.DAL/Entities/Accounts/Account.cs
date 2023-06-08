@@ -17,4 +17,8 @@ public class Account: BaseEntity
     public Client? Client { get; set; }
 
     public Referral? Referral { get; set; }
+    public ICollection<Entity> Entities { get; set; } = new HashSet<Entity>();
+    public ICollection<Location> Locations { get; set; } = new HashSet<Location>();
+    public ICollection<Contact> Contacts { get; set; } = new HashSet<Contact>();
+
 }
