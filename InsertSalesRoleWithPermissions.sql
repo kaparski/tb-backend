@@ -31,31 +31,7 @@ BEGIN TRY
 	  END;
 
 	INSERT INTO @salesRolePermissions (Name)
-	VALUES ('Divisions.Activation'),
-         ('Divisions.Read'),
-         ('Divisions.ReadWrite'),
-         ('Divisions.ReadExport'),
-         ('Departments.Read'),
-         ('Departments.ReadWrite'),
-         ('Departments.ReadExport'),
-         ('JobTitles.Read'),
-         ('JobTitles.ReadWrite'),
-         ('JobTitles.ReadExport'),
-         ('Programs.Read'),
-         ('Programs.ReadExport'),
-         ('Roles.Read'),
-         ('Roles.ReadWrite'),
-         ('ServiceAreas.Read'),
-         ('ServiceAreas.ReadWrite'),
-         ('ServiceAreas.ReadExport'),
-         ('TableFilters.Read'),
-         ('TableFilters.ReadWrite'),
-         ('Teams.Read'),
-         ('Teams.ReadWrite'),
-         ('Teams.ReadExport'),
-         ('Users.Read'),
-         ('Users.ReadWrite'),
-         ('Users.ReadExport')
+	VALUES ('Accounts.Read')
 
 	INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 	SELECT NEWID(),
