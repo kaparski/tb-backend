@@ -30,23 +30,6 @@ BEGIN TRY
 		INSERT INTO TenantRoles VALUES (@tenantId, @roleId);
 	  END;
 
-	  INSERT INTO TenantUsers
-		SELECT Id, @tenantId
-		FROM Users AS u
-		WHERE NOT EXISTS(SELECT UserId
-						 FROM TenantUsers
-						 WHERE UserId = u.Id
-						 AND TenantId = @tenantId);
-
-    INSERT INTO TenantUserRoles
-    SELECT TenantId, @roleId, UserId
-    FROM TenantUsers AS tu
-    WHERE NOT EXISTS(SELECT UserId
-                     FROM TenantUserRoles
-                     WHERE UserId = tu.UserId
-                     AND TenantId = tu.TenantId
-                     AND RoleId = @roleId);
-
 	INSERT INTO @accountManagerRolePermissions (Name)
 	VALUES ('Accounts.Read')
 
