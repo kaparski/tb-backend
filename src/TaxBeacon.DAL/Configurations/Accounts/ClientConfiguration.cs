@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NPOI.SS.Formula.Eval;
 using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Configurations.Accounts;
@@ -11,10 +10,11 @@ public class ClientConfiguration: IEntityTypeConfiguration<Client>
         client
             .HasKey(c => new { c.TenantId, c.AccountId });
 
-        client.
-            HasOne(c => c.Tenant)
+        client
+            .HasOne(c => c.Tenant)
             .WithMany(t => t.Clients)
-            .HasForeignKey(c => c.TenantId);
+            .HasForeignKey(c => c.TenantId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         client
             .HasOne(c => c.Account)
