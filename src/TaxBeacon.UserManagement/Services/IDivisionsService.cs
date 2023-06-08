@@ -3,12 +3,13 @@ using OneOf.Types;
 using OneOf;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Errors;
 
 namespace TaxBeacon.UserManagement.Services
 {
     public interface IDivisionsService
     {
-        Task<OneOf<QueryablePaging<DivisionDto>, NotFound>> GetDivisionsAsync(GridifyQuery gridifyQuery,
+        Task<QueryablePaging<DivisionDto>> GetDivisionsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
         Task<byte[]> ExportDivisionsAsync(FileType fileType,
@@ -21,6 +22,9 @@ namespace TaxBeacon.UserManagement.Services
 
         Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default);
 
-        Task<OneOf<DivisionDetailsDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default);
+        Task<OneOf<DivisionDetailsDto, NotFound, InvalidOperation>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default);
+
+        Task<OneOf<DivisionDepartmentDto[], NotFound>> GetDivisionDepartmentsAsync(Guid id,
+            CancellationToken cancellationToken = default);
     }
 }

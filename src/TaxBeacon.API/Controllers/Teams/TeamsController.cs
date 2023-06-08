@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
-using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
@@ -43,7 +42,6 @@ public class TeamsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTeamList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -52,10 +50,8 @@ public class TeamsController: BaseController
             return BadRequest();
         }
 
-        var teamOneOf = await _teamService.GetTeamsAsync(query, cancellationToken);
-        return teamOneOf.Match<IActionResult>(
-            teams => Ok(new QueryablePaging<TeamResponse>(teams.Count, teams.Query.ProjectToType<TeamResponse>())),
-            notFound => NotFound());
+        var teams = await _teamService.GetTeamsAsync(query, cancellationToken);
+        return Ok(new QueryablePaging<TeamResponse>(teams.Count, teams.Query.ProjectToType<TeamResponse>()));
     }
 
     /// <summary>

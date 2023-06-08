@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
@@ -89,12 +90,11 @@ public class ServiceAreaServiceTests
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
 
         // Act
-        var actualResult = await _serviceAreaService.GetServiceAreasAsync(query, default);
+        var pageOfServiceAreas = await _serviceAreaService.GetServiceAreasAsync(query, default);
 
         // Arrange
         using (new AssertionScope())
         {
-            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
             pageOfServiceAreas.Should().NotBeNull();
             pageOfServiceAreas.Count.Should().Be(5);
             var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
@@ -115,12 +115,11 @@ public class ServiceAreaServiceTests
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
 
         // Act
-        var actualResult = await _serviceAreaService.GetServiceAreasAsync(query, default);
+        var pageOfServiceAreas = await _serviceAreaService.GetServiceAreasAsync(query, default);
 
         // Arrange
         using (new AssertionScope())
         {
-            actualResult.TryPickT0(out var pageOfServiceAreas, out _);
             pageOfServiceAreas.Should().NotBeNull();
             pageOfServiceAreas.Count.Should().Be(5);
             var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
@@ -144,8 +143,7 @@ public class ServiceAreaServiceTests
         var actualResult = await _serviceAreaService.GetServiceAreasAsync(query, default);
 
         // Arrange
-        actualResult.IsT1.Should().BeTrue();
-        actualResult.IsT0.Should().BeFalse();
+        actualResult.Query.Count().Should().Be(0);
     }
 
     [Fact]
@@ -520,6 +518,7 @@ public class ServiceAreaServiceTests
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();

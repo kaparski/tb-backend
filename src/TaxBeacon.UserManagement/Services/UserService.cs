@@ -3,6 +3,7 @@ using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npoi.Mapper;
 using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
@@ -12,6 +13,7 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -68,25 +70,32 @@ public class UserService: IUserService
     {
         var user = await _context
             .Users
-            .FirstOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
+            .SingleOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
+
+        var tenant = await _context
+            .Tenants
+            .FirstOrDefaultAsync(t => t.Id == _currentUserService.TenantId, cancellationToken);
 
         if (user is null)
         {
             return new NotFound();
         }
 
-        user.LastLoginDateTimeUtc = _dateTimeService.UtcNow;
+        var now = _dateTimeService.UtcNow;
+
+        user.LastLoginDateTimeUtc = now;
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - User ({createdUserId}) has logged in",
-            _dateTimeService.UtcNow,
+            now,
             user.Id);
 
         return new LoginUserDto(
             user.Id,
             user.FullName,
             await GetUserPermissionsAsync(user.Id, cancellationToken),
-            await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken));
+            await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken),
+            tenant?.DivisionEnabled);
     }
 
     public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
@@ -106,19 +115,84 @@ public class UserService: IUserService
         return await users.GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
 
+    class UserRoleContainer
+    {
+        /// <summary>
+        /// Concatenation of UserId and TenantId. If user is tenant-free, then it is just UserId.
+        /// Needed for optimization purposes.
+        /// </summary>
+        public string UserIdPlusTenantId { get; set; } = null!;
+        public Guid RoleId { get; set; }
+        public string RoleName { get; set; } = null!;
+    }
+
+    public IQueryable<UserDto> QueryUsers()
+    {
+        var nonTenantUsers = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true };
+
+        var userRoles = nonTenantUsers ?
+            _context.UserRoles
+                .Select(ur => new UserRoleContainer
+                {
+                    UserIdPlusTenantId = ur.UserId.ToString(),
+                    RoleId = ur.RoleId,
+                    RoleName = ur.Role.Name
+                }) :
+            _context.TenantUserRoles
+                .Select(tur => new UserRoleContainer
+                {
+                    UserIdPlusTenantId = tur.UserId.ToString() + tur.TenantId.ToString(),
+                    RoleId = tur.RoleId,
+                    RoleName = tur.TenantRole.Role.Name
+                });
+
+        Guid? tenantId = nonTenantUsers ?
+            null :
+            _currentUserService.TenantId;
+
+        // Need to use a view here. Main reason is because EF fails to construct a query when
+        // an array-like field (Roles in this case) must be both sortable and filterable.
+        // Also a view allows to optimize fetching relative fields like Department, JobTitle etc.
+        var users = _context.UsersView.Where(u => u.TenantId == tenantId);
+
+        var userDtos = users.GroupJoin(userRoles,
+            u => u.UserIdPlusTenantId,
+            tur => tur.UserIdPlusTenantId,
+            (u, roles) => new UserDto
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email,
+                Status = u.Status,
+                CreatedDateTimeUtc = u.CreatedDateTimeUtc,
+                LastLoginDateTimeUtc = u.LastLoginDateTimeUtc,
+                DeactivationDateTimeUtc = u.DeactivationDateTimeUtc,
+                ReactivationDateTimeUtc = u.ReactivationDateTimeUtc,
+                FullName = u.FullName,
+                LegalName = u.LegalName,
+                DivisionId = u.DivisionId,
+                Division = u.Division,
+                DepartmentId = u.DepartmentId,
+                Department = u.Department,
+                JobTitleId = u.JobTitleId,
+                JobTitle = u.JobTitle,
+                ServiceAreaId = u.ServiceAreaId,
+                ServiceArea = u.ServiceArea,
+                TeamId = u.TeamId,
+                Team = u.Team,
+                Roles = u.Roles,
+                RoleIds = roles.Select(r => r.RoleId)
+            })
+        ;
+
+        return userDtos;
+    }
+
     public async Task<OneOf<UserDto, NotFound>> GetUserDetailsByIdAsync(Guid id,
         CancellationToken cancellationToken = default)
     {
-        var users = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
-            ? _context
-                .Users
-                .MapToUserDtoWithNoTenantRoleNames(_context)
-            : _context
-                .Users
-                .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
-                .MapToUserDtoWithTenantRoleNames(_context, _currentUserService);
-
-        var user = await users.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var user = await QueryUsers().SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (user is null)
         {
@@ -219,8 +293,8 @@ public class UserService: IUserService
         return user.Adapt<UserDto>();
     }
 
-    public async Task<OneOf<UserDto, EmailAlreadyExists>> CreateUserAsync(
-        UserDto newUserData,
+    public async Task<OneOf<UserDto, EmailAlreadyExists, InvalidOperation>> CreateUserAsync(
+        CreateUserDto newUserData,
         CancellationToken cancellationToken = default)
     {
         var user = newUserData.Adapt<User>();
@@ -229,17 +303,29 @@ public class UserService: IUserService
 
         var userEmail = new MailAddress(newUserData.Email);
 
+        if (await EmailExistsAsync(user.Email, cancellationToken))
+        {
+            return new EmailAlreadyExists();
+        }
+
+        var validationResult = await ValidateOrganizationUnitsAsync(
+            newUserData.DivisionId,
+            newUserData.DepartmentId,
+            newUserData.ServiceAreaId,
+            newUserData.JobTitleId,
+            newUserData.TeamId);
+
+        if (!validationResult.TryPickT0(out var ok, out var error))
+        {
+            return error;
+        }
+
         if (!_domainsToSkipExternalStorageUserCreation.Contains(userEmail.Host))
         {
             _ = await _userExternalStore.CreateUserAsync(userEmail,
                 newUserData.FirstName,
                 newUserData.LastName,
                 cancellationToken);
-        }
-
-        if (await EmailExistsAsync(user.Email, cancellationToken))
-        {
-            return new EmailAlreadyExists();
         }
 
         if (_currentUserService.TenantId != default)
@@ -256,7 +342,7 @@ public class UserService: IUserService
         {
             TenantId = _currentUserService.TenantId,
             UserId = user.Id,
-            Date = _dateTimeService.UtcNow,
+            Date = now,
             Revision = 1,
             Event = JsonSerializer.Serialize(
                 new UserCreatedEvent(_currentUserService.UserId,
@@ -269,7 +355,7 @@ public class UserService: IUserService
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - User ({createdUserId}) was created by {@userId}",
-            _dateTimeService.UtcNow,
+            now,
             user.Id,
             _currentUserService.UserId);
 
@@ -360,7 +446,7 @@ public class UserService: IUserService
         return new Success();
     }
 
-    public async Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid userId,
+    public async Task<OneOf<UserDto, NotFound, InvalidOperation>> UpdateUserByIdAsync(Guid userId,
         UpdateUserDto updateUserDto,
         CancellationToken cancellationToken = default)
     {
@@ -371,10 +457,21 @@ public class UserService: IUserService
             return notFound;
         }
 
+        var validationResult = await ValidateOrganizationUnitsAsync(
+            updateUserDto.DivisionId,
+            updateUserDto.DepartmentId,
+            updateUserDto.ServiceAreaId,
+            updateUserDto.JobTitleId,
+            updateUserDto.TeamId);
+
+        if (!validationResult.TryPickT0(out var ok, out var error))
+        {
+            return error;
+        }
+
         var previousUserValues = JsonSerializer.Serialize(user.Adapt<UpdateUserDto>());
-        user.FirstName = updateUserDto.FirstName;
-        user.LegalName = updateUserDto.LegalName;
-        user.LastName = updateUserDto.LastName;
+
+        updateUserDto.Adapt(user);
 
         var now = _dateTimeService.UtcNow;
         var currentUserInfo = _currentUserService.UserInfo;
@@ -398,12 +495,14 @@ public class UserService: IUserService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - User ({createdUserId}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - User ({updatedUserId}) was updated by {@userId}",
             now,
             user.Id,
             _currentUserService.UserId);
 
-        return await GetUserDetailsByIdAsync(userId, cancellationToken);
+        var userDto = await GetUserDetailsByIdAsync(userId, cancellationToken);
+
+        return userDto.AsT0;
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid userId, uint page = 1,
@@ -443,8 +542,8 @@ public class UserService: IUserService
 
     public async Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken)
     {
-        var tenantId = await GetTenantIdAsync(mailAddress, cancellationToken);
-
+        var tenant = await GetTenantAsync(mailAddress, cancellationToken);
+        var tenantId = tenant?.Id ?? Guid.Empty;
         var userQuery = from u in _context.Users
                         join ur in _context.UserRoles on u.Id equals ur.UserId into rolesGrouping
                         from userRole in rolesGrouping.DefaultIfEmpty()
@@ -468,11 +567,11 @@ public class UserService: IUserService
             .Select(g => new UserInfo
             (
                 tenantId,
+                tenant?.DivisionEnabled ?? false,
                 g.Key.Id,
                 g.Key.FullName,
                 g.Where(r => !string.IsNullOrEmpty(r.Role)).Select(r => r.Role).Distinct().ToList(),
-                g.Where(tr => !string.IsNullOrEmpty(tr.TenantRole)).Select(tr => tr.TenantRole).Distinct().ToList()
-            ))
+                g.Where(tr => !string.IsNullOrEmpty(tr.TenantRole)).Select(tr => tr.TenantRole).Distinct().ToList()))
             .SingleOrDefault();
     }
 
@@ -511,10 +610,10 @@ public class UserService: IUserService
             .UserRoles
             .AnyAsync(ur => ur.UserId == id && ur.Role.Name == roleName, cancellationToken);
 
-    private Task<Guid> GetTenantIdAsync(MailAddress mail, CancellationToken cancellationToken) =>
+    private Task<Tenant?> GetTenantAsync(MailAddress mail, CancellationToken cancellationToken) =>
         _context.TenantUsers
             .Where(tu => tu.User.Email == mail.Address)
-            .Select(tu => tu.TenantId)
+            .Select(tu => tu.Tenant)
             .SingleOrDefaultAsync(cancellationToken);
 
     private async Task<OneOf<User, NotFound>> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -651,5 +750,61 @@ public class UserService: IUserService
         }
 
         return addedRolesString;
+    }
+
+    private async Task<OneOf<Success, InvalidOperation>> ValidateOrganizationUnitsAsync(
+        Guid? divisionId,
+        Guid? departmentId,
+        Guid? serviceAreaId,
+        Guid? jobTitleId,
+        Guid? teamId)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        if (divisionId is not null)
+        {
+            var divisionExists = await _context.Divisions
+                .AnyAsync(d => d.Id == divisionId && d.TenantId == tenantId);
+            if (!divisionExists)
+                return new InvalidOperation($"Division with the ID {divisionId} does not exist.");
+        }
+
+        if (departmentId is not null && (divisionId is not null || !_currentUserService.DivisionEnabled))
+        {
+            var departmentExists = _currentUserService.DivisionEnabled
+                ? await _context.Departments
+                    .AnyAsync(d => d.Id == departmentId && d.DivisionId == divisionId)
+                : await _context.Departments
+                    .AnyAsync(d => d.Id == departmentId && d.TenantId == _currentUserService.TenantId);
+
+            if (!departmentExists)
+                return new InvalidOperation($"Department with the ID {departmentId} does not exist.");
+        }
+
+        if (serviceAreaId is not null && departmentId is not null)
+        {
+            var serviceAreaExists = await _context.ServiceAreas
+                        .AnyAsync(d => d.Id == serviceAreaId && d.DepartmentId == departmentId);
+            if (!serviceAreaExists)
+                return new InvalidOperation($"Service area with the ID {serviceAreaId} does not exist.");
+        }
+
+        if (jobTitleId is not null && departmentId is not null)
+        {
+            var jobTitleExists = await _context.JobTitles
+                        .AnyAsync(d => d.Id == jobTitleId && d.DepartmentId == departmentId);
+            if (!jobTitleExists)
+                return new InvalidOperation($"Job title with the ID {jobTitleId} does not exist.");
+        }
+
+        if (teamId is not null)
+        {
+            var teamExists = await _context.Teams
+                .AnyAsync(d => d.Id == teamId && d.TenantId == tenantId);
+            if (!teamExists)
+                return new InvalidOperation($"Team with the ID {teamId} does not exist.");
+        }
+
+        return new Success();
     }
 }

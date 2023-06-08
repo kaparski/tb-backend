@@ -54,11 +54,9 @@ public class DepartmentsController: BaseController
             return BadRequest();
         }
 
-        var departmentsOneOf = await _service.GetDepartmentsAsync(query, cancellationToken);
-        return departmentsOneOf.Match<IActionResult>(
-            departments => Ok(new QueryablePaging<DepartmentResponse>(departments.Count,
-                departments.Query.ProjectToType<DepartmentResponse>())),
-            notFound => NotFound());
+        var departments = await _service.GetDepartmentsAsync(query, cancellationToken);
+        return Ok(new QueryablePaging<DepartmentResponse>(departments.Count,
+            departments.Query.ProjectToType<DepartmentResponse>()));
     }
 
     /// <summary>
@@ -163,7 +161,8 @@ public class DepartmentsController: BaseController
 
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<DepartmentDetailsResponse>()),
-            notFound => NotFound());
+            notFound => NotFound(),
+            error => Conflict(error.Message));
     }
 
     /// <summary>
@@ -197,5 +196,55 @@ public class DepartmentsController: BaseController
             result => Ok(new QueryablePaging<DepartmentUserResponse>(result.Count,
                 result.Query.ProjectToType<DepartmentUserResponse>())),
             _ => NotFound());
+    }
+
+    /// <summary>
+    /// Get service areas of a department
+    /// </summary>
+    /// <response code="200">Returns department's service areas</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Department is not found</response>
+    /// <returns>A collection of service areas associated with a particular department</returns>
+    [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
+    [HttpGet("{id:guid}/serviceareas", Name = "GetDepartmentServiceAreas")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<DepartmentServiceAreaResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetDepartmentServiceAreasAsync([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var activities = await _service.GetDepartmentServiceAreasAsync(id, cancellationToken);
+
+        return activities.Match<IActionResult>(
+            result => Ok(result.Adapt<DepartmentServiceAreaResponse[]>()),
+            notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Get job titles of a department
+    /// </summary>
+    /// <response code="200">Returns department's job titles</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Department is not found</response>
+    /// <returns>A collection of job titles associated with a particular department</returns>
+    [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
+    [HttpGet("{id:guid}/jobtitles", Name = "GetDepartmentJobTitles")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IEnumerable<DepartmentJobTitleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetDepartmentJobTitlesAsync([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var activities = await _service.GetDepartmentJobTitlesAsync(id, cancellationToken);
+
+        return activities.Match<IActionResult>(
+            result => Ok(result.Adapt<DepartmentJobTitleResponse[]>()),
+            notFound => NotFound());
     }
 }

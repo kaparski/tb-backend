@@ -14,7 +14,7 @@ namespace TaxBeacon.DAL.Entities
 
         public string? LegalAuthority { get; set; }
 
-        public string? Agency { get; set; }
+        public string Agency { get; set; } = string.Empty;
 
         public Jurisdiction Jurisdiction { get; set; }
 
@@ -30,9 +30,9 @@ namespace TaxBeacon.DAL.Entities
 
         public string? IncentivesType { get; set; }
 
-        public DateTime StartDateTimeUtc { get; set; }
+        public DateTime? StartDateTimeUtc { get; set; }
 
-        public DateTime EndDateTimeUtc { get; set; }
+        public DateTime? EndDateTimeUtc { get; set; }
 
         public ICollection<TenantProgram> TenantsPrograms { get; set; } = new HashSet<TenantProgram>();
 

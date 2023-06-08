@@ -32,7 +32,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
             {
                 result.Date.Should().Be(date);
                 result.FullName.Should().Be("Test");
-                result.Message.Should().Be("User has been assigned to the following role(s): Admin");
+                result.Message.Should().Be("User assigned to the following role(s): Admin");
             };
 
         }

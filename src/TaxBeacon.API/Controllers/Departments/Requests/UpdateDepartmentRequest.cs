@@ -1,8 +1,9 @@
 using FluentValidation;
+using TaxBeacon.Common.Services;
 
 namespace TaxBeacon.API.Controllers.Departments.Requests;
 
-public record UpdateDepartmentRequest(string Name, string Description);
+public record UpdateDepartmentRequest(string Name, string Description, Guid? DivisionId, IEnumerable<Guid>? ServiceAreasIds, IEnumerable<Guid>? JobTitlesIds);
 
 public class UpdateDepartmentRequestValidator: AbstractValidator<UpdateDepartmentRequest>
 {

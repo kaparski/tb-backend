@@ -10,6 +10,8 @@ using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Services.Tenants;
+using TaxBeacon.UserManagement.Services.Tenants.Models;
 
 namespace TaxBeacon.API.Controllers.Tenants;
 
@@ -52,11 +54,9 @@ public class TenantsController: BaseController
             return BadRequest();
         }
 
-        var tenantsOneOf = await _tenantService.GetTenantsAsync(query, cancellationToken);
-        return tenantsOneOf.Match<IActionResult>(
-            tenants => Ok(new QueryablePaging<TenantResponse>(tenants.Count,
-                tenants.Query.ProjectToType<TenantResponse>())),
-            notFound => NotFound());
+        var tenants = await _tenantService.GetTenantsAsync(query, cancellationToken);
+        return Ok(new QueryablePaging<TenantResponse>(tenants.Count,
+            tenants.Query.ProjectToType<TenantResponse>()));
     }
 
     /// <summary>
@@ -186,5 +186,79 @@ public class TenantsController: BaseController
         }
 
         return Ok();
+    }
+
+    /// <summary>
+    /// Activate/Deactivate divisions from tenant
+    /// </summary>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Tenant is not found</response>
+    [HasPermissions(Common.Permissions.Divisions.Activation)]
+    [HttpPatch("toggle-divisions", Name = "ToggleDivisions")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ToggleDivisionsAsync([FromQuery] bool enable, CancellationToken cancellationToken)
+    {
+        var resultOneOf =
+            await _tenantService.ToggleDivisionsAsync(enable, cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            _ => Ok(),
+            _ => NotFound());
+    }
+
+    /// <summary>
+    /// Get assigned tenant programs
+    /// </summary>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Tenant is not found</response>
+    [HasPermissions(
+        Common.Permissions.Tenants.Read,
+        Common.Permissions.Tenants.ReadWrite,
+        Common.Permissions.Tenants.ReadExport)]
+    [HttpGet("{id:guid}/programs", Name = "GetAssignedPrograms")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(List<AssignedTenantProgramResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAssignedProgramsAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var changeProgramsResult = await _tenantService.GetTenantProgramsAsync(id, cancellationToken);
+
+        return changeProgramsResult.Match<IActionResult>(
+            programs => Ok(programs.Adapt<List<AssignedTenantProgramResponse>>()),
+            _ => NotFound());
+    }
+
+    /// <summary>
+    /// Change tenant programs
+    /// </summary>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Tenant is not found</response>
+    [HasPermissions(Common.Permissions.Tenants.ReadWrite)]
+    [HttpPost("{id:guid}/programs", Name = "ChangePrograms")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ChangeProgramsAsync([FromRoute] Guid id,
+        [FromBody] ChangeTenantProgramsRequest changeTenantProgramsRequest,
+        CancellationToken cancellationToken)
+    {
+        var changeProgramsResult =
+            await _tenantService.ChangeTenantProgramsAsync(id, changeTenantProgramsRequest.ProgramsIds,
+                cancellationToken);
+
+        return changeProgramsResult.Match<IActionResult>(
+            _ => Ok(),
+            _ => NotFound());
     }
 }

@@ -2,11 +2,11 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Gridify;
-using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
@@ -15,7 +15,6 @@ using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Models.MappingConfigs;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Divisions
@@ -38,7 +37,6 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
                     }
                 }
             };
-            TypeAdapterConfig.GlobalSettings.Scan(typeof(DivisionMappingConfig).Assembly);
         }
         [Fact]
         public async Task GetDivisionsList_ValidQuery_ReturnSuccessStatusCode()
@@ -243,16 +241,40 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
         }
 
         [Fact]
-        public async Task GetDivisionUsers_DivisionDoesNotExist_ShouldReturnNotFoundStatusCode()
+        public async Task GetDivisionDepartmentsAsync_DivisionExists_ShouldReturnSuccessfulStatusCode()
         {
             // Arrange
-            var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
             _divisionsServiceMock
-                .Setup(x => x.GetDivisionUsersAsync(It.IsAny<Guid>(), query, default))
+                .Setup(p => p.GetDivisionDepartmentsAsync(It.IsAny<Guid>(), default))
+                .ReturnsAsync(new DivisionDepartmentDto[] { });
+
+            // Act
+            var actualResponse = await _controller
+                .GetDivisionDepartmentsAsync(Guid.NewGuid(), default);
+
+            // Arrange
+            using (new AssertionScope())
+            {
+                var actualResult = actualResponse as OkObjectResult;
+                actualResponse.Should().NotBeNull();
+                actualResult.Should().NotBeNull();
+                actualResponse.Should().BeOfType<OkObjectResult>();
+                actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+                actualResult?.Value.Should().BeOfType<DivisionDepartmentResponse[]>();
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionDepartmentsAsync_DivisionDoesNotExist_ShouldReturnNotFoundStatusCode()
+        {
+            // Arrange
+            _divisionsServiceMock
+                .Setup(p => p.GetDivisionDepartmentsAsync(It.IsAny<Guid>(), default))
                 .ReturnsAsync(new NotFound());
 
             // Act
-            var actualResponse = await _controller.GetDivisionUsers(query, Guid.NewGuid(), default);
+            var actualResponse = await _controller
+                .GetDivisionDepartmentsAsync(Guid.NewGuid(), default);
 
             // Assert
             using (new AssertionScope())
@@ -334,6 +356,7 @@ namespace TaxBeacon.API.UnitTests.Controllers.Divisions
             }
         }
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static class TestData
         {
             public static readonly Faker<DivisionDto> DivisionFaker =

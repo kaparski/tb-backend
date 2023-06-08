@@ -14,5 +14,5 @@ public class AssignRolesEvent: UserEventBase
 
     public string AssignedRoles { get; set; }
 
-    public override string ToString() => $"User has been assigned to the following role(s): {AssignedRoles}";
+    public override string ToString() => $"User assigned to the following role(s): {AssignedRoles}";
 }

@@ -10,6 +10,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -48,13 +49,10 @@ namespace TaxBeacon.UserManagement.Services
                                          ?? ImmutableDictionary<(DivisionEventType, uint), IDivisionActivityFactory>.Empty;
         }
 
-        public async Task<OneOf<QueryablePaging<DivisionDto>, NotFound>> GetDivisionsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-        {
-            var tenantId = _currentUserService.TenantId;
-            var divisions = await _context
+        public async Task<QueryablePaging<DivisionDto>> GetDivisionsAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default) => await _context
                 .Divisions
-                .Where(div => div.TenantId == tenantId)
+                .Where(div => div.TenantId == _currentUserService.TenantId)
                 .Select(div => new DivisionDto
                 {
                     Id = div.Id,
@@ -69,14 +67,6 @@ namespace TaxBeacon.UserManagement.Services
                     .FirstOrDefault() ?? string.Empty
                 })
                 .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-            if (gridifyQuery.Page == 1 || divisions.Query.Any())
-            {
-                return divisions;
-            }
-
-            return new NotFound();
-        }
 
         public async Task<byte[]> ExportDivisionsAsync(FileType fileType,
         CancellationToken cancellationToken)
@@ -140,21 +130,22 @@ namespace TaxBeacon.UserManagement.Services
                 activities.Select(x => _divisionActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
         }
 
-        public async Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId, CancellationToken cancellationToken = default)
+        public async Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId,
+            CancellationToken cancellationToken = default)
         {
-            var division = await _context
-                .Divisions
-                .Include(x => x.Departments.OrderBy(dep => dep.Name))
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == divisionId, cancellationToken);
+            var divisionDetails = await _context
+               .Divisions
+               .Include(x => x.Departments.OrderBy(dep => dep.Name))
+               .Where(x => x.TenantId == _currentUserService.TenantId && x.Id == divisionId)
+               .ProjectToType<DivisionDetailsDto>()
+               .AsNoTracking()
+               .FirstOrDefaultAsync(cancellationToken);
 
-            return division is null
-                ? new NotFound()
-                : division.Adapt<DivisionDetailsDto>();
+            return divisionDetails is null ? new NotFound() : divisionDetails;
         }
 
-        public async Task<OneOf<DivisionDetailsDto, NotFound>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto,
-        CancellationToken cancellationToken = default)
+        public async Task<OneOf<DivisionDetailsDto, NotFound, InvalidOperation>> UpdateDivisionAsync(Guid id,
+            UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default)
         {
             var division = await _context.Divisions.Include(d => d.Departments).FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
@@ -163,32 +154,44 @@ namespace TaxBeacon.UserManagement.Services
                 return new NotFound();
             }
 
-            var isUpdateBlocked = await _context.Departments
-                .Where(d => updateDivisionDto.DepartmentIds.Contains(d.Id)
-                    && d.DivisionId != null
-                    && d.DivisionId != division.Id)
-                .AnyAsync();
+            var currentDepsIds = division.Departments.Select(dep => dep.Id).ToList();
 
-            if (isUpdateBlocked)
+            if (updateDivisionDto.DepartmentIds != null)
             {
-                return new NotFound();
+                var alreadyAssignedDepartments = await _context.Departments
+                    .Where(d => updateDivisionDto.DepartmentIds.Contains(d.Id)
+                        && d.DivisionId != null
+                        && d.DivisionId != division.Id
+                        && d.TenantId == _currentUserService.TenantId)
+                    .Select(d => d.Name)
+                    .ToListAsync(cancellationToken);
+
+                if (alreadyAssignedDepartments.Any())
+                {
+                    return new InvalidOperation($"Department(s) {string.Join(", ", alreadyAssignedDepartments)} have been assigned to another division");
+                }
+
+                // Removes association with departments
+                await _context.Departments
+                    .Where(dep => currentDepsIds.Except(updateDivisionDto.DepartmentIds).Contains(dep.Id))
+                    .ForEachAsync(dep => dep.DivisionId = null, cancellationToken);
+
+                // Set up association with freshly added departments
+                await _context.Departments
+                    .Where(dep => updateDivisionDto.DepartmentIds.Except(currentDepsIds).Contains(dep.Id))
+                    .ForEachAsync(dep => dep.DivisionId = id, cancellationToken);
+            }
+            else
+            {
+                // Removes association with departments
+                await _context.Departments
+                    .Where(dep => dep.DivisionId == id && dep.TenantId == _currentUserService.TenantId)
+                    .ForEachAsync(dep => dep.DivisionId = null, cancellationToken);
             }
 
             var previousValues = JsonSerializer.Serialize(division.Adapt<UpdateDivisionDto>());
             var userInfo = _currentUserService.UserInfo;
             var eventDateTime = _dateTimeService.UtcNow;
-
-            var currentDepsIds = division.Departments.Select(dep => dep.Id).ToList();
-
-            // Removes association with departments
-            await _context.Departments
-                .Where(dep => currentDepsIds.Except(updateDivisionDto.DepartmentIds).Contains(dep.Id))
-                .ForEachAsync(dep => dep.DivisionId = null);
-
-            // Set up association with freshly added departments
-            await _context.Departments
-                .Where(dep => updateDivisionDto.DepartmentIds.Except(currentDepsIds).Contains(dep.Id))
-                .ForEachAsync(dep => dep.DivisionId = id);
 
             await _context.DivisionActivityLogs.AddAsync(new DivisionActivityLog
             {
@@ -206,7 +209,8 @@ namespace TaxBeacon.UserManagement.Services
                     JsonSerializer.Serialize(updateDivisionDto)))
             }, cancellationToken);
 
-            updateDivisionDto.Adapt(division);
+            division.Name = updateDivisionDto.Name;
+            division.Description = updateDivisionDto.Description;
 
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -215,10 +219,25 @@ namespace TaxBeacon.UserManagement.Services
                 id,
                 _currentUserService.UserId);
 
-            return await GetDivisionDetailsAsync(id, cancellationToken);
+            return (await GetDivisionDetailsAsync(id, cancellationToken)).AsT0;
         }
 
-        public async Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
+        public async Task<OneOf<DivisionDepartmentDto[], NotFound>> GetDivisionDepartmentsAsync(Guid id,
+            CancellationToken cancellationToken = default)
+        {
+            var department = await _context.Divisions.SingleOrDefaultAsync(
+                t => t.Id == id && t.TenantId == _currentUserService.TenantId, cancellationToken);
+
+            return department is null
+                ? new NotFound()
+                : await _context.Departments
+                    .Where(sa => sa.DivisionId == id)
+                    .ProjectToType<DivisionDepartmentDto>()
+                    .ToArrayAsync(cancellationToken);
+        }
+
+        public async Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId,
+            GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
         {
             var tenantId = _currentUserService.TenantId;
 
@@ -233,7 +252,14 @@ namespace TaxBeacon.UserManagement.Services
             var users = await _context
                 .Users
                 .Where(u => u.DivisionId == divisionId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
-                .ProjectToType<DivisionUserDto>()
+                .Select(u => new DivisionUserDto()
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FullName = u.FullName,
+                    Department = u.Department == null ? string.Empty : u.Department.Name,
+                    JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
+                })
                 .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
             return users;

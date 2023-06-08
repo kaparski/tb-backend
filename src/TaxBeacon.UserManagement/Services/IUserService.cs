@@ -13,6 +13,8 @@ public interface IUserService
     Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 
+    IQueryable<UserDto> QueryUsers();
+
     Task<OneOf<LoginUserDto, NotFound>> LoginAsync(MailAddress mailAddress,
         CancellationToken cancellationToken = default);
 
@@ -26,8 +28,8 @@ public interface IUserService
         Status status,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<UserDto, EmailAlreadyExists>> CreateUserAsync(
-        UserDto user,
+    Task<OneOf<UserDto, EmailAlreadyExists, InvalidOperation>> CreateUserAsync(
+        CreateUserDto user,
         CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportUsersAsync(FileType fileType, CancellationToken cancellationToken = default);
@@ -36,7 +38,7 @@ public interface IUserService
         Guid[] roleIds,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<UserDto, NotFound>> UpdateUserByIdAsync(Guid userId,
+    Task<OneOf<UserDto, NotFound, InvalidOperation>> UpdateUserByIdAsync(Guid userId,
         UpdateUserDto updateUserDto,
         CancellationToken cancellationToken = default);
 

@@ -20,5 +20,8 @@
 
         public ICollection<ServiceAreaActivityLog> ServiceAreaActivityLogs { get; set; } =
             new HashSet<ServiceAreaActivityLog>();
+
+        public ICollection<ServiceAreaTenantProgram> ServiceAreaTenantPrograms { get; set; } =
+            new HashSet<ServiceAreaTenantProgram>();
     }
 }

@@ -20,15 +20,33 @@ public class UserResponse
 
     public string Email { get; set; } = null!;
 
-    public string Roles { get; set; } = null!;
+    public string? Roles { get; set; }
 
-    public string Department { get; set; } = null!;
+    public Guid? DepartmentId { get; set; }
 
-    public string JobTitle { get; set; } = null!;
+    public string? Department { get; set; }
 
     public string FullName { get; set; } = null!;
 
     public DateTime? DeactivationDateTimeUtc { get; set; }
 
     public DateTime? ReactivationDateTimeUtc { get; set; }
+
+    public Guid? DivisionId { get; set; }
+
+    public string? Division { get; set; }
+
+    public Guid? JobTitleId { get; set; }
+
+    public string? JobTitle { get; set; }
+
+    public Guid? ServiceAreaId { get; set; }
+
+    public string? ServiceArea { get; set; }
+
+    public Guid? TeamId { get; set; }
+
+    public string? Team { get; set; }
+
+    public IEnumerable<Guid>? RoleIds { get; set; }
 }

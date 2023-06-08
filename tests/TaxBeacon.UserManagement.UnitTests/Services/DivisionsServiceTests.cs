@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
@@ -16,7 +17,6 @@ using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
-using TaxBeacon.UserManagement.Services.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services
 {
@@ -36,7 +36,7 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
         private readonly Mock<IEnumerable<IDivisionActivityFactory>> _activityFactories;
 
         private readonly User _currentUser = TestData.TestUser.Generate();
-        public static readonly Guid TenantId = Guid.NewGuid();
+        private static readonly Guid TenantId = Guid.NewGuid();
         public DivisionsServiceTests()
         {
             _entitySaveChangesInterceptorMock = new();
@@ -116,12 +116,11 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
+            var pageOfDivisions = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
             {
-                divisionsOneOf.TryPickT0(out var pageOfDivisions, out _);
                 pageOfDivisions.Should().NotBeNull();
                 var listOfDivisions = pageOfDivisions.Query.ToList();
                 listOfDivisions.Count.Should().Be(5);
@@ -145,12 +144,11 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
+            var pageOfDivisions = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
             {
-                divisionsOneOf.TryPickT0(out var pageOfDivisions, out _);
                 pageOfDivisions.Should().NotBeNull();
                 var listOfDivisions = pageOfDivisions.Query.ToList();
                 listOfDivisions.Count.Should().Be(4);
@@ -171,12 +169,11 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
+            var pageOfDivisions = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
             using (new AssertionScope())
             {
-                divisionsOneOf.TryPickT0(out var pageOfDivisions, out _);
                 pageOfDivisions.Should().NotBeNull();
                 var listOfDivisions = pageOfDivisions.Query.ToList();
                 listOfDivisions.Count.Should().Be(0);
@@ -201,11 +198,10 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             };
 
             // Act
-            var divisionsOneOf = await _divisionsService.GetDivisionsAsync(query, default);
+            var pageOfDivisions = await _divisionsService.GetDivisionsAsync(query, default);
 
             // Assert
-            divisionsOneOf.TryPickT0(out var pageOfDivisions, out _);
-            pageOfDivisions.Should().BeNull();
+            pageOfDivisions.Query.Count().Should().Be(0);
         }
 
         [Theory]
@@ -483,6 +479,70 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             }
         }
 
+        [Fact]
+        public async Task GetDivisionDepartmentsAsync_DivisionExists_ShouldReturnDivisionDepartments()
+        {
+            //Arrange
+            var division = TestData.TestDivision.Generate();
+            division.TenantId = TenantId;
+            var departments = TestData.TestDepartment.Generate(5);
+            division.Departments = departments;
+            await _dbContextMock.Divisions.AddRangeAsync(division);
+            await _dbContextMock.SaveChangesAsync();
+
+            //Act
+            var resultOneOf = await _divisionsService.GetDivisionDepartmentsAsync(division.Id);
+
+            //Assert
+            using (new AssertionScope())
+            {
+                resultOneOf.TryPickT0(out var divisionDepartmentDtos, out _).Should().BeTrue();
+                divisionDepartmentDtos.Should().AllBeOfType<DivisionDepartmentDto>();
+                divisionDepartmentDtos.Length.Should().Be(5);
+            }
+        }
+
+        [Fact]
+        public async Task GetDivisionDepartmentsAsync_DivisionDoesNotExist_ShouldReturnNotFound()
+        {
+            //Arrange
+            var division = TestData.TestDivision.Generate();
+            division.TenantId = TenantId;
+            var departments = TestData.TestDepartment.Generate(5);
+            division.Departments = departments;
+            await _dbContextMock.Divisions.AddRangeAsync(division);
+            await _dbContextMock.SaveChangesAsync();
+
+            //Act
+            var resultOneOf = await _divisionsService.GetDivisionDepartmentsAsync(Guid.NewGuid());
+
+            //Assert
+            resultOneOf.IsT0.Should().BeFalse();
+            resultOneOf.IsT1.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GetDivisionDepartmentsAsync_UserIsFromDifferentTenant_ShouldReturnNotFound()
+        {
+            //Arrange
+            var division = TestData.TestDivision.Generate();
+            division.TenantId = TenantId;
+            var departments = TestData.TestDepartment.Generate(5);
+            division.Departments = departments;
+            await _dbContextMock.Divisions.AddRangeAsync(division);
+            await _dbContextMock.SaveChangesAsync();
+
+            _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
+
+            //Act
+            var resultOneOf = await _divisionsService.GetDivisionDepartmentsAsync(division.Id);
+
+            //Assert
+            resultOneOf.IsT0.Should().BeFalse();
+            resultOneOf.IsT1.Should().BeTrue();
+        }
+
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static class TestData
         {
             public static readonly Faker<User> TestUser =

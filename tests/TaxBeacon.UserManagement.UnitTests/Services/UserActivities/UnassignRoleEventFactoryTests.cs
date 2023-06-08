@@ -32,7 +32,7 @@ public class UnassignRoleEventFactoryTests
         {
             result.Date.Should().Be(date);
             result.FullName.Should().Be("Test Full Name");
-            result.Message.Should().Be("User has been unassigned from the following role(s): Admin");
+            result.Message.Should().Be("User unassigned from the following role(s): Admin");
         };
 
     }

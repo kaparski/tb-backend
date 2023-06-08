@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
@@ -84,28 +85,6 @@ public class JobTitlesControllerTest
             actualResult.Should().NotBeNull();
             actualResponse.Should().BeOfType<BadRequestResult>();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
-    }
-
-    [Fact]
-    public async Task GetJobTitleList_TenantIdDoesNotExist_ReturnNotFoundStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _jobTitleServiceMock.Setup(p => p.GetJobTitlesAsync(query, default))
-            .ReturnsAsync(new NotFound());
-
-        // Act
-        var actualResponse = await _controller.GetJobTitleList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as NotFoundResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<NotFoundResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }
     }
 
@@ -372,6 +351,7 @@ public class JobTitlesControllerTest
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Faker<JobTitleDetailsDto> TestJobTitleDetailsDto =

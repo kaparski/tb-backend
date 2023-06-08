@@ -6,16 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.ServiceAreas;
 using TaxBeacon.API.Controllers.ServiceAreas.Requests;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
-using TaxBeacon.API.Controllers.Tenants.Requests;
-using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -87,28 +85,6 @@ public class ServiceAreasControllerTest
             actualResult.Should().NotBeNull();
             actualResponse.Should().BeOfType<BadRequestResult>();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
-    }
-
-    [Fact]
-    public async Task GetServiceAreaList_TenantIdDoesNotExist_ReturnNotFoundStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _serviceAreaServiceMock.Setup(p => p.GetServiceAreasAsync(query, default))
-            .ReturnsAsync(new NotFound());
-
-        // Act
-        var actualResponse = await _controller.GetServiceAreaList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as NotFoundResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<NotFoundResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }
     }
 
@@ -375,6 +351,7 @@ public class ServiceAreasControllerTest
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Faker<ServiceAreaDetailsDto> TestServiceAreaDetailsDto =

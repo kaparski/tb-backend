@@ -50,10 +50,9 @@ public class ServiceAreaService: IServiceAreaService
                             ?? ImmutableDictionary<(ServiceAreaEventType, uint), IServiceAreaActivityFactory>.Empty;
     }
 
-    public async Task<OneOf<QueryablePaging<ServiceAreaDto>, NotFound>> GetServiceAreasAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var serviceAreas = await _context
+    public async Task<QueryablePaging<ServiceAreaDto>> GetServiceAreasAsync(GridifyQuery gridifyQuery,
+        CancellationToken cancellationToken = default) =>
+        await _context
             .ServiceAreas
             .Where(d => d.TenantId == _currentUserService.TenantId)
             .Select(d => new ServiceAreaDto()
@@ -66,14 +65,6 @@ public class ServiceAreaService: IServiceAreaService
                 Department = d.Department == null ? string.Empty : d.Department.Name
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        if (gridifyQuery.Page == 1 || serviceAreas.Query.Any())
-        {
-            return serviceAreas;
-        }
-
-        return new NotFound();
-    }
 
     public async Task<byte[]> ExportServiceAreasAsync(FileType fileType,
         CancellationToken cancellationToken)

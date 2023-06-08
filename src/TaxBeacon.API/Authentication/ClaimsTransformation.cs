@@ -60,6 +60,11 @@ namespace TaxBeacon.API.Authentication
                 claimsIdentity.AddClaim(new Claim(Claims.FullName, userInfo.FullName));
             }
 
+            if (!principal.HasClaim(claim => claim.Type == Claims.DivisionEnabled))
+            {
+                claimsIdentity.AddClaim(new Claim(Claims.DivisionEnabled, userInfo.DivisionEnabled.ToString()));
+            }
+
             principal.AddIdentity(claimsIdentity);
             return principal;
         }

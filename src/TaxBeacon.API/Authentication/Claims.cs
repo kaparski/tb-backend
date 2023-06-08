@@ -9,5 +9,6 @@
         public const string Roles = "roles";
         public const string TenantRoles = "tenantRoles";
         public const string FullName = "fullName";
+        public const string DivisionEnabled = "divisionEnabled";
     }
 }

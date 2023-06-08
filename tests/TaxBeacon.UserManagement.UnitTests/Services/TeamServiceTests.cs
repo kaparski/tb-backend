@@ -5,6 +5,7 @@ using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
@@ -107,12 +108,11 @@ public class TeamServiceTests
         };
 
         // Act
-        var teamsOneOf = await _teamService.GetTeamsAsync(query, default);
+        var pageOfTeams = await _teamService.GetTeamsAsync(query, default);
 
         // Assert
         using (new AssertionScope())
         {
-            teamsOneOf.TryPickT0(out var pageOfTeams, out _);
             pageOfTeams.Should().NotBeNull();
             var listOfTeams = pageOfTeams.Query.ToList();
             listOfTeams.Count.Should().Be(5);
@@ -136,12 +136,11 @@ public class TeamServiceTests
         };
 
         // Act
-        var teamsOneOf = await _teamService.GetTeamsAsync(query, default);
+        var pageOfTeams = await _teamService.GetTeamsAsync(query, default);
 
         // Assert
         using (new AssertionScope())
         {
-            teamsOneOf.TryPickT0(out var pageOfTeams, out _);
             pageOfTeams.Should().NotBeNull();
             var listOfTeams = pageOfTeams.Query.ToList();
             listOfTeams.Count.Should().Be(4);
@@ -162,12 +161,11 @@ public class TeamServiceTests
         };
 
         // Act
-        var teamsOneOf = await _teamService.GetTeamsAsync(query, default);
+        var pageOfTeams = await _teamService.GetTeamsAsync(query, default);
 
         // Assert
         using (new AssertionScope())
         {
-            teamsOneOf.TryPickT0(out var pageOfTeams, out _);
             pageOfTeams.Should().NotBeNull();
             var listOfTeams = pageOfTeams.Query.ToList();
             listOfTeams.Count.Should().Be(0);
@@ -192,11 +190,10 @@ public class TeamServiceTests
         };
 
         // Act
-        var teamsOneOf = await _teamService.GetTeamsAsync(query, default);
+        var pageOfTeams = await _teamService.GetTeamsAsync(query, default);
 
         // Assert
-        teamsOneOf.TryPickT0(out var pageOfTeams, out _);
-        pageOfTeams.Should().BeNull();
+        pageOfTeams.Query.Count().Should().Be(0);
     }
 
     [Theory]
@@ -559,6 +556,7 @@ public class TeamServiceTests
         resultOneOf.IsT1.Should().BeTrue();
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Faker<User> TestUser =

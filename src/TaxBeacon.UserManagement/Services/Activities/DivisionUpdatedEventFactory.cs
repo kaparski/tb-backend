@@ -2,7 +2,6 @@
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities;
-using TaxBeacon.UserManagement.Models.Activities.Tenant;
 
 namespace TaxBeacon.UserManagement.Services.Activities
 {

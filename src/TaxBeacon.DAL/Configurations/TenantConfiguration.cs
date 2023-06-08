@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaxBeacon.DAL.Entities;
 
 namespace TaxBeacon.DAL.Configurations;
 
@@ -31,5 +30,9 @@ public class TenantConfiguration: IEntityTypeConfiguration<Tenant>
             .HasConversion<string>()
             .HasColumnType("nvarchar")
             .HasMaxLength(100);
+
+        tenant
+            .Property(t => t.DivisionEnabled)
+            .HasDefaultValue(true);
     }
 }

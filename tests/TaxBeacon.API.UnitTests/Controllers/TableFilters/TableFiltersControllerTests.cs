@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.API.Controllers.TableFilters;
 using TaxBeacon.API.Controllers.TableFilters.Requests;
 using TaxBeacon.API.Controllers.TableFilters.Responses;
@@ -164,6 +165,7 @@ public class TableFiltersControllerTests
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Faker<TableFilterDto> TableFilterDtoFaker =

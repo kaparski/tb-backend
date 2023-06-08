@@ -6,11 +6,11 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
@@ -98,10 +98,9 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "name asc" };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
+        var pageOfDepartments = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
-        itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
         pageOfDepartments.Should().NotBeNull();
         var listOfDepartments = pageOfDepartments.Query.ToList();
         listOfDepartments.Count.Should().Be(5);
@@ -119,12 +118,11 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "name desc" };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
+        var pageOfDepartments = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
         using (new AssertionScope())
         {
-            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
             pageOfDepartments.Should().NotBeNull();
             var listOfDepartments = pageOfDepartments.Query.ToList();
             listOfDepartments.Count.Should().Be(4);
@@ -140,12 +138,11 @@ public class DepartmentServiceTests
         var query = new GridifyQuery { Page = 1, PageSize = 123, OrderBy = "name desc" };
 
         // Act
-        var itemsOneOf = await _departmentService.GetDepartmentsAsync(query, default);
+        var pageOfDepartments = await _departmentService.GetDepartmentsAsync(query, default);
 
         // Assert
         using (new AssertionScope())
         {
-            itemsOneOf.TryPickT0(out var pageOfDepartments, out _);
             pageOfDepartments.Should().NotBeNull();
             var listOfDepartments = pageOfDepartments.Query.ToList();
             listOfDepartments.Count.Should().Be(0);
@@ -168,8 +165,7 @@ public class DepartmentServiceTests
         // Assert
         using (new AssertionScope())
         {
-            actualResult.IsT0.Should().BeFalse();
-            actualResult.IsT1.Should().BeTrue();
+            actualResult.Query.Count().Should().Be(0);
         }
     }
 
@@ -188,8 +184,7 @@ public class DepartmentServiceTests
         // Assert
         using (new AssertionScope())
         {
-            actualResult.IsT0.Should().BeFalse();
-            actualResult.IsT1.Should().BeTrue();
+            actualResult.Query.Count().Should().Be(0);
         }
     }
 
@@ -215,6 +210,36 @@ public class DepartmentServiceTests
         else if (fileType == FileType.Xlsx)
         {
             _xlsxMock.Verify(x => x.Convert(It.IsAny<List<DepartmentExportModel>>()), Times.Once());
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportDepartmentsAsync_ValidInputDataWithDivision_AppropriateConverterShouldBeCalled(FileType fileType)
+    {
+        //Arrange
+        var departments = TestData.TestDepartment.Generate(5);
+
+        await _dbContextMock.Departments.AddRangeAsync(departments);
+        await _dbContextMock.SaveChangesAsync();
+        _currentUserServiceMock.Setup(x => x.DivisionEnabled).Returns(true);
+
+        //Act
+        _ = await _departmentService.ExportDepartmentsAsync(fileType, default);
+
+        //Assert
+        if (fileType == FileType.Csv)
+        {
+            _csvMock.Verify(x => x.Convert(It.IsAny<List<DepartmentWithDivisionExportModel>>()), Times.Once());
+        }
+        else if (fileType == FileType.Xlsx)
+        {
+            _xlsxMock.Verify(x => x.Convert(It.IsAny<List<DepartmentWithDivisionExportModel>>()), Times.Once());
         }
         else
         {
@@ -308,8 +333,8 @@ public class DepartmentServiceTests
         // Arrange
         var department = TestData.TestDepartment.Generate();
 
-        var serviceAreas = TestData.TestServiceArea.Generate(3);
-        serviceAreas.ForEach(department.ServiceAreas.Add);
+        var jobTitles = TestData.TestJobTitle.Generate(3);
+        jobTitles.ForEach(department.JobTitles.Add);
 
         var division = TestData.TestDivision.Generate();
         department.Division = division;
@@ -328,9 +353,10 @@ public class DepartmentServiceTests
             departmentDetailsResult.Id.Should().Be(department.Id);
             departmentDetailsResult.Name.Should().Be(department.Name);
             departmentDetailsResult.Description.Should().Be(department.Description);
-            departmentDetailsResult.DivisionId.Should().Be(division.Id);
-            departmentDetailsResult.Division.Should().Be(division.Name);
-            departmentDetailsResult.ServiceAreas.Count.Should().Be(serviceAreas.Count);
+            departmentDetailsResult.Division.Id.Should().Be(division.Id);
+            departmentDetailsResult.Division.Name.Should().Be(division.Name);
+            departmentDetailsResult.ServiceAreas.Should().BeEmpty();
+            departmentDetailsResult.JobTitles.Count.Should().Be(jobTitles.Count);
         }
     }
 
@@ -339,6 +365,13 @@ public class DepartmentServiceTests
     {
         // Arrange
         var department = TestData.TestDepartment.Generate();
+
+        var serviceAreas = TestData.TestServiceArea.Generate(3);
+        serviceAreas.ForEach(department.ServiceAreas.Add);
+
+        var jobTitles = TestData.TestJobTitle.Generate(3);
+        jobTitles.ForEach(department.JobTitles.Add);
+
         await _dbContextMock.Departments.AddAsync(department);
         await _dbContextMock.SaveChangesAsync();
 
@@ -353,8 +386,9 @@ public class DepartmentServiceTests
             departmentDetailsResult.Id.Should().Be(department.Id);
             departmentDetailsResult.Name.Should().Be(department.Name);
             departmentDetailsResult.Description.Should().Be(department.Description);
-            departmentDetailsResult.Division.Should().BeEmpty();
-            departmentDetailsResult.ServiceAreas.Should().BeEmpty();
+            departmentDetailsResult.Division.Should().BeNull();
+            departmentDetailsResult.ServiceAreas.Count().Should().Be(serviceAreas.Count);
+            departmentDetailsResult.JobTitles.Count().Should().Be(jobTitles.Count);
         }
     }
 
@@ -528,6 +562,133 @@ public class DepartmentServiceTests
         resultOneOf.IsT1.Should().BeTrue();
     }
 
+    [Fact]
+    public async Task GetDepartmentServiceAreasAsync_DepartmentExists_ShouldReturnDepartmentServiceAreas()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var serviceAreas = TestData.TestServiceArea.Generate(5);
+        department.ServiceAreas = serviceAreas;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentServiceAreasAsync(department.Id);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            resultOneOf.TryPickT0(out var serviceAreaDtos, out _).Should().BeTrue();
+            serviceAreaDtos.Should().AllBeOfType<DepartmentServiceAreaDto>();
+            serviceAreaDtos.Length.Should().Be(5);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentServiceAreasAsync_DepartmentDoesNotExist_ShouldReturnNotFound()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var serviceAreas = TestData.TestServiceArea.Generate(5);
+        department.ServiceAreas = serviceAreas;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentServiceAreasAsync(Guid.NewGuid());
+
+        //Assert
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetDepartmentServiceAreasAsync_UserIsFromDifferentTenant_ShouldReturnNotFound()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var serviceAreas = TestData.TestServiceArea.Generate(5);
+        department.ServiceAreas = serviceAreas;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentServiceAreasAsync(department.Id);
+
+        //Assert
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetDepartmentJobTitlesAsync_DepartmentExists_ShouldReturnDepartmentJobTitles()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var jobTitles = TestData.TestJobTitle.Generate(5);
+        department.JobTitles = jobTitles;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentJobTitlesAsync(department.Id);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            resultOneOf.TryPickT0(out var jobTitleDtos, out _).Should().BeTrue();
+            jobTitleDtos.Should().AllBeOfType<DepartmentJobTitleDto>();
+            jobTitleDtos.Length.Should().Be(5);
+        }
+    }
+
+    [Fact]
+    public async Task GetDepartmentJobTitlesAsync_DepartmentDoesNotExist_ShouldReturnNotFound()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var jobTitles = TestData.TestJobTitle.Generate(5);
+        department.JobTitles = jobTitles;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentJobTitlesAsync(Guid.NewGuid());
+
+        //Assert
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetDepartmentJobTitlesAsync_UserIsFromDifferentTenant_ShouldReturnNotFound()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var jobTitles = TestData.TestJobTitle.Generate(5);
+        department.JobTitles = jobTitles;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
+
+        //Act
+        var resultOneOf = await _departmentService.GetDepartmentJobTitlesAsync(department.Id);
+
+        //Assert
+        resultOneOf.IsT0.Should().BeFalse();
+        resultOneOf.IsT1.Should().BeTrue();
+    }
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();
@@ -563,15 +724,9 @@ public class DepartmentServiceTests
                 .RuleFor(u => u.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(u => u.Status, f => f.PickRandom<Status>())
                 .RuleFor(u => u.Team, f =>
-                    new Team
-                    {
-                        Name = f.Name.FirstName()
-                    })
+                    new Team { Name = f.Name.FirstName() })
                 .RuleFor(u => u.JobTitle, f =>
-                    new JobTitle
-                    {
-                        Name = f.Name.FirstName()
-                    });
+                    new JobTitle { Name = f.Name.FirstName() });
 
         public static readonly Faker<Division> TestDivision =
             new Faker<Division>()
@@ -583,6 +738,14 @@ public class DepartmentServiceTests
 
         public static readonly Faker<UpdateDepartmentDto> UpdateDepartmentDtoFaker =
             new Faker<UpdateDepartmentDto>()
-                .RuleFor(dto => dto.Name, f => f.Company.CompanyName());
+                .RuleFor(dto => dto.Name, f => f.Company.CompanyName())
+                .RuleFor(dto => dto.ServiceAreasIds, f => f.Make(3, Guid.NewGuid))
+                .RuleFor(dto => dto.JobTitlesIds, f => f.Make(3, Guid.NewGuid))
+                .RuleFor(dto => dto.DivisionId, Guid.NewGuid());
+
+        public static readonly Faker<JobTitle> TestJobTitle = new Faker<JobTitle>()
+            .RuleFor(jt => jt.Id, f => Guid.NewGuid())
+            .RuleFor(jt => jt.Name, f => f.Name.JobTitle())
+            .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
     }
 }

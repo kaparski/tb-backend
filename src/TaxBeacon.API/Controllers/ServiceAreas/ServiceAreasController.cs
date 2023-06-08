@@ -1,14 +1,12 @@
 ﻿using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.ServiceAreas.Requests;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.Common.Services;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 
@@ -46,7 +44,6 @@ public class ServiceAreasController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetServiceAreaList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -56,12 +53,10 @@ public class ServiceAreasController: BaseController
             return BadRequest();
         }
 
-        var serviceAreasOneOf = await _serviceAreaService.GetServiceAreasAsync(query, cancellationToken);
+        var serviceAreas = await _serviceAreaService.GetServiceAreasAsync(query, cancellationToken);
 
-        return serviceAreasOneOf.Match<IActionResult>(
-            serviceAreas => Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count,
-                serviceAreas.Query.ProjectToType<ServiceAreaResponse>())),
-            notFound => NotFound());
+        return Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count,
+            serviceAreas.Query.ProjectToType<ServiceAreaResponse>()));
     }
 
     /// <summary>

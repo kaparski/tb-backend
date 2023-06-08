@@ -44,7 +44,6 @@ public class JobTitlesController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetJobTitleList([FromQuery] GridifyQuery query,
         CancellationToken cancellationToken)
     {
@@ -54,12 +53,10 @@ public class JobTitlesController: BaseController
             return BadRequest();
         }
 
-        var jobTitlesOneOf = await _jobTitleService.GetJobTitlesAsync(query, cancellationToken);
+        var jobTitles = await _jobTitleService.GetJobTitlesAsync(query, cancellationToken);
 
-        return jobTitlesOneOf.Match<IActionResult>(
-            jobTitles => Ok(new QueryablePaging<JobTitleResponse>(jobTitles.Count,
-                jobTitles.Query.ProjectToType<JobTitleResponse>())),
-            notFound => NotFound());
+        return Ok(new QueryablePaging<JobTitleResponse>(jobTitles.Count,
+            jobTitles.Query.ProjectToType<JobTitleResponse>()));
     }
 
     /// <summary>
