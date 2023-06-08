@@ -1,4 +1,5 @@
 ﻿using TaxBeacon.Common.Enums;
+using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Entities;
 
@@ -52,4 +53,9 @@ public class User: BaseEntity
     public ICollection<TableFilter> TableFilters { get; set; } = new HashSet<TableFilter>();
 
     public ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
+
+    public ICollection<Referral> Referrals { get; set; } = new HashSet<Referral>();
+
+    public ICollection<Client> Clients { get; set; } = new HashSet<Client>();
+
 }
