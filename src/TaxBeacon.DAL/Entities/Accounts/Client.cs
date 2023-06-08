@@ -13,6 +13,8 @@ public class Client: BaseEntity
 
     public ClientState State { get; set; }
 
+    public bool IsEnabled { get; set; }
+
     public Guid? ManagerId { get; set; }
 
     public User? Manager { get; set; }
