@@ -28,14 +28,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.API.UnitTests", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migration-scripts", "{E149189A-4D39-48F3-9B5A-DBDA8D351B70}"
 	ProjectSection(SolutionItems) = preProject
-		migration-scripts\AddPermisionsToAdminRole.sql = migration-scripts\AddPermisionsToAdminRole.sql
-		migration-scripts\AddPermissionsToSuperAdminRole.sql = migration-scripts\AddPermissionsToSuperAdminRole.sql
-		migration-scripts\InsertPermissionsAndRoles.sql = migration-scripts\InsertPermissionsAndRoles.sql
+		InsertAccountManagerRoleWithPermissions.sql = InsertAccountManagerRoleWithPermissions.sql
+		InsertSalesOpsRoleWithPermissions.sql = InsertSalesOpsRoleWithPermissions.sql
+		InsertSalesRoleWithPermissions.sql = InsertSalesRoleWithPermissions.sql
 		migration-scripts\InsertSuperAdminRoleWithPermissions.sql = migration-scripts\InsertSuperAdminRoleWithPermissions.sql
+		migration-scripts\InsertAdminRoleWithPermissions.sql = migration-scripts\InsertAdminRoleWithPermissions.sql
 		migration-scripts\UsersView.sql = migration-scripts\UsersView.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Accounts", "TaxBeacon.Accounts\TaxBeacon.Accounts.csproj", "{B5D3EDE5-3410-4C66-940C-C2F31248C06B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Accounts", "TaxBeacon.Accounts\TaxBeacon.Accounts.csproj", "{B5D3EDE5-3410-4C66-940C-C2F31248C06B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
