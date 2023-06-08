@@ -13,7 +13,8 @@ public class ReferralConfiguration: IEntityTypeConfiguration<Referral>
         referral
             .HasOne(r => r.Tenant)
             .WithMany(t => t.Referrals)
-            .HasForeignKey(r => r.TenantId);
+            .HasForeignKey(r => r.TenantId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         referral
             .HasOne(r => r.Account)
