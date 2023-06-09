@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.API.Exceptions;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Controllers.Roles;
@@ -38,15 +39,16 @@ public class RoleAssignedUsersController: BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Get([FromRoute] Guid id)
     {
-        var getRoleResult = await _roleService.GetRoleByIdAsync(id);
-        if (!getRoleResult.TryPickT0(out var role, out var notFound))
+        try
+        {
+            var query = await _roleService.QueryRoleAssignedUsersAsync(id);
+
+            return Ok(query.ProjectToType<RoleAssignedUserResponse>());
+        }
+        catch (NotFoundException)
         {
             return NotFound();
         }
-
-        var query = await _roleService.QueryRoleAssignedUsersAsync(id);
-
-        return Ok(query.ProjectToType<RoleAssignedUserResponse>());
     }
 
     /// <summary>

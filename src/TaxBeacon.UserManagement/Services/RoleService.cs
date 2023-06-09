@@ -8,6 +8,7 @@ using OneOf.Types;
 using System.Text.Json;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -48,7 +49,7 @@ public class RoleService: IRoleService
         var getRoleResult = await GetRoleByIdAsync(roleId);
         if (!getRoleResult.TryPickT0(out var role, out var notFound))
         {
-            throw new ArgumentException(nameof(roleId));
+            throw new NotFoundException($"Role {roleId} not found");
         }
 
         var users = role.Type == SourceType.Tenant
