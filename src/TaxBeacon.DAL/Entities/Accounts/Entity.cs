@@ -20,7 +20,7 @@ public class Entity: BaseEntity
 
     public string? City { get; set; }
 
-    public string? State { get; set; }
+    public State State { get; set; }
 
     public EntityType Type { get; set; } = EntityType.None;
 

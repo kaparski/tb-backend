@@ -49,7 +49,8 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
         builder
             .Property(e => e.State)
             .HasColumnType("nvarchar")
-            .HasMaxLength(100);
+            .HasMaxLength(2)
+            .HasConversion<string>();
 
         builder
             .Property(e => e.Status)

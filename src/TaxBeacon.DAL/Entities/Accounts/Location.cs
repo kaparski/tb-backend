@@ -20,7 +20,7 @@ public class Location: BaseEntity
 
     public LocationType Type { get; set; }
 
-    public string? State { get; set; }
+    public State State { get; set; }
 
     public string? County { get; set; }
 

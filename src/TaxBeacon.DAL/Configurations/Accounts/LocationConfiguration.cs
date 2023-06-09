@@ -49,7 +49,8 @@ public class LocationConfiguration: IEntityTypeConfiguration<Location>
         builder
             .Property(l => l.State)
             .HasColumnType("nvarchar")
-            .HasMaxLength(100);
+            .HasMaxLength(2)
+            .HasConversion<string>();
 
         builder
             .Property(l => l.Status)
