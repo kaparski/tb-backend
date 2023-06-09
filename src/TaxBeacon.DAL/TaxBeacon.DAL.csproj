@@ -19,4 +19,8 @@
     <ProjectReference Include="..\TaxBeacon.Common\TaxBeacon.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views" />
+  </ItemGroup>
+
 </Project>
