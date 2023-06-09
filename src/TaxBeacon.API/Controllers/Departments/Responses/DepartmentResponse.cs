@@ -9,9 +9,13 @@ public class DepartmentResponse
 
     public string Description { get; set; } = null!;
 
-    public string Division { get; set; } = null!;
+    public Guid? DivisionId { get; set; }
 
-    public string ServiceArea { get; set; } = null!;
+    public string? Division { get; set; }
+
+    public string? ServiceArea { get; set; }
+
+    public IEnumerable<Guid>? ServiceAreaIds { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
 

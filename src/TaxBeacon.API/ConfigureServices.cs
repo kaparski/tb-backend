@@ -12,6 +12,12 @@ using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.JobTitles.Responses;
+using TaxBeacon.API.Controllers.Roles.Responses;
+using TaxBeacon.API.Controllers.ServiceAreas.Responses;
+using TaxBeacon.API.Controllers.Teams.Responses;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Extensions.SwaggerServices;
@@ -39,6 +45,10 @@ public static class ConfigureServices
                 .AddRouteComponents(
                     routePrefix: "api/odata",
                     model: GetODataEdmModel()
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/roles/{id}",
+                    model: GetODataEdmModelForRoleAssignedUsers()
                 )
             );
 
@@ -86,6 +96,29 @@ public static class ConfigureServices
 
         // EntitySet name here should match controller's name
         modelBuilder.EntitySet<UserResponse>("Users");
+        modelBuilder.EntitySet<DepartmentResponse>("Departments");
+        modelBuilder.EntitySet<DivisionResponse>("Divisions");
+        modelBuilder.EntitySet<TenantResponse>("Tenants");
+        modelBuilder.EntitySet<JobTitleResponse>("JobTitles");
+        modelBuilder.EntitySet<RoleResponse>("Roles");
+        modelBuilder.EntitySet<ServiceAreaResponse>("ServiceAreas");
+        modelBuilder.EntitySet<TeamResponse>("Teams");
+
+        modelBuilder.EnableLowerCamelCase();
+
+        return modelBuilder.GetEdmModel();
+    }
+
+    /// <summary>
+    /// Builds a dedicated EDM model for api/odata/roles/{id:guid}/roleassignedusers endpoint.
+    /// TODO: find a better way to make this custom routing work.
+    /// </summary>
+    /// <returns></returns>
+    private static IEdmModel GetODataEdmModelForRoleAssignedUsers()
+    {
+        var modelBuilder = new ODataConventionModelBuilder();
+
+        modelBuilder.EntitySet<RoleAssignedUserResponse>("RoleAssignedUsers");
 
         modelBuilder.EnableLowerCamelCase();
 

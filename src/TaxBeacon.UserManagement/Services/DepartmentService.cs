@@ -11,6 +11,7 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -48,6 +49,29 @@ public class DepartmentService: IDepartmentService
         _dateTimeFormatter = dateTimeFormatter;
         _activityFactories = activityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
                                    ?? ImmutableDictionary<(DepartmentEventType, uint), IDepartmentActivityFactory>.Empty;
+    }
+
+    public IQueryable<DepartmentDto> QueryDepartments()
+    {
+        var items = _context.Departments.Where(d => d.TenantId == _currentUserService.TenantId);
+
+        var itemDtos = items.GroupJoin(_context.ServiceAreas,
+            d => d.Id,
+            sa => sa.DepartmentId,
+            (d, serviceAreas) => new DepartmentDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+                AssignedUsersCount = d.Users.Count(),
+                DivisionId = d.DivisionId,
+                Division = d.Division == null ? null : d.Division.Name,
+                ServiceAreaIds = serviceAreas.Select(r => r.Id)
+            })
+        ;
+
+        return itemDtos;
     }
 
     public async Task<QueryablePaging<DepartmentDto>> GetDepartmentsAsync(GridifyQuery gridifyQuery,

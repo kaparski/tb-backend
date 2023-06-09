@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.ServiceAreas;
 using TaxBeacon.API.Controllers.ServiceAreas.Requests;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
@@ -339,6 +340,32 @@ public class ServiceAreasControllerTest
         // Arrange
         var methodInfo = ((Func<Guid, UpdateServiceAreaRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateServiceAreaAsync).Method;
         var permissions = new object[] { Common.Permissions.ServiceAreas.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public void Get_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<IQueryable<ServiceAreaResponse>>)_controller.Get).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Departments.Read,
+            Common.Permissions.Departments.ReadWrite,
+            Common.Permissions.Departments.ReadExport,
+            Common.Permissions.ServiceAreas.Read,
+            Common.Permissions.ServiceAreas.ReadWrite,
+            Common.Permissions.ServiceAreas.ReadExport
+        };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();

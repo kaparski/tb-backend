@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Controllers.Teams;
 using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
@@ -348,6 +349,29 @@ public class TeamControllerTest
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void Get_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<IQueryable<TeamResponse>>)_controller.Get).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Teams.Read,
+            Common.Permissions.Teams.ReadExport,
+            Common.Permissions.Teams.ReadWrite
+        };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 

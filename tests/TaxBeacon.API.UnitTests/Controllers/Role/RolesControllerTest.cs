@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
+using System.Reflection;
+using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Roles;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.UserManagement.Models;
@@ -210,6 +213,28 @@ public class RolesControllerTest
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void Get_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<IQueryable<RoleResponse>>)_controller.Get).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Roles.Read,
+            Common.Permissions.Roles.ReadWrite
+        };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 }
