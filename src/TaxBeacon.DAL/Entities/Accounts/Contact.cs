@@ -31,7 +31,7 @@ public class Contact: BaseEntity
 
     public string FullName { get; private set; } = string.Empty;
 
-    public State State { get; set; }
+    public State State { get; set; } = State.None;
 
     public string? City { get; set; }
 

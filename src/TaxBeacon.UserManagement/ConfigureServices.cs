@@ -6,6 +6,7 @@ using TaxBeacon.UserManagement.Services.Activities;
 using TaxBeacon.UserManagement.Services.Activities.Department;
 using TaxBeacon.UserManagement.Services.Activities.JobTitle;
 using TaxBeacon.UserManagement.Services.Activities.ServiceArea;
+using TaxBeacon.UserManagement.Services.Contacts;
 using TaxBeacon.UserManagement.Services.Program;
 using TaxBeacon.UserManagement.Services.Program.Activities;
 using TaxBeacon.UserManagement.Services.Tenants;
@@ -37,6 +38,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IServiceAreaService, ServiceAreaService>();
         serviceCollection.AddScoped<IProgramService, ProgramService>();
         serviceCollection.AddScoped<IJobTitleService, JobTitleService>();
+        serviceCollection.AddScoped<IContactService, ContactService>();
 
         serviceCollection.AddScoped<ITeamActivityFactory, TeamUpdatedEventFactory>();
 

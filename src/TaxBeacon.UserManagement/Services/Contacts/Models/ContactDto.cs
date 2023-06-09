@@ -1,4 +1,5 @@
-﻿using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Accounts;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.UserManagement.Services.Contacts.Models;
 
@@ -6,21 +7,21 @@ public class ContactDto
 {
     public Guid Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string FullName { get; set; } = null!;
 
     public string Email { get; set; } = null!;
 
-    public string JobTitle { get; set; } = null!;
+    public string? JobTitle { get; set; }
 
-    public string ContactType { get; set; } = null!;
+    public ContactType ContactType { get; set; } = ContactType.None;
 
-    public string Phone { get; set; } = null!;
+    public string? Phone { get; set; }
 
     public Status Status { get; set; }
 
-    public string Country { get; set; } = null!;
+    public string? Country { get; set; }
 
-    public string City { get; set; } = null!;
+    public string? City { get; set; } = null!;
 
-    public string State { get; set; } = null!;
+    public State State { get; set; } = State.None;
 }
