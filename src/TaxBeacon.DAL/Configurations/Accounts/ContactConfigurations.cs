@@ -9,7 +9,13 @@ public class ContactConfigurations: IEntityTypeConfiguration<Contact>
     public void Configure(EntityTypeBuilder<Contact> builder)
     {
         builder
-            .Property(c => c.Name)
+            .Property(c => c.FirstName)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder
+            .Property(c => c.LastName)
             .HasColumnType("nvarchar")
             .HasMaxLength(100)
             .IsRequired();
@@ -37,27 +43,23 @@ public class ContactConfigurations: IEntityTypeConfiguration<Contact>
             .HasForeignKey(c => c.AccountId);
 
         builder
-            .HasIndex(c => new { c.TenantId, c.Name })
-            .IsUnique();
-
-        builder
-            .Property(e => e.JobTitle)
+            .Property(c => c.JobTitle)
             .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         builder
-            .Property(e => e.Phone)
+            .Property(c => c.Phone)
             .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
         builder
-            .Property(e => e.Status)
+            .Property(c => c.Status)
             .HasColumnType("nvarchar")
             .HasMaxLength(20)
             .HasConversion<string>();
 
         builder
-            .Property(e => e.Email)
+            .Property(c => c.Email)
             .HasColumnType("nvarchar")
             .HasMaxLength(100)
             .HasConversion(
@@ -65,11 +67,17 @@ public class ContactConfigurations: IEntityTypeConfiguration<Contact>
                 v => new System.Net.Mail.MailAddress(v));
 
         builder
-            .Property(e => e.Type)
+            .Property(c => c.Type)
             .HasConversion(
                 v => v.Value,
                 v => ContactType.FromValue(v))
             .HasColumnType("nvarchar")
             .HasMaxLength(20);
+
+        builder
+            .Property(c => c.FullName)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(202)
+            .HasComputedColumnSql("TRIM(CONCAT([FirstName], ' ', [LastName]))", stored: true);
     }
 }

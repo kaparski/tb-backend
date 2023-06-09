@@ -15,7 +15,9 @@ public class Contact: BaseEntity
 
     public Guid Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string FirstName { get; set; } = null!;
+
+    public string LastName { get; set; } = null!;
 
     public MailAddress Email { get; set; } = null!;
 
@@ -26,4 +28,7 @@ public class Contact: BaseEntity
     public string? Phone { get; set; }
 
     public Status Status { get; set; }
+
+    public string FullName { get; private set; } = string.Empty;
+
 }

@@ -36,10 +36,6 @@ public class LocationConfiguration: IEntityTypeConfiguration<Location>
             .HasForeignKey(l => l.AccountId);
 
         builder
-            .HasIndex(l => new { l.TenantId, l.Name })
-            .IsUnique();
-
-        builder
             .Property(l => l.City)
             .HasColumnType("nvarchar")
             .HasMaxLength(100);

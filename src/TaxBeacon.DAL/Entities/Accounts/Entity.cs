@@ -2,7 +2,7 @@
 using EntityType = TaxBeacon.Common.Accounts.EntityType;
 
 namespace TaxBeacon.DAL.Entities.Accounts;
-public class Entity
+public class Entity: BaseEntity
 {
     public Guid TenantId { get; set; }
 
