@@ -11,5 +11,11 @@ public interface IAccountDbContext
 
     DbSet<Referral> Referrals { get; }
 
+    DbSet<Entity> Entities { get; }
+
+    DbSet<Location> Locations { get; }
+
+    DbSet<Contact> Contacts { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
