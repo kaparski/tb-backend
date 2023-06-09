@@ -1,4 +1,6 @@
-﻿namespace TaxBeacon.DAL.Entities.Accounts;
+﻿using TaxBeacon.Common.Enums;
+
+namespace TaxBeacon.DAL.Entities.Accounts;
 
 public class Account: BaseEntity
 {
@@ -10,11 +12,13 @@ public class Account: BaseEntity
 
     public string Name { get; set; } = null!;
 
-    public string? State { get; set; }
+    public State State { get; set; }
 
     public string? City { get; set; }
 
     public Client? Client { get; set; }
+
+    public string Website { get; set; } = null!;
 
     public Referral? Referral { get; set; }
     public ICollection<Entity> Entities { get; set; } = new HashSet<Entity>();

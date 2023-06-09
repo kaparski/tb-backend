@@ -63,5 +63,19 @@ public class LocationConfiguration: IEntityTypeConfiguration<Location>
             .HasConversion<string>()
             .HasColumnType("nvarchar")
             .HasMaxLength(20);
+
+        builder
+            .Property(l => l.LocationId)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder
+            .HasIndex(l => new { l.TenantId, l.LocationId })
+            .IsUnique();
+
+        builder
+            .HasIndex(l => new { l.TenantId, l.Name })
+            .IsUnique();
     }
 }

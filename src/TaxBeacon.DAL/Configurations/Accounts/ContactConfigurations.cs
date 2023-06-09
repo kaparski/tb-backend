@@ -80,5 +80,9 @@ public class ContactConfigurations: IEntityTypeConfiguration<Contact>
             .HasColumnType("nvarchar")
             .HasMaxLength(202)
             .HasComputedColumnSql("TRIM(CONCAT([FirstName], ' ', [LastName]))", stored: true);
+
+        builder
+            .HasIndex(c => new { c.TenantId, c.Email })
+            .IsUnique();
     }
 }
