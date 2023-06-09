@@ -31,4 +31,9 @@ public class Contact: BaseEntity
 
     public string FullName { get; private set; } = string.Empty;
 
+    public State State { get; set; }
+
+    public string? City { get; set; }
+
+    public string? Country { get; set; }
 }

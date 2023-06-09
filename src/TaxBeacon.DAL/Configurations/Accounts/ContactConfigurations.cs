@@ -84,5 +84,21 @@ public class ContactConfigurations: IEntityTypeConfiguration<Contact>
         builder
             .HasIndex(c => new { c.TenantId, c.Email })
             .IsUnique();
+
+        builder
+            .Property(c => c.State)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(2)
+            .HasConversion<string>();
+
+        builder
+            .Property(c => c.City)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
+
+        builder
+            .Property(c => c.Country)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
     }
 }
