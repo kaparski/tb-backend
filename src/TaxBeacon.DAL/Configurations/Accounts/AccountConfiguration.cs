@@ -32,5 +32,21 @@ public class AccountConfiguration: IEntityTypeConfiguration<Entities.Accounts.Ac
         account
             .HasIndex(d => new { d.TenantId, d.Name })
             .IsUnique();
+
+        account
+            .Property(a => a.Website)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        account
+            .HasIndex(d => new { d.TenantId, d.Website })
+            .IsUnique();
+
+        account
+            .Property(a => a.State)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(2)
+            .HasConversion<string>();
     }
 }

@@ -81,6 +81,12 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<ServiceAreaTenantProgram> ServiceAreaTenantPrograms => Set<ServiceAreaTenantProgram>();
 
+    public DbSet<Entity> Entities => Set<Entity>();
+
+    public DbSet<Location> Locations => Set<Location>();
+
+    public DbSet<Contact> Contacts => Set<Contact>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
