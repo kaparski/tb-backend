@@ -65,5 +65,9 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
                 v => EntityType.FromValue(v))
             .HasColumnType("nvarchar")
             .HasMaxLength(20);
+
+        builder
+            .HasIndex(e => new { e.TenantId, e.Fein })
+            .IsUnique();
     }
 }
