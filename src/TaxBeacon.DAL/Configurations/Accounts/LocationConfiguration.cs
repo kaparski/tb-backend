@@ -28,7 +28,8 @@ public class LocationConfiguration: IEntityTypeConfiguration<Location>
         builder
             .HasOne(l => l.Tenant)
             .WithMany(t => t.Locations)
-            .HasForeignKey(l => l.TenantId);
+            .HasForeignKey(l => l.TenantId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder
             .HasOne(l => l.Account)

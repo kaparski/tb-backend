@@ -35,7 +35,8 @@ public class ContactConfigurations: IEntityTypeConfiguration<Contact>
         builder
             .HasOne(c => c.Tenant)
             .WithMany(t => t.Contacts)
-            .HasForeignKey(c => c.TenantId);
+            .HasForeignKey(c => c.TenantId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder
             .HasOne(c => c.Account)

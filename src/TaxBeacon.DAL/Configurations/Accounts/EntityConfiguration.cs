@@ -29,7 +29,8 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
         builder
             .HasOne(e => e.Tenant)
             .WithMany(t => t.Entities)
-            .HasForeignKey(e => e.TenantId);
+            .HasForeignKey(e => e.TenantId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder
             .HasOne(e => e.Account)
