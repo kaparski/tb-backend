@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230609085155_AddEntitiesLocationsAndContacts")]
+    partial class AddEntitiesLocationsAndContacts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,17 +53,10 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("nvarchar");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Website")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
 
                     b.HasKey("Id");
 
@@ -71,9 +67,6 @@ namespace TaxBeacon.DAL.Migrations
                     SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "Id"));
 
                     b.HasIndex("TenantId", "Name")
-                        .IsUnique();
-
-                    b.HasIndex("TenantId", "Website")
                         .IsUnique();
 
                     b.ToTable("Accounts");
@@ -131,14 +124,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
-
-                    b.Property<string>("Country")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
-
                     b.Property<DateTime>("CreatedDateTimeUtc")
                         .HasColumnType("datetime2");
 
@@ -181,11 +166,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("nvarchar");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -203,9 +183,6 @@ namespace TaxBeacon.DAL.Migrations
                     SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
 
                     b.HasIndex("AccountId");
-
-                    b.HasIndex("TenantId", "Email")
-                        .IsUnique();
 
                     b.HasIndex("TenantId", "AccountId", "Id");
 
@@ -237,9 +214,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<string>("EntityId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Fein")
-                        .HasColumnType("int");
-
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -252,8 +226,7 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(2)
+                        .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Status")
@@ -273,9 +246,6 @@ namespace TaxBeacon.DAL.Migrations
                     SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
 
                     b.HasIndex("AccountId");
-
-                    b.HasIndex("TenantId", "Fein")
-                        .IsUnique();
 
                     b.HasIndex("TenantId", "Name")
                         .IsUnique();
@@ -318,9 +288,7 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LocationId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -328,8 +296,7 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(2)
+                        .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Status")
@@ -350,12 +317,6 @@ namespace TaxBeacon.DAL.Migrations
                     SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
 
                     b.HasIndex("AccountId");
-
-                    b.HasIndex("TenantId", "LocationId")
-                        .IsUnique();
-
-                    b.HasIndex("TenantId", "Name")
-                        .IsUnique();
 
                     b.HasIndex("TenantId", "AccountId", "Id");
 

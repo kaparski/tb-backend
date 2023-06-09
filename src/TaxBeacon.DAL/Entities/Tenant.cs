@@ -54,4 +54,7 @@ public class Tenant: BaseEntity
     public ICollection<Accounts.Client> Clients { get; set; } = new HashSet<Accounts.Client>();
 
     public ICollection<Accounts.Referral> Referrals { get; set; } = new HashSet<Accounts.Referral>();
+    public ICollection<Accounts.Entity> Entities { get; set; } = new HashSet<Accounts.Entity>();
+    public ICollection<Accounts.Location> Locations { get; set; } = new HashSet<Accounts.Location>();
+    public ICollection<Accounts.Contact> Contacts { get; set; } = new HashSet<Accounts.Contact>();
 }
