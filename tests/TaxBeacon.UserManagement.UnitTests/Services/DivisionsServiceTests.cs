@@ -542,6 +542,36 @@ namespace TaxBeacon.UserManagement.UnitTests.Services
             resultOneOf.IsT1.Should().BeTrue();
         }
 
+        [Fact]
+        public async Task QueryDivisions_ReturnsDivisions()
+        {
+            // Arrange
+            var items = TestData.TestDivision.Generate(5);
+            await _dbContextMock.Divisions.AddRangeAsync(items);
+            await _dbContextMock.SaveChangesAsync();
+
+            // Act
+            var query = _divisionsService.QueryDivisions();
+            var result = query.ToArray();
+
+            // Assert
+
+            using (new AssertionScope())
+            {
+                result.Should().HaveCount(5);
+
+                foreach (var dto in result)
+                {
+                    var item = items.Single(u => u.Id == dto.Id);
+
+                    dto.Should().BeEquivalentTo(item, opt => opt
+                        .ExcludingMissingMembers()
+                        .Excluding(d => d.Departments)
+                    );
+                }
+            }
+        }
+
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static class TestData
         {

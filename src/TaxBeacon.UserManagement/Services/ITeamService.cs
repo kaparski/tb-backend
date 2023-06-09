@@ -8,6 +8,8 @@ namespace TaxBeacon.UserManagement.Services;
 
 public interface ITeamService
 {
+    IQueryable<TeamDto> QueryTeams();
+
     Task<QueryablePaging<TeamDto>> GetTeamsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default);
 

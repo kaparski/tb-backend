@@ -2,6 +2,7 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
@@ -19,6 +20,35 @@ public class DepartmentsController: BaseController
     private readonly IDepartmentService _service;
 
     public DepartmentsController(IDepartmentService departmentService) => _service = departmentService;
+
+    /// <summary>
+    /// Queryable list of tenant's departments
+    /// </summary>
+    /// <response code="200">Returns departments in a given tenant</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>List of departments</returns>
+    [HasPermissions(
+        Common.Permissions.Departments.Read,
+        Common.Permissions.Departments.ReadWrite,
+        Common.Permissions.Departments.ReadExport,
+        Common.Permissions.ServiceAreas.Read,
+        Common.Permissions.ServiceAreas.ReadWrite,
+        Common.Permissions.ServiceAreas.ReadExport)]
+    [EnableQuery]
+    [HttpGet("api/odata/departments")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IQueryable<DepartmentResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public IQueryable<DepartmentResponse> Get()
+    {
+        var query = _service.QueryDepartments();
+
+        return query.ProjectToType<DepartmentResponse>();
+    }
 
     /// <summary>
     /// List of tenant's departments

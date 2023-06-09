@@ -10,13 +10,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.Tenants;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Tenants;
 using TaxBeacon.UserManagement.Services.Tenants.Models;
 
@@ -507,6 +507,30 @@ public class TenantsControllerTests
         // Arrange
         var methodInfo = ((Func<Guid, ChangeTenantProgramsRequest, CancellationToken, Task<IActionResult>>)_controller.ChangeProgramsAsync).Method;
         var permissions = new object[] { Common.Permissions.Tenants.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public void Get_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+
+        var methodInfo = ((Func<IQueryable<TenantResponse>>)_controller.Get).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Tenants.Read,
+            Common.Permissions.Tenants.ReadWrite,
+            Common.Permissions.Tenants.ReadExport
+        };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();

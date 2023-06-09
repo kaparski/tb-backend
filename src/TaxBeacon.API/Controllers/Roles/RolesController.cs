@@ -2,6 +2,7 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.API.Exceptions;
@@ -15,6 +16,27 @@ public class RolesController: BaseController
     private readonly IRoleService _roleService;
 
     public RolesController(IRoleService roleService) => _roleService = roleService;
+
+    /// <summary>
+    /// Queryable list of roles
+    /// </summary>
+    /// <response code="200">Returns roles</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>Roles collection</returns>
+    [HasPermissions(Common.Permissions.Roles.Read, Common.Permissions.Roles.ReadWrite)]
+    [EnableQuery]
+    [HttpGet("api/odata/roles")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(QueryablePaging<RoleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public IQueryable<RoleResponse> Get()
+    {
+        var query = _roleService.QueryRoles();
+
+        return query.ProjectToType<RoleResponse>();
+    }
 
     /// <summary>
     /// List of roles

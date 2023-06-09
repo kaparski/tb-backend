@@ -2,9 +2,11 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.JobTitles.Requests;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.UserManagement.Models;
@@ -18,6 +20,35 @@ public class JobTitlesController: BaseController
     private readonly IJobTitleService _jobTitleService;
 
     public JobTitlesController(IJobTitleService jobTitleService) => _jobTitleService = jobTitleService;
+
+    /// <summary>
+    /// Queryable list of job titles
+    /// </summary>
+    /// <response code="200">Returns all job titles</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>List of job titles</returns>
+    [HasPermissions(
+        Common.Permissions.Departments.Read,
+        Common.Permissions.Departments.ReadWrite,
+        Common.Permissions.Departments.ReadExport,
+        Common.Permissions.JobTitles.Read,
+        Common.Permissions.JobTitles.ReadWrite,
+        Common.Permissions.JobTitles.ReadExport)]
+    [EnableQuery]
+    [HttpGet("api/odata/jobtitles")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IQueryable<JobTitleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public IQueryable<JobTitleResponse> Get()
+    {
+        var query = _jobTitleService.QueryJobTitles();
+
+        return query.ProjectToType<JobTitleResponse>();
+    }
 
     /// <summary>
     /// List of job titles

@@ -8,6 +8,7 @@ using OneOf.Types;
 using System.Text.Json;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -32,6 +33,30 @@ public class RoleService: IRoleService
         _logger = logger;
         _dateTimeService = dateTimeService;
         _currentUserService = currentUserService;
+    }
+
+    public IQueryable<RoleDto> QueryRoles()
+    {
+        var roles = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
+            ? GetNotTenantRolesQuery()
+            : GetTenantRolesQuery();
+
+        return roles.ProjectToType<RoleDto>();
+    }
+
+    public async Task<IQueryable<RoleAssignedUserDto>> QueryRoleAssignedUsersAsync(Guid roleId)
+    {
+        var getRoleResult = await GetRoleByIdAsync(roleId);
+        if (!getRoleResult.TryPickT0(out var role, out var notFound))
+        {
+            throw new NotFoundException($"Role {roleId} not found");
+        }
+
+        var users = role.Type == SourceType.Tenant
+            ? GetTenantRoleAssignedUsersQuery(roleId)
+            : GetNotTenantRoleAssignedUsersQuery(roleId);
+
+        return users.ProjectToType<RoleAssignedUserDto>();
     }
 
     public async Task<QueryablePaging<RoleDto>> GetRolesAsync(IGridifyQuery gridifyQuery,
@@ -187,7 +212,7 @@ public class RoleService: IRoleService
         return permissionsWithCategory;
     }
 
-    private async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
+    public async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
         CancellationToken cancellationToken = default)
     {
         var role = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }

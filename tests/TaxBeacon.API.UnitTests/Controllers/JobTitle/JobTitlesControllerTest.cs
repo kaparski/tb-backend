@@ -13,6 +13,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.JobTitles;
 using TaxBeacon.API.Controllers.JobTitles.Requests;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
+using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
@@ -125,6 +126,32 @@ public class JobTitlesControllerTest
     {
         // Arrange
         var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetJobTitleList).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Departments.Read,
+            Common.Permissions.Departments.ReadWrite,
+            Common.Permissions.Departments.ReadExport,
+            Common.Permissions.JobTitles.Read,
+            Common.Permissions.JobTitles.ReadWrite,
+            Common.Permissions.JobTitles.ReadExport
+        };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public void Get_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<IQueryable<JobTitleResponse>>)_controller.Get).Method;
         var permissions = new object[]
         {
             Common.Permissions.Departments.Read,

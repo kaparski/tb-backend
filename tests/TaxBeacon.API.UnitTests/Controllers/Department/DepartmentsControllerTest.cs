@@ -12,6 +12,7 @@ using TaxBeacon.API.Controllers.Departments;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
+using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
@@ -114,6 +115,33 @@ public class DepartmentsControllerTest
                 FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 _ => throw new InvalidOperationException()
             });
+        }
+    }
+
+    [Fact]
+    public void Get_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+
+        var methodInfo = ((Func<IQueryable<DepartmentResponse>>)_controller.Get).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Departments.Read,
+            Common.Permissions.Departments.ReadWrite,
+            Common.Permissions.Departments.ReadExport,
+            Common.Permissions.ServiceAreas.Read,
+            Common.Permissions.ServiceAreas.ReadWrite,
+            Common.Permissions.ServiceAreas.ReadExport
+        };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 

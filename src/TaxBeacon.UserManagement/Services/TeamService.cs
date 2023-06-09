@@ -51,6 +51,22 @@ public class TeamService: ITeamService
                                         ?? ImmutableDictionary<(TeamEventType, uint), ITeamActivityFactory>.Empty;
     }
 
+    public IQueryable<TeamDto> QueryTeams()
+    {
+        var items = _context.Teams.Where(d => d.TenantId == _currentUserService.TenantId);
+
+        var itemDtos = items.Select(d => new TeamDto()
+        {
+            Id = d.Id,
+            Name = d.Name,
+            Description = d.Description,
+            CreatedDateTimeUtc = d.CreatedDateTimeUtc,
+            NumberOfUsers = d.Users.Count()
+        });
+
+        return itemDtos;
+    }
+
     public async Task<QueryablePaging<TeamDto>> GetTeamsAsync(GridifyQuery gridifyQuery,
         CancellationToken cancellationToken = default) => await _context
             .Teams

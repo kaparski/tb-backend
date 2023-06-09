@@ -2,7 +2,9 @@
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.ServiceAreas.Requests;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Exceptions;
@@ -18,6 +20,35 @@ public class ServiceAreasController: BaseController
     private readonly IServiceAreaService _serviceAreaService;
 
     public ServiceAreasController(IServiceAreaService serviceAreaService) => _serviceAreaService = serviceAreaService;
+
+    /// <summary>
+    /// Queryable list of service areas
+    /// </summary>
+    /// <response code="200">Returns all service areas</response>
+    /// <response code="400">Invalid filtering or sorting</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>List of service areas</returns>
+    [HasPermissions(
+        Common.Permissions.Departments.Read,
+        Common.Permissions.Departments.ReadWrite,
+        Common.Permissions.Departments.ReadExport,
+        Common.Permissions.ServiceAreas.Read,
+        Common.Permissions.ServiceAreas.ReadWrite,
+        Common.Permissions.ServiceAreas.ReadExport)]
+    [EnableQuery]
+    [HttpGet("api/odata/serviceareas")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(IQueryable<ServiceAreaResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public IQueryable<ServiceAreaResponse> Get()
+    {
+        var query = _serviceAreaService.QueryServiceAreas();
+
+        return query.ProjectToType<ServiceAreaResponse>();
+    }
 
     /// <summary>
     /// List of service areas
