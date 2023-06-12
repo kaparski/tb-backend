@@ -44,7 +44,10 @@ VALUES ('Departments.Read'),
        ('Tenants.ReadExport'),
        ('Users.Read'),
        ('Users.ReadWrite'),
-       ('Users.ReadExport')
+       ('Users.ReadExport'),
+       ('Locations.Read'),
+       ('Locations.ReadWrite'),
+       ('Locations.ReadExport')
 
 INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 SELECT NEWID(),
