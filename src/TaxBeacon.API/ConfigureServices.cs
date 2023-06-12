@@ -12,6 +12,7 @@ using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Contacts.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Roles.Responses;
@@ -103,6 +104,7 @@ public static class ConfigureServices
         modelBuilder.EntitySet<RoleResponse>("Roles");
         modelBuilder.EntitySet<ServiceAreaResponse>("ServiceAreas");
         modelBuilder.EntitySet<TeamResponse>("Teams");
+        modelBuilder.EntitySet<ContactResponse>("Contacts");
 
         modelBuilder.EnableLowerCamelCase();
 

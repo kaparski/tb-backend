@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
@@ -9,6 +10,7 @@ using TaxBeacon.UserManagement.Services.Contacts;
 
 namespace TaxBeacon.API.Controllers.Contacts;
 
+[Authorize]
 public class ContactsController: BaseController
 {
     private readonly IContactService _contactService;
@@ -26,13 +28,14 @@ public class ContactsController: BaseController
     [HasPermissions(
         Common.Permissions.Contacts.Read)]
     [EnableQuery]
-    [HttpGet("/api/odata/contacts", Name = "GetContacts")]
+    [HttpGet("contacts", Name = "GetContacts")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IQueryable<ContactResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IQueryable<ContactResponse> GetContacts()
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public IQueryable<ContactResponse> Get()
     {
         var query = _contactService.QueryContacts();
 
