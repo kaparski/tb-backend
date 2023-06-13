@@ -8,15 +8,12 @@ namespace TaxBeacon.Accounts.Services.Contacts;
 public class ContactService: IContactService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly ILogger<ContactService> _logger;
     private readonly ITaxBeaconDbContext _context;
 
-    public ContactService(ILogger<ContactService> logger, ICurrentUserService currentUserService, ITaxBeaconDbContext context)
+    public ContactService(ICurrentUserService currentUserService, ITaxBeaconDbContext context)
     {
         _currentUserService = currentUserService;
         _context = context;
-        _logger = logger;
-
     }
 
     public IQueryable<ContactDto> QueryContacts()

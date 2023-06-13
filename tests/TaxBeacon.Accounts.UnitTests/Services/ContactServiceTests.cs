@@ -22,7 +22,6 @@ public class ContactServiceTests
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly IContactService _contactService;
     private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
-    private readonly Mock<ILogger<ContactService>> _serviceLoggerMock;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
 
     public ContactServiceTests()
@@ -34,8 +33,7 @@ public class ContactServiceTests
                 .UseInMemoryDatabase($"{nameof(ContactServiceTests)}-InMemoryDb-{Guid.NewGuid()}")
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
-        _serviceLoggerMock = new();
-        _contactService = new ContactService(_serviceLoggerMock.Object, _currentUserServiceMock.Object, _dbContextMock);
+        _contactService = new ContactService(_currentUserServiceMock.Object, _dbContextMock);
 
     }
 
