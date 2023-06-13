@@ -34,6 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migrat
 		migration-scripts\InsertSuperAdminRoleWithPermissions.sql = migration-scripts\InsertSuperAdminRoleWithPermissions.sql
 		migration-scripts\InsertAdminRoleWithPermissions.sql = migration-scripts\InsertAdminRoleWithPermissions.sql
 		migration-scripts\UsersView.sql = migration-scripts\UsersView.sql
+		migration-scripts\AccountsView.sql = migration-scripts\AccountsView.sql
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Accounts", "TaxBeacon.Accounts\TaxBeacon.Accounts.csproj", "{B5D3EDE5-3410-4C66-940C-C2F31248C06B}"

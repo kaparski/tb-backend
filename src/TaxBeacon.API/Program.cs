@@ -1,4 +1,5 @@
 using Microsoft.IdentityModel.Logging;
+using TaxBeacon.Accounts;
 using TaxBeacon.API;
 using TaxBeacon.API.Extensions.Logging;
 using TaxBeacon.API.Extensions.SwaggerServices;
@@ -13,6 +14,7 @@ builder.AddLogging();
 builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddUserManagementServices();
 builder.Services.AddCommonServices();
+builder.Services.AddAccountsServices();
 
 var app = builder.Build();
 

@@ -21,4 +21,6 @@ public enum EntityType
     Program = 9,
 
     TenantProgram = 10,
+
+    Account = 11,
 }

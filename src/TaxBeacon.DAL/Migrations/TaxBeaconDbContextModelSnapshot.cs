@@ -108,8 +108,10 @@ namespace TaxBeacon.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("State")
-                        .HasColumnType("int");
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("nvarchar");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
