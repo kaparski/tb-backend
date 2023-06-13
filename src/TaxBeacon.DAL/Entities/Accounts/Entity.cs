@@ -1,5 +1,5 @@
 ﻿using TaxBeacon.Common.Enums;
-using EntityType = TaxBeacon.Common.Accounts.EntityType;
+using AccountEntityType = TaxBeacon.Common.Accounts.AccountEntityType;
 
 namespace TaxBeacon.DAL.Entities.Accounts;
 public class Entity: BaseEntity
@@ -24,7 +24,7 @@ public class Entity: BaseEntity
 
     public State State { get; set; }
 
-    public EntityType Type { get; set; } = EntityType.None;
+    public AccountEntityType Type { get; set; } = AccountEntityType.None;
 
     public Status Status { get; set; }
 }

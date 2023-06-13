@@ -31,7 +31,8 @@ BEGIN TRY
 	  END;
 
 	INSERT INTO @salesRolePermissions (Name)
-	VALUES ('Accounts.Read')
+	VALUES ('Accounts.Read'),
+         ('Entities.Read')
 
 	INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 	SELECT NEWID(),

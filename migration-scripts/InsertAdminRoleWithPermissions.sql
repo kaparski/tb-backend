@@ -37,6 +37,7 @@ BEGIN TRY
          ('Divisions.ReadExport'),
          ('Departments.Read'),
          ('Departments.ReadWrite'),
+         ('Entities.Read'),
          ('Departments.ReadExport'),
          ('JobTitles.Read'),
          ('JobTitles.ReadWrite'),
