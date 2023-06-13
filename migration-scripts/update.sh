@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 if ! command -v sqlcmd &> /dev/null; then
   # Install the SqlServer module
   sudo apt-get install mssql-tools
