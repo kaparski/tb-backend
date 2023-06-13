@@ -27,4 +27,6 @@ public class ContactDto
     public string? City { get; set; } = null!;
 
     public State State { get; set; } = State.None;
+
+    public Guid AccountId { get; set; }
 }

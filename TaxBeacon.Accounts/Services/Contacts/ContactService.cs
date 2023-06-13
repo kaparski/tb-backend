@@ -35,7 +35,8 @@ public class ContactService: IContactService
                 Status = d.Status,
                 Country = d.Country,
                 City = d.City,
-                State = d.State
+                State = d.State,
+                AccountId = d.AccountId
             });
 
         return contacts;

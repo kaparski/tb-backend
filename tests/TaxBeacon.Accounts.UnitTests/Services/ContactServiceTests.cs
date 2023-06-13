@@ -46,15 +46,17 @@ public class ContactServiceTests
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
+        var account = TestData.TestAccount.Generate();
         await _dbContextMock.Tenants.AddAsync(tenant);
         TestData.TestContact.RuleFor(x => x.Tenant, tenant);
+        TestData.TestContact.RuleFor(x => x.Account, account);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
         var items = TestData.TestContact.Generate(3);
         await _accountContextMock.Contacts.AddRangeAsync(items);
         await _accountContextMock.SaveChangesAsync();
 
         // Act
-        var query = _contactService.QueryContacts();
+        var query = _contactService.QueryContacts(items[0].Account.Id);
         var result = query.ToArray();
 
         // Assert
@@ -79,11 +81,6 @@ public class ContactServiceTests
         public static readonly Faker<Contact> TestContact =
             new Faker<Contact>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
-                .RuleFor(t => t.Account, t => new Account()
-                {
-                    Name = t.Name.JobArea(),
-                    Website = t.Name.JobTitle()
-                })
                 .RuleFor(t => t.FirstName, f => f.Person.FirstName)
                 .RuleFor(t => t.LastName, f => f.Person.LastName)
                 .RuleFor(t => t.Email, t => t.Person.Email)
@@ -96,5 +93,11 @@ public class ContactServiceTests
                 .RuleFor(t => t.Id, f => TestTenantId)
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+
+        public static readonly Faker<Account> TestAccount =
+            new Faker<Account>()
+                .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.Website, f => f.Internet.Url())
+                .RuleFor(t => t.Name, f => f.Person.FullName);
     }
 }

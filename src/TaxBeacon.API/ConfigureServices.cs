@@ -51,6 +51,10 @@ public static class ConfigureServices
                     routePrefix: "api/odata/roles/{id}",
                     model: GetODataEdmModelForRoleAssignedUsers()
                 )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/accounts/{id}",
+                    model: GetODataEdmModelForAccountContacts()
+                )
             );
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -104,7 +108,6 @@ public static class ConfigureServices
         modelBuilder.EntitySet<RoleResponse>("Roles");
         modelBuilder.EntitySet<ServiceAreaResponse>("ServiceAreas");
         modelBuilder.EntitySet<TeamResponse>("Teams");
-        modelBuilder.EntitySet<ContactResponse>("Contacts");
 
         modelBuilder.EnableLowerCamelCase();
 
@@ -121,6 +124,17 @@ public static class ConfigureServices
         var modelBuilder = new ODataConventionModelBuilder();
 
         modelBuilder.EntitySet<RoleAssignedUserResponse>("RoleAssignedUsers");
+
+        modelBuilder.EnableLowerCamelCase();
+
+        return modelBuilder.GetEdmModel();
+    }
+
+    private static IEdmModel GetODataEdmModelForAccountContacts()
+    {
+        var modelBuilder = new ODataConventionModelBuilder();
+
+        modelBuilder.EntitySet<ContactResponse>("Contacts");
 
         modelBuilder.EnableLowerCamelCase();
 
