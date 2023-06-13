@@ -1,8 +1,8 @@
 #!/bin/sh
-if ! command -v sqlcmd &> /dev/null; then
-  # Install the SqlServer module
-  sudo apt-get install mssql-tools
-fi
+# if ! command -v sqlcmd &> /dev/null; then
+#   # Install the SqlServer module
+#   sudo apt-get install mssql-tools
+# fi
 
 sql_files=$(ls ./*.sql 2>/dev/null)
 echo "$sql_files"
@@ -13,5 +13,6 @@ database=$DB_NAME
 password=$DB_SQLPASSWD
 
 for file in $sql_files; do
-/opt/mssql-tools/bin/sqlcmd -S "$server" -U "$username" -P "$password" -d "$database" -i "$file"
+#/opt/mssql-tools/bin/sqlcmd -S "$server" -U "$username" -P "$password" -d "$database" -i "$file"
+sqlcmd -S "$server" -U "$username" -P "$password" -d "$database" -i "$file"
 done
