@@ -24,5 +24,5 @@ public enum EntityType
 
     Contact = 11,
 
-    Entity = 11
+    Entity = 12
 }
