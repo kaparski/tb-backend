@@ -12,6 +12,7 @@ using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Roles.Responses;
@@ -41,7 +42,7 @@ public static class ConfigureServices
             .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
         // Configuring OData. Routing to OData endpoints is separate from normal Web API routing
             .AddOData(options => options
-                .EnableQueryFeatures(null)
+                .EnableQueryFeatures()
                 .AddRouteComponents(
                     routePrefix: "api/odata",
                     model: GetODataEdmModel()
@@ -96,6 +97,7 @@ public static class ConfigureServices
 
         // EntitySet name here should match controller's name
         modelBuilder.EntitySet<UserResponse>("Users");
+        modelBuilder.EntitySet<AccountResponse>("Accounts");
         modelBuilder.EntitySet<DepartmentResponse>("Departments");
         modelBuilder.EntitySet<DivisionResponse>("Divisions");
         modelBuilder.EntitySet<TenantResponse>("Tenants");
