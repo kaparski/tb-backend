@@ -25,6 +25,8 @@ public class ContactService: IContactService
             .Select(d => new ContactDto
             {
                 Id = d.Id,
+                FirstName = d.FirstName,
+                LastName = d.LastName,
                 FullName = d.FullName,
                 Email = d.Email,
                 JobTitle = d.JobTitle,
