@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TaxBeacon.Common.Accounts;
 using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Configurations.Accounts;
@@ -25,5 +26,19 @@ public class ReferralConfiguration: IEntityTypeConfiguration<Referral>
             .HasOne(r => r.Manager)
             .WithMany(m => m.Referrals)
             .HasForeignKey(r => r.ManagerId);
+
+        referral
+            .Property(r => r.Status)
+            .HasConversion<string>()
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
+
+        referral
+            .Property(c => c.State)
+            .HasConversion(
+                v => v.Value,
+                v => ReferralState.FromValue(v))
+            .HasColumnType("nvarchar")
+            .HasMaxLength(50);
     }
 }
