@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mapster" Version="7.3.0" />
+    <PackageReference Include="OneOf" Version="3.0.243" />
   </ItemGroup>
 
 </Project>

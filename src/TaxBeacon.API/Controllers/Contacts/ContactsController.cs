@@ -33,10 +33,12 @@ public class ContactsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IQueryable<ContactResponse> Get([FromRoute] Guid id)
+    public async Task<IActionResult> Get([FromRoute] Guid id)
     {
-        var query = _contactService.QueryContacts(id);
+        var oneOf = await _contactService.QueryContactsAsync(id);
 
-        return query.ProjectToType<ContactResponse>();
+        return oneOf.Match<IActionResult>(
+            contacts => Ok(contacts.Value.ProjectToType<ContactResponse>()),
+            _ => NotFound());
     }
 }

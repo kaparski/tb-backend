@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
 using TaxBeacon.Accounts.Services.Contacts.Models;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Interfaces;
+using OneOf;
+using OneOf.Types;
 
 namespace TaxBeacon.Accounts.Services.Contacts;
 
@@ -16,12 +19,18 @@ public class ContactService: IContactService
         _context = context;
     }
 
-    public IQueryable<ContactDto> QueryContacts(Guid accountId)
+    public async Task<OneOf<Success<IQueryable<ContactDto>>, NotFound>> QueryContactsAsync(Guid accountId)
     {
         var currentTenantId = _currentUserService.TenantId;
+        var accountExists  = await _context.Accounts.AnyAsync(x => x.Id == accountId && x.TenantId == currentTenantId);
+        if (!accountExists)
+        {
+            return new NotFound();
+        }
+
         var contacts = _context
             .Contacts
-            .Where(x => x.TenantId == currentTenantId && x.AccountId == accountId)
+            .Where(x => x.AccountId == accountId)
             .Select(d => new ContactDto
             {
                 Id = d.Id,
@@ -39,6 +48,6 @@ public class ContactService: IContactService
                 AccountId = d.AccountId
             });
 
-        return contacts;
+        return new Success<IQueryable<ContactDto>>(contacts);
     }
 }

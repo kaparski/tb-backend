@@ -4,6 +4,7 @@ using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Common.Accounts;
@@ -42,26 +43,31 @@ public class ContactServiceTests
     }
 
     [Fact]
-    public async Task QueryContacts_CorrectArguments_ReturnsContacts()
+    public async Task QueryContacts_AccountExists_ReturnsContacts()
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
-        var account = TestData.TestAccount.Generate();
-        await _dbContextMock.Tenants.AddAsync(tenant);
         TestData.TestContact.RuleFor(x => x.Tenant, tenant);
+        TestData.TestAccount.RuleFor(x => x.Tenant, tenant);
+        var account = TestData.TestAccount.Generate();
+
         TestData.TestContact.RuleFor(x => x.Account, account);
+        await _dbContextMock.Tenants.AddAsync(tenant);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
+
         var items = TestData.TestContact.Generate(3);
         await _accountContextMock.Contacts.AddRangeAsync(items);
+        await _accountContextMock.Accounts.AddRangeAsync(account);
         await _accountContextMock.SaveChangesAsync();
 
         // Act
-        var query = _contactService.QueryContacts(items[0].Account.Id);
-        var result = query.ToArray();
+        var oneOf = await _contactService.QueryContactsAsync(items[0].Account.Id);
 
         // Assert
         using (new AssertionScope())
         {
+            oneOf.IsT0.Should().BeTrue();
+            var result = oneOf.AsT0.Value;
             result.Should().HaveCount(3);
 
             foreach (var dto in result)
@@ -70,6 +76,36 @@ public class ContactServiceTests
 
                 dto.Should().BeEquivalentTo(item, opt => opt.ExcludingMissingMembers());
             }
+        }
+    }
+
+    [Fact]
+    public async Task QueryContacts_AccountDoesNotExist_ReturnsContacts()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+        TestData.TestContact.RuleFor(x => x.Tenant, tenant);
+        TestData.TestAccount.RuleFor(x => x.Tenant, tenant);
+        var account = TestData.TestAccount.Generate();
+
+        TestData.TestContact.RuleFor(x => x.Account, account);
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
+
+        var items = TestData.TestContact.Generate(3);
+        await _accountContextMock.Contacts.AddRangeAsync(items);
+        await _accountContextMock.Accounts.AddRangeAsync(account);
+        await _accountContextMock.SaveChangesAsync();
+
+        // Act
+        var oneOf = await _contactService.QueryContactsAsync(new Guid());
+
+        // Assert
+        using (new AssertionScope())
+        {
+            oneOf.IsT1.Should().BeTrue();
+            var result = oneOf.AsT1;
+            result.Should().BeOfType<NotFound>();
         }
     }
 

@@ -1,8 +1,11 @@
 ﻿using TaxBeacon.Accounts.Services.Contacts.Models;
+using TaxBeacon.Common.Errors;
+using OneOf;
+using OneOf.Types;
 
 namespace TaxBeacon.Accounts.Services.Contacts;
 
 public interface IContactService
 {
-    IQueryable<ContactDto> QueryContacts(Guid accountId);
+    Task<OneOf<Success<IQueryable<ContactDto>>, NotFound>> QueryContactsAsync(Guid accountId);
 }
