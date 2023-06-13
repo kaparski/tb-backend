@@ -9,8 +9,8 @@ SELECT a.Id,
        a.IsDeleted,
        a.DeletedDateTimeUtc,
        CONCAT_WS(',',
-                 NULLIF(CONCAT_WS(' - ', c.State, c.IsEnabled), ''),
-                 NULLIF(CONCAT_WS(' - ', r.State, r.isEnabled), '')) as AccountType
+                 NULLIF(CONCAT_WS(' - ', c.State, c.Status), ''),
+                 NULLIF(CONCAT_WS(' - ', r.State, r.Status), '')) as AccountType
 FROM Accounts a
          LEFT JOIN Clients c on a.Id = c.AccountId
          LEFT JOIN Referrals r on a.Id = r.AccountId;
