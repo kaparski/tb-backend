@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using TaxBeacon.Accounts.Services.Contacts.Models;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Services.Contacts.Models;
 
-namespace TaxBeacon.UserManagement.Services.Contacts;
+namespace TaxBeacon.Accounts.Services.Contacts;
 
 public class ContactService: IContactService
 {
@@ -29,7 +29,7 @@ public class ContactService: IContactService
             {
                 Id = d.Id,
                 FullName = d.FullName,
-                Email = d.Email.Address,
+                Email = d.Email,
                 JobTitle = d.JobTitle,
                 ContactType = d.Type,
                 Phone = d.Phone,

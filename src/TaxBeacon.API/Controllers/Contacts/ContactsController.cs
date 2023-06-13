@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Contacts.Responses;
-using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
-using TaxBeacon.UserManagement.Services.Contacts;
 
 namespace TaxBeacon.API.Controllers.Contacts;
 
@@ -28,13 +27,12 @@ public class ContactsController: BaseController
     [HasPermissions(
         Common.Permissions.Contacts.Read)]
     [EnableQuery]
-    [HttpGet("contacts", Name = "GetContacts")]
+    [HttpGet("api/odata/contacts")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IQueryable<ContactResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IQueryable<ContactResponse> Get()
     {
         var query = _contactService.QueryContacts();

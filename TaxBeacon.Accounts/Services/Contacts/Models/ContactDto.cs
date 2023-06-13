@@ -1,7 +1,6 @@
-﻿using TaxBeacon.Common.Accounts;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.UserManagement.Services.Contacts.Models;
+namespace TaxBeacon.Accounts.Services.Contacts.Models;
 
 public class ContactDto
 {
@@ -13,7 +12,7 @@ public class ContactDto
 
     public string? JobTitle { get; set; }
 
-    public ContactType ContactType { get; set; } = ContactType.None;
+    public string ContactType { get; set; } = string.Empty;
 
     public string? Phone { get; set; }
 

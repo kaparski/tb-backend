@@ -13,7 +13,7 @@ public class ContactResponse
 
     public string JobTitle { get; set; } = null!;
 
-    public ContactType ContactType { get; set; } = ContactType.None;
+    public string ContactType { get; set; } = string.Empty;
 
     public string Phone { get; set; } = null!;
 

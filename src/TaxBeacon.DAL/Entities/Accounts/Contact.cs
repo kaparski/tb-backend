@@ -19,11 +19,11 @@ public class Contact: BaseEntity
 
     public string LastName { get; set; } = null!;
 
-    public MailAddress Email { get; set; } = null!;
+    public string Email { get; set; } = null!;
 
     public string? JobTitle { get; set; }
 
-    public ContactType Type { get; set; } = ContactType.None;
+    public string Type { get; set; } = null!;
 
     public string? Phone { get; set; }
 
