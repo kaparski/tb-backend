@@ -12,6 +12,7 @@ using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Contacts.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Roles.Responses;
@@ -49,6 +50,10 @@ public static class ConfigureServices
                 .AddRouteComponents(
                     routePrefix: "api/odata/roles/{id}",
                     model: GetODataEdmModelForRoleAssignedUsers()
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/accounts/{id}",
+                    model: GetODataEdmModelForAccountContacts()
                 )
             );
 
@@ -119,6 +124,17 @@ public static class ConfigureServices
         var modelBuilder = new ODataConventionModelBuilder();
 
         modelBuilder.EntitySet<RoleAssignedUserResponse>("RoleAssignedUsers");
+
+        modelBuilder.EnableLowerCamelCase();
+
+        return modelBuilder.GetEdmModel();
+    }
+
+    private static IEdmModel GetODataEdmModelForAccountContacts()
+    {
+        var modelBuilder = new ODataConventionModelBuilder();
+
+        modelBuilder.EntitySet<ContactResponse>("Contacts");
 
         modelBuilder.EnableLowerCamelCase();
 
