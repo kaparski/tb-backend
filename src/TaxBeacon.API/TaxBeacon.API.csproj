@@ -40,6 +40,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\Contacts\Requests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Controllers\Entities\Requests\" />
   </ItemGroup>
 

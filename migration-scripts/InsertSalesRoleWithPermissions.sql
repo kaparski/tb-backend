@@ -32,6 +32,8 @@ BEGIN TRY
 
 	INSERT INTO @salesRolePermissions (Name)
 	VALUES ('Accounts.Read'),
+         ('Contacts.Read')
+	VALUES ('Accounts.Read'),
          ('Entities.Read')
 
 	INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
