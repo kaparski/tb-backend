@@ -27,15 +27,15 @@ public class ContactsController: BaseController
     [HasPermissions(
         Common.Permissions.Contacts.Read)]
     [EnableQuery]
-    [HttpGet("api/odata/contacts")]
+    [HttpGet("api/odata/accounts/{accountId}/contacts")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IQueryable<ContactResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IQueryable<ContactResponse> Get()
+    public IQueryable<ContactResponse> Get([FromRoute] Guid accountId)
     {
-        var query = _contactService.QueryContacts();
+        var query = _contactService.QueryContacts(accountId);
 
         return query.ProjectToType<ContactResponse>();
     }

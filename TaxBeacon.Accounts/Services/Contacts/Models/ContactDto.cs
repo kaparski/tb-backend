@@ -16,7 +16,7 @@ public class ContactDto
 
     public string? JobTitle { get; set; }
 
-    public string ContactType { get; set; } = string.Empty;
+    public string ContactType { get; set; } = null!;
 
     public string? Phone { get; set; }
 

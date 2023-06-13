@@ -27,14 +27,14 @@ public class ContactsControllerTest
     public void Get_ValidQuery_ReturnSuccessStatusCode()
     {
         // Arrange
-        _contactServiceMock.Setup(p => p.QueryContacts()).Returns(
+        _contactServiceMock.Setup(p => p.QueryContacts(It.IsAny<Guid>())).Returns(
                 Enumerable.Empty<ContactDto>().AsQueryable());
 
         // Act
-        var actualResponse = _controller.Get();
+        var actualResponse = _controller.Get(new Guid());
 
         // Arrange
         actualResponse.Should().NotBeNull();
-        actualResponse?.Should().BeOfType<EnumerableQuery<ContactResponse>>();
+        actualResponse?.Should().BeAssignableTo<IQueryable<ContactResponse>>();
     }
 }

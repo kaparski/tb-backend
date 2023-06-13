@@ -4,5 +4,5 @@ namespace TaxBeacon.Accounts.Services.Contacts;
 
 public interface IContactService
 {
-    IQueryable<ContactDto> QueryContacts();
+    IQueryable<ContactDto> QueryContacts(Guid accountId);
 }

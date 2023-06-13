@@ -8,20 +8,20 @@ namespace TaxBeacon.Accounts.Services.Contacts;
 public class ContactService: IContactService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly ITaxBeaconDbContext _context;
+    private readonly IAccountDbContext _context;
 
-    public ContactService(ICurrentUserService currentUserService, ITaxBeaconDbContext context)
+    public ContactService(ICurrentUserService currentUserService, IAccountDbContext context)
     {
         _currentUserService = currentUserService;
         _context = context;
     }
 
-    public IQueryable<ContactDto> QueryContacts()
+    public IQueryable<ContactDto> QueryContacts(Guid accountId)
     {
         var currentTenantId = _currentUserService.TenantId;
         var contacts = _context
             .Contacts
-            .Where(x => x.TenantId == currentTenantId)
+            .Where(x => x.TenantId == currentTenantId && x.AccountId == accountId)
             .Select(d => new ContactDto
             {
                 Id = d.Id,

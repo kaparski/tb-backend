@@ -19,6 +19,7 @@ namespace TaxBeacon.Accounts.UnitTests.Services;
 
 public class ContactServiceTests
 {
+    private readonly IAccountDbContext _accountContextMock;
     private readonly ITaxBeaconDbContext _dbContextMock;
     private readonly IContactService _contactService;
     private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
@@ -28,17 +29,20 @@ public class ContactServiceTests
     {
         _currentUserServiceMock = new();
         _entitySaveChangesInterceptorMock = new();
-        _dbContextMock = new TaxBeaconDbContext(
+        var dbContext = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
                 .UseInMemoryDatabase($"{nameof(ContactServiceTests)}-InMemoryDb-{Guid.NewGuid()}")
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
-        _contactService = new ContactService(_currentUserServiceMock.Object, _dbContextMock);
+
+        _accountContextMock = dbContext;
+        _dbContextMock = dbContext;
+        _contactService = new ContactService(_currentUserServiceMock.Object, _accountContextMock);
 
     }
 
     [Fact]
-    public async Task QueryDepartments_CorrectArguments_ReturnsContacts()
+    public async Task QueryContacts_CorrectArguments_ReturnsContacts()
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
@@ -46,8 +50,8 @@ public class ContactServiceTests
         TestData.TestContact.RuleFor(x => x.Tenant, tenant);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
         var items = TestData.TestContact.Generate(3);
-        await _dbContextMock.Contacts.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
+        await _accountContextMock.Contacts.AddRangeAsync(items);
+        await _accountContextMock.SaveChangesAsync();
 
         // Act
         var query = _contactService.QueryContacts();
