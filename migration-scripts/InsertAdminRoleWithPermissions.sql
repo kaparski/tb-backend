@@ -13,7 +13,9 @@ BEGIN TRY
 	FROM Tenants
 	WHERE Name ='CTI'
 
-	IF NOT EXISTS(SELECT Id FROM Roles WHERE Id = @roleId)
+	IF NOT EXISTS(SELECT 1
+              FROM Roles
+              WHERE Name = @roleName)
 	  BEGIN
 		INSERT INTO Roles(Id, Name, CreatedDateTimeUtc) VALUES (@roleId, @roleName, GETUTCDATE());
 	  END;
