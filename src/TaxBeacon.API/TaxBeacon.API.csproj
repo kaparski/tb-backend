@@ -39,4 +39,8 @@
     <ProjectReference Include="..\TaxBeacon.UserManagement\TaxBeacon.UserManagement.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Contacts\Requests" />
+  </ItemGroup>
+
 </Project>

@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migrat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Accounts", "TaxBeacon.Accounts\TaxBeacon.Accounts.csproj", "{B5D3EDE5-3410-4C66-940C-C2F31248C06B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Accounts.UnitTests", "tests\TaxBeacon.Accounts.UnitTests\TaxBeacon.Accounts.UnitTests.csproj", "{7737CC30-B5DD-4EC4-9325-A16089464D93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{B5D3EDE5-3410-4C66-940C-C2F31248C06B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5D3EDE5-3410-4C66-940C-C2F31248C06B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5D3EDE5-3410-4C66-940C-C2F31248C06B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7737CC30-B5DD-4EC4-9325-A16089464D93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7737CC30-B5DD-4EC4-9325-A16089464D93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7737CC30-B5DD-4EC4-9325-A16089464D93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7737CC30-B5DD-4EC4-9325-A16089464D93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,6 +91,7 @@ Global
 		{BF40CE7B-1B35-4BAF-819E-998431E1C239} = {78103266-2E2B-4710-9139-0AB800F12A71}
 		{FA27BB92-9E96-4117-84C8-95787C922BED} = {78103266-2E2B-4710-9139-0AB800F12A71}
 		{B5D3EDE5-3410-4C66-940C-C2F31248C06B} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{7737CC30-B5DD-4EC4-9325-A16089464D93} = {78103266-2E2B-4710-9139-0AB800F12A71}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F4F2EB9-1E83-4F40-B890-0589652A15CA}

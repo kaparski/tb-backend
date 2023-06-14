@@ -62,16 +62,10 @@ public class ContactConfigurations: IEntityTypeConfiguration<Contact>
         builder
             .Property(c => c.Email)
             .HasColumnType("nvarchar")
-            .HasMaxLength(100)
-            .HasConversion(
-                v => v.Address,
-                v => new System.Net.Mail.MailAddress(v));
+            .HasMaxLength(100);
 
         builder
             .Property(c => c.Type)
-            .HasConversion(
-                v => v.Value,
-                v => ContactType.FromValue(v))
             .HasColumnType("nvarchar")
             .HasMaxLength(20);
 

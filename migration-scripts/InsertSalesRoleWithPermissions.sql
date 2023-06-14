@@ -2,10 +2,10 @@
 --- Assign Roles to all users in tenant
 --- Assign Permissions to Role
 
-DECLARE @salesOpsRolePermissions TABLE (NAME NVARCHAR(250));
+DECLARE @salesRolePermissions TABLE (NAME NVARCHAR(250));
 DECLARE @roleId UNIQUEIDENTIFIER = NEWID();
 DECLARE @tenantId AS UNIQUEIDENTIFIER;
-DECLARE @roleName AS NVARCHAR(100) = N'SalesOps'
+DECLARE @roleName AS NVARCHAR(100) = N'Sales'
 
 BEGIN TRANSACTION [Tran1];
 BEGIN TRY
@@ -30,19 +30,20 @@ BEGIN TRY
             INSERT INTO TenantRoles VALUES (@tenantId, @roleId);
         END;
 
-    INSERT INTO @salesOpsRolePermissions (Name)
+    INSERT INTO @salesRolePermissions (Name)
     VALUES ('Accounts.Read'),
-           ('Accounts.ReadExport');
+           ('Accounts.ReadExport')
+           ('Contacts.Read');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),
-           sorp.Name,
+           srp.Name,
            GETUTCDATE()
-    FROM @salesOpsRolePermissions sorp
+    FROM @salesRolePermissions srp
     WHERE NOT EXISTS
         (SELECT 1
          FROM Permissions
-         WHERE Name = sorp.Name)
+         WHERE Name = srp.Name)
 
     INSERT INTO TenantPermissions (TenantId, PermissionId)
     SELECT @tenantId,
@@ -61,7 +62,7 @@ BEGIN TRY
     FROM Permissions p
     WHERE p.Name in
           (SELECT Name
-           FROM @salesOpsRolePermissions)
+           FROM @salesRolePermissions)
       AND NOT EXISTS
         (SELECT 1
          FROM TenantRolePermissions
