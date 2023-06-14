@@ -1,8 +1,11 @@
-﻿--- Insert Roles and Permission
+--- Insert Roles and Permission
 --- Assign Roles to all users in tenant
 --- Assign Permissions to Role
 
-DECLARE @salesRolePermissions TABLE (NAME NVARCHAR(250));
+DECLARE @salesRolePermissions TABLE
+                              (
+                                  NAME NVARCHAR(250)
+                              );
 DECLARE @roleId UNIQUEIDENTIFIER = NEWID();
 DECLARE @tenantId AS UNIQUEIDENTIFIER;
 DECLARE @roleName AS NVARCHAR(100) = N'Sales'
@@ -13,7 +16,7 @@ BEGIN TRY
     FROM Tenants
     WHERE Name = 'CTI'
 
-    IF NOT EXISTS(SELECT Id FROM Roles WHERE Id = @roleId)
+    IF NOT EXISTS(SELECT Id FROM Roles WHERE Name = @roleName)
         BEGIN
             INSERT INTO Roles(Id, Name, CreatedDateTimeUtc) VALUES (@roleId, @roleName, GETUTCDATE());
         END;
@@ -32,7 +35,7 @@ BEGIN TRY
 
     INSERT INTO @salesRolePermissions (Name)
     VALUES ('Accounts.Read'),
-           ('Accounts.ReadExport')
+           ('Accounts.ReadExport'),
            ('Contacts.Read');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
