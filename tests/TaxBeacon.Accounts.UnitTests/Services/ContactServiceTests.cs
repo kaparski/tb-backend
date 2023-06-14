@@ -20,26 +20,21 @@ namespace TaxBeacon.Accounts.UnitTests.Services;
 
 public class ContactServiceTests
 {
-    private readonly IAccountDbContext _accountContextMock;
-    private readonly ITaxBeaconDbContext _dbContextMock;
+    private readonly TaxBeaconDbContext _dbContext;
     private readonly IContactService _contactService;
-    private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
 
     public ContactServiceTests()
     {
         _currentUserServiceMock = new();
-        _entitySaveChangesInterceptorMock = new();
-        var dbContext = new TaxBeaconDbContext(
+        Mock<EntitySaveChangesInterceptor> entitySaveChangesInterceptorMock = new();
+        _dbContext = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
                 .UseInMemoryDatabase($"{nameof(ContactServiceTests)}-InMemoryDb-{Guid.NewGuid()}")
                 .Options,
-            _entitySaveChangesInterceptorMock.Object);
+            entitySaveChangesInterceptorMock.Object);
 
-        _accountContextMock = dbContext;
-        _dbContextMock = dbContext;
-        _contactService = new ContactService(_currentUserServiceMock.Object, _accountContextMock);
-
+        _contactService = new ContactService(_currentUserServiceMock.Object, _dbContext);
     }
 
     [Fact]
@@ -52,13 +47,13 @@ public class ContactServiceTests
         var account = TestData.TestAccount.Generate();
 
         TestData.TestContact.RuleFor(x => x.Account, account);
-        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContext.Tenants.AddAsync(tenant);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
         var items = TestData.TestContact.Generate(3);
-        await _accountContextMock.Contacts.AddRangeAsync(items);
-        await _accountContextMock.Accounts.AddRangeAsync(account);
-        await _accountContextMock.SaveChangesAsync();
+        await _dbContext.Contacts.AddRangeAsync(items);
+        await _dbContext.Accounts.AddRangeAsync(account);
+        await _dbContext.SaveChangesAsync();
 
         // Act
         var oneOf = await _contactService.QueryContactsAsync(items[0].Account.Id);
@@ -80,7 +75,7 @@ public class ContactServiceTests
     }
 
     [Fact]
-    public async Task QueryContacts_AccountDoesNotExist_ReturnsContacts()
+    public async Task QueryContacts_AccountDoesNotExist_ReturnsNotFound()
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
@@ -89,13 +84,13 @@ public class ContactServiceTests
         var account = TestData.TestAccount.Generate();
 
         TestData.TestContact.RuleFor(x => x.Account, account);
-        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContext.Tenants.AddAsync(tenant);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
         var items = TestData.TestContact.Generate(3);
-        await _accountContextMock.Contacts.AddRangeAsync(items);
-        await _accountContextMock.Accounts.AddRangeAsync(account);
-        await _accountContextMock.SaveChangesAsync();
+        await _dbContext.Contacts.AddRangeAsync(items);
+        await _dbContext.Accounts.AddRangeAsync(account);
+        await _dbContext.SaveChangesAsync();
 
         // Act
         var oneOf = await _contactService.QueryContactsAsync(new Guid());
