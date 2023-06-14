@@ -53,7 +53,7 @@ public static class ConfigureServices
                     model: GetODataEdmModelForRoleAssignedUsers()
                 )
                 .AddRouteComponents(
-                    routePrefix: "api/accounts/{id}",
+                    routePrefix: "api/accounts/{accountId}",
                     model: GetODataEdmModelForAccountLocations()
                 )
             );

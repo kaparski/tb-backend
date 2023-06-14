@@ -1,6 +1,9 @@
 ﻿using Ardalis.SmartEnum;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TaxBeacon.Common.Accounts;
+
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public class EntityType: SmartEnum<EntityType>
 {
     public static readonly EntityType None = new("None", 0);

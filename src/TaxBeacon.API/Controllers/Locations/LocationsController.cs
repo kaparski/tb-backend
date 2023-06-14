@@ -26,7 +26,7 @@ public class LocationsController: BaseController
     /// <returns>A collection of locations associated with a particular account</returns>
     [HasPermissions(Common.Permissions.Locations.Read)]
     [EnableQuery]
-    [HttpGet("/api/accounts/{id:guid}/locations")]
+    [HttpGet("api/accounts/{accountId:guid}/locations")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IQueryable<LocationResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
