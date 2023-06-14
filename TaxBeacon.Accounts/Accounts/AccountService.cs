@@ -22,13 +22,15 @@ public class AccountService: IAccountService
         IAccountDbContext context,
         ICurrentUserService currentUserService,
         IDateTimeService dateTimeService,
-        IImmutableDictionary<FileType, IListToFileConverter> listToFileConverters)
+        IEnumerable<IListToFileConverter> listToFileConverters)
     {
         _logger = logger;
         _context = context;
         _currentUserService = currentUserService;
         _dateTimeService = dateTimeService;
-        _listToFileConverters = listToFileConverters;
+        _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
+                                ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
+        ;
     }
 
     public IQueryable<AccountDto> GetAccounts() =>
@@ -53,8 +55,9 @@ public class AccountService: IAccountService
         CancellationToken cancellationToken)
     {
         var exportAccounts = await _context
-            .Accounts
+            .AccountsView
             .Where(a => a.TenantId == _currentUserService.TenantId)
+            .OrderBy(a => a.Name)
             .ProjectToType<AccountExportDto>()
             .ToListAsync(cancellationToken);
         
