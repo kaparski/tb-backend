@@ -17,6 +17,7 @@ using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Controllers.Contacts.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
+using TaxBeacon.API.Controllers.Locations.Responses;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Controllers.Teams.Responses;
@@ -55,8 +56,8 @@ public static class ConfigureServices
                     model: GetODataEdmModelForRoleAssignedUsers()
                 )
                 .AddRouteComponents(
-                    routePrefix: "api/accounts/{id}",
-                    model: GetODataEdmModelForAccountContacts()
+                    routePrefix: "api/accounts/{accountId}",
+                    model: GetODataEdmModelForAccount()
                 )
             );
 
@@ -144,11 +145,16 @@ public static class ConfigureServices
         return modelBuilder.GetEdmModel();
     }
 
-    private static IEdmModel GetODataEdmModelForAccountContacts()
+    /// <summary>
+    /// Builds a dedicated EDM model for api/odata/accounts/{id} endpoint.
+    /// </summary>
+    /// <returns></returns>
+    private static IEdmModel GetODataEdmModelForAccount()
     {
         var modelBuilder = new ODataConventionModelBuilder();
 
         modelBuilder.EntitySet<ContactResponse>("Contacts");
+        modelBuilder.EntitySet<LocationResponse>("Locations");
 
         modelBuilder.EnableLowerCamelCase();
 

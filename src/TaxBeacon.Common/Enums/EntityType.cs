@@ -25,4 +25,6 @@ public enum EntityType
     Contact = 11,
 
     Account = 12,
+
+    Locations = 13,
 }

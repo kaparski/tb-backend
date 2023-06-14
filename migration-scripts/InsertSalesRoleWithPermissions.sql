@@ -36,7 +36,8 @@ BEGIN TRY
     INSERT INTO @salesRolePermissions (Name)
     VALUES ('Accounts.Read'),
            ('Accounts.ReadExport'),
-           ('Contacts.Read');
+           ('Contacts.Read'),
+           ('Locations.Read');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),

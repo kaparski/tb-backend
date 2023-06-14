@@ -34,7 +34,9 @@ BEGIN TRY
         END;
 
     INSERT INTO @accountManagerRolePermissions (Name)
-    VALUES ('Accounts.Read')
+    VALUES ('Accounts.Read'),
+           ('Contacts.Read'),
+           ('Locations.Read');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),
