@@ -1,7 +1,10 @@
 ﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Immutable;
 using TaxBeacon.Accounts.Accounts.Models;
+using TaxBeacon.Common.Converters;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Interfaces;
 
@@ -12,14 +15,20 @@ public class AccountService: IAccountService
     private readonly ILogger<AccountService> _logger;
     private readonly IAccountDbContext _context;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IDateTimeService _dateTimeService;
+    private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
 
     public AccountService(ILogger<AccountService> logger,
         IAccountDbContext context,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IDateTimeService dateTimeService,
+        IImmutableDictionary<FileType, IListToFileConverter> listToFileConverters)
     {
         _logger = logger;
         _context = context;
         _currentUserService = currentUserService;
+        _dateTimeService = dateTimeService;
+        _listToFileConverters = listToFileConverters;
     }
 
     public IQueryable<AccountDto> GetAccounts() =>
@@ -39,4 +48,20 @@ public class AccountService: IAccountService
             Client = accountClients == null ? null : new ClientDto(accountClients.State, accountClients.Status),
             Referral = accountReferrals == null ? null : new ReferralDto(accountReferrals.State, accountReferrals.Status),
         };
+
+    public async Task<byte[]> ExportAccountsAsync(FileType fileType,
+        CancellationToken cancellationToken)
+    {
+        var exportAccounts = await _context
+            .Accounts
+            .Where(a => a.TenantId == _currentUserService.TenantId)
+            .ProjectToType<AccountExportDto>()
+            .ToListAsync(cancellationToken);
+        
+        _logger.LogInformation("{dateTime} - Accounts export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+        
+        return _listToFileConverters[fileType].Convert(exportAccounts);
+    }
 }
