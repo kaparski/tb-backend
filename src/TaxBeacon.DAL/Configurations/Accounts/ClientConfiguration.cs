@@ -36,8 +36,8 @@ public class ClientConfiguration: IEntityTypeConfiguration<Client>
         client
             .Property(c => c.State)
             .HasConversion(
-                v => v.Value,
-                v => ClientState.FromValue(v))
+                v => v.Name,
+                v => ClientState.FromName(v, false))
             .HasColumnType("nvarchar")
             .HasMaxLength(50);
     }

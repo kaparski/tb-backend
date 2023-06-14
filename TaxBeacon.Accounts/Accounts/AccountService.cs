@@ -23,23 +23,20 @@ public class AccountService: IAccountService
     }
 
     public IQueryable<AccountDto> GetAccounts() =>
-        _context.AccountsView
-            .AsNoTracking()
-            .Where(a => a.TenantId == _currentUserService.TenantId)
-            .Select(av => new AccountDto
-            {
-                Id = av.Id,
-                Name = av.Name,
-                State = av.State,
-                City = av.City,
-                AccountType = av.AccountType,
-                Client = _context.Clients
-                    .Where(c => c.AccountId == av.Id)
-                    .Select(c => new ClientDto(c.State, c.Status))
-                    .SingleOrDefault(),
-                // Referral = _context.Referrals
-                //     .Where(r => r.AccountId == av.Id)
-                //     .Select(r => new ReferralDto(r.State, r.Status))
-                //     .SingleOrDefault(),
-            });
+        from av in _context.AccountsView
+        join c in _context.Clients on av.Id equals c.AccountId into clients
+        from accountClients in clients.DefaultIfEmpty()
+        join r in _context.Referrals on av.Id equals r.AccountId into referrals
+        from accountReferrals in referrals.DefaultIfEmpty()
+        where av.TenantId == _currentUserService.TenantId
+        select new AccountDto
+        {
+            Id = av.Id,
+            Name = av.Name,
+            AccountType = av.AccountType,
+            City = av.City,
+            State = av.State,
+            Client = accountClients == null ? null : new ClientDto(accountClients.State, accountClients.Status),
+            Referral = accountReferrals == null ? null : new ReferralDto(accountReferrals.State, accountReferrals.Status),
+        };
 }

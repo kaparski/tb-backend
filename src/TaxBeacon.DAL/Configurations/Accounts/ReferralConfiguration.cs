@@ -36,8 +36,8 @@ public class ReferralConfiguration: IEntityTypeConfiguration<Referral>
         referral
             .Property(c => c.State)
             .HasConversion(
-                v => v.Value,
-                v => ReferralState.FromValue(v))
+                v => v.Name,
+                v => ReferralState.FromName(v, false))
             .HasColumnType("nvarchar")
             .HasMaxLength(50);
     }
