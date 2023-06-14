@@ -54,7 +54,7 @@ public static class ConfigureServices
                 )
                 .AddRouteComponents(
                     routePrefix: "api/accounts/{accountId}",
-                    model: GetODataEdmModelForAccountLocations()
+                    model: GetODataEdmModelForAccount()
                 )
             );
 
@@ -131,26 +131,15 @@ public static class ConfigureServices
         return modelBuilder.GetEdmModel();
     }
 
-    private static IEdmModel GetODataEdmModelForAccountContacts()
+    /// <summary>
+    /// Builds a dedicated EDM model for api/odata/accounts/{id} endpoint.
+    /// </summary>
+    /// <returns></returns>
+    private static IEdmModel GetODataEdmModelForAccount()
     {
         var modelBuilder = new ODataConventionModelBuilder();
 
         modelBuilder.EntitySet<ContactResponse>("Contacts");
-        
-        modelBuilder.EnableLowerCamelCase();
-
-        return modelBuilder.GetEdmModel();
-    }
-
-    /// <summary>
-    /// Builds a dedicated EDM model for api/odata/accounts/{id}/locations endpoint.
-    /// TODO: find a better way to make this custom routing work.
-    /// </summary>
-    /// <returns></returns>
-    private static IEdmModel GetODataEdmModelForAccountLocations()
-    {
-        var modelBuilder = new ODataConventionModelBuilder();
-
         modelBuilder.EntitySet<LocationResponse>("Locations");
 
         modelBuilder.EnableLowerCamelCase();
