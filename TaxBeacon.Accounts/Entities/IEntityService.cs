@@ -1,5 +1,8 @@
-﻿namespace TaxBeacon.Accounts.Entities;
+﻿using OneOf.Types;
+using OneOf;
+
+namespace TaxBeacon.Accounts.Entities;
 public interface IEntityService
 {
-    IQueryable<EntityDto> QueryEntities();
+    Task<OneOf<Success<IQueryable<EntityDto>>, NotFound>> QueryEntitiesAsync(Guid accountId);
 }

@@ -4,8 +4,7 @@ using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using OneOf.Types;
-using System.Diagnostics.CodeAnalysis;
-using TaxBeacon.Accounts.Services.Contacts;
+using TaxBeacon.Accounts.Entities;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -15,51 +14,48 @@ using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.Accounts.UnitTests.Services;
-
-public class ContactServiceTests
+public class EntityServiceTest
 {
     private readonly IAccountDbContext _accountContextMock;
     private readonly ITaxBeaconDbContext _dbContextMock;
-    private readonly IContactService _contactService;
+    private readonly IEntityService _entityService;
     private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
-
-    public ContactServiceTests()
+    public EntityServiceTest()
     {
         _currentUserServiceMock = new();
         _entitySaveChangesInterceptorMock = new();
         var dbContext = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
-                .UseInMemoryDatabase($"{nameof(ContactServiceTests)}-InMemoryDb-{Guid.NewGuid()}")
+                .UseInMemoryDatabase($"{nameof(EntityServiceTest)}-InMemoryDb-{Guid.NewGuid()}")
                 .Options,
             _entitySaveChangesInterceptorMock.Object);
 
         _accountContextMock = dbContext;
         _dbContextMock = dbContext;
-        _contactService = new ContactService(_currentUserServiceMock.Object, _accountContextMock);
-
+        _entityService = new EntityService(_accountContextMock, _currentUserServiceMock.Object);
     }
 
     [Fact]
-    public async Task QueryContacts_AccountExists_ReturnsContacts()
+    public async Task QueryEntities_AccountExists_ReturnsEntities()
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
-        TestData.TestContact.RuleFor(x => x.Tenant, tenant);
+        TestData.TestEntity.RuleFor(x => x.Tenant, tenant);
         TestData.TestAccount.RuleFor(x => x.Tenant, tenant);
         var account = TestData.TestAccount.Generate();
 
-        TestData.TestContact.RuleFor(x => x.Account, account);
+        TestData.TestEntity.RuleFor(x => x.Account, account);
         await _dbContextMock.Tenants.AddAsync(tenant);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
-        var items = TestData.TestContact.Generate(3);
-        await _accountContextMock.Contacts.AddRangeAsync(items);
+        var items = TestData.TestEntity.Generate(3);
+        await _accountContextMock.Entities.AddRangeAsync(items);
         await _accountContextMock.Accounts.AddRangeAsync(account);
         await _accountContextMock.SaveChangesAsync();
 
         // Act
-        var oneOf = await _contactService.QueryContactsAsync(items[0].Account.Id);
+        var oneOf = await _entityService.QueryEntitiesAsync(items[0].Account.Id);
 
         // Assert
         using (new AssertionScope())
@@ -78,25 +74,25 @@ public class ContactServiceTests
     }
 
     [Fact]
-    public async Task QueryContacts_AccountDoesNotExist_ReturnsContacts()
+    public async Task QueryEntities_AccountDoesNotExist_ReturnsEntities()
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
-        TestData.TestContact.RuleFor(x => x.Tenant, tenant);
+        TestData.TestEntity.RuleFor(x => x.Tenant, tenant);
         TestData.TestAccount.RuleFor(x => x.Tenant, tenant);
         var account = TestData.TestAccount.Generate();
 
-        TestData.TestContact.RuleFor(x => x.Account, account);
+        TestData.TestEntity.RuleFor(x => x.Account, account);
         await _dbContextMock.Tenants.AddAsync(tenant);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
-        var items = TestData.TestContact.Generate(3);
-        await _accountContextMock.Contacts.AddRangeAsync(items);
+        var items = TestData.TestEntity.Generate(3);
+        await _accountContextMock.Entities.AddRangeAsync(items);
         await _accountContextMock.Accounts.AddRangeAsync(account);
         await _accountContextMock.SaveChangesAsync();
 
         // Act
-        var oneOf = await _contactService.QueryContactsAsync(new Guid());
+        var oneOf = await _entityService.QueryEntitiesAsync(new Guid());
 
         // Assert
         using (new AssertionScope())
@@ -107,18 +103,17 @@ public class ContactServiceTests
         }
     }
 
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
         public static readonly Guid TestTenantId = Guid.NewGuid();
 
-        public static readonly Faker<Contact> TestContact =
-            new Faker<Contact>()
+        public static readonly Faker<Entity> TestEntity =
+            new Faker<Entity>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
-                .RuleFor(t => t.FirstName, f => f.Person.FirstName)
-                .RuleFor(t => t.LastName, f => f.Person.LastName)
-                .RuleFor(t => t.Email, t => t.Person.Email)
-                .RuleFor(t => t.Type, t => t.PickRandom("Client", "Referral Partner", "Client Partner"))
+                .RuleFor(t => t.Name, f => f.Company.CompanyName())
+                .RuleFor(t => t.Type, t => Common.Accounts.AccountEntityType.LLC)
+                .RuleFor(t => t.City, f => f.Address.City())
+                .RuleFor(t => t.State, t => State.NM)
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow)
                 .RuleFor(t => t.Status, t => Status.Active);
 

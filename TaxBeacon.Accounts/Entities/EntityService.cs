@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using OneOf;
+using OneOf.Types;
 using System.Collections.Immutable;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
@@ -9,40 +12,40 @@ namespace TaxBeacon.Accounts.Entities;
 
 public class EntityService: IEntityService
 {
-    private readonly ILogger<EntityService> _logger;
     private readonly IAccountDbContext _context;
-    private readonly IDateTimeService _dateTimeService;
     private readonly ICurrentUserService _currentUserService;
-    private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
-    public EntityService(ILogger<EntityService> logger,
+    public EntityService(
         IAccountDbContext context,
-        IDateTimeService dateTimeService,
-        ICurrentUserService currentUserService,
-        IEnumerable<IListToFileConverter> listToFileConverters)
+        ICurrentUserService currentUserService)
     {
-        _logger = logger;
         _context = context;
-        _dateTimeService = dateTimeService;
         _currentUserService = currentUserService;
-        _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
-                                ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
     }
 
-    public IQueryable<EntityDto> QueryEntities()
+    public async Task<OneOf<Success<IQueryable<EntityDto>>, NotFound>> QueryEntitiesAsync(Guid accountId)
     {
+        var currentTenantId = _currentUserService.TenantId;
+        var accountExists = await _context.Accounts.AnyAsync(x => x.Id == accountId && x.TenantId == currentTenantId);
+        if (!accountExists)
+        {
+            return new NotFound();
+        }
+
         var items = _context.Entities.Where(d => d.TenantId == _currentUserService.TenantId);
 
-        var itemDtos = items.Select(d => new EntityDto()
-        {
-            Id = d.Id,
-            Name = d.Name,
-            City = d.City,
-            State = d.State,
-            Type = d.Type,
-            Status = d.Status,
-            EntityId = d.EntityId
-        });
+        var itemDtos = items
+            .Where(x => x.AccountId == accountId)
+            .Select(d => new EntityDto()
+            {
+                Id = d.Id,
+                Name = d.Name,
+                City = d.City,
+                State = d.State,
+                Type = d.Type,
+                Status = d.Status,
+                EntityId = d.EntityId
+            });
 
-        return itemDtos;
+        return new Success<IQueryable<EntityDto>>(itemDtos);
     }
 }

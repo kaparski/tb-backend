@@ -9,7 +9,7 @@ using TaxBeacon.API.Exceptions;
 
 namespace TaxBeacon.API.Controllers.Entities;
 [Authorize]
-public class EntitiesController: ControllerBase
+public class EntitiesController: BaseController
 {
     private readonly IEntityService _entityService;
     public EntitiesController(IEntityService entityService) => _entityService = entityService;
@@ -23,18 +23,20 @@ public class EntitiesController: ControllerBase
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>List of entities</returns>
     [HasPermissions(
-        Common.Permissions.Departments.Read)]
+        Common.Permissions.Entities.Read)]
     [EnableQuery]
-    [HttpGet("api/odata/entities")]
+    [HttpGet("api/accounts/{id:guid}/entities")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IQueryable<EntityResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IQueryable<EntityResponse> Get()
+    public async Task<IActionResult> Get([FromRoute] Guid id)
     {
-        var query = _entityService.QueryEntities();
+        var oneOf = await _entityService.QueryEntitiesAsync(id);
 
-        return query.ProjectToType<EntityResponse>();
+        return oneOf.Match<IActionResult>(
+            entities => Ok(entities.Value.ProjectToType<EntityResponse>()),
+            _ => NotFound());
     }
 }
