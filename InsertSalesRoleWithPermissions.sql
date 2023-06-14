@@ -1,14 +1,14 @@
-﻿--- Insert Roles and Permission
+--- Insert Roles and Permission
 --- Assign Roles to all users in tenant
 --- Assign Permissions to Role
 
-DECLARE @adminRolePermissions TABLE
+DECLARE @salesRolePermissions TABLE
                               (
                                   NAME NVARCHAR(250)
                               );
 DECLARE @roleId UNIQUEIDENTIFIER = NEWID();
 DECLARE @tenantId AS UNIQUEIDENTIFIER;
-DECLARE @roleName AS NVARCHAR(100) = N'Admin'
+DECLARE @roleName AS NVARCHAR(100) = N'Sales'
 
 BEGIN TRANSACTION [Tran1];
 BEGIN TRY
@@ -33,42 +33,20 @@ BEGIN TRY
             INSERT INTO TenantRoles VALUES (@tenantId, @roleId);
         END;
 
-    INSERT INTO @adminRolePermissions (Name)
-    VALUES ('Divisions.Activation'),
-           ('Divisions.Read'),
-           ('Divisions.ReadWrite'),
-           ('Divisions.ReadExport'),
-           ('Departments.Read'),
-           ('Departments.ReadWrite'),
-           ('Departments.ReadExport'),
-           ('JobTitles.Read'),
-           ('JobTitles.ReadWrite'),
-           ('JobTitles.ReadExport'),
-           ('Programs.Read'),
-           ('Programs.ReadExport'),
-           ('Roles.Read'),
-           ('Roles.ReadWrite'),
-           ('ServiceAreas.Read'),
-           ('ServiceAreas.ReadWrite'),
-           ('ServiceAreas.ReadExport'),
-           ('TableFilters.Read'),
-           ('TableFilters.ReadWrite'),
-           ('Teams.Read'),
-           ('Teams.ReadWrite'),
-           ('Teams.ReadExport'),
-           ('Users.Read'),
-           ('Users.ReadWrite'),
-           ('Users.ReadExport')
+    INSERT INTO @salesRolePermissions (Name)
+    VALUES ('Accounts.Read'),
+           ('Accounts.ReadExport'),
+           ('Contacts.Read');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),
-           arp.Name,
+           srp.Name,
            GETUTCDATE()
-    FROM @adminRolePermissions arp
+    FROM @salesRolePermissions srp
     WHERE NOT EXISTS
         (SELECT 1
          FROM Permissions
-         WHERE Name = arp.Name)
+         WHERE Name = srp.Name)
 
     INSERT INTO TenantPermissions (TenantId, PermissionId)
     SELECT @tenantId,
@@ -87,7 +65,7 @@ BEGIN TRY
     FROM Permissions p
     WHERE p.Name in
           (SELECT Name
-           FROM @adminRolePermissions)
+           FROM @salesRolePermissions)
       AND NOT EXISTS
         (SELECT 1
          FROM TenantRolePermissions
