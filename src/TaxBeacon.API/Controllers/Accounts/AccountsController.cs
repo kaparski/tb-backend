@@ -37,7 +37,7 @@ public class AccountsController: BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public IQueryable<AccountResponse> Get()
     {
-        var query = _accountService.GetAccounts();
+        var query = _accountService.QueryAccounts();
 
         return query.ProjectToType<AccountResponse>();
     }

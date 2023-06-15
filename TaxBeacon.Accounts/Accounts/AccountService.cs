@@ -33,7 +33,7 @@ public class AccountService: IAccountService
         ;
     }
 
-    public IQueryable<AccountDto> GetAccounts() =>
+    public IQueryable<AccountDto> QueryAccounts() =>
         from av in _context.AccountsView
         join c in _context.Clients on av.Id equals c.AccountId into clients
         from accountClients in clients.DefaultIfEmpty()
@@ -52,7 +52,7 @@ public class AccountService: IAccountService
         };
 
     public async Task<byte[]> ExportAccountsAsync(FileType fileType,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var exportAccounts = await _context
             .AccountsView

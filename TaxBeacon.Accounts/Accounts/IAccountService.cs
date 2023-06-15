@@ -5,8 +5,8 @@ namespace TaxBeacon.Accounts.Accounts;
 
 public interface IAccountService
 {
-    IQueryable<AccountDto> GetAccounts();
+    IQueryable<AccountDto> QueryAccounts();
     
     Task<byte[]> ExportAccountsAsync(FileType fileType,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 }
