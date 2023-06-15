@@ -15,7 +15,7 @@ using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Services.Program.Activities;
 using TaxBeacon.UserManagement.Services.Program.Activities.Models;
 using TaxBeacon.UserManagement.Services.Program.Models;

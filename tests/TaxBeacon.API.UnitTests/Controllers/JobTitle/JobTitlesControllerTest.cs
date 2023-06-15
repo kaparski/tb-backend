@@ -13,8 +13,8 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.JobTitles;
 using TaxBeacon.API.Controllers.JobTitles.Requests;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
-using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 

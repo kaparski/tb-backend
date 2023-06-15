@@ -1,5 +1,5 @@
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 
 namespace TaxBeacon.UserManagement.Services.Tenants.Activities;
 

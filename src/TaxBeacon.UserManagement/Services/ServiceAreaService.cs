@@ -14,6 +14,7 @@ using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models.Activities.ServiceArea;
 using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Services.Activities.ServiceArea;

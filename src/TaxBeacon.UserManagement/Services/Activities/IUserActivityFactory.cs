@@ -1,14 +1,13 @@
 ﻿using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 
-namespace TaxBeacon.UserManagement.Services.Activities
+namespace TaxBeacon.UserManagement.Services.Activities;
+
+public interface IUserActivityFactory
 {
-    public interface IUserActivityFactory
-    {
-        public uint Revision { get; }
+    public uint Revision { get; }
 
-        public UserEventType UserEventType { get; }
+    public UserEventType UserEventType { get; }
 
-        public ActivityItemDto Create(string userEvent);
-    }
+    public ActivityItemDto Create(string userEvent);
 }
