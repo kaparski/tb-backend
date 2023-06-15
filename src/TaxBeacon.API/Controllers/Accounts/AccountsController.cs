@@ -35,11 +35,11 @@ public class AccountsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IQueryable<AccountResponse> Get()
+    public IActionResult Get()
     {
         var query = _accountService.QueryAccounts();
 
-        return query.ProjectToType<AccountResponse>();
+        return Ok(query.ProjectToType<AccountResponse>());
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public class AccountsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> ExportJobTitlesAsync(
+    public async Task<IActionResult> ExportAccountsAsync(
         [FromQuery] ExportAccountsRequest exportAccountsRequest,
         CancellationToken cancellationToken)
     {
