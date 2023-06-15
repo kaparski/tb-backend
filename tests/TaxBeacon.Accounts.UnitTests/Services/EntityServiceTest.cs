@@ -4,7 +4,7 @@ using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using OneOf.Types;
-using TaxBeacon.Accounts.Entities;
+using TaxBeacon.Accounts.Services.Entities;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
