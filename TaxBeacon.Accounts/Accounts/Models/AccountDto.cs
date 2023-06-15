@@ -15,11 +15,11 @@ public record AccountDto
 
     public string AccountType { get; init; } = null!;
     
-    public ClientState? ClientState { get; set; }
+    public ClientState? ClientState { get; init; }
 
-    public Status? ClientStatus { get; set; }
+    public Status? ClientStatus { get; init; }
 
-    public ReferralState? ReferralState { get; set; }
+    public ReferralState? ReferralState { get; init; }
 
-    public Status? ReferralStatus { get; set; }
+    public Status? ReferralStatus { get; init; }
 }
