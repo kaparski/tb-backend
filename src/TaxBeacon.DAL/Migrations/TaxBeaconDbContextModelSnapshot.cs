@@ -373,6 +373,10 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
+                    b.Property<string>("Country")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
                     b.Property<string>("County")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
@@ -421,12 +425,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
 
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("TenantId", "LocationId")
-                        .IsUnique();
-
-                    b.HasIndex("TenantId", "Name")
+                    b.HasIndex("AccountId", "LocationId", "Name")
                         .IsUnique();
 
                     b.HasIndex("TenantId", "AccountId", "Id");

@@ -27,4 +27,6 @@ public class Location: BaseEntity
     public string? City { get; set; }
 
     public Status Status { get; set; }
+
+    public string? Country { get; set; }
 }

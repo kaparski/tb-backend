@@ -17,6 +17,8 @@ public interface IAccountDbContext
 
     DbSet<Contact> Contacts { get; }
 
+    DbSet<AccountView> AccountsView { get; }
+
     DbSet<StateId> StateIds { get; }
 
     DbSet<EntityActivityLog> EntityActivityLogs { get; }

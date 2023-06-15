@@ -71,11 +71,12 @@ public class LocationConfiguration: IEntityTypeConfiguration<Location>
             .IsRequired();
 
         builder
-            .HasIndex(l => new { l.TenantId, l.LocationId })
-            .IsUnique();
+            .Property(c => c.Country)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
 
         builder
-            .HasIndex(l => new { l.TenantId, l.Name })
+            .HasIndex(l => new { l.AccountId, l.LocationId, l.Name })
             .IsUnique();
     }
 }
