@@ -13,8 +13,8 @@ builder.AddLogging();
 
 builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddUserManagementServices();
-builder.Services.AddAccountManagementServices();
 builder.Services.AddCommonServices();
+builder.Services.AddAccountsServices();
 
 var app = builder.Build();
 

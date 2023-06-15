@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TaxBeacon.Accounts.Services.Contacts.Models;
-using TaxBeacon.Common.Errors;
-using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Interfaces;
 using OneOf;
 using OneOf.Types;
+using TaxBeacon.Accounts.Services.Contacts.Models;
+using TaxBeacon.Common.Services;
+using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.Accounts.Services.Contacts;
 
