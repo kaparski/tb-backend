@@ -1,4 +1,5 @@
-﻿using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Accounts;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.Accounts.Accounts.Models;
 
@@ -14,7 +15,11 @@ public record AccountDto
 
     public string AccountType { get; init; } = null!;
     
-    public ClientDto? Client { get; init; }
-    
-    public ReferralDto? Referral { get; init; }
+    public ClientState? ClientState { get; set; }
+
+    public Status? ClientStatus { get; set; }
+
+    public ReferralState? ReferralState { get; set; }
+
+    public Status? ReferralStatus { get; set; }
 }

@@ -34,22 +34,9 @@ public class AccountService: IAccountService
     }
 
     public IQueryable<AccountDto> QueryAccounts() =>
-        from av in _context.AccountsView
-        join c in _context.Clients on av.Id equals c.AccountId into clients
-        from accountClients in clients.DefaultIfEmpty()
-        join r in _context.Referrals on av.Id equals r.AccountId into referrals
-        from accountReferrals in referrals.DefaultIfEmpty()
-        where av.TenantId == _currentUserService.TenantId
-        select new AccountDto
-        {
-            Id = av.Id,
-            Name = av.Name,
-            AccountType = av.AccountType,
-            City = av.City,
-            State = av.State,
-            Client = accountClients == null ? null : new ClientDto(accountClients.State, accountClients.Status),
-            Referral = accountReferrals == null ? null : new ReferralDto(accountReferrals.State, accountReferrals.Status),
-        };
+        _context.AccountsView
+            .Where(av => av.TenantId == _currentUserService.TenantId)
+            .ProjectToType<AccountDto>();
 
     public async Task<byte[]> ExportAccountsAsync(FileType fileType,
         CancellationToken cancellationToken = default)

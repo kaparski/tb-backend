@@ -15,7 +15,11 @@ public record AccountResponse
 
     public string AccountType { get; init; } = null!;
 
-    public ClientResponse? Client { get; init; }
+    public ClientState? ClientState { get; set; }
 
-    public ReferralResponse? Referral { get; init; }
+    public Status? ClientStatus { get; set; }
+
+    public ReferralState? ReferralState { get; set; }
+
+    public Status? ReferralStatus { get; set; }
 }
