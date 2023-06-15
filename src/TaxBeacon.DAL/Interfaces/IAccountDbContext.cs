@@ -17,5 +17,7 @@ public interface IAccountDbContext
 
     DbSet<Contact> Contacts { get; }
 
+    DbSet<AccountView> AccountsView { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
