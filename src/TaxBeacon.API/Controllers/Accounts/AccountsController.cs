@@ -85,7 +85,7 @@ public class AccountsController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetDepartmentDetails([FromRoute] Guid id,
+    public async Task<IActionResult> GetDepartmentDetailsAsync([FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
         var getAccountDetailsResult = await _accountService.GetAccountDetailsById(id, cancellationToken);
