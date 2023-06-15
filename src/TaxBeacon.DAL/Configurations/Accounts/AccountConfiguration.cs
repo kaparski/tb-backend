@@ -63,8 +63,7 @@ public class AccountConfiguration: IEntityTypeConfiguration<Entities.Accounts.Ac
         account
             .Property(a => a.County)
             .HasColumnType("nvarchar")
-            .HasMaxLength(150)
-            .IsRequired();
+            .HasMaxLength(150);
 
         account
             .Property(a => a.StreetAddress2)

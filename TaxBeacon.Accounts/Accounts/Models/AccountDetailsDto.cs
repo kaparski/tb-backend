@@ -1,30 +1,40 @@
-﻿using Mapster;
-using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities.Accounts;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.Accounts.Accounts.Models;
 
-public record AccountDetailsDto(
-    Guid Id,
-    string Name,
-    string? DoingBusinessAs,
-    string? LinkedInUrl,
-    string Website, 
-    string Country, 
-    string? StreetAddress1,
-    string? StreetAddress2,
-    string? City,
-    State? State,
-    int? Zip,
-    string? County,
-    int? Phone,
-    string? Extension,
-    int? Fax,
-    string? Address,
-    IEnumerable<SalesPersonDto> SalesPersons): IRegister
+public record AccountDetailsDto
 {
-    // TODO: We have to write correct mapping for SalesPersonDto in the future stories
-    public void Register(TypeAdapterConfig config) =>
-        config.NewConfig<Account, AccountDetailsDto>()
-            .Map(dest => SalesPersons, src => src.TenantUserAccounts);
+    public Guid Id { get; init; }
+
+    public string Name { get; init; } = null!;
+
+    public string? DoingBusinessAs { get; init; }
+
+    public string? LinkedInUrl { get; init; }
+
+    public string Website { get; init; } = null!;
+
+    public string Country { get; init; } = null!;
+
+    public string? StreetAddress1 { get; init; }
+
+    public string? StreetAddress2 { get; init; }
+
+    public string? City { get; init; }
+
+    public State? State { get; init; }
+
+    public int? Zip { get; init; }
+
+    public string? County { get; init; }
+
+    public int? Phone { get; init; }
+
+    public string? Extension { get; init; }
+
+    public int? Fax { get; init; }
+
+    public string? Address { get; init; }
+
+    public IEnumerable<SalesPersonDto> SalesPersons { get; init; } = Enumerable.Empty<SalesPersonDto>();
 }
