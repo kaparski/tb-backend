@@ -87,6 +87,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<Contact> Contacts => Set<Contact>();
 
+    public DbSet<AccountView> AccountsView => Set<AccountView>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

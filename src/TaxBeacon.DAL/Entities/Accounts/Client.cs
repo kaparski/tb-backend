@@ -1,6 +1,8 @@
 ﻿using TaxBeacon.Common.Accounts;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.DAL.Entities.Accounts;
+
 public class Client: BaseEntity
 {
     public Guid TenantId { get; set; }
@@ -13,7 +15,7 @@ public class Client: BaseEntity
 
     public ClientState State { get; set; }
 
-    public bool IsEnabled { get; set; }
+    public Status Status { get; set; }
 
     public Guid? ManagerId { get; set; }
 
