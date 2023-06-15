@@ -1,4 +1,8 @@
-﻿namespace TaxBeacon.Common.Enums;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TaxBeacon.Common.Enums;
+
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public enum State
 {
     None = 0,
