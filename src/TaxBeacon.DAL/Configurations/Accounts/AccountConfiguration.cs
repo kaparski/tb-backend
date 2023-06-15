@@ -40,6 +40,53 @@ public class AccountConfiguration: IEntityTypeConfiguration<Entities.Accounts.Ac
             .IsRequired();
 
         account
+            .Property(a => a.DoingBusinessAs)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
+
+        account
+            .Property(a => a.LinkedInUrl)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
+
+        account
+            .Property(a => a.Country)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        account
+            .Property(a => a.StreetAddress1)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
+
+        account
+            .Property(a => a.County)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(150)
+            .IsRequired();
+
+        account
+            .Property(a => a.StreetAddress2)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
+
+        account
+            .Property(a => a.City)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
+
+        account
+            .Property(a => a.Extension)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(200);
+
+        account
+            .Property(a => a.Address)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(200);
+
+        account
             .HasIndex(d => new { d.TenantId, d.Website })
             .IsUnique();
 
