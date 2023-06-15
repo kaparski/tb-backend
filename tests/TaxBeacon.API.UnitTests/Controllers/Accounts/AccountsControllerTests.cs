@@ -38,7 +38,7 @@ public sealed class AccountsControllerTests
             actualResult.Should().NotBeNull();
             actualResponse.Should().BeOfType<OkObjectResult>();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<EnumerableQuery<AccountResponse>>();
+            actualResult?.Value.Should().BeAssignableTo<IQueryable<AccountResponse>>();
         }
     }
 
