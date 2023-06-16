@@ -91,7 +91,7 @@ public class AccountsController: BaseController
     public async Task<IActionResult> GetAccountDetailsAsync([FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        var getAccountDetailsResult = await _accountService.GetAccountDetailsById(id, cancellationToken);
+        var getAccountDetailsResult = await _accountService.GetAccountDetailsByIdAsync(id, cancellationToken);
 
         return getAccountDetailsResult.Match<IActionResult>(
             result => Ok(result.Adapt<AccountDetailsResponse>()),

@@ -39,7 +39,7 @@ public class AccountService: IAccountService
             .Where(av => av.TenantId == _currentUserService.TenantId)
             .ProjectToType<AccountDto>();
 
-    public async Task<OneOf<AccountDetailsDto, NotFound>> GetAccountDetailsById(Guid id,
+    public async Task<OneOf<AccountDetailsDto, NotFound>> GetAccountDetailsByIdAsync(Guid id,
         CancellationToken cancellationToken = default)
     {
         var accountDetails = await _context.Accounts

@@ -9,7 +9,7 @@ public interface IAccountService
 {
     IQueryable<AccountDto> QueryAccounts();
 
-    Task<OneOf<AccountDetailsDto, NotFound>> GetAccountDetailsById(Guid id,
+    Task<OneOf<AccountDetailsDto, NotFound>> GetAccountDetailsByIdAsync(Guid id,
         CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportAccountsAsync(FileType fileType,

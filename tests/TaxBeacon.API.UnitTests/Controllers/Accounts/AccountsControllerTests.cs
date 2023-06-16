@@ -117,7 +117,7 @@ public sealed class AccountsControllerTests
     {
         // Arrange
         _accountServiceMock
-            .Setup(x => x.GetAccountDetailsById(It.IsAny<Guid>(), default))
+            .Setup(x => x.GetAccountDetailsByIdAsync(It.IsAny<Guid>(), default))
             .ReturnsAsync(new AccountDetailsDto());
 
         // Act
@@ -139,7 +139,7 @@ public sealed class AccountsControllerTests
     {
         // Arrange
         _accountServiceMock
-            .Setup(x => x.GetAccountDetailsById(It.IsAny<Guid>(), default))
+            .Setup(x => x.GetAccountDetailsByIdAsync(It.IsAny<Guid>(), default))
             .ReturnsAsync(new NotFound());
 
         // Act

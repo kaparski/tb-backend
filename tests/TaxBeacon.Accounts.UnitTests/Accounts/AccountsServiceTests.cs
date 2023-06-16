@@ -179,7 +179,7 @@ public sealed class AccountsServiceTests
             .Returns(tenant.Id);
 
         // Act
-        var actualResult = await _accountService.GetAccountDetailsById(accounts[0].Id);
+        var actualResult = await _accountService.GetAccountDetailsByIdAsync(accounts[0].Id);
 
         // Assert
         actualResult.TryPickT0(out var actualAccount, out _).Should().BeTrue();
@@ -190,7 +190,32 @@ public sealed class AccountsServiceTests
     public async Task GetAccountDetailsByIdAsync_NonExistingTenantId_ReturnsNotFound()
     {
         // Act
-        var actualResult = await _accountService.GetAccountDetailsById(Guid.NewGuid());
+        var actualResult = await _accountService.GetAccountDetailsByIdAsync(Guid.NewGuid());
+
+        // Assert
+        actualResult.IsT1.Should().BeTrue();
+        actualResult.IsT0.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetAccountDetailsByIdAsync_AccountTenantIdNotEqualCurrentUserTenantId_ReturnsNotFound()
+    {
+        // Arrange
+        var tenants = TestData.TenantFaker.Generate(2);
+        var accounts = TestData.AccountsViewFaker
+            .RuleFor(a => a.TenantId, _ => tenants[^1].Id)
+            .Generate(5);
+
+        await _dbContextMock.Tenants.AddRangeAsync(tenants);
+        await _dbContextMock.AccountsView.AddRangeAsync(accounts);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantId)
+            .Returns(tenants[0].Id);
+
+        // Act
+        var actualResult = await _accountService.GetAccountDetailsByIdAsync(accounts[0].Id);
 
         // Assert
         actualResult.IsT1.Should().BeTrue();
