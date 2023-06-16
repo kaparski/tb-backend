@@ -45,7 +45,7 @@ public class ContactsController: BaseController
     /// <summary>
     /// Get Contact Details
     /// </summary>
-    /// <response code="200">Returns users</response>
+    /// <response code="200">Returns contact</response>
     /// <response code="400">Invalid filtering or sorting</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
