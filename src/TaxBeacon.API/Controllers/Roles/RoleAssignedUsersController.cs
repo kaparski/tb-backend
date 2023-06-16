@@ -22,7 +22,7 @@ public class RoleAssignedUsersController: BaseController
     public RoleAssignedUsersController(IRoleService roleService) => _roleService = roleService;
 
     /// <summary>
-    /// Queryable list of user of a given role
+    /// Queryable list of users of a given role
     /// </summary>
     /// <response code="200">Returns list of role assigned users</response>
     /// <response code="401">User is unauthorized</response>
