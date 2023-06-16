@@ -27,15 +27,15 @@ public class ContactsController: BaseController
     [HasPermissions(
         Common.Permissions.Contacts.Read)]
     [EnableQuery]
-    [HttpGet("api/accounts/{id:guid}/contacts")]
+    [HttpGet("api/accounts/{accountId:guid}/contacts")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IQueryable<ContactResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Get([FromRoute] Guid id)
+    public async Task<IActionResult> Get([FromRoute] Guid accountId)
     {
-        var oneOf = await _contactService.QueryContactsAsync(id);
+        var oneOf = await _contactService.QueryContactsAsync(accountId);
 
         return oneOf.Match<IActionResult>(
             contacts => Ok(contacts.Value.ProjectToType<ContactResponse>()),

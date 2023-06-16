@@ -1,7 +1,14 @@
-﻿namespace TaxBeacon.Common.Accounts;
-public enum ReferralState
+﻿using Ardalis.SmartEnum;
+
+namespace TaxBeacon.Common.Accounts;
+
+public class ReferralState: SmartEnum<ReferralState>
 {
-    None = 0,
-    ReferralProspect = 1,
-    ReferralPartner = 2
+    public static readonly ReferralState None = new("None", 0);
+    public static readonly ReferralState ReferralProspect = new("Referral prospect", 1);
+    public static readonly ReferralState ReferralPartner = new("Referral partner", 2);
+
+    private ReferralState(string name, int value) : base(name, value)
+    {
+    }
 }

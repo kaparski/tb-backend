@@ -19,4 +19,6 @@ public class DepartmentDto
     public Guid? DivisionId { get; set; }
 
     public string? Division { get; set; }
+
+    public IEnumerable<Guid>? JobTitleIds { get; set; }
 }

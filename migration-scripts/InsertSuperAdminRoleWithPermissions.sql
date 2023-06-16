@@ -1,4 +1,7 @@
-﻿DECLARE @rolePermissions TABLE (NAME NVARCHAR(250));
+﻿DECLARE @rolePermissions TABLE
+                         (
+                             NAME NVARCHAR(250)
+                         );
 DECLARE @roleType AS INT = 1;
 DECLARE @roleId AS UNIQUEIDENTIFIER = NEWID();
 DECLARE @roleName AS NVARCHAR(100) = N'Super admin';
@@ -44,7 +47,11 @@ VALUES ('Departments.Read'),
        ('Tenants.ReadExport'),
        ('Users.Read'),
        ('Users.ReadWrite'),
-       ('Users.ReadExport')
+       ('Users.ReadExport'),
+       ('Accounts.Read'),
+       ('Accounts.ReadExport'),
+       ('Contacts.Read'),
+       ('Locations.Read');
 
 INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 SELECT NEWID(),
@@ -60,5 +67,5 @@ INSERT INTO RolePermissions(RoleId, PermissionId)
 SELECT @roleId, Id
 FROM Permissions p
 WHERE p.Name in
-    (SELECT Name FROM @rolePermissions)
-    AND NOT EXISTS(SELECT 1 FROM RolePermissions WHERE RoleId = @roleId AND PermissionId = p.Id);
+      (SELECT Name FROM @rolePermissions)
+  AND NOT EXISTS(SELECT 1 FROM RolePermissions WHERE RoleId = @roleId AND PermissionId = p.Id);

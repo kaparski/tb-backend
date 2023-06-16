@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Ardalis.SmartEnum;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
 using Microsoft.AspNetCore.Authentication;
@@ -12,6 +13,7 @@ using Microsoft.OData.ModelBuilder;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Controllers.Contacts.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
@@ -24,6 +26,7 @@ using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.API.Services;
+using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -43,7 +46,7 @@ public static class ConfigureServices
             .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
         // Configuring OData. Routing to OData endpoints is separate from normal Web API routing
             .AddOData(options => options
-                .EnableQueryFeatures(null)
+                .EnableQueryFeatures()
                 .AddRouteComponents(
                     routePrefix: "api/odata",
                     model: GetODataEdmModel()
@@ -102,6 +105,18 @@ public static class ConfigureServices
 
         // EntitySet name here should match controller's name
         modelBuilder.EntitySet<UserResponse>("Users");
+
+        var clientState = modelBuilder.ComplexType<ClientState>();
+        clientState.Property(c => c.Name);
+        clientState.Property(c => c.Value);
+        clientState.DerivesFrom<SmartEnum<ClientState>>();
+
+        var referralState = modelBuilder.ComplexType<ReferralState>();
+        referralState.Property(c => c.Name);
+        referralState.Property(c => c.Value);
+        referralState.DerivesFrom<SmartEnum<ReferralState>>();
+
+        modelBuilder.EntitySet<AccountResponse>("Accounts");
         modelBuilder.EntitySet<DepartmentResponse>("Departments");
         modelBuilder.EntitySet<DivisionResponse>("Divisions");
         modelBuilder.EntitySet<TenantResponse>("Tenants");
@@ -109,7 +124,6 @@ public static class ConfigureServices
         modelBuilder.EntitySet<RoleResponse>("Roles");
         modelBuilder.EntitySet<ServiceAreaResponse>("ServiceAreas");
         modelBuilder.EntitySet<TeamResponse>("Teams");
-
         modelBuilder.EnableLowerCamelCase();
 
         return modelBuilder.GetEdmModel();

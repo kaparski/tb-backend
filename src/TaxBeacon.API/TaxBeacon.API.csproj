@@ -41,7 +41,6 @@
 
   <ItemGroup>
     <Folder Include="Controllers\Contacts\Requests" />
-    <Folder Include="Controllers\Locations\Requests\" />
   </ItemGroup>
 
 </Project>
