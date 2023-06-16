@@ -42,5 +42,9 @@ public record AccountDetailsDto
     
     public int ContactsCount { get; init; }
 
+    public ClientDto? Client { get; init; }
+    
+    public ReferralDto? Referral { get; init; }
+
     public IEnumerable<SalesPersonDto> SalesPersons { get; init; } = Enumerable.Empty<SalesPersonDto>();
 }
