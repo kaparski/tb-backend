@@ -25,7 +25,9 @@ public class Contact: BaseEntity
 
     public string Type { get; set; } = null!;
 
-    public string? Phone { get; set; }
+    public string Phone { get; set; }
+
+    public string? Phone2 { get; set; }
 
     public Status Status { get; set; }
 
@@ -36,4 +38,8 @@ public class Contact: BaseEntity
     public string? City { get; set; }
 
     public string? Country { get; set; }
+
+    public string? Zip { get; set; }
+
+    public string? Address { get; set; }
 }

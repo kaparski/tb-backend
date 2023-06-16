@@ -50,4 +50,39 @@ public class ContactService: IContactService
 
         return new Success<IQueryable<ContactDto>>(contacts);
     }
+
+    public async Task<OneOf<ContactDetailsDto, NotFound>> GetContactDetailsAsync(Guid accountId, Guid contactId)
+    {
+        var currentTenantId = _currentUserService.TenantId;
+
+        var contactDetailsDto = await _context
+            .Contacts
+            .Where(x => x.AccountId == accountId && x.Id == contactId && x.TenantId == currentTenantId)
+            .Select(x => new ContactDetailsDto()
+            {
+                Id = x.Id,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                FullName = x.FullName,
+                Email = x.Email,
+                JobTitle = x.JobTitle,
+                Type = x.Type,
+                Phone = x.Phone,
+                Status = x.Status,
+                Country = x.Country,
+                City = x.City,
+                State = x.State,
+                AccountId = x.AccountId,
+                TenantId = x.TenantId,
+                Zip = x.Zip,
+            })
+            .FirstOrDefaultAsync();
+
+        if (contactDetailsDto == null)
+        {
+            return new NotFound();
+        }
+
+        return contactDetailsDto;
+    }
 }

@@ -57,7 +57,50 @@ public class ContactsControllerTest
         // Act
         var actualResponse = await _controller.Get(new Guid());
 
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public async Task GetContactDetails_ExistingContactId_ReturnSuccessStatusCode()
+    {
         // Arrange
+        _contactServiceMock.Setup(p => p
+                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(new ContactDetailsDto());
+
+        // Act
+        var actualResponse = await _controller.GetContactDetails(new Guid(), new Guid());
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResponse.Should().BeOfType<OkObjectResult>();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeAssignableTo<ContactDetailsResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task GetContactDetails_NonExistingContactId_ReturnNotFoundStatusCode()
+    {
+        // Arrange
+        _contactServiceMock.Setup(p => p
+                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetContactDetails(new Guid(), new Guid());
+
         // Assert
         using (new AssertionScope())
         {
