@@ -53,12 +53,9 @@ public class DepartmentService: IDepartmentService
 
     public IQueryable<DepartmentDto> QueryDepartments()
     {
-        var items = _context.Departments.Where(d => d.TenantId == _currentUserService.TenantId);
-
-        var itemDtos = items.GroupJoin(_context.ServiceAreas,
-            d => d.Id,
-            sa => sa.DepartmentId,
-            (d, serviceAreas) => new DepartmentDto
+        var itemDtos = _context.Departments
+            .Where(d => d.TenantId == _currentUserService.TenantId)
+            .Select(d => new DepartmentDto
             {
                 Id = d.Id,
                 Name = d.Name,
@@ -67,7 +64,8 @@ public class DepartmentService: IDepartmentService
                 AssignedUsersCount = d.Users.Count(),
                 DivisionId = d.DivisionId,
                 Division = d.Division == null ? null : d.Division.Name,
-                ServiceAreaIds = serviceAreas.Select(r => r.Id)
+                ServiceAreaIds = d.ServiceAreas.Select(r => r.Id),
+                JobTitleIds = d.JobTitles.Select(r => r.Id),
             })
         ;
 

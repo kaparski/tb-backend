@@ -11,7 +11,7 @@ public class AccountView: BaseEntity
 
     public string Name { get; set; } = null!;
 
-    public State State { get; set; }
+    public State? State { get; set; }
 
     public string? City { get; set; }
 

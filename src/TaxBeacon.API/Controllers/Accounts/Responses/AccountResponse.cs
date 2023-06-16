@@ -11,7 +11,7 @@ public record AccountResponse
 
     public string? City { get; init; }
 
-    public State State { get; init; }
+    public State? State { get; init; }
 
     public string AccountType { get; init; } = null!;
 
