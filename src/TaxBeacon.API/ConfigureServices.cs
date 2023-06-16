@@ -53,7 +53,7 @@ public static class ConfigureServices
                 )
                 .AddRouteComponents(
                     routePrefix: "api/odata/roles/{id}",
-                    model: GetODataEdmModelForRoleAssignedUsers()
+                    model: GetCustomODataEdmModel<RoleAssignedUserResponse>("RoleAssignedUsers")
                 )
                 .AddRouteComponents(
                     routePrefix: "api/accounts/{accountId}",
@@ -130,15 +130,12 @@ public static class ConfigureServices
     }
 
     /// <summary>
-    /// Builds a dedicated EDM model for api/odata/roles/{id:guid}/roleassignedusers endpoint.
-    /// TODO: find a better way to make this custom routing work.
-    /// </summary>
-    /// <returns></returns>
-    private static IEdmModel GetODataEdmModelForRoleAssignedUsers()
+    /// Builds a dedicated EDM model for an endpoint.
+    private static IEdmModel GetCustomODataEdmModel<TEntity>(string entityName) where TEntity : class
     {
         var modelBuilder = new ODataConventionModelBuilder();
 
-        modelBuilder.EntitySet<RoleAssignedUserResponse>("RoleAssignedUsers");
+        modelBuilder.EntitySet<TEntity>(entityName);
 
         modelBuilder.EnableLowerCamelCase();
 
