@@ -113,7 +113,7 @@ public sealed class AccountsControllerTests
     }
 
     [Fact]
-    public async Task GetDepartmentDetailsAsync_AccountExists_ReturnsSuccessfulStatusCode()
+    public async Task GetAccountDetailsAsync_AccountExists_ReturnsSuccessfulStatusCode()
     {
         // Arrange
         _accountServiceMock
@@ -121,7 +121,7 @@ public sealed class AccountsControllerTests
             .ReturnsAsync(new AccountDetailsDto());
 
         // Act
-        var actualResponse = await _controller.GetDepartmentDetailsAsync(Guid.NewGuid(), default);
+        var actualResponse = await _controller.GetAccountDetailsAsync(Guid.NewGuid(), default);
 
         // Assert
         using (new AssertionScope())
@@ -135,7 +135,7 @@ public sealed class AccountsControllerTests
     }
 
     [Fact]
-    public async Task GetDepartmentDetailsAsync_AccountDoesNotExist_ReturnsNotFoundStatusCode()
+    public async Task GetAccountDetailsAsync_AccountDoesNotExist_ReturnsNotFoundStatusCode()
     {
         // Arrange
         _accountServiceMock
@@ -143,7 +143,7 @@ public sealed class AccountsControllerTests
             .ReturnsAsync(new NotFound());
 
         // Act
-        var actualResponse = await _controller.GetDepartmentDetailsAsync(Guid.NewGuid(), default);
+        var actualResponse = await _controller.GetAccountDetailsAsync(Guid.NewGuid(), default);
 
         // Assert
         using (new AssertionScope())
@@ -156,11 +156,11 @@ public sealed class AccountsControllerTests
     }
 
     [Fact]
-    public void GetDepartmentDetailsAsync_MarkedWithCorrectHasPermissionsAttribute()
+    public void GetAccountDetailsAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
         var methodInfo =
-            ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetDepartmentDetailsAsync)
+            ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetAccountDetailsAsync)
             .Method;
 
         // Act
@@ -170,7 +170,7 @@ public sealed class AccountsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Accounts.Read;Accounts.ReadWrite");
+            hasPermissionsAttribute?.Policy.Should().Be("Accounts.Read;Accounts.ReadWrite;Accounts.ReadExport");
         }
     }
 }

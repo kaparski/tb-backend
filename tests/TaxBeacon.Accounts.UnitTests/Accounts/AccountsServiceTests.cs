@@ -187,7 +187,7 @@ public sealed class AccountsServiceTests
     }
 
     [Fact]
-    public async Task GetJobTitleDetailsByIdAsync_NonExistingTenantId_ReturnsNotFound()
+    public async Task GetAccountDetailsByIdAsync_NonExistingTenantId_ReturnsNotFound()
     {
         // Act
         var actualResult = await _accountService.GetAccountDetailsById(Guid.NewGuid());
@@ -220,10 +220,10 @@ public sealed class AccountsServiceTests
                 .RuleFor(a => a.State, f => f.PickRandom<State>())
                 .RuleFor(a => a.City, f => f.Address.City())
                 .RuleFor(a => a.StreetAddress1, f => f.Address.StreetAddress())
-                .RuleFor(a => a.Zip, f => f.Random.Number(10000, 9999999))
+                .RuleFor(a => a.Zip, f => f.Random.Number(10000, 9999999).ToString())
                 .RuleFor(a => a.County, f => f.Address.County())
-                .RuleFor(a => a.Phone, f => f.Random.Number(100000000, 99999999))
-                .RuleFor(a => a.Fax, f => f.Random.Number(100000000, 99999999));
+                .RuleFor(a => a.Phone, f => f.Random.Number(100000000, 99999999).ToString())
+                .RuleFor(a => a.Fax, f => f.Random.Number(100000000, 99999999).ToString());
 
         public static readonly Faker<Tenant> TenantFaker =
             new Faker<Tenant>()

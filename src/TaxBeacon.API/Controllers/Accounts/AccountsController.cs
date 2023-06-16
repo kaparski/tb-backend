@@ -78,14 +78,17 @@ public class AccountsController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Account is not found</response>
     /// <returns>Account details</returns>
-    [HasPermissions(Common.Permissions.Accounts.Read, Common.Permissions.Accounts.ReadWrite)]
+    [HasPermissions(
+        Common.Permissions.Accounts.Read,
+        Common.Permissions.Accounts.ReadWrite,
+        Common.Permissions.Accounts.ReadExport)]
     [HttpGet("{id:guid}", Name = "AccountDetails")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(AccountDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetDepartmentDetailsAsync([FromRoute] Guid id,
+    public async Task<IActionResult> GetAccountDetailsAsync([FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
         var getAccountDetailsResult = await _accountService.GetAccountDetailsById(id, cancellationToken);
