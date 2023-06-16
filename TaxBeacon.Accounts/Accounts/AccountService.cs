@@ -65,6 +65,8 @@ public class AccountService: IAccountService
                 EntitiesCount = a.Entities.Count,
                 LocationsCount = a.Locations.Count,
                 ContactsCount = a.Contacts.Count,
+                Client = a.Client == null ? null : new ClientDto(a.Client.State, a.Client.Status),
+                Referral = a.Referral == null ? null : new ReferralDto(a.Referral.State, a.Referral.Status),
             })
             .SingleOrDefaultAsync(cancellationToken);
 

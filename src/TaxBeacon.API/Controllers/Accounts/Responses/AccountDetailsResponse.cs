@@ -42,5 +42,9 @@ public record AccountDetailsResponse
 
     public int ContactsCount { get; init; }
 
+    public ClientResponse? Client { get; init; }
+
+    public ReferralResponse? Referral { get; init; }
+
     public IEnumerable<SalesPersonResponse> SalesPersons { get; init; } = Enumerable.Empty<SalesPersonResponse>();
 }
