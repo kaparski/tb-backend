@@ -145,13 +145,13 @@ public class ContactServiceTests
         await _dbContext.Tenants.AddAsync(tenant);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
-        var items = TestData.TestContact.Generate(3);
+        var items = TestData.TestContact.Generate();
         await _dbContext.Contacts.AddRangeAsync(items);
         await _dbContext.Accounts.AddRangeAsync(account);
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var oneOf = await _contactService.QueryContactsAsync(new Guid());
+        var oneOf = await _contactService.GetContactDetailsAsync(new Guid(), new Guid());
 
         // Assert
         using (new AssertionScope())
