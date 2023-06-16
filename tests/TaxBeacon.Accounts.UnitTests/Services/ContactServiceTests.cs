@@ -127,8 +127,9 @@ public class ContactServiceTests
 
         public static readonly Faker<Account> TestAccount =
             new Faker<Account>()
-                .RuleFor(t => t.Id, f => Guid.NewGuid())
-                .RuleFor(t => t.Website, f => f.Internet.Url())
-                .RuleFor(t => t.Name, f => f.Person.FullName);
+                .RuleFor(a => a.Id, f => Guid.NewGuid())
+                .RuleFor(a => a.Website, f => f.Internet.Url())
+                .RuleFor(a => a.Name, f => f.Person.FullName)
+                .RuleFor(a => a.Country, f => f.Address.Country());
     }
 }

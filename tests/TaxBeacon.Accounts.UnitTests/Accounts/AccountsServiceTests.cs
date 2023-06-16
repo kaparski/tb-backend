@@ -161,6 +161,67 @@ public sealed class AccountsServiceTests
         }
     }
 
+    [Fact]
+    public async Task GetAccountDetailsByIdAsync_AccountExists_ReturnsAccountDetailsDto()
+    {
+        // Arrange
+        var tenant = TestData.TenantFaker.Generate();
+        var accounts = TestData.AccountsFaker
+            .RuleFor(a => a.TenantId, _ => tenant.Id)
+            .Generate(3);
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Accounts.AddRangeAsync(accounts);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(x => x.TenantId)
+            .Returns(tenant.Id);
+
+        // Act
+        var actualResult = await _accountService.GetAccountDetailsByIdAsync(accounts[0].Id);
+
+        // Assert
+        actualResult.TryPickT0(out var actualAccount, out _).Should().BeTrue();
+        actualAccount.Should().BeEquivalentTo(accounts[0], opt => opt.ExcludingMissingMembers());
+    }
+
+    [Fact]
+    public async Task GetAccountDetailsByIdAsync_NonExistingTenantId_ReturnsNotFound()
+    {
+        // Act
+        var actualResult = await _accountService.GetAccountDetailsByIdAsync(Guid.NewGuid());
+
+        // Assert
+        actualResult.IsT1.Should().BeTrue();
+        actualResult.IsT0.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetAccountDetailsByIdAsync_AccountTenantIdNotEqualCurrentUserTenantId_ReturnsNotFound()
+    {
+        // Arrange
+        var tenants = TestData.TenantFaker.Generate(2);
+        var accounts = TestData.AccountsViewFaker
+            .RuleFor(a => a.TenantId, _ => tenants[^1].Id)
+            .Generate(5);
+
+        await _dbContextMock.Tenants.AddRangeAsync(tenants);
+        await _dbContextMock.AccountsView.AddRangeAsync(accounts);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantId)
+            .Returns(tenants[0].Id);
+
+        // Act
+        var actualResult = await _accountService.GetAccountDetailsByIdAsync(accounts[0].Id);
+
+        // Assert
+        actualResult.IsT1.Should().BeTrue();
+        actualResult.IsT0.Should().BeFalse();
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
@@ -173,6 +234,21 @@ public sealed class AccountsServiceTests
                 .RuleFor(a => a.City, f => f.Address.City())
                 .RuleFor(a => a.Website, f => f.Internet.Url())
                 .RuleFor(a => a.AccountType, f => f.Name.JobTitle());
+
+        public static readonly Faker<Account> AccountsFaker =
+            new Faker<Account>()
+                .RuleFor(a => a.Id, _ => Guid.NewGuid())
+                .RuleFor(a => a.Name, f => f.Company.CompanyName())
+                .RuleFor(a => a.CreatedDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(a => a.Website, f => f.Internet.Url())
+                .RuleFor(a => a.Country, f => f.Address.Country())
+                .RuleFor(a => a.State, f => f.PickRandom<State>())
+                .RuleFor(a => a.City, f => f.Address.City())
+                .RuleFor(a => a.StreetAddress1, f => f.Address.StreetAddress())
+                .RuleFor(a => a.Zip, f => f.Random.Number(10000, 9999999).ToString())
+                .RuleFor(a => a.County, f => f.Address.County())
+                .RuleFor(a => a.Phone, f => f.Random.Number(100000000, 99999999).ToString())
+                .RuleFor(a => a.Fax, f => f.Random.Number(100000000, 99999999).ToString());
 
         public static readonly Faker<Tenant> TenantFaker =
             new Faker<Tenant>()
