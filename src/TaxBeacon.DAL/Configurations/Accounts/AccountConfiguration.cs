@@ -86,6 +86,21 @@ public class AccountConfiguration: IEntityTypeConfiguration<Entities.Accounts.Ac
             .HasMaxLength(200);
 
         account
+            .Property(a => a.Phone)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(15);
+
+        account
+            .Property(a => a.Fax)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(15);
+
+        account
+            .Property(a => a.Zip)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(10);
+
+        account
             .HasIndex(d => new { d.TenantId, d.Website })
             .IsUnique();
 

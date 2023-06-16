@@ -24,15 +24,15 @@ public record AccountDetailsDto
 
     public State? State { get; init; }
 
-    public int? Zip { get; init; }
+    public string? Zip { get; init; }
 
     public string? County { get; init; }
 
-    public int? Phone { get; init; }
+    public string? Phone { get; init; }
 
     public string? Extension { get; init; }
 
-    public int? Fax { get; init; }
+    public string? Fax { get; init; }
 
     public string? Address { get; init; }
 

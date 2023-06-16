@@ -26,15 +26,15 @@ public class Account: BaseEntity
 
     public State? State { get; set; }
 
-    public int? Zip { get; set; }
+    public string? Zip { get; set; }
 
     public string? County { get; set; }
 
-    public int? Phone { get; set; }
+    public string? Phone { get; set; }
 
     public string? Extension { get; set; }
 
-    public int? Fax { get; set; }
+    public string? Fax { get; set; }
 
     public string? Address { get; set; }
 
