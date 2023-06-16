@@ -44,7 +44,28 @@ public class AccountService: IAccountService
     {
         var accountDetails = await _context.Accounts
             .Where(a => a.Id == id && a.TenantId == _currentUserService.TenantId)
-            .ProjectToType<AccountDetailsDto>()
+            .Select(a => new AccountDetailsDto
+            {
+                Id = a.Id,
+                Name = a.Name,
+                DoingBusinessAs = a.DoingBusinessAs,
+                LinkedInUrl = a.LinkedInUrl,
+                Website = a.Website,
+                Country = a.Country,
+                StreetAddress1 = a.StreetAddress1,
+                StreetAddress2 = a.StreetAddress2,
+                City = a.City,
+                State = a.State,
+                Zip = a.Zip,
+                County = a.County,
+                Phone = a.Phone,
+                Extension = a.Extension,
+                Fax = a.Fax,
+                Address = a.Address,
+                EntitiesCount = a.Entities.Count,
+                LocationsCount = a.Locations.Count,
+                ContactsCount = a.Contacts.Count,
+            })
             .SingleOrDefaultAsync(cancellationToken);
 
         return accountDetails is not null

@@ -36,5 +36,11 @@ public record AccountDetailsDto
 
     public string? Address { get; init; }
 
+    public int EntitiesCount { get; init; }
+    
+    public int LocationsCount { get; init; }
+    
+    public int ContactsCount { get; init; }
+
     public IEnumerable<SalesPersonDto> SalesPersons { get; init; } = Enumerable.Empty<SalesPersonDto>();
 }
