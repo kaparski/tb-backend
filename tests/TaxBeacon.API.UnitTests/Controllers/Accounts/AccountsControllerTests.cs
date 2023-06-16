@@ -3,8 +3,10 @@ using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using OneOf.Types;
 using System.Reflection;
 using TaxBeacon.Accounts.Accounts;
+using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts;
 using TaxBeacon.API.Controllers.Accounts.Requests;
@@ -82,7 +84,7 @@ public sealed class AccountsControllerTests
             var actualResult = actualResponse as FileContentResult;
             actualResult.Should().NotBeNull();
             actualResult!.FileDownloadName.Should().Be($"accounts.{fileType.ToString().ToLowerInvariant()}");
-            actualResult!.ContentType.Should().Be(fileType switch
+            actualResult.ContentType.Should().Be(fileType switch
             {
                 FileType.Csv => "text/csv",
                 FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -107,6 +109,68 @@ public sealed class AccountsControllerTests
         {
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be("Accounts.ReadExport");
+        }
+    }
+
+    [Fact]
+    public async Task GetAccountDetailsAsync_AccountExists_ReturnsSuccessfulStatusCode()
+    {
+        // Arrange
+        _accountServiceMock
+            .Setup(x => x.GetAccountDetailsByIdAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(new AccountDetailsDto());
+
+        // Act
+        var actualResponse = await _controller.GetAccountDetailsAsync(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<AccountDetailsResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task GetAccountDetailsAsync_AccountDoesNotExist_ReturnsNotFoundStatusCode()
+    {
+        // Arrange
+        _accountServiceMock
+            .Setup(x => x.GetAccountDetailsByIdAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetAccountDetailsAsync(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void GetAccountDetailsAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo =
+            ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetAccountDetailsAsync)
+            .Method;
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be("Accounts.Read;Accounts.ReadWrite;Accounts.ReadExport");
         }
     }
 }

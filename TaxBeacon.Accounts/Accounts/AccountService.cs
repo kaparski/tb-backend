@@ -1,6 +1,8 @@
 ﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using OneOf;
+using OneOf.Types;
 using System.Collections.Immutable;
 using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.Common.Converters;
@@ -30,13 +32,46 @@ public class AccountService: IAccountService
         _dateTimeService = dateTimeService;
         _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
                                 ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
-        ;
     }
 
     public IQueryable<AccountDto> QueryAccounts() =>
         _context.AccountsView
             .Where(av => av.TenantId == _currentUserService.TenantId)
             .ProjectToType<AccountDto>();
+
+    public async Task<OneOf<AccountDetailsDto, NotFound>> GetAccountDetailsByIdAsync(Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var accountDetails = await _context.Accounts
+            .Where(a => a.Id == id && a.TenantId == _currentUserService.TenantId)
+            .Select(a => new AccountDetailsDto
+            {
+                Id = a.Id,
+                Name = a.Name,
+                DoingBusinessAs = a.DoingBusinessAs,
+                LinkedInUrl = a.LinkedInUrl,
+                Website = a.Website,
+                Country = a.Country,
+                StreetAddress1 = a.StreetAddress1,
+                StreetAddress2 = a.StreetAddress2,
+                City = a.City,
+                State = a.State,
+                Zip = a.Zip,
+                County = a.County,
+                Phone = a.Phone,
+                Extension = a.Extension,
+                Fax = a.Fax,
+                Address = a.Address,
+                EntitiesCount = a.Entities.Count,
+                LocationsCount = a.Locations.Count,
+                ContactsCount = a.Contacts.Count,
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return accountDetails is not null
+            ? accountDetails
+            : new NotFound();
+    }
 
     public async Task<byte[]> ExportAccountsAsync(FileType fileType,
         CancellationToken cancellationToken = default)
