@@ -25,7 +25,7 @@ public class JobTitleUsersController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Job title is not found</response>
     /// <returns>Users of job title</returns>
-    [HasPermissions(Common.Permissions.JobTitles.ReadWrite)]
+    [HasPermissions(Common.Permissions.JobTitles.Read, Common.Permissions.JobTitles.ReadWrite)]
     [EnableQuery]
     [HttpGet("api/odata/jobtitles/{id:guid}/jobtitleusers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]

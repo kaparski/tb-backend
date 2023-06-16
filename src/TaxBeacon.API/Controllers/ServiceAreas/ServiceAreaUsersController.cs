@@ -25,7 +25,7 @@ public class ServiceAreaUsersController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Service area is not found</response>
     /// <returns>Users of service area</returns>
-    [HasPermissions(Common.Permissions.ServiceAreas.ReadWrite)]
+    [HasPermissions(Common.Permissions.ServiceAreas.Read, Common.Permissions.ServiceAreas.ReadWrite)]
     [EnableQuery]
     [HttpGet("api/odata/serviceareas/{id:guid}/serviceareausers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
