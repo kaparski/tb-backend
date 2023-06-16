@@ -29,6 +29,8 @@ public interface IDepartmentService
     Task<OneOf<QueryablePaging<DepartmentUserDto>, NotFound>> GetDepartmentUsersAsync(Guid departmentId,
         GridifyQuery gridifyQuery, CancellationToken cancellationToken = default);
 
+    Task<IQueryable<DepartmentUserDto>> QueryDepartmentUsersAsync(Guid departmentId);
+
     Task<OneOf<DepartmentServiceAreaDto[], NotFound>> GetDepartmentServiceAreasAsync(Guid id,
         CancellationToken cancellationToken = default);
 

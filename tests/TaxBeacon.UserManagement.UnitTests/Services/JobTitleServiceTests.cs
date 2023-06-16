@@ -10,6 +10,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
@@ -514,6 +515,50 @@ public class JobTitleServiceTests
             pageOfUsers.Count.Should().Be(3);
             var listOfUsers = pageOfUsers.Query.ToList();
             listOfUsers.Count.Should().Be(3);
+            listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
+        }
+    }
+
+    [Fact]
+    public async Task QueryUsersAsync_JobTitleDoesNotExists_ShouldThrow()
+    {
+        // Arrange
+        TestData.TestJobTitle.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(1));
+        var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "fullname asc", };
+        var title = TestData.TestJobTitle.Generate();
+        await _dbContextMock.JobTitles.AddAsync(title);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
+
+        // Act
+        var task = _serviceAreaService.QueryUsersAsync(new Guid());
+
+        // Arrange
+        task.Exception!.InnerException.Should().BeOfType<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task QueryUsersAsync_JobTitleExists_ShouldReturnUsersInDescendingOrderByEmail()
+    {
+        // Arrange
+        TestData.TestJobTitle.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(3));
+        var title = TestData.TestJobTitle.Generate();
+        await _dbContextMock.JobTitles.AddAsync(title);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
+
+        // Act
+        var query = await _serviceAreaService.QueryUsersAsync(title.Id);
+        var listOfUsers = query
+            .OrderByDescending(u => u.Email)
+            .ToArray();
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            listOfUsers.Length.Should().Be(3);
             listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
         }
     }

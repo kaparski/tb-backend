@@ -3,6 +3,7 @@ using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
 using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
@@ -11,6 +12,7 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
@@ -283,6 +285,32 @@ namespace TaxBeacon.UserManagement.Services
                     JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
                 })
                 .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+            return users;
+        }
+
+        public async Task<IQueryable<DivisionUserDto>> QueryDivisionUsersAsync(Guid divisionId)
+        {
+            var tenantId = _currentUserService.TenantId;
+
+            if ((await _context.Divisions
+                .FirstOrDefaultAsync(d => d.Id == divisionId && d.TenantId == tenantId)) is null)
+            {
+                throw new NotFoundException($"Division {divisionId} not found");
+            }
+
+            var users = _context
+                .Users
+                .Where(u => u.DivisionId == divisionId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
+                .Select(u => new DivisionUserDto()
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FullName = u.FullName,
+                    Department = u.Department == null ? string.Empty : u.Department.Name,
+                    JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
+                })
+            ;
 
             return users;
         }

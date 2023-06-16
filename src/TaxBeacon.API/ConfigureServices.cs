@@ -56,6 +56,26 @@ public static class ConfigureServices
                     model: GetCustomODataEdmModel<RoleAssignedUserResponse>("RoleAssignedUsers")
                 )
                 .AddRouteComponents(
+                    routePrefix: "api/odata/departments/{id}",
+                    model: GetCustomODataEdmModel<DepartmentUserResponse>("DepartmentUsers")
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/jobtitles/{id}",
+                    model: GetCustomODataEdmModel<JobTitleUserResponse>("JobTitleUsers")
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/serviceareas/{id}",
+                    model: GetCustomODataEdmModel<ServiceAreaUserResponse>("ServiceAreaUsers")
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/teams/{id}",
+                    model: GetCustomODataEdmModel<TeamUserResponse>("TeamUsers")
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/divisions/{id}",
+                    model: GetCustomODataEdmModel<DivisionUserResponse>("DivisionUsers")
+                )
+                .AddRouteComponents(
                     routePrefix: "api/accounts/{accountId}",
                     model: GetODataEdmModelForAccount()
                 )
@@ -131,6 +151,7 @@ public static class ConfigureServices
 
     /// <summary>
     /// Builds a dedicated EDM model for an endpoint.
+    /// </summary>
     private static IEdmModel GetCustomODataEdmModel<TEntity>(string entityName) where TEntity : class
     {
         var modelBuilder = new ODataConventionModelBuilder();
@@ -145,7 +166,6 @@ public static class ConfigureServices
     /// <summary>
     /// Builds a dedicated EDM model for api/odata/accounts/{id} endpoint.
     /// </summary>
-    /// <returns></returns>
     private static IEdmModel GetODataEdmModelForAccount()
     {
         var modelBuilder = new ODataConventionModelBuilder();
