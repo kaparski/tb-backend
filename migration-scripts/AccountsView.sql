@@ -13,7 +13,7 @@ SELECT a.Id,
        c.Status as ClientStatus,
        r.State as ReferralState,
        r.Status as ReferralStatus,
-       CONCAT_WS(',',
+       CONCAT_WS(', ',
                  NULLIF(CONCAT_WS(' - ', c.State, c.Status), ''),
                  NULLIF(CONCAT_WS(' - ', r.State, r.Status), '')) as AccountType
 FROM Accounts a

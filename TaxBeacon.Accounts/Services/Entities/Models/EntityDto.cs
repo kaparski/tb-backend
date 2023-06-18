@@ -1,20 +1,22 @@
 ﻿using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Accounts;
 
-namespace TaxBeacon.Accounts.Services.Entities.Models;
-public class EntityDto
+namespace TaxBeacon.Accounts.Entities;
+public record EntityDto
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; init; } = null!;
 
-    public string? EntityId { get; set; }
+    public string? EntityId { get; init; }
 
-    public string? City { get; set; }
+    public string? City { get; init; }
 
-    public State State { get; set; }
+    public int Fein { get; set; }
 
-    public AccountEntityType Type { get; set; } = AccountEntityType.None;
+    public State State { get; init; }
 
-    public Status Status { get; set; }
+    public AccountEntityType Type { get; init; } = AccountEntityType.None;
+
+    public Status Status { get; init; }
 }

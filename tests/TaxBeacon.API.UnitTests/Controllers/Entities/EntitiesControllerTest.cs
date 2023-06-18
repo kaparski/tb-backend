@@ -3,6 +3,7 @@ using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using OneOf;
 using OneOf.Types;
 using System.Reflection;
 using TaxBeacon.Accounts.Services.Entities;
@@ -24,14 +25,14 @@ public class EntitiesControllerTest
     }
 
     [Fact]
-    public async Task Get_ExistingAccountId_ReturnSuccessStatusCode()
+    public void Get_ExistingAccountId_ReturnSuccessStatusCode()
     {
         // Arrange
-        _entityServiceMock.Setup(p => p.QueryEntitiesAsync(It.IsAny<Guid>())).ReturnsAsync(
-                new Success<IQueryable<EntityDto>>(Enumerable.Empty<EntityDto>().AsQueryable()));
+        _entityServiceMock.Setup(p => p.QueryEntitiesAsync(It.IsAny<Guid>())).Returns(
+                OneOf<IQueryable<EntityDto>, NotFound>.FromT0(new List<EntityDto>().AsQueryable()));
 
         // Act
-        var actualResponse = await _controller.Get(new Guid());
+        var actualResponse = _controller.Get(new Guid());
 
         // Arrange
         using (new AssertionScope())
@@ -46,14 +47,14 @@ public class EntitiesControllerTest
     }
 
     [Fact]
-    public async Task Get_NonExistingAccountId_ReturnNotFoundStatusCode()
+    public void Get_NonExistingAccountId_ReturnNotFoundStatusCode()
     {
         // Arrange
-        _entityServiceMock.Setup(p => p.QueryEntitiesAsync(It.IsAny<Guid>())).ReturnsAsync(
+        _entityServiceMock.Setup(p => p.QueryEntitiesAsync(It.IsAny<Guid>())).Returns(
             new NotFound());
 
         // Act
-        var actualResponse = await _controller.Get(new Guid());
+        var actualResponse = _controller.Get(new Guid());
 
         // Arrange
         // Assert
@@ -70,7 +71,7 @@ public class EntitiesControllerTest
     public void Get_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, Task<IActionResult>>)_controller.Get).Method;
+        var methodInfo = ((Func<Guid, IActionResult>)_controller.Get).Method;
         var permissions = new object[]
         {
             Common.Permissions.Entities.Read

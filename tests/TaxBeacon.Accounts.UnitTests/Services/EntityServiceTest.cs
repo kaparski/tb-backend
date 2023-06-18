@@ -55,13 +55,13 @@ public class EntityServiceTest
         await _accountContextMock.SaveChangesAsync();
 
         // Act
-        var oneOf = await _entityService.QueryEntitiesAsync(items[0].Account.Id);
+        var oneOf = _entityService.QueryEntitiesAsync(items[0].Account.Id);
 
         // Assert
         using (new AssertionScope())
         {
             oneOf.IsT0.Should().BeTrue();
-            var result = oneOf.AsT0.Value;
+            var result = oneOf.AsT0;
             result.Should().HaveCount(3);
 
             foreach (var dto in result)
@@ -92,7 +92,7 @@ public class EntityServiceTest
         await _accountContextMock.SaveChangesAsync();
 
         // Act
-        var oneOf = await _entityService.QueryEntitiesAsync(new Guid());
+        var oneOf = _entityService.QueryEntitiesAsync(new Guid());
 
         // Assert
         using (new AssertionScope())
@@ -118,15 +118,16 @@ public class EntityServiceTest
                 .RuleFor(t => t.Status, t => Status.Active);
 
         public static readonly Faker<Tenant> TestTenant =
-            new Faker<Tenant>()
-                .RuleFor(t => t.Id, f => TestTenantId)
-                .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
+           new Faker<Tenant>()
+               .RuleFor(t => t.Id, f => Guid.NewGuid())
+               .RuleFor(t => t.Name, f => f.Company.CompanyName())
+               .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow);
 
         public static readonly Faker<Account> TestAccount =
             new Faker<Account>()
-                .RuleFor(t => t.Id, f => Guid.NewGuid())
-                .RuleFor(t => t.Website, f => f.Internet.Url())
-                .RuleFor(t => t.Name, f => f.Person.FullName);
+                .RuleFor(a => a.Id, f => Guid.NewGuid())
+                .RuleFor(a => a.Website, f => f.Internet.Url())
+                .RuleFor(a => a.Name, f => f.Company.CompanyName())
+                .RuleFor(a => a.Country, f => f.Address.Country());
     }
 }

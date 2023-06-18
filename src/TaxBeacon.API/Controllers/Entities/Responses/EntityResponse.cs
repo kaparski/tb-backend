@@ -3,19 +3,21 @@ using TaxBeacon.Common.Accounts;
 
 namespace TaxBeacon.API.Controllers.Entities.Responses;
 
-public class EntityResponse
+public record EntityResponse
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Name { get; set; } = null!;
+    public int Fein { get; set; }
 
-    public string? EntityId { get; set; }
+    public string Name { get; init; } = null!;
 
-    public string? City { get; set; }
+    public string? EntityId { get; init; }
 
-    public State State { get; set; }
+    public string? City { get; init; }
 
-    public AccountEntityType Type { get; set; } = AccountEntityType.None;
+    public State State { get; init; }
 
-    public Status Status { get; set; }
+    public AccountEntityType Type { get; init; } = AccountEntityType.None;
+
+    public Status Status { get; init; }
 }

@@ -36,10 +36,12 @@ BEGIN TRY
     INSERT INTO @salesOpsRolePermissions (Name)
     VALUES ('Accounts.Read'),
            ('Accounts.ReadExport'),
+           ('Contacts.Read'),
+           ('Locations.Read'),
+           ('TableFilters.Read'),
            ('Entities.Read'),
            ('Entities.ReadWrite'),
-           ('Contacts.Read'),
-           ('Locations.Read');
+           ('TableFilters.ReadWrite');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),
