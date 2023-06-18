@@ -37,8 +37,10 @@ BEGIN TRY
     VALUES ('Accounts.Read'),
            ('Accounts.ReadExport'),
            ('Contacts.Read'),
+           ('Locations.Read'),
+           ('TableFilters.Read'),
            ('Entities.Read'),
-           ('Locations.Read');
+           ('TableFilters.ReadWrite');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),
