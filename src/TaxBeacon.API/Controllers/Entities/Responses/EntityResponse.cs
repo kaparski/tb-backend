@@ -7,6 +7,8 @@ public record EntityResponse
 {
     public Guid Id { get; init; }
 
+    public int Fein { get; set; }
+
     public string Name { get; init; } = null!;
 
     public string? EntityId { get; init; }

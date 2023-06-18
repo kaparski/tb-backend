@@ -8,6 +8,7 @@ using TaxBeacon.API.Controllers.Entities.Responses;
 using TaxBeacon.API.Exceptions;
 
 namespace TaxBeacon.API.Controllers.Entities;
+
 [Authorize]
 public class EntitiesController: BaseController
 {
@@ -25,18 +26,18 @@ public class EntitiesController: BaseController
     [HasPermissions(
         Common.Permissions.Entities.Read)]
     [EnableQuery]
-    [HttpGet("api/accounts/{id:guid}/entities")]
+    [HttpGet("api/accounts/{accountId:guid}/entities")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IQueryable<EntityResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Get([FromRoute] Guid id)
+    public IActionResult Get([FromRoute] Guid accountId)
     {
-        var oneOf = await _entityService.QueryEntitiesAsync(id);
+        var oneOf = _entityService.QueryEntitiesAsync(accountId);
 
         return oneOf.Match<IActionResult>(
-            entities => Ok(entities.Value.ProjectToType<EntityResponse>()),
+            entities => Ok(entities.ProjectToType<EntityResponse>()),
             _ => NotFound());
     }
 }

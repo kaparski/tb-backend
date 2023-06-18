@@ -12,6 +12,8 @@ public record EntityDto
 
     public string? City { get; init; }
 
+    public int Fein { get; set; }
+
     public State State { get; init; }
 
     public AccountEntityType Type { get; init; } = AccountEntityType.None;

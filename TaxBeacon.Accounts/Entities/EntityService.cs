@@ -1,10 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Mapster;
 using OneOf;
 using OneOf.Types;
-using System.Collections.Immutable;
-using TaxBeacon.Common.Converters;
-using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Interfaces;
 
@@ -22,29 +18,21 @@ public class EntityService: IEntityService
         _currentUserService = currentUserService;
     }
 
-    public async Task<OneOf<Success<IQueryable<EntityDto>>, NotFound>> QueryEntitiesAsync(Guid accountId)
+    public OneOf<IQueryable<EntityDto>, NotFound> QueryEntitiesAsync(Guid accountId)
     {
-        var accountExists = await _context.Accounts.AnyAsync(x => x.Id == accountId && x.TenantId == _currentUserService.TenantId);
+        var tenantId = _currentUserService.TenantId;
+
+        var accountExists = _context.Accounts.Any(acc => acc.Id == accountId && acc.TenantId == tenantId);
+
         if (!accountExists)
         {
             return new NotFound();
         }
 
-        var items = _context.Entities.Where(d => d.TenantId == _currentUserService.TenantId);
+        var entities = _context.Entities
+            .Where(l => l.AccountId == accountId)
+            .ProjectToType<EntityDto>();
 
-        var itemDtos = items
-            .Where(x => x.AccountId == accountId)
-            .Select(d => new EntityDto
-            {
-                Id = d.Id,
-                Name = d.Name,
-                City = d.City,
-                State = d.State,
-                Type = d.Type,
-                Status = d.Status,
-                EntityId = d.EntityId
-            });
-
-        return new Success<IQueryable<EntityDto>>(itemDtos);
+        return OneOf<IQueryable<EntityDto>, NotFound>.FromT0(entities);
     }
 }
