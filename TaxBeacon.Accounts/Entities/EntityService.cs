@@ -24,8 +24,7 @@ public class EntityService: IEntityService
 
     public async Task<OneOf<Success<IQueryable<EntityDto>>, NotFound>> QueryEntitiesAsync(Guid accountId)
     {
-        var currentTenantId = _currentUserService.TenantId;
-        var accountExists = await _context.Accounts.AnyAsync(x => x.Id == accountId && x.TenantId == currentTenantId);
+        var accountExists = await _context.Accounts.AnyAsync(x => x.Id == accountId && x.TenantId == _currentUserService.TenantId);
         if (!accountExists)
         {
             return new NotFound();
@@ -35,7 +34,7 @@ public class EntityService: IEntityService
 
         var itemDtos = items
             .Where(x => x.AccountId == accountId)
-            .Select(d => new EntityDto()
+            .Select(d => new EntityDto
             {
                 Id = d.Id,
                 Name = d.Name,
