@@ -109,5 +109,15 @@ public class ContactConfigurations: IEntityTypeConfiguration<Contact>
             .Property(c => c.Phone2)
             .HasColumnType("nvarchar")
             .HasMaxLength(15);
+
+        builder
+            .Property(c => c.Role)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
+
+        builder
+            .Property(c => c.SubRole)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
     }
 }
