@@ -74,6 +74,8 @@ public class ContactService: IContactService
                 AccountId = x.AccountId,
                 TenantId = x.TenantId,
                 Zip = x.Zip,
+                Role = x.Role,
+                SubRole = x.SubRole
             })
             .FirstOrDefaultAsync(cancellationToken);
 
