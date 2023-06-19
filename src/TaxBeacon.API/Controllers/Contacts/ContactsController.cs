@@ -41,4 +41,29 @@ public class ContactsController: BaseController
             contacts => Ok(contacts.Value.ProjectToType<ContactResponse>()),
             _ => NotFound());
     }
+
+    /// <summary>
+    /// Get Contact Details
+    /// </summary>
+    /// <response code="200">Returns contact</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Not found</response>
+    /// <returns>Contact Details</returns>
+    [HasPermissions(
+        Common.Permissions.Contacts.Read)]
+    [HttpGet("/api/accounts/{accountId:guid}/contacts/{contactId:guid}")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(ContactDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetContactDetails([FromRoute] Guid accountId, [FromRoute] Guid contactId, CancellationToken cancellationToken)
+    {
+        var oneOf = await _contactService.GetContactDetailsAsync(contactId, accountId, cancellationToken);
+
+        return oneOf.Match<IActionResult>(
+            contacts => Ok(contacts.Adapt<ContactDetailsResponse>()),
+            _ => NotFound());
+    }
 }
