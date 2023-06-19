@@ -121,7 +121,7 @@ public class ContactServiceTests
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var oneOf = await _contactService.GetContactDetailsAsync(item.Account.Id, item.Id);
+        var oneOf = await _contactService.GetContactDetailsAsync(item.Id, item.Account.Id, default);
 
         // Assert
         using (new AssertionScope())
@@ -151,7 +151,7 @@ public class ContactServiceTests
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var oneOf = await _contactService.GetContactDetailsAsync(new Guid(), new Guid());
+        var oneOf = await _contactService.GetContactDetailsAsync(new Guid(), new Guid(), default);
 
         // Assert
         using (new AssertionScope())

@@ -72,7 +72,7 @@ public class ContactsControllerTest
     {
         // Arrange
         _contactServiceMock.Setup(p => p
-                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), TODO))
             .ReturnsAsync(new ContactDetailsDto());
 
         // Act
@@ -95,7 +95,7 @@ public class ContactsControllerTest
     {
         // Arrange
         _contactServiceMock.Setup(p => p
-                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), TODO))
             .ReturnsAsync(new NotFound());
 
         // Act

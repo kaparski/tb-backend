@@ -50,7 +50,7 @@ public class ContactService: IContactService
         return new Success<IQueryable<ContactDto>>(contacts);
     }
 
-    public async Task<OneOf<ContactDetailsDto, NotFound>> GetContactDetailsAsync(Guid accountId, Guid contactId)
+    public async Task<OneOf<ContactDetailsDto, NotFound>> GetContactDetailsAsync(Guid contactId, Guid accountId, CancellationToken cancellationToken)
     {
         var currentTenantId = _currentUserService.TenantId;
 
@@ -75,7 +75,7 @@ public class ContactService: IContactService
                 TenantId = x.TenantId,
                 Zip = x.Zip,
             })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (contactDetailsDto == null)
         {

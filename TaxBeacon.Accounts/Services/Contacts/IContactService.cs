@@ -9,5 +9,5 @@ public interface IContactService
 {
     Task<OneOf<Success<IQueryable<ContactDto>>, NotFound>> QueryContactsAsync(Guid accountId);
 
-    Task<OneOf<ContactDetailsDto, NotFound>> GetContactDetailsAsync(Guid accountId, Guid contactId);
+    Task<OneOf<ContactDetailsDto, NotFound>> GetContactDetailsAsync(Guid contactId, Guid accountId, CancellationToken cancellationToken);
 }

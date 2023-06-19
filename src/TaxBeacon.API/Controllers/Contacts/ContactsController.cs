@@ -58,9 +58,9 @@ public class ContactsController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetContactDetails([FromRoute] Guid accountId, [FromRoute] Guid contactId)
+    public async Task<IActionResult> GetContactDetails([FromRoute] Guid accountId, [FromRoute] Guid contactId, CancellationToken cancellationToken)
     {
-        var oneOf = await _contactService.GetContactDetailsAsync(accountId, contactId);
+        var oneOf = await _contactService.GetContactDetailsAsync(contactId, accountId, cancellationToken);
 
         return oneOf.Match<IActionResult>(
             contacts => Ok(contacts.Adapt<ContactDetailsResponse>()),
