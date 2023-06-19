@@ -50,6 +50,8 @@ VALUES ('Departments.Read'),
        ('Users.ReadExport'),
        ('Accounts.Read'),
        ('Accounts.ReadExport'),
+       ('Entities.Read'),
+       ('Entities.ReadWrite'),
        ('Contacts.Read'),
        ('Locations.Read');
 
