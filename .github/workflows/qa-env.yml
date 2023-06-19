@@ -15,6 +15,12 @@ jobs:
   migrations:
     runs-on: ubuntu-latest
     environment: qa
+    env: 
+      connectionString: '${{secrets.CONNECTION_STRING}}'
+      DB_SERVER: '${{secrets.DB_SERVER}}'
+      DB_USERNAME: '${{secrets.DB_USERNAME}}'
+      DB_NAME: '${{secrets.DB_NAME}}'
+      DB_SQLPASSWD: '${{secrets.DB_SQLPASSWD}}'
     if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v3
