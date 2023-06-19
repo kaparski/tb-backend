@@ -6,7 +6,7 @@ using TaxBeacon.Common.Models;
 namespace TaxBeacon.Accounts.Services.Entities;
 public interface IEntityService
 {
-    Task<OneOf<Success<IQueryable<EntityDto>>, NotFound>> QueryEntitiesAsync(Guid accountId);
+    OneOf<IQueryable<EntityDto>, NotFound> QueryEntitiesAsync(Guid accountId);
 
     Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid entityId, int page = 1,
     int pageSize = 10, CancellationToken cancellationToken = default);

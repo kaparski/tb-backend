@@ -6,6 +6,7 @@ namespace TaxBeacon.API.Controllers.Entities.Responses;
 
 public record EntityDetailsResponse
 (
+    Guid Id,
     string Name,
     string? Dba,
     string? EntityId,

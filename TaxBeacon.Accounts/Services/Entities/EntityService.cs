@@ -18,7 +18,6 @@ namespace TaxBeacon.Accounts.Services.Entities;
 public class EntityService: IEntityService
 {
     private readonly ILogger<EntityService> _logger;
-    private readonly IDateTimeFormatter _dateTimeFormatter;
     private readonly IDateTimeService _dateTimeService;
     private readonly IAccountDbContext _context;
     private readonly ICurrentUserService _currentUserService;
@@ -26,14 +25,12 @@ public class EntityService: IEntityService
 
     public EntityService(
         ILogger<EntityService> logger,
-        IDateTimeFormatter dateTimeFormatter,
         IDateTimeService dateTimeService,
         IAccountDbContext context,
         ICurrentUserService currentUserService,
         IEnumerable<IEntityActivityFactory> entityActivityFactories)
     {
         _logger = logger;
-        _dateTimeFormatter = dateTimeFormatter;
         _dateTimeService = dateTimeService;
         _context = context;
         _currentUserService = currentUserService;
@@ -41,31 +38,22 @@ public class EntityService: IEntityService
                                        ?? ImmutableDictionary<(EntityEventType, uint), IEntityActivityFactory>.Empty;
     }
 
-    public async Task<OneOf<Success<IQueryable<EntityDto>>, NotFound>> QueryEntitiesAsync(Guid accountId)
+    public OneOf<IQueryable<EntityDto>, NotFound> QueryEntitiesAsync(Guid accountId)
     {
-        var currentTenantId = _currentUserService.TenantId;
-        var accountExists = await _context.Accounts.AnyAsync(x => x.Id == accountId && x.TenantId == currentTenantId);
+        var tenantId = _currentUserService.TenantId;
+
+        var accountExists = _context.Accounts.Any(acc => acc.Id == accountId && acc.TenantId == tenantId);
+
         if (!accountExists)
         {
             return new NotFound();
         }
 
-        var items = _context.Entities.Where(d => d.TenantId == _currentUserService.TenantId);
+        var itemDtos = _context.Entities
+            .Where(l => l.AccountId == accountId)
+            .ProjectToType<EntityDto>();
 
-        var itemDtos = items
-            .Where(x => x.AccountId == accountId)
-            .Select(d => new EntityDto()
-            {
-                Id = d.Id,
-                Name = d.Name,
-                City = d.City,
-                State = d.State,
-                Type = d.Type,
-                Status = d.Status,
-                EntityId = d.EntityId
-            });
-
-        return new Success<IQueryable<EntityDto>>(itemDtos);
+        return OneOf<IQueryable<EntityDto>, NotFound>.FromT0(itemDtos);
     }
 
     public async Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid entityId, int page = 1,
