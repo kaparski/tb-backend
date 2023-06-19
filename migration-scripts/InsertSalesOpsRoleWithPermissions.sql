@@ -39,6 +39,7 @@ BEGIN TRY
            ('Contacts.Read'),
            ('Locations.Read'),
            ('TableFilters.Read'),
+           ('Entities.Read'),
            ('TableFilters.ReadWrite');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)

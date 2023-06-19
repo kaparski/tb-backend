@@ -5,6 +5,7 @@ using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Accounts.Accounts;
 using Microsoft.Extensions.DependencyInjection;
 using TaxBeacon.Accounts.Locations;
+using TaxBeacon.Accounts.Entities;
 
 namespace TaxBeacon.Accounts;
 
@@ -16,6 +17,7 @@ public static class ConfigureServices
         serviceCollection.AddAccounts();
         serviceCollection.AddScoped<IContactService, ContactService>();
         serviceCollection.AddScoped<ILocationService, LocationService>();
+        serviceCollection.AddScoped<IEntityService, EntityService>();
 
         return serviceCollection;
     }
