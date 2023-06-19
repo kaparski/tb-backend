@@ -4,8 +4,10 @@ using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using OneOf.Types;
+using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.Accounts.Entities;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
@@ -49,27 +51,24 @@ public class EntityServiceTest
         await _dbContextMock.Tenants.AddAsync(tenant);
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
-        var items = TestData.TestEntity.Generate(3);
-        await _accountContextMock.Entities.AddRangeAsync(items);
+        var entities = TestData.TestEntity.Generate(3);
+        await _accountContextMock.Entities.AddRangeAsync(entities);
         await _accountContextMock.Accounts.AddRangeAsync(account);
         await _accountContextMock.SaveChangesAsync();
 
+        var expectedEntities = entities
+            .Where(a => a.TenantId == tenant.Id)
+            .ToList();
+
         // Act
-        var oneOf = _entityService.QueryEntitiesAsync(items[0].Account.Id);
+        var actualResult = _entityService.QueryEntitiesAsync(entities[0].Account.Id).AsT0.ToList();
 
         // Assert
         using (new AssertionScope())
         {
-            oneOf.IsT0.Should().BeTrue();
-            var result = oneOf.AsT0;
-            result.Should().HaveCount(3);
-
-            foreach (var dto in result)
-            {
-                var item = items.Single(u => u.Id == dto.Id);
-
-                dto.Should().BeEquivalentTo(item, opt => opt.ExcludingMissingMembers());
-            }
+            actualResult.Should().HaveCount(expectedEntities.Count)
+                .And.AllBeOfType<EntityDto>()
+                .And.BeEquivalentTo(expectedEntities, opt => opt.ExcludingMissingMembers());
         }
     }
 
