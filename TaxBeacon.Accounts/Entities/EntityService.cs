@@ -30,7 +30,7 @@ public class EntityService: IEntityService
         }
 
         var entities = _context.Entities
-            .Where(l => l.AccountId == accountId)
+            .Where(e => e.AccountId == accountId && e.TenantId == tenantId)
             .ProjectToType<EntityDto>();
 
         return OneOf<IQueryable<EntityDto>, NotFound>.FromT0(entities);

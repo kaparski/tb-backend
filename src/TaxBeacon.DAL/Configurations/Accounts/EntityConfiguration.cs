@@ -61,8 +61,8 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
         builder
             .Property(e => e.Type)
             .HasConversion(
-                v => v.Value,
-                v => AccountEntityType.FromValue(v))
+                v => v.Name,
+                v => AccountEntityType.FromName(v, false))
             .HasColumnType("nvarchar")
             .HasMaxLength(20);
 
