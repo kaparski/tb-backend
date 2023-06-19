@@ -28,6 +28,10 @@ jobs:
         run: dotnet restore ${{ github.workspace }}/TaxBeacon.sln
       - name: Update database
         run: dotnet ef database update -p ${{ github.workspace }}/src/TaxBeacon.DAL/TaxBeacon.DAL.csproj -s ${{ github.workspace }}/src/TaxBeacon.API/TaxBeacon.API.csproj --connection '${{secrets.CONNECTION_STRING}}'
+      - name: Run script file
+        run: |
+          chmod +x ${{ github.workspace }}/migration-scripts/update.sh
+          ${{ github.workspace }}/migration-scripts/update.sh
 
   build:
     runs-on: backend
