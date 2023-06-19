@@ -94,5 +94,20 @@ public class ContactConfigurations: IEntityTypeConfiguration<Contact>
             .Property(c => c.Country)
             .HasColumnType("nvarchar")
             .HasMaxLength(100);
+
+        builder
+            .Property(c => c.Zip)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(9);
+
+        builder
+            .Property(c => c.Address)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(200);
+
+        builder
+            .Property(c => c.Phone2)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(15);
     }
 }
