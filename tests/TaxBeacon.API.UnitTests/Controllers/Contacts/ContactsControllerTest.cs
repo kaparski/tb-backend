@@ -72,11 +72,11 @@ public class ContactsControllerTest
     {
         // Arrange
         _contactServiceMock.Setup(p => p
-                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), TODO))
+                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
             .ReturnsAsync(new ContactDetailsDto());
 
         // Act
-        var actualResponse = await _controller.GetContactDetails(new Guid(), new Guid());
+        var actualResponse = await _controller.GetContactDetails(new Guid(), new Guid(), default);
 
         // Arrange
         using (new AssertionScope())
@@ -95,11 +95,11 @@ public class ContactsControllerTest
     {
         // Arrange
         _contactServiceMock.Setup(p => p
-                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), TODO))
+                .GetContactDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
             .ReturnsAsync(new NotFound());
 
         // Act
-        var actualResponse = await _controller.GetContactDetails(new Guid(), new Guid());
+        var actualResponse = await _controller.GetContactDetails(new Guid(), new Guid(), default);
 
         // Assert
         using (new AssertionScope())
