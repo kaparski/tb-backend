@@ -15,6 +15,7 @@ using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Controllers.Contacts.Responses;
+using TaxBeacon.API.Controllers.Entities.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Locations.Responses;
@@ -155,6 +156,7 @@ public static class ConfigureServices
 
         modelBuilder.EntitySet<ContactResponse>("Contacts");
         modelBuilder.EntitySet<LocationResponse>("Locations");
+        modelBuilder.EntitySet<EntityResponse>("Entities");
 
         modelBuilder.EnableLowerCamelCase();
 

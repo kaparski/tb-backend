@@ -62,6 +62,8 @@ BEGIN TRY
            ('Accounts.Read'),
            ('Accounts.ReadExport'),
            ('Contacts.Read'),
+           ('Entities.Read'),
+           ('Entities.ReadWrite'),
            ('Locations.Read');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)

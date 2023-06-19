@@ -21,7 +21,7 @@ public class ContactService: IContactService
     public async Task<OneOf<Success<IQueryable<ContactDto>>, NotFound>> QueryContactsAsync(Guid accountId)
     {
         var currentTenantId = _currentUserService.TenantId;
-        var accountExists  = await _context.Accounts.AnyAsync(x => x.Id == accountId && x.TenantId == currentTenantId);
+        var accountExists = await _context.Accounts.AnyAsync(x => x.Id == accountId && x.TenantId == currentTenantId);
         if (!accountExists)
         {
             return new NotFound();

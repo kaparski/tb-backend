@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1D7F782A-6727-4216-A75A-986158A288A6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.API", "src\TaxBeacon.API\TaxBeacon.API.csproj", "{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5D3EDE5-3410-4C66-940C-C2F31248C06B} = {B5D3EDE5-3410-4C66-940C-C2F31248C06B}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.UserManagement", "src\TaxBeacon.UserManagement\TaxBeacon.UserManagement.csproj", "{76DACBB4-458E-4840-A5DB-FEA9D837467E}"
 EndProject
@@ -29,7 +32,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migration-scripts", "{E149189A-4D39-48F3-9B5A-DBDA8D351B70}"
 	ProjectSection(SolutionItems) = preProject
 		migration-scripts\InsertSuperAdminRoleWithPermissions.sql = migration-scripts\InsertSuperAdminRoleWithPermissions.sql
-		migration-scripts\InsertAdminRoleWithPermissions.sql = migration-scripts\InsertAdminRoleWithPermissions.sql
 		migration-scripts\UsersView.sql = migration-scripts\UsersView.sql
 		migration-scripts\AccountsView.sql = migration-scripts\AccountsView.sql
 		migration-scripts\InsertAccountManagerRoleWithPermissions.sql = migration-scripts\InsertAccountManagerRoleWithPermissions.sql
@@ -38,6 +40,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migrat
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Accounts", "TaxBeacon.Accounts\TaxBeacon.Accounts.csproj", "{B5D3EDE5-3410-4C66-940C-C2F31248C06B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6} = {F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Accounts.UnitTests", "tests\TaxBeacon.Accounts.UnitTests\TaxBeacon.Accounts.UnitTests.csproj", "{7737CC30-B5DD-4EC4-9325-A16089464D93}"
 EndProject
