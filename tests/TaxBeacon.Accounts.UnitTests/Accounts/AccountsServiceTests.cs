@@ -62,7 +62,6 @@ public sealed class AccountsServiceTests
             _listToFileConverters.Object);
     }
 
-
     [Fact]
     public async Task QueryAccounts_ReturnsAccountsDto()
     {

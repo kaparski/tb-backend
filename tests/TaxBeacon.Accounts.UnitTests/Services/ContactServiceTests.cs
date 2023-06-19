@@ -2,12 +2,10 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Moq;
 using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Accounts.Services.Contacts;
-using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
