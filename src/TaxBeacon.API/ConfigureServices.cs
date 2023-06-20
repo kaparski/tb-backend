@@ -15,8 +15,8 @@ using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Controllers.Contacts.Responses;
-using TaxBeacon.API.Controllers.Entities.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.Entities.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Locations.Responses;
 using TaxBeacon.API.Controllers.Roles.Responses;
@@ -33,6 +33,7 @@ using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.Email.Options;
 
 namespace TaxBeacon.API;
 
@@ -69,6 +70,8 @@ public static class ConfigureServices
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.Configure<AzureAd>(configuration.GetSection(nameof(AzureAd)));
+        services.Configure<SendGridOptions>(configuration.GetSection(SendGridOptions.SendGrid));
+        services.Configure<CreateUserOptions>(configuration.GetSection(CreateUserOptions.CreateUser));
 
         services.AddScoped<EntitySaveChangesInterceptor>();
         services.AddDbContext<TaxBeaconDbContext>(options =>

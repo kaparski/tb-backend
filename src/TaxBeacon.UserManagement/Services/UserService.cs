@@ -3,7 +3,7 @@ using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Npoi.Mapper;
+using Microsoft.Extensions.Options;
 using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
@@ -13,10 +13,12 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
-using TaxBeacon.Common.Permissions;
+using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.Email;
+using TaxBeacon.Email.Messages;
 using TaxBeacon.UserManagement.Extensions;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities;
@@ -36,11 +38,8 @@ public class UserService: IUserService
     private readonly IUserExternalStore _userExternalStore;
     private readonly IDateTimeFormatter _dateTimeFormatter;
     private readonly IImmutableDictionary<(UserEventType, uint), IUserActivityFactory> _userActivityFactories;
-
-    private readonly IReadOnlyCollection<string> _domainsToSkipExternalStorageUserCreation = new[]
-    {
-        "ctitaxbeacon.onmicrosoft.com"
-    };
+    private readonly CreateUserOptions _createUserOptions;
+    private readonly IEmailSender _emailSender;
 
     public UserService(
         ILogger<UserService> logger,
@@ -50,7 +49,9 @@ public class UserService: IUserService
         IEnumerable<IListToFileConverter> listToFileConverters,
         IUserExternalStore userExternalStore,
         IDateTimeFormatter dateTimeFormatter,
-        IEnumerable<IUserActivityFactory> userActivityFactories)
+        IEnumerable<IUserActivityFactory> userActivityFactories,
+        IOptionsSnapshot<CreateUserOptions> createUserOptionsSnapshot,
+        IEmailSender emailSender)
     {
         _logger = logger;
         _context = context;
@@ -63,6 +64,8 @@ public class UserService: IUserService
         _userActivityFactories =
             userActivityFactories?.ToImmutableDictionary(x => (EventType: x.UserEventType, x.Revision))
             ?? ImmutableDictionary<(UserEventType, uint), IUserActivityFactory>.Empty;
+        _createUserOptions = createUserOptionsSnapshot.Value;
+        _emailSender = emailSender;
     }
 
     public async Task<OneOf<LoginUserDto, NotFound>> LoginAsync(MailAddress mailAddress,
@@ -320,12 +323,16 @@ public class UserService: IUserService
             return error;
         }
 
-        if (!_domainsToSkipExternalStorageUserCreation.Contains(userEmail.Host))
+        if (!_createUserOptions.RegisteredDomains.Contains(userEmail.Host, StringComparer.OrdinalIgnoreCase))
         {
-            _ = await _userExternalStore.CreateUserAsync(userEmail,
+            var password = await _userExternalStore.CreateUserAsync(userEmail,
                 newUserData.FirstName,
                 newUserData.LastName,
                 cancellationToken);
+
+            await _emailSender.SendAsync(EmailType.UserCreated,
+                _createUserOptions.Recipients,
+                new UserCreatedMessage(userEmail.Address, password));
         }
 
         if (_currentUserService.TenantId != default)
