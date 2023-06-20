@@ -64,7 +64,7 @@ public class TeamService: ITeamService
             Name = d.Name,
             Description = d.Description,
             CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-            NumberOfUsers = d.Users.Count()
+            NumberOfUsers = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId))
         });
 
         return itemDtos;
@@ -78,7 +78,7 @@ public class TeamService: ITeamService
             {
                 Id = t.Id,
                 Name = t.Name,
-                NumberOfUsers = t.Users.Count,
+                NumberOfUsers = t.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
                 CreatedDateTimeUtc = t.CreatedDateTimeUtc,
                 Description = t.Description
             })

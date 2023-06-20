@@ -64,7 +64,7 @@ namespace TaxBeacon.UserManagement.Services
                     Name = d.Name,
                     Description = d.Description,
                     CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                    NumberOfUsers = d.Users.Count(),
+                    NumberOfUsers = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
                     DepartmentIds = departments.Select(r => r.Id)
                 })
             ;
@@ -82,7 +82,7 @@ namespace TaxBeacon.UserManagement.Services
                     Name = div.Name,
                     Description = div.Description,
                     CreatedDateTimeUtc = div.CreatedDateTimeUtc,
-                    NumberOfUsers = div.Users.Count(),
+                    NumberOfUsers = div.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
                     Departments = string.Join(", ", div.Departments.Select(dep => dep.Name)),
                     Department = div.Departments.Select(dep => dep.Name)
                     .GroupBy(dep => 1)
@@ -104,7 +104,7 @@ namespace TaxBeacon.UserManagement.Services
                     Name = div.Name,
                     Description = div.Description,
                     CreatedDateTimeUtc = div.CreatedDateTimeUtc,
-                    NumberOfUsers = div.Users.Count(),
+                    NumberOfUsers = div.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
                     Departments = string.Join(", ", div.Departments.Select(dep => dep.Name)),
                 })
                 .OrderBy(d => d.Name)
