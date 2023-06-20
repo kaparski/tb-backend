@@ -3,7 +3,7 @@ using OneOf;
 using OneOf.Types;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Errors;
-using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Services.Program.Models;
 
 namespace TaxBeacon.UserManagement.Services.Program;
@@ -47,4 +47,8 @@ public interface IProgramService
 
     Task<OneOf<TenantProgramOrgUnitsAssignmentDto, NotFound>> GetTenantProgramOrgUnitsAssignmentAsync(Guid programId,
         CancellationToken cancellationToken = default);
+
+    IQueryable<ProgramDto> QueryPrograms();
+
+    IQueryable<ProgramDto> QueryTenantPrograms();
 }

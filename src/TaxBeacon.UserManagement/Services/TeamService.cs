@@ -10,6 +10,9 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Permissions;
+using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -216,6 +219,34 @@ CancellationToken cancellationToken = default)
                 Department = u.Department == null ? string.Empty : u.Department.Name,
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
+    }
+
+    public async Task<IQueryable<TeamUserDto>> QueryTeamUsersAsync(Guid teamId)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        if ((await _context
+            .Teams
+            .SingleOrDefaultAsync(t => t.Id == teamId && t.TenantId == tenantId)) is null)
+        {
+            throw new NotFoundException($"Team {teamId} not found");
+        }
+
+        var users = _context
+            .Users
+            .Where(u => u.TeamId == teamId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
+            .Select(u => new TeamUserDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FullName = u.FullName,
+                JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
+                ServiceArea = u.ServiceArea == null ? string.Empty : u.ServiceArea.Name,
+                Department = u.Department == null ? string.Empty : u.Department.Name,
+            })
+        ;
 
         return users;
     }

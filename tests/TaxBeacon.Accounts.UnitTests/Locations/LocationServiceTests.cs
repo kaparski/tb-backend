@@ -36,7 +36,7 @@ public class LocationServiceTests
         _locationService = new LocationService(_dbContext, _currentUserServiceMock.Object);
 
     }
-  
+
     [Fact]
     public async Task QueryLocations_AccountExists_ReturnsLocations()
     {
@@ -48,12 +48,12 @@ public class LocationServiceTests
         var locations = TestData.TestLocation
             .RuleFor(l => l.Account, f => account)
             .Generate(5);
-        
+
         await _dbContext.Tenants.AddAsync(tenant);
         await _dbContext.Accounts.AddRangeAsync(account);
         await _dbContext.Locations.AddRangeAsync(locations);
         await _dbContext.SaveChangesAsync();
-        
+
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
         // Act
@@ -69,7 +69,7 @@ public class LocationServiceTests
             {
                 var location = locations.Single(u => u.Id == dto.Id);
 
-                dto.Should().BeEquivalentTo(location, 
+                dto.Should().BeEquivalentTo(location,
                     opt => opt.ExcludingMissingMembers());
             }
         }
@@ -86,12 +86,12 @@ public class LocationServiceTests
         var locations = TestData.TestLocation
             .RuleFor(l => l.Account, f => account)
             .Generate(5);
-        
+
         await _dbContext.Tenants.AddAsync(tenant);
         await _dbContext.Accounts.AddRangeAsync(account);
         await _dbContext.Locations.AddRangeAsync(locations);
         await _dbContext.SaveChangesAsync();
-        
+
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
         // Act

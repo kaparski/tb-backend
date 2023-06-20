@@ -10,10 +10,13 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models.Activities.ServiceArea;
 using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Services.Activities.ServiceArea;
@@ -229,6 +232,33 @@ public class ServiceAreaService: IServiceAreaService
                 JobTitle = d.JobTitle != null ? d.JobTitle.Name : string.Empty,
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
+    }
+
+    public async Task<IQueryable<ServiceAreaUserDto>> QueryUsersAsync(Guid serviceAreaId)
+    {
+        var currentTenantId = _currentUserService.TenantId;
+
+        if ((await _context.ServiceAreas
+            .FirstOrDefaultAsync(sa => sa.Id == serviceAreaId && sa.TenantId == currentTenantId)) is null)
+        {
+            throw new NotFoundException($"Service Area {serviceAreaId} not found");
+        }
+
+        var users = _context
+            .Users
+            .AsNoTracking()
+            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.ServiceAreaId == serviceAreaId)
+            .Select(d => new ServiceAreaUserDto()
+            {
+                Id = d.Id,
+                FullName = d.FullName,
+                Email = d.Email,
+                Team = d.Team != null ? d.Team.Name : string.Empty,
+                JobTitle = d.JobTitle != null ? d.JobTitle.Name : string.Empty,
+            })
+        ;
 
         return users;
     }

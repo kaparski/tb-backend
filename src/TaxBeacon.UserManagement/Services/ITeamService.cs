@@ -3,6 +3,7 @@ using OneOf;
 using OneOf.Types;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 
 namespace TaxBeacon.UserManagement.Services;
 
@@ -24,4 +25,6 @@ public interface ITeamService
         int pageSize = 10, CancellationToken cancellationToken = default);
 
     Task<OneOf<QueryablePaging<TeamUserDto>, NotFound>> GetTeamUsersAsync(Guid teamId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default);
+
+    Task<IQueryable<TeamUserDto>> QueryTeamUsersAsync(Guid teamId);
 }

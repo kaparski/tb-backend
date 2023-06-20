@@ -84,11 +84,11 @@ public class AccountService: IAccountService
             .OrderBy(a => a.Name)
             .ProjectToType<AccountExportDto>()
             .ToListAsync(cancellationToken);
-        
+
         _logger.LogInformation("{dateTime} - Accounts export was executed by {@userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
-        
+
         return _listToFileConverters[fileType].Convert(exportAccounts);
     }
 }

@@ -1,5 +1,4 @@
-﻿using Gridify;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -23,7 +22,7 @@ public class RoleAssignedUsersController: BaseController
     public RoleAssignedUsersController(IRoleService roleService) => _roleService = roleService;
 
     /// <summary>
-    /// Queryable list of user of a given role
+    /// Queryable list of users of a given role
     /// </summary>
     /// <response code="200">Returns list of role assigned users</response>
     /// <response code="401">User is unauthorized</response>
@@ -34,9 +33,10 @@ public class RoleAssignedUsersController: BaseController
     [EnableQuery]
     [HttpGet("api/odata/roles/{id:guid}/roleassignedusers")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<RoleAssignedUserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IQueryable<RoleAssignedUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] Guid id)
     {
         try

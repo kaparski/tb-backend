@@ -8,13 +8,13 @@ public record AccountDto
     public Guid Id { get; init; }
 
     public string Name { get; init; } = null!;
-    
+
     public string? City { get; init; }
-    
+
     public State State { get; init; }
 
     public string AccountType { get; init; } = null!;
-    
+
     public ClientState? ClientState { get; init; }
 
     public Status? ClientStatus { get; init; }

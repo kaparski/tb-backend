@@ -15,7 +15,7 @@ using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Services.Program.Activities;
 using TaxBeacon.UserManagement.Services.Program.Activities.Models;
 using TaxBeacon.UserManagement.Services.Program.Models;
@@ -57,6 +57,10 @@ public class ProgramService: IProgramService
         _context.Programs
             .ProjectToType<ProgramDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+    public IQueryable<ProgramDto> QueryPrograms() =>
+        _context.Programs
+            .ProjectToType<ProgramDto>();
 
     public async Task<OneOf<ProgramDetailsDto, NameAlreadyExists>> CreateProgramAsync(CreateProgramDto createProgramDto,
         CancellationToken cancellationToken = default)
@@ -290,6 +294,11 @@ public class ProgramService: IProgramService
             .Where(x => x.TenantId == _currentUserService.TenantId && x.IsDeleted == false)
             .ProjectToType<TenantProgramDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+    public IQueryable<ProgramDto> QueryTenantPrograms() =>
+        _context.TenantsPrograms
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.IsDeleted == false)
+            .ProjectToType<ProgramDto>();
 
     public async Task<byte[]> ExportTenantProgramsAsync(FileType fileType,
         CancellationToken cancellationToken = default)
