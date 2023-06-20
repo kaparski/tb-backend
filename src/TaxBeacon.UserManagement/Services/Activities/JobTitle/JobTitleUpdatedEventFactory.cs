@@ -1,6 +1,6 @@
 using System.Text.Json;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models.Activities.JobTitle;
 
 namespace TaxBeacon.UserManagement.Services.Activities.JobTitle;

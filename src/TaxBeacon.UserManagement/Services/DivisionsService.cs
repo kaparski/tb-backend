@@ -12,6 +12,7 @@ using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;

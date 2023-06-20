@@ -10,11 +10,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.ServiceAreas;
 using TaxBeacon.API.Controllers.ServiceAreas.Requests;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services;
 

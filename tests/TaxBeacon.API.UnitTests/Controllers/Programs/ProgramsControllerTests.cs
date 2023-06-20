@@ -18,6 +18,7 @@ using TaxBeacon.Common.Errors;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Services.Program;
 using TaxBeacon.UserManagement.Services.Program.Models;
+using TaxBeacon.Common.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Programs;
 

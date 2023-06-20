@@ -33,6 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migrat
 	ProjectSection(SolutionItems) = preProject
 		migration-scripts\AccountsView.sql = migration-scripts\AccountsView.sql
 		migration-scripts\InsertAccountManagerRoleWithPermissions.sql = migration-scripts\InsertAccountManagerRoleWithPermissions.sql
+		migration-scripts\InsertAdminRoleWithPermissions.sql = migration-scripts\InsertAdminRoleWithPermissions.sql
 		migration-scripts\InsertProjectManagerRoleWithPermissions.sql = migration-scripts\InsertProjectManagerRoleWithPermissions.sql
 		migration-scripts\InsertSalesOpsRoleWithPermissions.sql = migration-scripts\InsertSalesOpsRoleWithPermissions.sql
 		migration-scripts\InsertSalesRoleWithPermissions.sql = migration-scripts\InsertSalesRoleWithPermissions.sql

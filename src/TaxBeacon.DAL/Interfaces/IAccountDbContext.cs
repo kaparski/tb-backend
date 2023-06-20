@@ -19,5 +19,9 @@ public interface IAccountDbContext
 
     DbSet<AccountView> AccountsView { get; }
 
+    DbSet<StateId> StateIds { get; }
+
+    DbSet<EntityActivityLog> EntityActivityLogs { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

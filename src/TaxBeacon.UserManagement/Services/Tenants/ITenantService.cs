@@ -1,9 +1,8 @@
 ﻿using Gridify;
-using NPOI.SS.Formula.Functions;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Services.Tenants.Models;
 
 namespace TaxBeacon.UserManagement.Services.Tenants;

@@ -12,9 +12,9 @@ using TaxBeacon.API.Controllers.Departments;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
-using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Department;
