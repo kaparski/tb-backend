@@ -292,7 +292,7 @@ namespace TaxBeacon.UserManagement.Services
             var tenantId = _currentUserService.TenantId;
 
             if ((await _context.Divisions
-                .FirstOrDefaultAsync(d => d.Id == divisionId && d.TenantId == tenantId)) is null)
+                .SingleOrDefaultAsync(d => d.Id == divisionId && d.TenantId == tenantId)) is null)
             {
                 throw new NotFoundException($"Division {divisionId} not found");
             }

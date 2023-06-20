@@ -36,6 +36,7 @@ public class RoleAssignedUsersController: BaseController
     [ProducesResponseType(typeof(IQueryable<RoleAssignedUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] Guid id)
     {
         try

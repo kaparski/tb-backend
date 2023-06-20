@@ -33,6 +33,7 @@ using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.API.Controllers.Programs.Responses;
 
 namespace TaxBeacon.API;
 
@@ -145,6 +146,9 @@ public static class ConfigureServices
         modelBuilder.EntitySet<RoleResponse>("Roles");
         modelBuilder.EntitySet<ServiceAreaResponse>("ServiceAreas");
         modelBuilder.EntitySet<TeamResponse>("Teams");
+        modelBuilder.EntitySet<ProgramResponse>("Programs");
+        modelBuilder.EntitySet<ProgramResponse>("TenantPrograms");
+
         modelBuilder.EnableLowerCamelCase();
 
         return modelBuilder.GetEdmModel();

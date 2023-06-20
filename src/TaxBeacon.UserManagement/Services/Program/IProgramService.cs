@@ -47,4 +47,8 @@ public interface IProgramService
 
     Task<OneOf<TenantProgramOrgUnitsAssignmentDto, NotFound>> GetTenantProgramOrgUnitsAssignmentAsync(Guid programId,
         CancellationToken cancellationToken = default);
+
+    IQueryable<ProgramDto> QueryPrograms();
+
+    IQueryable<ProgramDto> QueryTenantPrograms();
 }

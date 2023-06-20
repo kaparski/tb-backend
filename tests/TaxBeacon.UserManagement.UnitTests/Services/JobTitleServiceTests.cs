@@ -524,7 +524,6 @@ public class JobTitleServiceTests
     {
         // Arrange
         TestData.TestJobTitle.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(1));
-        var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "fullname asc", };
         var title = TestData.TestJobTitle.Generate();
         await _dbContextMock.JobTitles.AddAsync(title);
         await _dbContextMock.SaveChangesAsync();
