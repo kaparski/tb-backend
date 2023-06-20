@@ -1,14 +1,13 @@
 ﻿--- Insert Roles and Permission
---- Assign Roles to all users in tenant
 --- Assign Permissions to Role
 
-DECLARE @adminRolePermissions TABLE
-                              (
-                                  NAME NVARCHAR(250)
-                              );
+DECLARE @subjectMatterExpertPermissions TABLE
+                                 (
+                                     NAME NVARCHAR(250)
+                                 );
 DECLARE @roleId UNIQUEIDENTIFIER = NEWID();
 DECLARE @tenantId AS UNIQUEIDENTIFIER;
-DECLARE @roleName AS NVARCHAR(100) = N'Admin'
+DECLARE @roleName AS NVARCHAR(100) = N'Subject Matter Expert'
 
 BEGIN TRANSACTION [Tran1];
 BEGIN TRY
@@ -33,48 +32,33 @@ BEGIN TRY
             INSERT INTO TenantRoles VALUES (@tenantId, @roleId);
         END;
 
-    INSERT INTO @adminRolePermissions (Name)
-    VALUES ('Divisions.Activation'),
-           ('Divisions.Read'),
-           ('Divisions.ReadWrite'),
-           ('Divisions.ReadExport'),
-           ('Departments.Read'),
-           ('Departments.ReadWrite'),
-           ('Departments.ReadExport'),
-           ('JobTitles.Read'),
-           ('JobTitles.ReadWrite'),
-           ('JobTitles.ReadExport'),
-           ('Programs.Read'),
-           ('Programs.ReadExport'),
-           ('Roles.Read'),
-           ('Roles.ReadWrite'),
-           ('ServiceAreas.Read'),
-           ('ServiceAreas.ReadWrite'),
-           ('ServiceAreas.ReadExport'),
-           ('TableFilters.Read'),
-           ('TableFilters.ReadWrite'),
-           ('Teams.Read'),
-           ('Teams.ReadWrite'),
-           ('Teams.ReadExport'),
-           ('Users.Read'),
-           ('Users.ReadWrite'),
-           ('Users.ReadExport'),
-           ('Accounts.Read'),
+    INSERT INTO @subjectMatterExpertPermissions (Name)
+    VALUES ('Accounts.Read'),
+           ('Accounts.ReadWrite'),
            ('Accounts.ReadExport'),
+           ('Prospects.Activation'),
            ('Contacts.Read'),
+           ('Contacts.ReadWrite'),
+           ('Contacts.ReadExport'),
+           ('Contacts.Activation'),
+           ('Locations.Read'),
+           ('Locations.ReadWrite'),
+           ('Locations.ReadExport'),
+           ('Locations.Activation'),
            ('Entities.Read'),
            ('Entities.ReadWrite'),
-           ('Locations.Read');
+           ('Entities.ReadExport'),
+           ('Entities.Activation');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),
-           arp.Name,
+           smep.Name,
            GETUTCDATE()
-    FROM @adminRolePermissions arp
+    FROM @subjectMatterExpertPermissions smep
     WHERE NOT EXISTS
         (SELECT 1
          FROM Permissions
-         WHERE Name = arp.Name)
+         WHERE Name = smep.Name)
 
     INSERT INTO TenantPermissions (TenantId, PermissionId)
     SELECT @tenantId,
@@ -93,7 +77,7 @@ BEGIN TRY
     FROM Permissions p
     WHERE p.Name in
           (SELECT Name
-           FROM @adminRolePermissions)
+           FROM @subjectMatterExpertPermissions)
       AND NOT EXISTS
         (SELECT 1
          FROM TenantRolePermissions

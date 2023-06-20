@@ -6,15 +6,15 @@ using Moq;
 using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Accounts.Services.Contacts;
+using TaxBeacon.Accounts.Services.Contacts.Models;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Entities.Accounts;
 using TaxBeacon.DAL.Interceptors;
-using TaxBeacon.DAL.Interfaces;
 
-namespace TaxBeacon.Accounts.UnitTests.Services;
+namespace TaxBeacon.Accounts.UnitTests.Contacts;
 
 public class ContactServiceTests
 {
@@ -102,6 +102,66 @@ public class ContactServiceTests
         }
     }
 
+    [Fact]
+    public async Task GetContactDetailsAsync_ContactExists_ReturnsContact()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+        TestData.TestContact.RuleFor(x => x.Tenant, tenant);
+        TestData.TestAccount.RuleFor(x => x.Tenant, tenant);
+        var account = TestData.TestAccount.Generate();
+
+        TestData.TestContact.RuleFor(x => x.Account, account);
+        await _dbContext.Tenants.AddAsync(tenant);
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
+
+        var item = TestData.TestContact.Generate();
+        await _dbContext.Contacts.AddRangeAsync(item);
+        await _dbContext.Accounts.AddRangeAsync(account);
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var oneOf = await _contactService.GetContactDetailsAsync(item.Id, item.Account.Id, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            oneOf.IsT0.Should().BeTrue();
+            var dto = oneOf.AsT0;
+            dto.Should().BeEquivalentTo(item, opt => opt.ExcludingMissingMembers());
+        }
+    }
+
+    [Fact]
+    public async Task GetContactDetailsAsync_ContactDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var tenant = TestData.TestTenant.Generate();
+        TestData.TestContact.RuleFor(x => x.Tenant, tenant);
+        TestData.TestAccount.RuleFor(x => x.Tenant, tenant);
+        var account = TestData.TestAccount.Generate();
+
+        TestData.TestContact.RuleFor(x => x.Account, account);
+        await _dbContext.Tenants.AddAsync(tenant);
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
+
+        var items = TestData.TestContact.Generate();
+        await _dbContext.Contacts.AddRangeAsync(items);
+        await _dbContext.Accounts.AddRangeAsync(account);
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var oneOf = await _contactService.GetContactDetailsAsync(new Guid(), new Guid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            oneOf.IsT1.Should().BeTrue();
+            var result = oneOf.AsT1;
+            result.Should().BeOfType<NotFound>();
+        }
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
@@ -115,7 +175,8 @@ public class ContactServiceTests
                 .RuleFor(t => t.Email, t => t.Person.Email)
                 .RuleFor(t => t.Type, t => t.PickRandom("Client", "Referral Partner", "Client Partner"))
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow)
-                .RuleFor(t => t.Status, t => Status.Active);
+                .RuleFor(t => t.Status, t => Status.Active)
+                .RuleFor(t => t.Phone, t => t.Person.Phone);
 
         public static readonly Faker<Tenant> TestTenant =
             new Faker<Tenant>()
