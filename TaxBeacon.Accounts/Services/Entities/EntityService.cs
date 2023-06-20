@@ -92,6 +92,7 @@ public class EntityService: IEntityService
     {
         var entity = await _context
             .Entities
+            .Include(e => e.StateIds)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.TenantId == _currentUserService.TenantId && x.Id == entityId, cancellationToken);
 

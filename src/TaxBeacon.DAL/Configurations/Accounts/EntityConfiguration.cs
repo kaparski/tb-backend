@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaxBeacon.Common.Accounts;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Configurations.Accounts;
@@ -120,6 +121,12 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
            .HasColumnType("nvarchar")
            .HasMaxLength(15)
            .IsRequired();
+
+        builder
+            .HasMany(d => d.StateIds)
+            .WithOne(jt => jt.Entity)
+            .HasForeignKey(jt => jt.EntityId)
+             .IsRequired(false);
 
         builder
             .HasIndex(e => new { e.TenantId, e.Fein })
