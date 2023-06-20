@@ -101,7 +101,7 @@ public class EntityService: IEntityService
             : entity.Adapt<EntityDetailsDto>();
     }
 
-    public async Task<OneOf<EntityDetailsDto, NotFound>> UpdateTeamAsync(Guid id, UpdateEntityDto updateEntity,
+    public async Task<OneOf<EntityDetailsDto, NotFound>> UpdateEntityAsync(Guid id, UpdateEntityDto updateEntity,
 CancellationToken cancellationToken = default)
     {
         var entity = await _context
@@ -137,7 +137,7 @@ CancellationToken cancellationToken = default)
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Entity ({teamId}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Entity ({entityId}) was updated by {@userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);

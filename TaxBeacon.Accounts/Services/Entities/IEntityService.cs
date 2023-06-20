@@ -13,5 +13,5 @@ public interface IEntityService
 
     Task<OneOf<EntityDetailsDto, NotFound>> GetEntityDetailsAsync(Guid entityId, CancellationToken cancellationToken = default);
 
-    Task<OneOf<EntityDetailsDto, NotFound>> UpdateTeamAsync(Guid id, UpdateEntityDto updateEntity, CancellationToken cancellationToken = default);
+    Task<OneOf<EntityDetailsDto, NotFound>> UpdateEntityAsync(Guid id, UpdateEntityDto updateEntity, CancellationToken cancellationToken = default);
 }

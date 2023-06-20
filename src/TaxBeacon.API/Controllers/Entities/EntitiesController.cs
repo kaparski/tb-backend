@@ -7,10 +7,7 @@ using TaxBeacon.Accounts.Services.Entities.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Entities.Requests;
 using TaxBeacon.API.Controllers.Entities.Responses;
-using TaxBeacon.API.Controllers.Teams.Requests;
-using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Exceptions;
-using TaxBeacon.UserManagement.Models;
 
 namespace TaxBeacon.API.Controllers.Entities;
 
@@ -53,7 +50,7 @@ public class EntitiesController: BaseController
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Entity is not found</response>
-    /// <returns>Activity history for a specific team</returns>
+    /// <returns>Activity history for a specific entity</returns>
     [HasPermissions(Common.Permissions.Entities.Read, Common.Permissions.Entities.ReadWrite)]
     [HttpGet("{id:guid}/activities", Name = "EntityActivityHistory")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
@@ -114,7 +111,7 @@ public class EntitiesController: BaseController
     public async Task<IActionResult> UpdateEntityAsync([FromRoute] Guid id, [FromBody] UpdateEntityRequest request,
         CancellationToken cancellationToken)
     {
-        var resultOneOf = await _entityService.UpdateTeamAsync(id, request.Adapt<UpdateEntityDto>(), cancellationToken);
+        var resultOneOf = await _entityService.UpdateEntityAsync(id, request.Adapt<UpdateEntityDto>(), cancellationToken);
 
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<EntityResponse>()),
