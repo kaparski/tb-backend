@@ -58,6 +58,10 @@ public class ProgramService: IProgramService
             .ProjectToType<ProgramDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
+    public IQueryable<ProgramDto> QueryPrograms() =>
+        _context.Programs
+            .ProjectToType<ProgramDto>();
+
     public async Task<OneOf<ProgramDetailsDto, NameAlreadyExists>> CreateProgramAsync(CreateProgramDto createProgramDto,
         CancellationToken cancellationToken = default)
     {
@@ -290,6 +294,11 @@ public class ProgramService: IProgramService
             .Where(x => x.TenantId == _currentUserService.TenantId && x.IsDeleted == false)
             .ProjectToType<TenantProgramDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+    public IQueryable<ProgramDto> QueryTenantPrograms() =>
+        _context.TenantsPrograms
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.IsDeleted == false)
+            .ProjectToType<ProgramDto>();
 
     public async Task<byte[]> ExportTenantProgramsAsync(FileType fileType,
         CancellationToken cancellationToken = default)

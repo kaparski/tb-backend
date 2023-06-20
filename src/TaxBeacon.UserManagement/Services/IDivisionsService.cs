@@ -28,5 +28,7 @@ namespace TaxBeacon.UserManagement.Services
 
         Task<OneOf<DivisionDepartmentDto[], NotFound>> GetDivisionDepartmentsAsync(Guid id,
             CancellationToken cancellationToken = default);
+
+        Task<IQueryable<DivisionUserDto>> QueryDivisionUsersAsync(Guid divisionId);
     }
 }

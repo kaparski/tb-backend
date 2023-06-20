@@ -24,4 +24,6 @@ public interface ITeamService
         int pageSize = 10, CancellationToken cancellationToken = default);
 
     Task<OneOf<QueryablePaging<TeamUserDto>, NotFound>> GetTeamUsersAsync(Guid teamId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default);
+
+    Task<IQueryable<TeamUserDto>> QueryTeamUsersAsync(Guid teamId);
 }

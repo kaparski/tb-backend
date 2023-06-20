@@ -156,6 +156,29 @@ public class ProgramServiceTests
         }
     }
 
+    [Fact]
+    public async Task QueryPrograms_QueryIsValidOrderByNameDescending_ReturnsListOfPrograms()
+    {
+        // Arrange
+        var programs = TestData.ProgramFaker.Generate(10);
+        await _dbContextMock.Programs.AddRangeAsync(programs);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var query = _programService.QueryPrograms();
+        var listOfPrograms = query
+            .OrderByDescending(p => p.Name)
+            .Take(5)
+            .ToArray();
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            listOfPrograms.Length.Should().Be(5);
+            listOfPrograms.Select(x => x.Name).Should().BeInDescendingOrder();
+        }
+    }
+
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
@@ -262,6 +285,29 @@ public class ProgramServiceTests
             actualResult.Count.Should().Be(10);
             var tenantProgramDtos = actualResult.Query.ToList();
             tenantProgramDtos.Count.Should().Be(5);
+            tenantProgramDtos.Select(x => x.Name).Should().BeInDescendingOrder();
+        }
+    }
+
+    [Fact]
+    public async Task QueryTenantPrograms_QueryIsValidOrderByNameDescending_ReturnsListOfPrograms()
+    {
+        // Arrange
+        var programs = TestData.TenantProgramFaker.Generate(10);
+        await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        var query = _programService.QueryTenantPrograms();
+        var tenantProgramDtos = query
+            .OrderByDescending(p => p.Name)
+            .Take(5)
+            .ToArray();
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            tenantProgramDtos.Length.Should().Be(5);
             tenantProgramDtos.Select(x => x.Name).Should().BeInDescendingOrder();
         }
     }
