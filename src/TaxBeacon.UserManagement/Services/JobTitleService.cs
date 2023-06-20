@@ -10,6 +10,8 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -229,6 +231,34 @@ public class JobTitleService: IJobTitleService
                 Team = d.Team != null ? d.Team.Name : string.Empty,
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
+    }
+
+    public async Task<IQueryable<JobTitleUserDto>> QueryUsersAsync(Guid jobTitleId)
+    {
+        var currentTenantId = _currentUserService.TenantId;
+
+        if ((await _context.JobTitles
+            .SingleOrDefaultAsync(sa => sa.Id == jobTitleId && sa.TenantId == currentTenantId)) is null)
+        {
+            throw new NotFoundException($"Job Title {jobTitleId} not found");
+        }
+
+        var users = _context
+            .Users
+            .AsNoTracking()
+            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.JobTitleId == jobTitleId)
+            .Select(d => new JobTitleUserDto()
+            {
+                Id = d.Id,
+                FullName = d.FullName,
+                Email = d.Email,
+                Department = d.Department != null ? d.Department.Name : string.Empty,
+                ServiceArea = d.ServiceArea != null ? d.ServiceArea.Name : string.Empty,
+                Team = d.Team != null ? d.Team.Name : string.Empty,
+            })
+        ;
 
         return users;
     }

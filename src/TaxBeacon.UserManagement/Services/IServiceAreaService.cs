@@ -32,4 +32,6 @@ public interface IServiceAreaService
     Task<OneOf<QueryablePaging<ServiceAreaUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId,
         GridifyQuery gridifyQuery,
         CancellationToken cancellationToken);
+
+    Task<IQueryable<ServiceAreaUserDto>> QueryUsersAsync(Guid serviceAreaId);
 }
