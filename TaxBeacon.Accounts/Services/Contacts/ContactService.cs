@@ -67,6 +67,7 @@ public class ContactService: IContactService
                 JobTitle = x.JobTitle,
                 Type = x.Type,
                 Phone = x.Phone,
+                Phone2 = x.Phone2,
                 Status = x.Status,
                 Country = x.Country,
                 City = x.City,
