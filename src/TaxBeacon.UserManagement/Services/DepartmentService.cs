@@ -11,7 +11,8 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
-using TaxBeacon.Common.Permissions;
+using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
@@ -61,7 +62,7 @@ public class DepartmentService: IDepartmentService
                 Name = d.Name,
                 Description = d.Description,
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(),
+                AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
                 DivisionId = d.DivisionId,
                 Division = d.Division == null ? null : d.Division.Name,
                 ServiceAreaIds = d.ServiceAreas.Select(r => r.Id),
@@ -83,7 +84,7 @@ public class DepartmentService: IDepartmentService
                 Name = d.Name,
                 Description = d.Description,
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(),
+                AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
                 Division = d.Division == null ? string.Empty : d.Division.Name,
                 ServiceArea = d.ServiceAreas.Select(sa => sa.Name)
                     .GroupBy(sa => 1)
@@ -111,7 +112,7 @@ public class DepartmentService: IDepartmentService
                     Division = d.Division == null ? string.Empty : d.Division.Name,
                     ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
                     CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                    AssignedUsersCount = d.Users.Count()
+                    AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId))
                 })
                 .OrderBy(dep => dep.Name)
                 .ToListAsync(cancellationToken);
@@ -129,7 +130,7 @@ public class DepartmentService: IDepartmentService
                     Description = d.Description,
                     ServiceAreas = string.Join(", ", d.ServiceAreas.Select(sa => sa.Name)),
                     CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                    AssignedUsersCount = d.Users.Count()
+                    AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId))
                 })
                 .OrderBy(dep => dep.Name)
                 .ToListAsync(cancellationToken);
@@ -336,6 +337,34 @@ public class DepartmentService: IDepartmentService
                 Team = u.Team == null ? string.Empty : u.Team.Name,
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
+    }
+
+    public async Task<IQueryable<DepartmentUserDto>> QueryDepartmentUsersAsync(Guid departmentId)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        if ((await _context
+            .Departments
+            .SingleOrDefaultAsync(t => t.Id == departmentId && t.TenantId == tenantId)) == null)
+        {
+            throw new NotFoundException($"Department {departmentId} not found");
+        }
+
+        var users = _context
+            .Users
+            .Where(u => u.DepartmentId == departmentId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
+            .Select(u => new DepartmentUserDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FullName = u.FullName,
+                JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
+                ServiceArea = u.ServiceArea == null ? string.Empty : u.ServiceArea.Name,
+                Team = u.Team == null ? string.Empty : u.Team.Name,
+            })
+        ;
 
         return users;
     }

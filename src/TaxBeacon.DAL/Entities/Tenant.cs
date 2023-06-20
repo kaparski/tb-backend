@@ -1,4 +1,5 @@
 ﻿using TaxBeacon.Common.Enums;
+using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Entities;
 
@@ -48,6 +49,8 @@ public class Tenant: BaseEntity
 
     public ICollection<ProgramActivityLog> ProgramActivityLogs { get; set; } =
         new HashSet<ProgramActivityLog>();
+
+    public ICollection<EntityActivityLog> EntityActivityLogs { get; set; } = new HashSet<EntityActivityLog>();
 
     public ICollection<Accounts.Account> Accounts { get; set; } = new HashSet<Accounts.Account>();
 

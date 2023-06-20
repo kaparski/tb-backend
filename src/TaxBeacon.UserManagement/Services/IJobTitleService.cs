@@ -2,6 +2,7 @@ using Gridify;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models;
 
 namespace TaxBeacon.UserManagement.Services;
@@ -31,4 +32,6 @@ public interface IJobTitleService
     Task<OneOf<QueryablePaging<JobTitleUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId,
         GridifyQuery gridifyQuery,
         CancellationToken cancellationToken);
+
+    Task<IQueryable<JobTitleUserDto>> QueryUsersAsync(Guid jobTitleId);
 }

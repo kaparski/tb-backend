@@ -10,10 +10,13 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models.Activities.JobTitle;
 using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Services.Activities.JobTitle;
@@ -60,7 +63,7 @@ public class JobTitleService: IJobTitleService
             Name = d.Name,
             Description = d.Description,
             CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-            AssignedUsersCount = d.Users.Count(),
+            AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
             DepartmentId = d.DepartmentId,
             Department = d.Department == null ? null : d.Department.Name
         });
@@ -79,7 +82,7 @@ public class JobTitleService: IJobTitleService
                 Name = d.Name,
                 Description = d.Description,
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(),
+                AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
                 Department = d.Department == null ? string.Empty : d.Department.Name
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
@@ -97,7 +100,7 @@ public class JobTitleService: IJobTitleService
                 Description = sa.Description,
                 Department = sa.Department == null ? string.Empty : sa.Department.Name,
                 CreatedDateTimeUtc = sa.CreatedDateTimeUtc,
-                AssignedUsersCount = sa.Users.Count()
+                AssignedUsersCount = sa.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId))
             })
             .OrderBy(sa => sa.Name)
             .ToListAsync(cancellationToken);
@@ -228,6 +231,34 @@ public class JobTitleService: IJobTitleService
                 Team = d.Team != null ? d.Team.Name : string.Empty,
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
+    }
+
+    public async Task<IQueryable<JobTitleUserDto>> QueryUsersAsync(Guid jobTitleId)
+    {
+        var currentTenantId = _currentUserService.TenantId;
+
+        if ((await _context.JobTitles
+            .SingleOrDefaultAsync(sa => sa.Id == jobTitleId && sa.TenantId == currentTenantId)) is null)
+        {
+            throw new NotFoundException($"Job Title {jobTitleId} not found");
+        }
+
+        var users = _context
+            .Users
+            .AsNoTracking()
+            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.JobTitleId == jobTitleId)
+            .Select(d => new JobTitleUserDto()
+            {
+                Id = d.Id,
+                FullName = d.FullName,
+                Email = d.Email,
+                Department = d.Department != null ? d.Department.Name : string.Empty,
+                ServiceArea = d.ServiceArea != null ? d.ServiceArea.Name : string.Empty,
+                Team = d.Team != null ? d.Team.Name : string.Empty,
+            })
+        ;
 
         return users;
     }

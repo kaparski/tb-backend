@@ -34,6 +34,7 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.Email.Options;
+using TaxBeacon.API.Controllers.Programs.Responses;
 
 namespace TaxBeacon.API;
 
@@ -55,7 +56,27 @@ public static class ConfigureServices
                 )
                 .AddRouteComponents(
                     routePrefix: "api/odata/roles/{id}",
-                    model: GetODataEdmModelForRoleAssignedUsers()
+                    model: GetCustomODataEdmModel<RoleAssignedUserResponse>("RoleAssignedUsers")
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/departments/{id}",
+                    model: GetCustomODataEdmModel<DepartmentUserResponse>("DepartmentUsers")
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/jobtitles/{id}",
+                    model: GetCustomODataEdmModel<JobTitleUserResponse>("JobTitleUsers")
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/serviceareas/{id}",
+                    model: GetCustomODataEdmModel<ServiceAreaUserResponse>("ServiceAreaUsers")
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/teams/{id}",
+                    model: GetCustomODataEdmModel<TeamUserResponse>("TeamUsers")
+                )
+                .AddRouteComponents(
+                    routePrefix: "api/odata/divisions/{id}",
+                    model: GetCustomODataEdmModel<DivisionUserResponse>("DivisionUsers")
                 )
                 .AddRouteComponents(
                     routePrefix: "api/accounts/{accountId}",
@@ -128,21 +149,22 @@ public static class ConfigureServices
         modelBuilder.EntitySet<RoleResponse>("Roles");
         modelBuilder.EntitySet<ServiceAreaResponse>("ServiceAreas");
         modelBuilder.EntitySet<TeamResponse>("Teams");
+        modelBuilder.EntitySet<ProgramResponse>("Programs");
+        modelBuilder.EntitySet<ProgramResponse>("TenantPrograms");
+
         modelBuilder.EnableLowerCamelCase();
 
         return modelBuilder.GetEdmModel();
     }
 
     /// <summary>
-    /// Builds a dedicated EDM model for api/odata/roles/{id:guid}/roleassignedusers endpoint.
-    /// TODO: find a better way to make this custom routing work.
+    /// Builds a dedicated EDM model for an endpoint.
     /// </summary>
-    /// <returns></returns>
-    private static IEdmModel GetODataEdmModelForRoleAssignedUsers()
+    private static IEdmModel GetCustomODataEdmModel<TEntity>(string entityName) where TEntity : class
     {
         var modelBuilder = new ODataConventionModelBuilder();
 
-        modelBuilder.EntitySet<RoleAssignedUserResponse>("RoleAssignedUsers");
+        modelBuilder.EntitySet<TEntity>(entityName);
 
         modelBuilder.EnableLowerCamelCase();
 
@@ -152,7 +174,6 @@ public static class ConfigureServices
     /// <summary>
     /// Builds a dedicated EDM model for api/odata/accounts/{id} endpoint.
     /// </summary>
-    /// <returns></returns>
     private static IEdmModel GetODataEdmModelForAccount()
     {
         var modelBuilder = new ODataConventionModelBuilder();

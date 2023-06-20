@@ -5,6 +5,7 @@ using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 
 namespace TaxBeacon.UserManagement.Services;
 

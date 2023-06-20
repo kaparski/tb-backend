@@ -10,10 +10,13 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models.Activities.ServiceArea;
 using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Services.Activities.ServiceArea;
@@ -60,7 +63,7 @@ public class ServiceAreaService: IServiceAreaService
             Name = d.Name,
             Description = d.Description,
             CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-            AssignedUsersCount = d.Users.Count(),
+            AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
             DepartmentId = d.DepartmentId,
             Department = d.Department == null ? null : d.Department.Name
         });
@@ -79,7 +82,7 @@ public class ServiceAreaService: IServiceAreaService
                 Name = d.Name,
                 Description = d.Description,
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(),
+                AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
                 Department = d.Department == null ? string.Empty : d.Department.Name
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
@@ -97,7 +100,7 @@ public class ServiceAreaService: IServiceAreaService
                 Description = sa.Description,
                 Department = sa.Department == null ? string.Empty : sa.Department.Name,
                 CreatedDateTimeUtc = sa.CreatedDateTimeUtc,
-                AssignedUsersCount = sa.Users.Count()
+                AssignedUsersCount = sa.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId))
             })
             .OrderBy(sa => sa.Name)
             .ToListAsync(cancellationToken);
@@ -229,6 +232,33 @@ public class ServiceAreaService: IServiceAreaService
                 JobTitle = d.JobTitle != null ? d.JobTitle.Name : string.Empty,
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
+
+        return users;
+    }
+
+    public async Task<IQueryable<ServiceAreaUserDto>> QueryUsersAsync(Guid serviceAreaId)
+    {
+        var currentTenantId = _currentUserService.TenantId;
+
+        if ((await _context.ServiceAreas
+            .FirstOrDefaultAsync(sa => sa.Id == serviceAreaId && sa.TenantId == currentTenantId)) is null)
+        {
+            throw new NotFoundException($"Service Area {serviceAreaId} not found");
+        }
+
+        var users = _context
+            .Users
+            .AsNoTracking()
+            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.ServiceAreaId == serviceAreaId)
+            .Select(d => new ServiceAreaUserDto()
+            {
+                Id = d.Id,
+                FullName = d.FullName,
+                Email = d.Email,
+                Team = d.Team != null ? d.Team.Name : string.Empty,
+                JobTitle = d.JobTitle != null ? d.JobTitle.Name : string.Empty,
+            })
+        ;
 
         return users;
     }

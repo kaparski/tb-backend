@@ -21,6 +21,7 @@ using TaxBeacon.Email;
 using TaxBeacon.Email.Messages;
 using TaxBeacon.UserManagement.Extensions;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Services.Activities;
@@ -28,7 +29,7 @@ using RolesConstants = TaxBeacon.Common.Roles.Roles;
 
 namespace TaxBeacon.UserManagement.Services;
 
-public class UserService: IUserService
+public class UserService : IUserService
 {
     private readonly ILogger<UserService> _logger;
     private readonly ITaxBeaconDbContext _context;

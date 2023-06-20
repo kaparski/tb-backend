@@ -11,6 +11,7 @@ using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
@@ -560,6 +561,70 @@ public class DepartmentServiceTests
         //Assert
         resultOneOf.IsT0.Should().BeFalse();
         resultOneOf.IsT1.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task QueryDepartmentUsersAsync_DepartmentExistsAndFilterApplied_ShouldReturnUsersWithSpecificDepartment()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        var listOfUsers = TestData.TestUser.Generate(5);
+        department.Users = listOfUsers;
+        await _dbContextMock.TenantUsers.AddRangeAsync(department.Users.Select(u => new TenantUser { UserId = u.Id, TenantId = TestData.TestTenantId }));
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var query = await _departmentService.QueryDepartmentUsersAsync(department.Id);
+
+        var teamName = listOfUsers.First().Team!.Name;
+        var users = query
+            .Where(u => u.Team == teamName)
+            .OrderBy(u => u.Team)
+            .ToArray();
+
+        //Assert
+        using (new AssertionScope())
+        {
+            users.Length.Should().BeGreaterThan(0);
+            users.Should().BeInAscendingOrder((o1, o2) => string.Compare(o1.Team, o2.Team, StringComparison.InvariantCultureIgnoreCase));
+            users.Should().AllSatisfy(u => u.Team.Should().Be(users.First().Team));
+        }
+    }
+
+    [Fact]
+    public async Task QueryDepartmentUsersAsync_DepartmentDoesNotExist_ShouldThrow()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        //Act
+        var task = _departmentService.QueryDepartmentUsersAsync(new Guid());
+
+        //Assert
+        task.Exception!.InnerException.Should().BeOfType<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task QueryDepartmentUsersAsync_UserIsFromDifferentTenant_ShouldThrow()
+    {
+        //Arrange
+        var department = TestData.TestDepartment.Generate();
+        department.TenantId = TestData.TestTenantId;
+        await _dbContextMock.Departments.AddRangeAsync(department);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
+
+        //Act
+        var task = _departmentService.QueryDepartmentUsersAsync(department.Id);
+
+        //Assert
+        task.Exception!.InnerException.Should().BeOfType<NotFoundException>();
     }
 
     [Fact]
