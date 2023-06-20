@@ -90,8 +90,8 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
         builder
             .Property(e => e.TaxYearEndType)
             .HasConversion(
-                v => v.Value,
-                v => TaxYearEndType.FromValue(v))
+                v => v.Name,
+                v => TaxYearEndType.FromName(v, false))
             .HasColumnType("nvarchar")
             .HasMaxLength(20);
 

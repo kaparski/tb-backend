@@ -2,19 +2,19 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using OneOf.Types;
 using TaxBeacon.Accounts.Services.Entities;
+using TaxBeacon.Accounts.Services.Entities.Activities;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Permissions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
+using TaxBeacon.DAL.Entities.Accounts;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.DAL.Entities.Accounts;
-using Microsoft.Extensions.Logging;
-using TaxBeacon.Accounts.Services.Entities.Activities;
+using TaxBeacon.Accounts.Services.Entities.Models;
 
 namespace TaxBeacon.Accounts.UnitTests.Services;
 public class EntityServiceTest
