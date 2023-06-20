@@ -29,6 +29,10 @@ public class Contact: BaseEntity
 
     public string? Phone2 { get; set; }
 
+    public string? Role { get; set; }
+
+    public string? SubRole { get; set; }
+
     public Status Status { get; set; }
 
     public string FullName { get; private set; } = string.Empty;

@@ -48,7 +48,9 @@ BEGIN TRY
            ('Entities.Read'),
            ('Entities.ReadWrite'),
            ('Entities.ReadExport'),
-           ('Entities.Activation');
+           ('Entities.Activation'),
+           ('TableFilters.Read'),
+           ('TableFilters.ReadWrite');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),

@@ -32,6 +32,10 @@ public class ContactDetailsResponse
 
     public string? Address { get; set; }
 
+    public string? Role { get; set; }
+
+    public string? SubRole { get; set; }
+
     public State State { get; set; } = State.None;
 
     public Guid AccountId { get; set; }
