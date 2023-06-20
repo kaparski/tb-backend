@@ -27,12 +27,8 @@ public interface IDivisionsService
 
     Task<OneOf<DivisionDetailsDto, NotFound, InvalidOperation>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default);
 
-        Task<OneOf<DivisionDepartmentDto[], NotFound>> GetDivisionDepartmentsAsync(Guid id,
+    Task<OneOf<DivisionDepartmentDto[], NotFound>> GetDivisionDepartmentsAsync(Guid id,
             CancellationToken cancellationToken = default);
 
-        Task<IQueryable<DivisionUserDto>> QueryDivisionUsersAsync(Guid divisionId);
-    }
-}
-    Task<OneOf<DivisionDepartmentDto[], NotFound>> GetDivisionDepartmentsAsync(Guid id,
-        CancellationToken cancellationToken = default);
+    Task<IQueryable<DivisionUserDto>> QueryDivisionUsersAsync(Guid divisionId);
 }
