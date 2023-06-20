@@ -122,7 +122,7 @@ public class EntityServiceTest
         // Assert
         using (new AssertionScope())
         {
-            oneOf.IsT0.Should().BeTrue();
+            oneOf.IsT1.Should().BeTrue();
             var result = oneOf.AsT1;
             result.Should().BeOfType<NotFound>();
         }
@@ -155,7 +155,9 @@ public class EntityServiceTest
                 .RuleFor(t => t.City, f => f.Address.City())
                 .RuleFor(t => t.State, t => State.NM)
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow)
-                .RuleFor(t => t.Status, t => Status.Active);
+                .RuleFor(t => t.Status, t => Status.Active)
+                .RuleFor(t => t.Country, f => f.Address.Country())
+                .RuleFor(t => t.StreetAddress1, f => f.Address.StreetAddress());
 
         public static readonly Faker<Tenant> TestTenant =
            new Faker<Tenant>()
