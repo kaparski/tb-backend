@@ -91,6 +91,10 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<AccountView> AccountsView => Set<AccountView>();
 
+    public DbSet<StateId> StateIds => Set<StateId>();
+
+    public DbSet<EntityActivityLog> EntityActivityLogs => Set<EntityActivityLog>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

@@ -16,6 +16,7 @@ using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Common.Models;
 using TaxBeacon.UserManagement.Models.Activities.JobTitle;
 using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Services.Activities.JobTitle;
@@ -62,7 +63,7 @@ public class JobTitleService: IJobTitleService
             Name = d.Name,
             Description = d.Description,
             CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-            AssignedUsersCount = d.Users.Count(),
+            AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
             DepartmentId = d.DepartmentId,
             Department = d.Department == null ? null : d.Department.Name
         });
@@ -81,7 +82,7 @@ public class JobTitleService: IJobTitleService
                 Name = d.Name,
                 Description = d.Description,
                 CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(),
+                AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
                 Department = d.Department == null ? string.Empty : d.Department.Name
             })
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
@@ -99,7 +100,7 @@ public class JobTitleService: IJobTitleService
                 Description = sa.Description,
                 Department = sa.Department == null ? string.Empty : sa.Department.Name,
                 CreatedDateTimeUtc = sa.CreatedDateTimeUtc,
-                AssignedUsersCount = sa.Users.Count()
+                AssignedUsersCount = sa.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId))
             })
             .OrderBy(sa => sa.Name)
             .ToListAsync(cancellationToken);

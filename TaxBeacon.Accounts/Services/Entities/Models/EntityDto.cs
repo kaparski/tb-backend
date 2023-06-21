@@ -1,7 +1,7 @@
 ﻿using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Accounts;
 
-namespace TaxBeacon.Accounts.Entities;
+namespace TaxBeacon.Accounts.Services.Entities.Models;
 public record EntityDto
 {
     public Guid Id { get; init; }
@@ -16,7 +16,7 @@ public record EntityDto
 
     public State State { get; init; }
 
-    public AccountEntityType Type { get; init; } = AccountEntityType.None;
+    public string Type { get; init; } = null!;
 
     public Status Status { get; init; }
 }

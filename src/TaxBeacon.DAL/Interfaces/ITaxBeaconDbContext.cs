@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Interfaces;
 

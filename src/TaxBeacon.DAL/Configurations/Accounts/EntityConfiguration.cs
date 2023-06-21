@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaxBeacon.Common.Accounts;
+using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Configurations.Accounts;
@@ -47,10 +48,31 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
             .HasMaxLength(100);
 
         builder
+            .Property(e => e.StreetAddress1)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(150)
+            .IsRequired();
+
+        builder
+            .Property(e => e.StreetAddress2)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(150);
+
+        builder
+            .Property(e => e.Address)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(200);
+
+        builder
             .Property(e => e.State)
             .HasColumnType("nvarchar")
             .HasMaxLength(2)
             .HasConversion<string>();
+
+        builder
+            .Property(c => c.Country)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
 
         builder
             .Property(e => e.Status)
@@ -60,11 +82,49 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
 
         builder
             .Property(e => e.Type)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(20)
+            .IsRequired();
+
+        builder
+            .Property(e => e.TaxYearEndType)
             .HasConversion(
                 v => v.Name,
-                v => AccountEntityType.FromName(v, false))
+                v => TaxYearEndType.FromName(v, false))
             .HasColumnType("nvarchar")
             .HasMaxLength(20);
+
+        builder
+            .Property(e => e.Phone)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(20);
+
+        builder
+            .Property(e => e.Fax)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(20);
+
+        builder
+            .Property(e => e.Extension)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(20);
+
+        builder
+           .Property(e => e.Dba)
+           .HasColumnType("nvarchar")
+           .HasMaxLength(20);
+
+        builder
+           .Property(e => e.Zip)
+           .HasColumnType("nvarchar")
+           .HasMaxLength(15)
+           .IsRequired();
+
+        builder
+            .HasMany(d => d.StateIds)
+            .WithOne(jt => jt.Entity)
+            .HasForeignKey(jt => jt.EntityId)
+             .IsRequired(false);
 
         builder
             .HasIndex(e => new { e.TenantId, e.Fein })

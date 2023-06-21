@@ -6,12 +6,11 @@ using Moq;
 using OneOf;
 using OneOf.Types;
 using System.Reflection;
-using TaxBeacon.Accounts.Entities;
-using TaxBeacon.Accounts.Locations.Models;
+using TaxBeacon.Accounts.Services.Entities.Models;
+using TaxBeacon.Accounts.Services.Entities;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Entities;
 using TaxBeacon.API.Controllers.Entities.Responses;
-using TaxBeacon.API.Controllers.Tenants.Responses;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Entities;
 public class EntitiesControllerTest

@@ -5,7 +5,7 @@ using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Accounts.Accounts;
 using Microsoft.Extensions.DependencyInjection;
 using TaxBeacon.Accounts.Locations;
-using TaxBeacon.Accounts.Entities;
+using TaxBeacon.Accounts.Services.Entities;
 
 namespace TaxBeacon.Accounts;
 
