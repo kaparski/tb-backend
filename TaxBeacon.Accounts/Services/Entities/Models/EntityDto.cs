@@ -16,7 +16,7 @@ public record EntityDto
 
     public State State { get; init; }
 
-    public AccountEntityType Type { get; init; } = AccountEntityType.None;
+    public string Type { get; init; } = null!;
 
     public Status Status { get; init; }
 }

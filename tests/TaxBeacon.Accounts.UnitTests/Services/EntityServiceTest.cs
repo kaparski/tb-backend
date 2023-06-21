@@ -151,7 +151,7 @@ public class EntityServiceTest
             new Faker<Entity>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.Type, t => Common.Accounts.AccountEntityType.LLC)
+                .RuleFor(t => t.Type, t => Common.Accounts.AccountEntityType.LLC.Name)
                 .RuleFor(t => t.City, f => f.Address.City())
                 .RuleFor(t => t.State, t => State.NM)
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow)
