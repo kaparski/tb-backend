@@ -37,7 +37,7 @@ public class Entity: BaseEntity
 
     public State State { get; set; }
 
-    public AccountEntityType Type { get; set; } = AccountEntityType.None;
+    public string Type { get; set; } = null!;
 
     public TaxYearEndType TaxYearEndType { get; set; } = TaxYearEndType.None;
 
