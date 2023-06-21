@@ -50,5 +50,5 @@ public interface IProgramService
 
     IQueryable<ProgramDto> QueryPrograms();
 
-    IQueryable<ProgramDto> QueryTenantPrograms();
+    IQueryable<TenantProgramDto> QueryTenantPrograms();
 }

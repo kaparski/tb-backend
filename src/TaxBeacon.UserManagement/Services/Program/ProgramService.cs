@@ -295,10 +295,14 @@ public class ProgramService: IProgramService
             .ProjectToType<TenantProgramDto>()
             .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
-    public IQueryable<ProgramDto> QueryTenantPrograms() =>
-        _context.TenantsPrograms
-            .Where(x => x.TenantId == _currentUserService.TenantId && x.IsDeleted == false)
-            .ProjectToType<ProgramDto>();
+    public IQueryable<TenantProgramDto> QueryTenantPrograms()
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        return _context.TenantsPrograms
+            .Where(x => x.TenantId == tenantId)
+            .ProjectToType<TenantProgramDto>();
+    }
 
     public async Task<byte[]> ExportTenantProgramsAsync(FileType fileType,
         CancellationToken cancellationToken = default)
