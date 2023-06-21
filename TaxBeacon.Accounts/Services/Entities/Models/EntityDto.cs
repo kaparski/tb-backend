@@ -1,6 +1,4 @@
 ﻿using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities.Accounts;
-using Mapster;
 
 namespace TaxBeacon.Accounts.Services.Entities.Models;
 public record EntityDto
