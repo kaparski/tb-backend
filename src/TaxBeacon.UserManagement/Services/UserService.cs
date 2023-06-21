@@ -128,65 +128,102 @@ public class UserService: IUserService
 
     public IQueryable<UserDto> QueryUsers()
     {
+        // Need to use views here. Main reason is because EF fails to construct a query when
+        // an array-like field (Roles in this case) must be both sortable and filterable.
+        // Also a view allows to optimize fetching relative fields like Department, JobTitle etc.
+
         var nonTenantUsers = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true };
 
-        var userRoles = nonTenantUsers ?
-            _context.UserRoles
-                .Select(ur => new UserRoleContainer
+        if (nonTenantUsers)
+        {
+            var userRoles = _context.UserRoles
+                .Select(ur => new
                 {
-                    UserIdPlusTenantId = ur.UserId.ToString(),
+                    UserId = ur.UserId,
                     RoleId = ur.RoleId,
                     RoleName = ur.Role.Name
-                }) :
-            _context.TenantUserRoles
-                .Select(tur => new UserRoleContainer
+                });
+
+            var userDtos = _context.UsersView.GroupJoin(userRoles,
+                u => u.Id,
+                ur => ur.UserId,
+                (u, roles) => new UserDto
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    Status = u.Status,
+                    CreatedDateTimeUtc = u.CreatedDateTimeUtc,
+                    LastLoginDateTimeUtc = u.LastLoginDateTimeUtc,
+                    DeactivationDateTimeUtc = u.DeactivationDateTimeUtc,
+                    ReactivationDateTimeUtc = u.ReactivationDateTimeUtc,
+                    FullName = u.FullName,
+                    LegalName = u.LegalName,
+                    DivisionId = u.DivisionId,
+                    Division = u.Division,
+                    DepartmentId = u.DepartmentId,
+                    Department = u.Department,
+                    JobTitleId = u.JobTitleId,
+                    JobTitle = u.JobTitle,
+                    ServiceAreaId = u.ServiceAreaId,
+                    ServiceArea = u.ServiceArea,
+                    TeamId = u.TeamId,
+                    Team = u.Team,
+                    Roles = u.Roles,
+                    RoleIds = roles.Select(r => r.RoleId)
+                })
+            ;
+
+            return userDtos;
+        }
+        else
+        {
+            var tenantId = _currentUserService.TenantId;
+
+            var users = _context.TenantUsersView.Where(u => u.TenantId == tenantId);
+
+            var userRoles = _context.TenantUserRoles
+                .Select(tur => new
                 {
                     UserIdPlusTenantId = tur.UserId.ToString() + tur.TenantId.ToString(),
                     RoleId = tur.RoleId,
                     RoleName = tur.TenantRole.Role.Name
                 });
 
-        Guid? tenantId = nonTenantUsers ?
-            null :
-            _currentUserService.TenantId;
+            var userDtos = users.GroupJoin(userRoles,
+                u => u.UserIdPlusTenantId,
+                tur => tur.UserIdPlusTenantId,
+                (u, roles) => new UserDto
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    Status = u.Status,
+                    CreatedDateTimeUtc = u.CreatedDateTimeUtc,
+                    LastLoginDateTimeUtc = u.LastLoginDateTimeUtc,
+                    DeactivationDateTimeUtc = u.DeactivationDateTimeUtc,
+                    ReactivationDateTimeUtc = u.ReactivationDateTimeUtc,
+                    FullName = u.FullName,
+                    LegalName = u.LegalName,
+                    DivisionId = u.DivisionId,
+                    Division = u.Division,
+                    DepartmentId = u.DepartmentId,
+                    Department = u.Department,
+                    JobTitleId = u.JobTitleId,
+                    JobTitle = u.JobTitle,
+                    ServiceAreaId = u.ServiceAreaId,
+                    ServiceArea = u.ServiceArea,
+                    TeamId = u.TeamId,
+                    Team = u.Team,
+                    Roles = u.Roles,
+                    RoleIds = roles.Select(r => r.RoleId)
+                })
+            ;
 
-        // Need to use a view here. Main reason is because EF fails to construct a query when
-        // an array-like field (Roles in this case) must be both sortable and filterable.
-        // Also a view allows to optimize fetching relative fields like Department, JobTitle etc.
-        var users = _context.UsersView.Where(u => u.TenantId == tenantId);
-
-        var userDtos = users.GroupJoin(userRoles,
-            u => u.UserIdPlusTenantId,
-            tur => tur.UserIdPlusTenantId,
-            (u, roles) => new UserDto
-            {
-                Id = u.Id,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                Email = u.Email,
-                Status = u.Status,
-                CreatedDateTimeUtc = u.CreatedDateTimeUtc,
-                LastLoginDateTimeUtc = u.LastLoginDateTimeUtc,
-                DeactivationDateTimeUtc = u.DeactivationDateTimeUtc,
-                ReactivationDateTimeUtc = u.ReactivationDateTimeUtc,
-                FullName = u.FullName,
-                LegalName = u.LegalName,
-                DivisionId = u.DivisionId,
-                Division = u.Division,
-                DepartmentId = u.DepartmentId,
-                Department = u.Department,
-                JobTitleId = u.JobTitleId,
-                JobTitle = u.JobTitle,
-                ServiceAreaId = u.ServiceAreaId,
-                ServiceArea = u.ServiceArea,
-                TeamId = u.TeamId,
-                Team = u.Team,
-                Roles = u.Roles,
-                RoleIds = roles.Select(r => r.RoleId)
-            })
-        ;
-
-        return userDtos;
+            return userDtos;
+        }
     }
 
     public async Task<OneOf<UserDto, NotFound>> GetUserDetailsByIdAsync(Guid id,

@@ -3,11 +3,13 @@
 namespace TaxBeacon.DAL.Entities;
 
 /// <summary>
-/// Represents a record in UsersView view. Must be separate from User entity, otherwise EF gets confused and produces wrong queries.
+/// Represents a record in TenantUsersView view. Must be separate from User entity, otherwise EF gets confused and produces wrong queries.
 /// </summary>
-public class UserView: BaseEntity
+public class TenantUserView: BaseEntity
 {
     public Guid Id { get; set; }
+
+    public Guid TenantId { get; set; }
 
     public string FirstName { get; set; } = null!;
 
@@ -48,4 +50,6 @@ public class UserView: BaseEntity
     public string? Team { get; set; }
 
     public string? Roles { get; set; }
+
+    public string? UserIdPlusTenantId { get; set; }
 }

@@ -61,6 +61,8 @@ public interface ITaxBeaconDbContext
 
     DbSet<UserView> UsersView { get; }
 
+    DbSet<TenantUserView> TenantUsersView { get; }
+
     DbSet<DepartmentTenantProgram> DepartmentTenantPrograms { get; }
 
     DbSet<ServiceAreaTenantProgram> ServiceAreaTenantPrograms { get; }

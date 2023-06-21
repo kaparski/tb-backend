@@ -1,4 +1,3 @@
-using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -32,7 +31,7 @@ public class TenantProgramsController: BaseController
         Common.Permissions.Programs.ReadWrite,
         Common.Permissions.Programs.ReadExport)]
     [EnableQuery]
-    [HttpGet("api/odata/tenants/programs")]
+    [HttpGet("api/odata/tenantprograms")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(IQueryable<ProgramResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
