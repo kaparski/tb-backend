@@ -39,6 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migrat
 		migration-scripts\InsertSalesRoleWithPermissions.sql = migration-scripts\InsertSalesRoleWithPermissions.sql
 		migration-scripts\InsertSubjectMatterExpertRoleWithPermissions.sql = migration-scripts\InsertSubjectMatterExpertRoleWithPermissions.sql
 		migration-scripts\InsertSuperAdminRoleWithPermissions.sql = migration-scripts\InsertSuperAdminRoleWithPermissions.sql
+		migration-scripts\TenantUsersView.sql = migration-scripts\TenantUsersView.sql
 		migration-scripts\UsersView.sql = migration-scripts\UsersView.sql
 	EndProjectSection
 EndProject
