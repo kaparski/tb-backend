@@ -86,12 +86,14 @@ public class ContactsController: BaseController
     [ProducesResponseType(typeof(ContactDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<ContactDetailsResponse>> UpdateContactStatusAsync([FromRoute] Guid accountId, [FromRoute] Guid contactId,
+    public async Task<IActionResult> UpdateContactStatusAsync([FromRoute] Guid accountId, [FromRoute] Guid contactId,
         [FromBody] Status contactStatus,
         CancellationToken cancellationToken)
     {
-        var user = await _contactService.UpdateContactStatusAsync(contactId, accountId, contactStatus, cancellationToken);
+        var updatedStatusResult = await _contactService.UpdateContactStatusAsync(contactId, accountId, contactStatus, cancellationToken);
 
-        return Ok(user.Adapt<ContactDetailsResponse>());
+        return updatedStatusResult.Match<IActionResult>(
+            user => Ok(user.Adapt<ContactDetailsResponse>()),
+            _ => NotFound());
     }
 }
