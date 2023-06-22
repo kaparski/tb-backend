@@ -1,9 +1,8 @@
-﻿namespace TaxBeacon.UserManagement.Models
-{
-    public sealed class UpdateTeamDto
-    {
-        public string Name { get; set; } = string.Empty;
+﻿namespace TaxBeacon.UserManagement.Models;
 
-        public string Description { get; set; } = string.Empty;
-    }
+public sealed record UpdateTeamDto
+{
+    public string Name { get; init; } = string.Empty;
+
+    public string? Description { get; init; } = string.Empty;
 }
