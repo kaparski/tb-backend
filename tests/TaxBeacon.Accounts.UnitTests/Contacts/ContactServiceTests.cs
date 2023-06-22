@@ -2,11 +2,13 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Accounts.Services.Contacts.Models;
+using TaxBeacon.Accounts.Services.Entities;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -18,12 +20,16 @@ namespace TaxBeacon.Accounts.UnitTests.Contacts;
 
 public class ContactServiceTests
 {
+    private readonly Mock<IDateTimeService> _dateTimeServiceMock;
+    private readonly Mock<ILogger<ContactService>> _loggerMock;
     private readonly TaxBeaconDbContext _dbContext;
     private readonly IContactService _contactService;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
 
     public ContactServiceTests()
     {
+        _loggerMock = new();
+        _dateTimeServiceMock = new();
         _currentUserServiceMock = new();
         Mock<EntitySaveChangesInterceptor> entitySaveChangesInterceptorMock = new();
         _dbContext = new TaxBeaconDbContext(
@@ -32,7 +38,7 @@ public class ContactServiceTests
                 .Options,
             entitySaveChangesInterceptorMock.Object);
 
-        _contactService = new ContactService(_currentUserServiceMock.Object, _dbContext);
+        _contactService = new ContactService(_loggerMock.Object, _currentUserServiceMock.Object, _dbContext, _dateTimeServiceMock.Object);
     }
 
     [Fact]

@@ -35,6 +35,10 @@ public class Contact: BaseEntity
 
     public Status Status { get; set; }
 
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
+
     public string FullName { get; private set; } = string.Empty;
 
     public State State { get; set; } = State.None;
@@ -46,4 +50,6 @@ public class Contact: BaseEntity
     public string? Zip { get; set; }
 
     public string? Address { get; set; }
+
+    public ICollection<ContactActivityLog> ContactActivityLogs { get; set; } = new HashSet<ContactActivityLog>();
 }
