@@ -1,11 +1,10 @@
-﻿namespace TaxBeacon.UserManagement.Models
+﻿namespace TaxBeacon.UserManagement.Models;
+
+public sealed record UpdateDivisionDto
 {
-    public sealed class UpdateDivisionDto
-    {
-        public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
-        public string Description { get; set; } = string.Empty;
+    public string? Description { get; init; }
 
-        public IEnumerable<Guid>? DepartmentIds { get; set; }
-    }
+    public IEnumerable<Guid>? DepartmentIds { get; init; }
 }
