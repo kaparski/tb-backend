@@ -33,23 +33,20 @@ public class SendGridEmailSender: IEmailSender
 
         var client = new SendGridClient(_sendGridOptions.ApiKey);
 
-        if (emailType == EmailType.UserCreated)
+        if (emailType == EmailType.UserCreated && message is UserCreatedMessage userCreatedMessage && recipients.Any())
         {
-            if (message is UserCreatedMessage userCreatedMessage && recipients.Any())
+            var msg = new SendGridMessage()
             {
-                var msg = new SendGridMessage()
-                {
-                    From = new EmailAddress(_sendGridOptions.From),
-                    Subject = "New User Created",
-                    PlainTextContent = $"User: {userCreatedMessage.Email}{Environment.NewLine}Password: {userCreatedMessage.Password}"
-                };
+                From = new EmailAddress(_sendGridOptions.From),
+                Subject = "New User Created",
+                PlainTextContent = $"User: {userCreatedMessage.Email}{Environment.NewLine}Password: {userCreatedMessage.Password}"
+            };
 
-                msg.AddTos(recipients.Select(r => new EmailAddress(r)).ToList());
+            msg.AddTos(recipients.Select(r => new EmailAddress(r)).ToList());
 
-                var response = await client.SendEmailAsync(msg);
+            var response = await client.SendEmailAsync(msg);
 
-                _logger.LogInformation("User {userEmail} creation information has been sent, response status code is {StatusCode}", userCreatedMessage.Email, response.StatusCode);
-            }
+            _logger.LogInformation("User {userEmail} creation information has been sent, response status code is {StatusCode}", userCreatedMessage.Email, response.StatusCode);
         }
     }
 }
