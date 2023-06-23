@@ -52,6 +52,8 @@ public class Tenant: BaseEntity
 
     public ICollection<EntityActivityLog> EntityActivityLogs { get; set; } = new HashSet<EntityActivityLog>();
 
+    public ICollection<ContactActivityLog> ContactActivityLogs { get; set; } = new HashSet<ContactActivityLog>();
+
     public ICollection<Accounts.Account> Accounts { get; set; } = new HashSet<Accounts.Account>();
 
     public ICollection<Accounts.Client> Clients { get; set; } = new HashSet<Accounts.Client>();

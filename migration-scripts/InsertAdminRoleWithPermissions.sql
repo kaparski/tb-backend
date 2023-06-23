@@ -62,6 +62,7 @@ BEGIN TRY
            ('Accounts.Read'),
            ('Accounts.ReadExport'),
            ('Contacts.Read'),
+           ('Contacts.ReadWrite'),
            ('Entities.Read'),
            ('Entities.ReadWrite'),
            ('Locations.Read');

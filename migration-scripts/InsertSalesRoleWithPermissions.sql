@@ -37,6 +37,7 @@ BEGIN TRY
     VALUES ('Accounts.Read'),
            ('Accounts.ReadExport'),
            ('Contacts.Read'),
+           ('Contacts.ReadWrite'),
            ('Entities.Read'),
            ('Locations.Read'),
            ('TableFilters.Read'),
