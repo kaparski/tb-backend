@@ -1,5 +1,4 @@
-﻿using TaxBeacon.Common.Accounts;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.DAL.Entities.Accounts;
 
@@ -19,11 +18,11 @@ public class AccountView: BaseEntity
 
     public string AccountType { get; set; } = null!;
 
-    public ClientState? ClientState { get; set; }
+    public string? ClientState { get; set; }
 
     public Status? ClientStatus { get; set; }
 
-    public ReferralState? ReferralState { get; set; }
+    public string? ReferralState { get; set; }
 
     public Status? ReferralStatus { get; set; }
 }

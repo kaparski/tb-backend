@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaxBeacon.Common.Accounts;
 using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Configurations.Accounts;
@@ -35,10 +34,8 @@ public class ClientConfiguration: IEntityTypeConfiguration<Client>
 
         client
             .Property(c => c.State)
-            .HasConversion(
-                v => v.Name,
-                v => ClientState.FromName(v, false))
             .HasColumnType("nvarchar")
-            .HasMaxLength(50);
+            .HasMaxLength(50)
+            .IsRequired();
     }
 }

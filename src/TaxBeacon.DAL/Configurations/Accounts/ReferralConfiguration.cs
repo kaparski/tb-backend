@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaxBeacon.Common.Accounts;
 using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Configurations.Accounts;
+
 public class ReferralConfiguration: IEntityTypeConfiguration<Referral>
 {
     public void Configure(EntityTypeBuilder<Referral> referral)
@@ -35,10 +35,8 @@ public class ReferralConfiguration: IEntityTypeConfiguration<Referral>
 
         referral
             .Property(c => c.State)
-            .HasConversion(
-                v => v.Name,
-                v => ReferralState.FromName(v, false))
             .HasColumnType("nvarchar")
-            .HasMaxLength(50);
+            .HasMaxLength(50)
+            .IsRequired();
     }
 }
