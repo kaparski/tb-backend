@@ -82,7 +82,7 @@ public class ContactsController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>Updated contact</returns>
     [HasPermissions(Common.Permissions.Contacts.ReadWrite)]
-    [HttpPut("/api/accounts/{accountId:guid}/contacts/{contactId:guid}", Name = "UpdateContactStatus")]
+    [HttpPut("/api/accounts/{accountId:guid}/contacts/{contactId:guid}/status", Name = "UpdateContactStatus")]
     [ProducesResponseType(typeof(ContactDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
