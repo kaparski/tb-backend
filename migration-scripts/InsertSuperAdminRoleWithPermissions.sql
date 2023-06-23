@@ -53,6 +53,7 @@ VALUES ('Departments.Read'),
        ('Entities.Read'),
        ('Entities.ReadWrite'),
        ('Contacts.Read'),
+       ('Contacts.ReadWrite'),
        ('Locations.Read');
 
 INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
