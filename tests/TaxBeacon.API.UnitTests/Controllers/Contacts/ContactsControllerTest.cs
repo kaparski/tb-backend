@@ -140,7 +140,7 @@ public class ContactsControllerTest
     public void UpdateContactStatusAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, Guid, Status, CancellationToken, Task <IActionResult>>)_controller.UpdateContactStatusAsync).Method;
+        var methodInfo = ((Func<Guid, Guid, Status, CancellationToken, Task<IActionResult>>)_controller.UpdateContactStatusAsync).Method;
         var permissions = new object[]
         {
             Common.Permissions.Contacts.ReadWrite
