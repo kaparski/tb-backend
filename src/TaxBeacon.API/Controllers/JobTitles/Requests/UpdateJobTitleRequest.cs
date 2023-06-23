@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace TaxBeacon.API.Controllers.JobTitles.Requests;
 
-public record UpdateJobTitleRequest(string Name, string Description, Guid? DepartmentId);
+public record UpdateJobTitleRequest(string Name, string? Description, Guid? DepartmentId);
 
 public class UpdateJobTitleRequestValidator: AbstractValidator<UpdateJobTitleRequest>
 {
