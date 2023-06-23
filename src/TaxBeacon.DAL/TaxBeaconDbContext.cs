@@ -71,6 +71,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<UserView> UsersView => Set<UserView>();
 
+    public DbSet<TenantUserView> TenantUsersView => Set<TenantUserView>();
+
     public DbSet<Account> Accounts => Set<Account>();
 
     public DbSet<Client> Clients => Set<Client>();

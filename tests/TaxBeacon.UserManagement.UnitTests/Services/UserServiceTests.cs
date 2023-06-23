@@ -507,7 +507,7 @@ public class UserServiceTests
     public async Task UpdateUserByIdAsync_ValidUserIdAndUpdateUserDto_ReturnsUpdatedUser()
     {
         // Arrange
-        TypeAdapterConfig<UserView, User>
+        TypeAdapterConfig<TenantUserView, User>
             .ForType()
             .Ignore(dest => dest.Division)
             .Ignore(dest => dest.Department)
@@ -521,7 +521,7 @@ public class UserServiceTests
         updateUserDto.DepartmentId = departmentId;
         updateUserDto.ServiceAreaId = serviceAreaId;
         updateUserDto.JobTitleId = jobTitleId;
-        var userView = TestData.TestUserView.Generate();
+        var userView = TestData.TestTenantUserView.Generate();
         userView.TenantId = tenantId;
         var user = userView.Adapt<User>();
         updateUserDto.Adapt(userView);
@@ -531,7 +531,7 @@ public class UserServiceTests
         var currentDate = DateTime.UtcNow;
 
         await _dbContextMock.Users.AddAsync(user);
-        await _dbContextMock.UsersView.AddAsync(userView);
+        await _dbContextMock.TenantUsersView.AddAsync(userView);
         await _dbContextMock.TenantUsers.AddAsync(new TenantUser
         {
             TenantId = tenantId,
@@ -1183,11 +1183,11 @@ public class UserServiceTests
     {
         // Arrange
         var tenant = TestData.TestTenant.Generate();
-        var userView = TestData.TestUserView.Generate();
+        var userView = TestData.TestTenantUserView.Generate();
         userView.TenantId = tenant.Id;
 
         await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.UsersView.AddAsync(userView);
+        await _dbContextMock.TenantUsersView.AddAsync(userView);
 
         var roles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
         var tenantRoles = TestData.TestRoles.Generate(3).Select(r => r.Name).ToArray();
@@ -1585,14 +1585,46 @@ public class UserServiceTests
     }
 
     [Fact]
+    public void TenantUserView_ListOfColumnsMatchesUserViewEntity()
+    {
+        // Arrange
+
+        var usersViewScript = File.ReadAllText("../../../../../migration-scripts/TenantUsersView.sql");
+
+        var fieldsAsString = new Regex(@"select((.|\n)*)from", RegexOptions.IgnoreCase | RegexOptions.Multiline)
+            .Match(usersViewScript)
+            .Groups[1]
+            .Value;
+
+        var fields = new Regex(@"(\w+),?[\r\n]", RegexOptions.IgnoreCase | RegexOptions.Multiline)
+            .Matches(fieldsAsString)
+            .Select(m => m.Groups[1].Value)
+            .ToArray();
+
+        var props = typeof(TenantUserView).GetProperties()
+            .Select(p => p.Name)
+            .Where(p => p != "IsDeleted" && p != "DeletedDateTimeUtc")
+            .ToArray();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            foreach (var prop in props)
+            {
+                fields.Should().Contain(prop);
+            }
+        }
+    }
+
+    [Fact]
     public async Task QueryUsers_ReturnsTenantUsers()
     {
         // Arrange
-        var userViews = TestData.TestUserView.Generate(5);
+        var userViews = TestData.TestTenantUserView.Generate(5);
 
         userViews.ForEach(u => u.TenantId = TestData.TestTenantId);
 
-        await _dbContextMock.UsersView.AddRangeAsync(userViews);
+        await _dbContextMock.TenantUsersView.AddRangeAsync(userViews);
         await _dbContextMock.SaveChangesAsync();
 
         _currentUserServiceMock
@@ -1682,6 +1714,33 @@ public class UserServiceTests
 
         public static readonly Faker<UserView> TestUserView =
             new Faker<UserView>()
+                .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.LastModifiedDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.Id, _ => Guid.NewGuid())
+                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+                .RuleFor(u => u.LegalName, (_, u) => u.FirstName)
+                .RuleFor(u => u.LastName, f => f.Name.LastName())
+                .RuleFor(u => u.Email, f => f.Internet.Email())
+                .RuleFor(u => u.Status, f => f.PickRandom<Status>())
+                .RuleFor(u => u.LastLoginDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.FullName, (_, u) => $"{u.FirstName} {u.LastName}")
+                .RuleFor(u => u.DeactivationDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.ReactivationDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(u => u.DivisionId, _ => Guid.NewGuid())
+                .RuleFor(u => u.Division, f => f.Commerce.Department())
+                .RuleFor(u => u.DepartmentId, _ => Guid.NewGuid())
+                .RuleFor(u => u.Department, f => f.Commerce.Department())
+                .RuleFor(u => u.ServiceAreaId, _ => Guid.NewGuid())
+                .RuleFor(u => u.ServiceArea, f => f.Name.JobArea())
+                .RuleFor(u => u.JobTitleId, _ => Guid.NewGuid())
+                .RuleFor(u => u.JobTitle, f => f.Name.JobTitle())
+                .RuleFor(u => u.TeamId, _ => Guid.NewGuid())
+                .RuleFor(u => u.Team, f => f.Commerce.Department())
+                .RuleFor(u => u.Roles, f => f.Name.JobTitle())
+        ;
+
+        public static readonly Faker<TenantUserView> TestTenantUserView =
+            new Faker<TenantUserView>()
                 .RuleFor(u => u.CreatedDateTimeUtc, _ => DateTime.UtcNow)
                 .RuleFor(u => u.LastModifiedDateTimeUtc, _ => DateTime.UtcNow)
                 .RuleFor(u => u.Id, _ => Guid.NewGuid())

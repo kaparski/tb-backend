@@ -82,11 +82,9 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
 
         builder
             .Property(e => e.Type)
-            .HasConversion(
-                v => v.Name,
-                v => AccountEntityType.FromName(v, false))
             .HasColumnType("nvarchar")
-            .HasMaxLength(20);
+            .HasMaxLength(20)
+            .IsRequired();
 
         builder
             .Property(e => e.TaxYearEndType)

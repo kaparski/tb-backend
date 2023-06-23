@@ -1,8 +1,8 @@
 ﻿
-DROP VIEW IF EXISTS dbo.UsersView
+DROP VIEW IF EXISTS dbo.TenantUsersView
 GO
 
-CREATE VIEW dbo.UsersView AS
+CREATE VIEW dbo.TenantUsersView AS
 	select 
 		u.Id,
 		u.FirstName,
@@ -26,17 +26,23 @@ CREATE VIEW dbo.UsersView AS
 		sa.Name as ServiceArea,
 		u.TeamId,
 		t.Name as Team,
+		tu.TenantId,
+		CAST(u.Id as varchar(50)) + ISNULL(CAST(tu.TenantId as varchar(50)), '') as UserIdPlusTenantId,
 		STRING_AGG(r.Name, ', ') as Roles
 	from 
 		dbo.Users u
 		left join
-		dbo.UserRoles ur
+		dbo.TenantUsers tu
 		on
-		ur.UserId = u.Id
+		u.Id = tu.UserId
+		left join
+		dbo.TenantUserRoles tur
+		on
+		tur.UserId = u.Id and tur.TenantId = tu.TenantId
 		left join
 		dbo.Roles r
 		on
-		r.Id = ur.RoleId
+		r.Id = tur.RoleId
 		left join
 		dbo.Divisions di
 		on
@@ -81,5 +87,6 @@ CREATE VIEW dbo.UsersView AS
 		d.Name,
 		jt.Name,
 		sa.Name,
-		t.Name
+		t.Name,
+		tu.TenantId
 GO

@@ -21,7 +21,7 @@ public record EntityDetailsResponse
     string? Phone,
     string? Extension,
     State State,
-    AccountEntityType Type,
+    string Type,
     TaxYearEndType TaxYearEndType,
     Status Status,
     IEnumerable<StateId> StateIds
