@@ -86,7 +86,8 @@ public class ContactsController: BaseController
     [ProducesResponseType(typeof(ContactDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> UpdateContactStatusAsync([FromRoute] Guid accountId, [FromRoute] Guid contactId,
+    public async Task<IActionResult> UpdateContactStatusAsync([FromRoute] Guid accountId,
+        [FromRoute] Guid contactId,
         [FromBody] Status contactStatus,
         CancellationToken cancellationToken)
     {
