@@ -168,6 +168,89 @@ public class ContactServiceTests
         }
     }
 
+    [Fact]
+    public async Task UpdateContactStatusAsync_ActiveStatusAndContactId_Succeeds()
+    {
+        //Arrange
+        var account = TestData.TestAccount.Generate();
+        var contact = TestData.TestContact.Generate();
+        var currentDate = DateTime.UtcNow;
+
+        contact.AccountId = account.Id;
+        contact.TenantId = TestData.TestTenantId;
+
+        await _dbContext.Accounts.AddRangeAsync(account);
+        await _dbContext.Contacts.AddAsync(contact);
+        await _dbContext.SaveChangesAsync();
+
+        _dateTimeServiceMock
+            .Setup(ds => ds.UtcNow)
+            .Returns(currentDate);
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
+
+        //Act
+        var actualResult = await _contactService.UpdateContactStatusAsync(contact.Id, contact.AccountId, Status.Active);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            (await _dbContext.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out var dto, out _).Should().BeTrue();
+            dto.Status.Should().Be(Status.Active);
+            dto.DeactivationDateTimeUtc.Should().BeNull();
+            dto.ReactivationDateTimeUtc.Should().Be(currentDate);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateContactStatusAsync_DeactivatedStatusAndContactId_Succeeds()
+    {
+        //Arrange
+        var account = TestData.TestAccount.Generate();
+        var contact = TestData.TestContact.Generate();
+        var currentDate = DateTime.UtcNow;
+
+        contact.AccountId = account.Id;
+        contact.TenantId = TestData.TestTenantId;
+
+        await _dbContext.Accounts.AddRangeAsync(account);
+        await _dbContext.Contacts.AddAsync(contact);
+        await _dbContext.SaveChangesAsync();
+
+        _dateTimeServiceMock
+            .Setup(ds => ds.UtcNow)
+            .Returns(currentDate);
+
+        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
+
+        //Act
+        var actualResult = await _contactService.UpdateContactStatusAsync(contact.Id, contact.AccountId, Status.Deactivated);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            (await _dbContext.SaveChangesAsync()).Should().Be(0);
+            actualResult.TryPickT0(out var dto, out _).Should().BeTrue();
+            dto.Status.Should().Be(Status.Deactivated);
+            dto.ReactivationDateTimeUtc.Should().BeNull();
+            dto.DeactivationDateTimeUtc.Should().Be(currentDate);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateContactStatusAsync_ContactIdNotInDb_ReturnNotFound()
+    {
+        //Act
+        var actualResult = await _contactService.UpdateContactStatusAsync(Guid.NewGuid(), Guid.NewGuid(), Status.Deactivated);
+
+        //Assert
+        using (new AssertionScope())
+        {
+            actualResult.TryPickT1(out _, out _).Should().BeTrue();
+        }
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
@@ -176,6 +259,7 @@ public class ContactServiceTests
         public static readonly Faker<Contact> TestContact =
             new Faker<Contact>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
+                .RuleFor(t => t.AccountId, f => Guid.NewGuid())
                 .RuleFor(t => t.FirstName, f => f.Person.FirstName)
                 .RuleFor(t => t.LastName, f => f.Person.LastName)
                 .RuleFor(t => t.Email, t => t.Person.Email)
