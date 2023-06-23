@@ -1,5 +1,4 @@
-﻿using TaxBeacon.Common.Accounts;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.DAL.Entities.Accounts;
 
@@ -13,7 +12,7 @@ public class Referral: BaseEntity
 
     public Account Account { get; set; } = null!;
 
-    public ReferralState State { get; set; }
+    public string State { get; set; } = null!;
 
     public Status Status { get; set; }
 

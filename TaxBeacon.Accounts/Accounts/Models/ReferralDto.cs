@@ -1,6 +1,5 @@
-﻿using TaxBeacon.Common.Accounts;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.Accounts.Accounts.Models;
 
-public record ReferralDto(ReferralState State, Status Status);
+public record ReferralDto(string State, Status Status);

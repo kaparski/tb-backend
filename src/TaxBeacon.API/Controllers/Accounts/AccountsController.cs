@@ -35,12 +35,7 @@ public class AccountsController: BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IActionResult Get()
-    {
-        var query = _accountService.QueryAccounts();
-
-        return Ok(query.ProjectToType<AccountResponse>());
-    }
+    public IActionResult Get() => Ok(_accountService.QueryAccounts().ProjectToType<AccountResponse>());
 
     /// <summary>
     /// Endpoint to export accounts

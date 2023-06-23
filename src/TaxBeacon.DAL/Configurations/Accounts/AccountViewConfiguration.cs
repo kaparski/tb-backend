@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaxBeacon.Common.Accounts;
 using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Configurations.Accounts;
@@ -23,9 +22,6 @@ public class AccountViewConfiguration: IEntityTypeConfiguration<AccountView>
 
         accountView
             .Property(a => a.ClientState)
-            .HasConversion(
-                v => v.Name,
-                v => ClientState.FromName(v, false))
             .HasColumnType("nvarchar")
             .HasMaxLength(50);
 
@@ -37,9 +33,6 @@ public class AccountViewConfiguration: IEntityTypeConfiguration<AccountView>
 
         accountView
             .Property(a => a.ReferralState)
-            .HasConversion(
-                v => v.Name,
-                v => ReferralState.FromName(v, false))
             .HasColumnType("nvarchar")
             .HasMaxLength(50);
 

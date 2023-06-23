@@ -1,6 +1,5 @@
-﻿using TaxBeacon.Common.Accounts;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Accounts.Responses;
 
-public record ReferralResponse(ReferralState State, Status Status);
+public record ReferralResponse(string State, Status Status);
