@@ -25,7 +25,7 @@ public class Contact: BaseEntity
 
     public string Type { get; set; } = null!;
 
-    public string Phone { get; set; }
+    public string Phone { get; set; } = null!;
 
     public string? Phone2 { get; set; }
 
@@ -34,6 +34,10 @@ public class Contact: BaseEntity
     public string? SubRole { get; set; }
 
     public Status Status { get; set; }
+
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
 
     public string FullName { get; private set; } = string.Empty;
 
@@ -46,4 +50,6 @@ public class Contact: BaseEntity
     public string? Zip { get; set; }
 
     public string? Address { get; set; }
+
+    public ICollection<ContactActivityLog> ContactActivityLogs { get; set; } = new HashSet<ContactActivityLog>();
 }

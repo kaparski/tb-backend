@@ -36,6 +36,7 @@ BEGIN TRY
     INSERT INTO @accountManagerRolePermissions (Name)
     VALUES ('Accounts.Read'),
            ('Contacts.Read'),
+           ('Contacts.ReadWrite'),
            ('Locations.Read'),
            ('TableFilters.Read'),
            ('TableFilters.ReadWrite');

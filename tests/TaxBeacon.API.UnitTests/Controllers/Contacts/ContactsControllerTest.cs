@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf;
 using OneOf.Types;
+using System.Reflection;
 using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Accounts.Services.Contacts.Models;
+using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Contacts;
 using TaxBeacon.API.Controllers.Contacts.Responses;
 using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Contacts;
 
@@ -108,6 +111,49 @@ public class ContactsControllerTest
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void Get_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, Task<IActionResult>>)_controller.Get).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Contacts.Read,
+            Common.Permissions.Contacts.ReadWrite
+        };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public void UpdateContactStatusAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, Guid, Status, CancellationToken, Task<IActionResult>>)_controller.UpdateContactStatusAsync).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Contacts.ReadWrite
+        };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 }

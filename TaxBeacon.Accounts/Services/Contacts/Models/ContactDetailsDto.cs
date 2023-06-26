@@ -41,4 +41,8 @@ public class ContactDetailsDto
     public Guid AccountId { get; set; }
 
     public Guid TenantId { get; set; }
+
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
 }

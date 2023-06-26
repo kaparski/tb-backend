@@ -1,6 +1,5 @@
-﻿using TaxBeacon.Common.Accounts;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Accounts.Responses;
 
-public record ClientResponse(ClientState State, Status Status);
+public record ClientResponse(string State, Status Status);

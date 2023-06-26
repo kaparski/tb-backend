@@ -1,19 +1,32 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneOf;
 using OneOf.Types;
+using System.Text.Json;
 using TaxBeacon.Accounts.Services.Contacts.Models;
+using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.DAL.Entities.Accounts;
+using Microsoft.Extensions.Logging;
+using Mapster;
 
 namespace TaxBeacon.Accounts.Services.Contacts;
 
 public class ContactService: IContactService
 {
+    private readonly ILogger<ContactService> _logger;
+    private readonly IDateTimeService _dateTimeService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IAccountDbContext _context;
 
-    public ContactService(ICurrentUserService currentUserService, IAccountDbContext context)
+    public ContactService(ILogger<ContactService> logger,
+        ICurrentUserService currentUserService,
+        IAccountDbContext context,
+        IDateTimeService dateTimeService)
     {
+        _logger = logger;
+        _dateTimeService = dateTimeService;
         _currentUserService = currentUserService;
         _context = context;
     }
@@ -78,7 +91,7 @@ public class ContactService: IContactService
                 Role = x.Role,
                 SubRole = x.SubRole
             })
-            .FirstOrDefaultAsync(cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
 
         if (contactDetailsDto == null)
         {
@@ -86,5 +99,83 @@ public class ContactService: IContactService
         }
 
         return contactDetailsDto;
+    }
+
+    public async Task<OneOf<ContactDetailsDto, NotFound>> UpdateContactStatusAsync(Guid contactId, Guid accountId,
+        Status status,
+        CancellationToken cancellationToken = default)
+    {
+        var currentTenantId = _currentUserService.TenantId;
+
+        var contact = await _context
+            .Contacts
+            .Where(x => x.AccountId == accountId && x.Id == contactId && x.TenantId == currentTenantId)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (contact == null)
+        {
+            return new NotFound();
+        }
+
+        switch (status)
+        {
+            case Status.Deactivated:
+                contact.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
+                contact.ReactivationDateTimeUtc = null;
+                break;
+            case Status.Active:
+                contact.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
+                contact.DeactivationDateTimeUtc = null;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(status), status, null);
+        }
+
+        contact.Status = status;
+
+        var now = _dateTimeService.UtcNow;
+        var currentUserInfo = _currentUserService.UserInfo;
+
+        var activityLog = status switch
+        {
+            Status.Active => new ContactActivityLog
+            {
+                TenantId = _currentUserService.TenantId,
+                ContactId = contact.Id,
+                Date = now,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new ContactReactivatedEvent(_currentUserService.UserId,
+                        now,
+                        currentUserInfo.FullName,
+                        currentUserInfo.Roles)),
+                EventType = ContactEventType.ContactReactivated
+            },
+            Status.Deactivated => new ContactActivityLog
+            {
+                TenantId = _currentUserService.TenantId,
+                ContactId = contact.Id,
+                Date = _dateTimeService.UtcNow,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new ContactDeactivatedEvent(_currentUserService.UserId,
+                        now,
+                        currentUserInfo.FullName,
+                        currentUserInfo.Roles)),
+                EventType = ContactEventType.ContactDeactivated
+            },
+            _ => throw new InvalidOperationException()
+        };
+
+        await _context.ContactActivityLogs.AddAsync(activityLog, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Contact ({contactId}) status was changed to {newStatus} by {@userId}",
+            _dateTimeService.UtcNow,
+            contact.Id,
+            status,
+            _currentUserService.UserId);
+
+        return contact.Adapt<ContactDetailsDto>();
     }
 }

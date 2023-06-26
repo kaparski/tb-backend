@@ -60,11 +60,21 @@ BEGIN TRY
            ('Users.ReadWrite'),
            ('Users.ReadExport'),
            ('Accounts.Read'),
+           ('Accounts.ReadWrite'),
            ('Accounts.ReadExport'),
+           ('Prospects.Activation'),
            ('Contacts.Read'),
+           ('Contacts.ReadWrite'),
+           ('Contacts.ReadExport'),
+           ('Contacts.Activation'),
+           ('Locations.Read'),
+           ('Locations.ReadWrite'),
+           ('Locations.ReadExport'),
+           ('Locations.Activation'),
            ('Entities.Read'),
            ('Entities.ReadWrite'),
-           ('Locations.Read');
+           ('Entities.ReadExport'),
+           ('Entities.Activation');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),

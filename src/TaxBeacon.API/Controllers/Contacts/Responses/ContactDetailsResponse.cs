@@ -18,7 +18,7 @@ public class ContactDetailsResponse
 
     public string Type { get; set; } = null!;
 
-    public string? Phone { get; set; }
+    public string Phone { get; set; } = null!;
 
     public string? Phone2 { get; set; } = null!;
 
@@ -41,4 +41,8 @@ public class ContactDetailsResponse
     public Guid AccountId { get; set; }
 
     public Guid TenantId { get; set; }
+
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
 }
