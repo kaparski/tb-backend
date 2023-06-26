@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\TaxBeacon.Accounts\TaxBeacon.Accounts.csproj" />
+    <ProjectReference Include="..\..\TaxBeacon.Email\TaxBeacon.Email.csproj" />
     <ProjectReference Include="..\TaxBeacon.UserManagement\TaxBeacon.UserManagement.csproj" />
   </ItemGroup>
 

@@ -5,27 +5,27 @@ using Gridify;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Graph.SecurityNamespace;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using NPOI.Util.ArrayExtensions;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.Email;
 using TaxBeacon.UserManagement.Models;
 using TaxBeacon.UserManagement.Models.Activities;
 using TaxBeacon.UserManagement.Models.Export;
 using TaxBeacon.UserManagement.Services;
 using TaxBeacon.UserManagement.Services.Activities;
 using JsonSerializer = System.Text.Json.JsonSerializer;
-using System.Diagnostics;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 
@@ -45,6 +45,8 @@ public class UserServiceTests
     private readonly Mock<IUserActivityFactory> _userCreatedActivityFactory;
     private readonly Mock<IEnumerable<IUserActivityFactory>> _activityFactories;
     private readonly Guid _tenantId = Guid.NewGuid();
+    private readonly Mock<IOptionsSnapshot<CreateUserOptions>> _createUserOptionsSnapshot;
+    private readonly Mock<IEmailSender> _emailSenderMock;
 
     public UserServiceTests()
     {
@@ -59,6 +61,8 @@ public class UserServiceTests
         _dateTimeFormatterMock = new();
         _userCreatedActivityFactory = new();
         _activityFactories = new();
+        _createUserOptionsSnapshot = new();
+        _emailSenderMock = new();
 
         _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
         _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
@@ -83,6 +87,8 @@ public class UserServiceTests
 
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(_tenantId);
 
+        _createUserOptionsSnapshot.Setup(x => x.Value).Returns(new CreateUserOptions());
+
         _userService = new UserService(
             _userServiceLoggerMock.Object,
             _dbContextMock,
@@ -91,7 +97,9 @@ public class UserServiceTests
             _listToFileConverters.Object,
             _userExternalStore.Object,
             _dateTimeFormatterMock.Object,
-            _activityFactories.Object);
+            _activityFactories.Object,
+            _createUserOptionsSnapshot.Object,
+            _emailSenderMock.Object);
 
         TypeAdapterConfig.GlobalSettings.Scan(typeof(IUserService).Assembly);
     }

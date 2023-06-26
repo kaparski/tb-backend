@@ -1,11 +1,10 @@
-﻿namespace TaxBeacon.UserManagement.Services
+﻿namespace TaxBeacon.UserManagement.Services;
+
+public interface IPasswordGenerator
 {
-    public interface IPasswordGenerator
-    {
-        /// <summary>
-        /// Generates new password.
-        /// </summary>
-        /// <returns></returns>
-        string GeneratePassword();
-    }
+    /// <summary>
+    /// Generates new password.
+    /// </summary>
+    /// <returns></returns>
+    string GeneratePassword();
 }

@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\TaxBeacon.Email\TaxBeacon.Email.csproj" />
     <ProjectReference Include="..\TaxBeacon.DAL\TaxBeacon.DAL.csproj" />
   </ItemGroup>
 
