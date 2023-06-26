@@ -22,9 +22,9 @@ public class ClientConfiguration: IEntityTypeConfiguration<Client>
             .HasForeignKey<Client>(c => c.AccountId);
 
         client
-            .HasOne(c => c.Manager)
+            .HasOne(c => c.PrimaryContact)
             .WithMany(m => m.Clients)
-            .HasForeignKey(c => c.ManagerId);
+            .HasForeignKey(c => c.PrimaryContactId);
 
         client
             .Property(c => c.Status)
@@ -37,5 +37,10 @@ public class ClientConfiguration: IEntityTypeConfiguration<Client>
             .HasColumnType("nvarchar")
             .HasMaxLength(50)
             .IsRequired();
+
+        client
+            .Property(c => c.AnnualRevenue)
+            .HasColumnType("decimal")
+            .HasPrecision(15, 2);
     }
 }

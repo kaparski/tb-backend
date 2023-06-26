@@ -56,6 +56,6 @@ public class User: BaseEntity
 
     public ICollection<Referral> Referrals { get; set; } = new HashSet<Referral>();
 
-    public ICollection<Client> Clients { get; set; } = new HashSet<Client>();
+    public ICollection<ClientManager> ClientManagers { get; set; } = new HashSet<ClientManager>();
 
 }

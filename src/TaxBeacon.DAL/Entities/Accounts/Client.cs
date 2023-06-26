@@ -16,9 +16,21 @@ public class Client: BaseEntity
 
     public Status Status { get; set; }
 
-    public Guid? ManagerId { get; set; }
+    public ICollection<ClientManager> ClientManagers { get; set; } = new HashSet<ClientManager>();
 
-    public User? Manager { get; set; }
+    public Guid? PrimaryContactId { get; set; }
+
+    public Contact? PrimaryContact { get; set; }
 
     public string? NaicsCode { get; set; }
+
+    public decimal? AnnualRevenue { get; set; }
+
+    public int? EmployeeCount { get; set; }
+
+    public int? FoundationYear { get; set; }
+
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
 }

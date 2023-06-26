@@ -5,6 +5,7 @@ using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
 using TaxBeacon.Accounts.Accounts.Models;
+using TaxBeacon.Accounts.Services.Contacts.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
@@ -65,7 +66,24 @@ public class AccountService: IAccountService
                 EntitiesCount = a.Entities.Count,
                 LocationsCount = a.Locations.Count,
                 ContactsCount = a.Contacts.Count,
-                Client = a.Client == null ? null : new ClientDto(a.Client.State, a.Client.Status),
+                Client = a.Client == null ? null
+                                          : new ClientDto
+                                          {
+                                              State = a.Client.State,
+                                              Status = a.Client.Status,
+                                              AnnualRevenue = a.Client.AnnualRevenue,
+                                              FoundationYear = a.Client.FoundationYear,
+                                              EmployeeCount = a.Client.EmployeeCount,
+                                              DeactivationDateTimeUtc = a.Client.DeactivationDateTimeUtc,
+                                              ReactivationDateTimeUtc = a.Client.ReactivationDateTimeUtc,
+                                              CreatedDateTimeUtc = a.Client.CreatedDateTimeUtc,
+                                              PrimaryContact = a.Client.PrimaryContact == null ? null : a.Client.PrimaryContact.Adapt<ContactDto>(),
+                                              Managers = a.Client.ClientManagers
+                                              .Select(m => new ClientManagerDto{
+                                                  ManagerId = m.ManagerId,
+                                                  Manager = m.Manager.Adapt<AccountUserDto>()
+                                              }).Adapt<ICollection<ClientManagerDto>>()
+                                          },
                 Referral = a.Referral == null ? null : new ReferralDto(a.Referral.State, a.Referral.Status),
             })
             .SingleOrDefaultAsync(cancellationToken);
