@@ -6,15 +6,15 @@ public class TenantProgramResponse
 {
     public Guid Id { get; set; }
 
-    public string Reference { get; set; } = string.Empty;
+    public string? Reference { get; set; }
 
     public string Name { get; set; } = string.Empty;
 
     public Jurisdiction Jurisdiction { get; set; }
 
-    public string Overview { get; set; } = string.Empty;
+    public string? Overview { get; set; }
 
-    public string LegalAuthority { get; set; } = string.Empty;
+    public string? LegalAuthority { get; set; }
 
     public string Agency { get; set; } = string.Empty;
 
@@ -22,11 +22,11 @@ public class TenantProgramResponse
 
     public string ServiceArea { get; set; } = string.Empty;
 
-    public string JurisdictionName { get; set; } = string.Empty;
+    public string? JurisdictionName { get; set; }
 
-    public string IncentivesArea { get; set; } = string.Empty;
+    public string? IncentivesArea { get; set; }
 
-    public string IncentivesType { get; set; } = string.Empty;
+    public string? IncentivesType { get; set; }
 
     public Status Status { get; set; }
 

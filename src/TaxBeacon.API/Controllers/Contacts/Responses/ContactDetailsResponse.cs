@@ -18,7 +18,7 @@ public class ContactDetailsResponse
 
     public string Type { get; set; } = null!;
 
-    public string? Phone { get; set; }
+    public string Phone { get; set; } = null!;
 
     public string? Phone2 { get; set; } = null!;
 
