@@ -58,7 +58,8 @@ CREATE VIEW dbo.UsersView AS
 		on
 		u.TeamId = t.Id
 	where
-		u.IsDeleted IS NULL OR u.IsDeleted = CAST(0 AS bit)
+		(u.IsDeleted IS NULL OR u.IsDeleted = CAST(0 AS bit))
+	    AND NOT EXISTS(SELECT 1 FROM TenantUsers tu WHERE tu.UserId = u.Id)
 	group by
 		u.Id,
 		u.FirstName,
