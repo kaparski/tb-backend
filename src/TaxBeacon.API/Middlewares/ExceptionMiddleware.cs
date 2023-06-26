@@ -29,6 +29,8 @@ public class ExceptionMiddleware
 
     public async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        _logger.LogError(exception, "Unhandled exception");
+
         var problemDetails = exception switch
         {
             ConflictException e => new CustomProblemDetails()
@@ -48,7 +50,5 @@ public class ExceptionMiddleware
         response.ContentType = "application/json";
         response.StatusCode = problemDetails.Status!.Value;
         await response.WriteAsync(JsonSerializer.Serialize(problemDetails));
-
-        _logger.LogError(exception, "Unhandled exception");
     }
 }
