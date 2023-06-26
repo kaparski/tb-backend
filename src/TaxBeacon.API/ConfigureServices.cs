@@ -93,7 +93,7 @@ public static class ConfigureServices
 
         services.AddScoped<EntitySaveChangesInterceptor>();
         services.AddDbContext<TaxBeaconDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("QA"),
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
                 builder => builder.MigrationsAssembly(typeof(TaxBeaconDbContext).Assembly.FullName)));
         services.AddScoped<ITaxBeaconDbContext>(provider => provider.GetRequiredService<TaxBeaconDbContext>());
         services.AddScoped<IAccountDbContext>(provider => provider.GetRequiredService<TaxBeaconDbContext>());
