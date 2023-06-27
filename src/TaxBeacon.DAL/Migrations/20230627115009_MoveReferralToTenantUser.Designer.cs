@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230627115009_MoveReferralToTenantUser")]
+    partial class MoveReferralToTenantUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,7 +264,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("TenantId", "AccountId", "UserId");
+                    b.HasKey("TenantId", "AccountId");
 
                     b.HasIndex("TenantId", "UserId");
 
@@ -1957,7 +1960,7 @@ namespace TaxBeacon.DAL.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("TaxBeacon.DAL.Entities.TenantUser", "TenantUser")
+                    b.HasOne("TaxBeacon.DAL.Entities.TenantUser", "User")
                         .WithMany("ClientManagers")
                         .HasForeignKey("TenantId", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1965,7 +1968,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.Navigation("Client");
 
-                    b.Navigation("TenantUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Accounts.Contact", b =>

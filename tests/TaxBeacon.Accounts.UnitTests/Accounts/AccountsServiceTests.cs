@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using TaxBeacon.Accounts.Accounts;
 using TaxBeacon.Accounts.Accounts.Models;
+using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
@@ -221,6 +222,148 @@ public sealed class AccountsServiceTests
         actualResult.IsT0.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task GetClientDetailsByIdAsync_ClientExists_ReturnsClienDetailsDto()
+    {
+        // Arrange
+        var tenant = TestData.TenantFaker.Generate();
+        var account = TestData.AccountsFaker
+            .RuleFor(a => a.TenantId, _ => tenant.Id)
+            .Generate();
+        var client = TestData.ClientsFaker
+            .RuleFor(c => c.AccountId, _ => account.Id)
+            .RuleFor(a => a.TenantId, _ => tenant.Id)
+            .Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Accounts.AddAsync(account);
+        await _dbContextMock.Clients.AddAsync(client);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(x => x.TenantId)
+            .Returns(tenant.Id);
+
+        // Act
+        var actualResult = await _accountService.GetClientDetailsByIdAsync(client.AccountId);
+
+        // Assert
+        actualResult.TryPickT0(out var actualClient, out _).Should().BeTrue();
+        actualClient.Should().BeEquivalentTo(client, opt => opt.ExcludingMissingMembers());
+    }
+
+    [Fact]
+    public async Task GetClientDetailsByIdAsync_NonExistingTenantId_ReturnsNotFound()
+    {
+        // Act
+        var actualResult = await _accountService.GetClientDetailsByIdAsync(Guid.NewGuid());
+
+        // Assert
+        actualResult.IsT1.Should().BeTrue();
+        actualResult.IsT0.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetClientDetailsByIdAsync_ClientTenantIdNotEqualCurrentUserTenantId_ReturnsNotFound()
+    {
+        // Arrange
+        var tenants = TestData.TenantFaker.Generate(2);
+        var account = TestData.AccountsViewFaker
+            .RuleFor(a => a.TenantId, _ => tenants[0].Id)
+            .Generate();
+        var client = TestData.ClientsFaker
+            .RuleFor(a => a.AccountId, _ => account.Id)
+            .RuleFor(a => a.TenantId, _ => tenants[^1].Id)
+            .Generate();
+
+        await _dbContextMock.Tenants.AddRangeAsync(tenants);
+        await _dbContextMock.AccountsView.AddAsync(account);
+        await _dbContextMock.Clients.AddAsync(client);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantId)
+            .Returns(tenants[0].Id);
+
+        // Act
+        var actualResult = await _accountService.GetClientDetailsByIdAsync(client.AccountId);
+
+        // Assert
+        actualResult.IsT1.Should().BeTrue();
+        actualResult.IsT0.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetReferralDetailsByIdAsync_ReferralExists_ReturnsClienDetailsDto()
+    {
+        // Arrange
+        var tenant = TestData.TenantFaker.Generate();
+        var account = TestData.AccountsFaker
+            .RuleFor(a => a.TenantId, _ => tenant.Id)
+            .Generate();
+        var referral = TestData.ReferralsFaker
+            .RuleFor(c => c.AccountId, _ => account.Id)
+            .RuleFor(a => a.TenantId, _ => tenant.Id)
+            .Generate();
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
+        await _dbContextMock.Accounts.AddAsync(account);
+        await _dbContextMock.Referrals.AddAsync(referral);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(x => x.TenantId)
+            .Returns(tenant.Id);
+
+        // Act
+        var actualResult = await _accountService.GetReferralDetailsByIdAsync(referral.AccountId);
+
+        // Assert
+        actualResult.TryPickT0(out var actualReferral, out _).Should().BeTrue();
+        actualReferral.Should().BeEquivalentTo(referral, opt => opt.ExcludingMissingMembers());
+    }
+
+    [Fact]
+    public async Task GetReferralDetailsByIdAsync_NonExistingTenantId_ReturnsNotFound()
+    {
+        // Act
+        var actualResult = await _accountService.GetReferralDetailsByIdAsync(Guid.NewGuid());
+
+        // Assert
+        actualResult.IsT1.Should().BeTrue();
+        actualResult.IsT0.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetReferraltDetailsByIdAsync_ReferralTenantIdNotEqualCurrentUserTenantId_ReturnsNotFound()
+    {
+        // Arrange
+        var tenants = TestData.TenantFaker.Generate(2);
+        var account = TestData.AccountsViewFaker
+            .RuleFor(a => a.TenantId, _ => tenants[0].Id)
+            .Generate();
+        var referral = TestData.ReferralsFaker
+            .RuleFor(a => a.AccountId, _ => account.Id)
+            .RuleFor(a => a.TenantId, _ => tenants[^1].Id)
+            .Generate();
+
+        await _dbContextMock.Tenants.AddRangeAsync(tenants);
+        await _dbContextMock.AccountsView.AddAsync(account);
+        await _dbContextMock.Referrals.AddAsync(referral);
+        await _dbContextMock.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantId)
+            .Returns(tenants[0].Id);
+
+        // Act
+        var actualResult = await _accountService.GetReferralDetailsByIdAsync(referral.AccountId);
+
+        // Assert
+        actualResult.IsT1.Should().BeTrue();
+        actualResult.IsT0.Should().BeFalse();
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
@@ -248,6 +391,23 @@ public sealed class AccountsServiceTests
                 .RuleFor(a => a.County, f => f.Address.County())
                 .RuleFor(a => a.Phone, f => f.Random.Number(100000000, 99999999).ToString())
                 .RuleFor(a => a.Fax, f => f.Random.Number(100000000, 99999999).ToString());
+
+        public static readonly Faker<Client> ClientsFaker =
+           new Faker<Client>()
+               .RuleFor(a => a.CreatedDateTimeUtc, _ => DateTime.UtcNow)
+               .RuleFor(a => a.ReactivationDateTimeUtc, _ => DateTime.UtcNow)
+               .RuleFor(a => a.DeactivationDateTimeUtc, _ => DateTime.UtcNow)
+               .RuleFor(a => a.AnnualRevenue, f => f.Finance.Amount())
+               .RuleFor(a => a.FoundationYear, f => f.Random.Number(1900, 2023))
+               .RuleFor(a => a.State, f => f.PickRandom("Client", "Client prospect"))
+               .RuleFor(a => a.EmployeeCount, f => f.Random.Number(0, 1000))
+               .RuleFor(a => a.Status, f => f.PickRandom<Status>());
+
+        public static readonly Faker<Referral> ReferralsFaker =
+           new Faker<Referral>()
+               .RuleFor(a => a.CreatedDateTimeUtc, _ => DateTime.UtcNow)
+               .RuleFor(a => a.State, f => f.PickRandom("Referral prospect", "Referral partner"))
+               .RuleFor(a => a.Status, f => f.PickRandom<Status>());
 
         public static readonly Faker<Tenant> TenantFaker =
             new Faker<Tenant>()
