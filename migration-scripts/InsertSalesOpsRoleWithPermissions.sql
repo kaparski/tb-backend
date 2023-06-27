@@ -36,6 +36,13 @@ BEGIN TRY
     INSERT INTO @salesOpsRolePermissions (Name)
     VALUES ('Accounts.Read'),
            ('Accounts.ReadExport'),
+           ('Clients.Read'),
+           ('Clients.ReadWrite'),
+           ('Clients.ReadExport'),
+           ('Referrals.Read'),
+           ('Referrals.ReadWrite'),
+           ('Referrals.ReadExport'),
+           ('Referrals.Activation'),
            ('Contacts.Read'),
            ('Contacts.ReadWrite'),
            ('Locations.Read'),

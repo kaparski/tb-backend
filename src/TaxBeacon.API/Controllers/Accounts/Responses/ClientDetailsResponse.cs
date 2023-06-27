@@ -4,7 +4,7 @@ using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Accounts.Responses;
 
-public record ClientResponse(
+public record ClientDetailsResponse(
     string State,
     Status Status,
     decimal? AnnualRevenue,
@@ -14,5 +14,5 @@ public record ClientResponse(
     DateTime? ReactivationDateTimeUtc,
     DateTime CreatedDateTimeUtc,
     ContactDto? PrimaryContact,
-    ICollection<ClientManagerDto> Managers
+    ICollection<ClientManagerDto> ClientManagers
     );

@@ -11,14 +11,16 @@ public class ClientManagerConfiguration: IEntityTypeConfiguration<ClientManager>
         clientManager
             .HasOne<Client>(cm => cm.Client)
             .WithMany(c => c.ClientManagers)
-            .HasForeignKey(cm => new { cm.TenantId, cm.AccountId });
+            .HasForeignKey(cm => new { cm.TenantId, cm.AccountId })
+            .OnDelete(DeleteBehavior.NoAction);
 
         clientManager
-            .HasOne<User>(cm => cm.Manager)
+            .HasOne<TenantUser>(cm => cm.User)
             .WithMany(u => u.ClientManagers)
-            .HasForeignKey(cm => cm.ManagerId);
+            .HasForeignKey(cm => new { cm.TenantId, cm.UserId })
+            .OnDelete(DeleteBehavior.NoAction);
 
         clientManager
-            .HasKey(cm => new { cm.ManagerId, cm.TenantId, cm.AccountId });
+            .HasKey(cm => new { cm.TenantId, cm.AccountId });
     }
 }

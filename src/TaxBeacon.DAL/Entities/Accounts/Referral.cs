@@ -18,7 +18,7 @@ public class Referral: BaseEntity
 
     public Guid? ManagerId { get; set; }
 
-    public User? Manager { get; set; }
+    public TenantUser? Manager { get; set; }
 
     public string? NaicsCode { get; set; }
 }

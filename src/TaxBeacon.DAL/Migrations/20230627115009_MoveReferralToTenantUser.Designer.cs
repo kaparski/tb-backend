@@ -12,8 +12,8 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    [Migration("20230626134719_AdditionalClientDetails")]
-    partial class AdditionalClientDetails
+    [Migration("20230627115009_MoveReferralToTenantUser")]
+    partial class MoveReferralToTenantUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -255,18 +255,18 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Accounts.ClientManager", b =>
                 {
-                    b.Property<Guid>("ManagerId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ManagerId", "TenantId", "AccountId");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("TenantId", "AccountId");
+                    b.HasKey("TenantId", "AccountId");
+
+                    b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("ClientManagers");
                 });
@@ -683,7 +683,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.HasIndex("AccountId")
                         .IsUnique();
 
-                    b.HasIndex("ManagerId");
+                    b.HasIndex("TenantId", "ManagerId");
 
                     b.ToTable("Referrals");
                 });
@@ -1954,21 +1954,21 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Accounts.ClientManager", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Entities.User", "Manager")
-                        .WithMany("ClientManagers")
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TaxBeacon.DAL.Entities.Accounts.Client", "Client")
                         .WithMany("ClientManagers")
                         .HasForeignKey("TenantId", "AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Entities.TenantUser", "User")
+                        .WithMany("ClientManagers")
+                        .HasForeignKey("TenantId", "UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Client");
 
-                    b.Navigation("Manager");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.Accounts.Contact", b =>
@@ -2074,15 +2074,15 @@ namespace TaxBeacon.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TaxBeacon.DAL.Entities.User", "Manager")
-                        .WithMany("Referrals")
-                        .HasForeignKey("ManagerId");
-
                     b.HasOne("TaxBeacon.DAL.Entities.Tenant", "Tenant")
                         .WithMany("Referrals")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Entities.TenantUser", "Manager")
+                        .WithMany("Referrals")
+                        .HasForeignKey("TenantId", "ManagerId");
 
                     b.Navigation("Account");
 
@@ -2743,6 +2743,10 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.TenantUser", b =>
                 {
+                    b.Navigation("ClientManagers");
+
+                    b.Navigation("Referrals");
+
                     b.Navigation("TenantUserAccounts");
 
                     b.Navigation("TenantUserRoles");
@@ -2750,10 +2754,6 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Entities.User", b =>
                 {
-                    b.Navigation("ClientManagers");
-
-                    b.Navigation("Referrals");
-
                     b.Navigation("TableFilters");
 
                     b.Navigation("TenantUsers");

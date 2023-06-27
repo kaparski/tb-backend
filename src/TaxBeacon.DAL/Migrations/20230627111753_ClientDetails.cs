@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TaxBeacon.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AdditionalClientDetails : Migration
+    public partial class ClientDetails : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,31 +61,29 @@ namespace TaxBeacon.DAL.Migrations
                 name: "ClientManagers",
                 columns: table => new
                 {
-                    ManagerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ClientManagers", x => new { x.ManagerId, x.TenantId, x.AccountId });
+                    table.PrimaryKey("PK_ClientManagers", x => new { x.TenantId, x.AccountId });
                     table.ForeignKey(
                         name: "FK_ClientManagers_Clients_TenantId_AccountId",
                         columns: x => new { x.TenantId, x.AccountId },
                         principalTable: "Clients",
-                        principalColumns: new[] { "TenantId", "AccountId" },
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumns: new[] { "TenantId", "AccountId" });
                     table.ForeignKey(
-                        name: "FK_ClientManagers_Users_ManagerId",
-                        column: x => x.ManagerId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_ClientManagers_TenantUsers_TenantId_UserId",
+                        columns: x => new { x.TenantId, x.UserId },
+                        principalTable: "TenantUsers",
+                        principalColumns: new[] { "TenantId", "UserId" });
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ClientManagers_TenantId_AccountId",
+                name: "IX_ClientManagers_TenantId_UserId",
                 table: "ClientManagers",
-                columns: new[] { "TenantId", "AccountId" });
+                columns: new[] { "TenantId", "UserId" });
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Clients_Contacts_PrimaryContactId",

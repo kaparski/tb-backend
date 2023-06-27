@@ -2,4 +2,4 @@
 
 namespace TaxBeacon.API.Controllers.Accounts.Responses;
 
-public record ReferralResponse(string State, Status Status);
+public record ReferralDetailsResponse(string State, Status Status);
