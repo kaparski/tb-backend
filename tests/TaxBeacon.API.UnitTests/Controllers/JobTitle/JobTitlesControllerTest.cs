@@ -9,14 +9,14 @@ using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
+using TaxBeacon.Administration.JobTitles;
+using TaxBeacon.Administration.JobTitles.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.JobTitles;
 using TaxBeacon.API.Controllers.JobTitles.Requests;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Models;
-using TaxBeacon.UserManagement.JobTitles;
-using TaxBeacon.UserManagement.JobTitles.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.JobTitle;
 

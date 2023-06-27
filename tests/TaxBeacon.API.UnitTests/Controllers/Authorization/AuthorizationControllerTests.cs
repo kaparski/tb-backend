@@ -7,11 +7,11 @@ using Moq;
 using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
+using TaxBeacon.Administration.Users;
+using TaxBeacon.Administration.Users.Models;
 using TaxBeacon.API.Controllers.Authorization;
 using TaxBeacon.API.Controllers.Authorization.Requests;
 using TaxBeacon.API.Controllers.Authorization.Responses;
-using TaxBeacon.UserManagement.Users;
-using TaxBeacon.UserManagement.Users.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Authorization;
 

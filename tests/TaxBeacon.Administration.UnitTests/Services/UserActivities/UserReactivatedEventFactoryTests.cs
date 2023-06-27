@@ -4,7 +4,7 @@ using System.Text.Json;
 using TaxBeacon.Administration.Users.Activities.Factories;
 using TaxBeacon.Administration.Users.Activities.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities;
+namespace TaxBeacon.Administration.UnitTests.Services.UserActivities;
 
 public class UserReactivatedEventFactoryTests
 {

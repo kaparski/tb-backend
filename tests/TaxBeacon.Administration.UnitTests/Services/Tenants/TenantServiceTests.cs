@@ -21,7 +21,7 @@ using TaxBeacon.Administration.Tenants.Activities;
 using TaxBeacon.Administration.Tenants.Activities.Models;
 using TaxBeacon.Administration.Tenants.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services.Tenants;
+namespace TaxBeacon.Administration.UnitTests.Services.Tenants;
 
 public class TenantServiceTests
 {

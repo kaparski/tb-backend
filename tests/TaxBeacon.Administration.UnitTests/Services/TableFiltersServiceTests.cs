@@ -15,7 +15,7 @@ using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.Administration.TableFilters;
 using TaxBeacon.Administration.TableFilters.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services;
+namespace TaxBeacon.Administration.UnitTests.Services;
 
 public class TableFiltersServiceTests
 {

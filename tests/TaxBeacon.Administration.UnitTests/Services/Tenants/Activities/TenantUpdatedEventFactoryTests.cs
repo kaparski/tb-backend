@@ -4,7 +4,7 @@ using System.Text.Json;
 using TaxBeacon.Administration.Tenants.Activities;
 using TaxBeacon.Administration.Tenants.Activities.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services.Tenants.Activities;
+namespace TaxBeacon.Administration.UnitTests.Services.Tenants.Activities;
 
 public sealed class TenantUpdatedEventFactoryTests
 {

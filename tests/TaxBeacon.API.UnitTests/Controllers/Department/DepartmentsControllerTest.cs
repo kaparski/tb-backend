@@ -7,15 +7,14 @@ using Moq;
 using OneOf.Types;
 using System.Reflection;
 using System.Security.Claims;
+using TaxBeacon.Administration.Departments;
+using TaxBeacon.Administration.Departments.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments;
 using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
-using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Models;
-using TaxBeacon.UserManagement.Departments;
-using TaxBeacon.UserManagement.Departments.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Department;
 

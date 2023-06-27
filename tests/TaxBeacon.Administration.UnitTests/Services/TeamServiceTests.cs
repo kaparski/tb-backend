@@ -19,7 +19,7 @@ using TaxBeacon.Administration.Teams;
 using TaxBeacon.Administration.Teams.Activities.Factories;
 using TaxBeacon.Administration.Teams.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services;
+namespace TaxBeacon.Administration.UnitTests.Services;
 
 public class TeamServiceTests
 {

@@ -6,7 +6,6 @@ using Moq;
 using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Accounts.Locations;
-using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;

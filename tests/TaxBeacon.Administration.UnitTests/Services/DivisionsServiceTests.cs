@@ -19,7 +19,7 @@ using TaxBeacon.Administration.Divisions;
 using TaxBeacon.Administration.Divisions.Activities.Factories;
 using TaxBeacon.Administration.Divisions.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services;
+namespace TaxBeacon.Administration.UnitTests.Services;
 
 public class DivisionsServiceTests
 {

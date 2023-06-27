@@ -6,12 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
 using System.Reflection;
+using TaxBeacon.Administration.Roles;
+using TaxBeacon.Administration.Roles.Models;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Roles;
 using TaxBeacon.API.Controllers.Roles.Responses;
-using TaxBeacon.UserManagement.Roles;
-using TaxBeacon.UserManagement.Roles.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Role;
 

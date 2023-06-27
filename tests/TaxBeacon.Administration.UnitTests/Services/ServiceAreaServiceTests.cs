@@ -21,7 +21,7 @@ using TaxBeacon.Administration.ServiceAreas.Activities.Factories;
 using TaxBeacon.Administration.ServiceAreas.Activities.Models;
 using TaxBeacon.Administration.ServiceAreas.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services;
+namespace TaxBeacon.Administration.UnitTests.Services;
 
 public class ServiceAreaServiceTests
 {

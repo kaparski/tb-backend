@@ -4,20 +4,20 @@ using System.Text.Json;
 using TaxBeacon.Administration.Tenants.Activities;
 using TaxBeacon.Administration.Tenants.Activities.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services.Tenants.Activities;
+namespace TaxBeacon.Administration.UnitTests.Services.Tenants.Activities;
 
-public class TenantUnassignProgramsEventFactoryTests
+public sealed class TenantAssignProgramsEventFactoryTests
 {
     private readonly ITenantActivityFactory _activityFactory;
 
-    public TenantUnassignProgramsEventFactoryTests() => _activityFactory = new TenantUnassignProgramsEventFactory();
+    public TenantAssignProgramsEventFactoryTests() => _activityFactory = new TenantAssignProgramsEventFactory();
 
     [Fact]
     public void Create_ValidateMapping()
     {
         //Arrange
         var date = DateTime.UtcNow;
-        var tenantAssignProgramsEvent = new TenantUnassignProgramsEvent(Guid.NewGuid(),
+        var tenantAssignProgramsEvent = new TenantAssignProgramsEvent(Guid.NewGuid(),
             "Super Admin",
             "Test",
             "Test",
@@ -31,7 +31,7 @@ public class TenantUnassignProgramsEventFactoryTests
         {
             result.Date.Should().Be(date);
             result.FullName.Should().Be("Test");
-            result.Message.Should().Be("Access to the following program(s) removed: Test");
+            result.Message.Should().Be("Access to the following program(s) provided: Test");
         };
     }
 }

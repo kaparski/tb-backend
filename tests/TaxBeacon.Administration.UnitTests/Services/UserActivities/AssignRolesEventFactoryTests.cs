@@ -4,21 +4,25 @@ using System.Text.Json;
 using TaxBeacon.Administration.Users.Activities.Factories;
 using TaxBeacon.Administration.Users.Activities.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities;
+namespace TaxBeacon.Administration.UnitTests.Services.UserActivities;
 
-public class UserDeactivatedEventFactoryTests
+public sealed class AssignRolesEventFactoryTests
 {
     private readonly IUserActivityFactory _sut;
 
-    public UserDeactivatedEventFactoryTests() => _sut = new UserDeactivatedEventFactory();
+    public AssignRolesEventFactoryTests() => _sut = new AssignRolesEventFactory();
 
     [Fact]
     public void Create_CheckMapping()
     {
         //Arrange
-        var deactivatedById = Guid.NewGuid();
+        var assignedByUserId = Guid.NewGuid();
         var date = DateTime.UtcNow;
-        var userEvent = new UserDeactivatedEvent(deactivatedById, date, "Test", "Admin");
+        var userEvent = new AssignRolesEvent("Admin",
+            date,
+            assignedByUserId,
+            "Test",
+            "Test");
 
         //Act
         var result = _sut.Create(JsonSerializer.Serialize(userEvent));
@@ -28,7 +32,7 @@ public class UserDeactivatedEventFactoryTests
         {
             result.Date.Should().Be(date);
             result.FullName.Should().Be("Test");
-            result.Message.Should().Be("User deactivated");
+            result.Message.Should().Be("User assigned to the following role(s): Admin");
         };
 
     }

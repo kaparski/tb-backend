@@ -26,7 +26,7 @@ using TaxBeacon.Administration.Users.Activities.Models;
 using TaxBeacon.Administration.Users.Models;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services;
+namespace TaxBeacon.Administration.UnitTests.Services;
 
 public class UserServiceTests
 {

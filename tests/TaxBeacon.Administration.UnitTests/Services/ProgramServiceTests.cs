@@ -20,7 +20,7 @@ using TaxBeacon.Administration.Programs.Activities;
 using TaxBeacon.Administration.Programs.Activities.Models;
 using TaxBeacon.Administration.Programs.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services;
+namespace TaxBeacon.Administration.UnitTests.Services;
 
 public class ProgramServiceTests
 {

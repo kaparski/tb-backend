@@ -21,7 +21,7 @@ using TaxBeacon.Administration.JobTitles.Activities.Factories;
 using TaxBeacon.Administration.JobTitles.Activities.Models;
 using TaxBeacon.Administration.JobTitles.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services;
+namespace TaxBeacon.Administration.UnitTests.Services;
 
 public class JobTitleServiceTests
 {

@@ -9,14 +9,13 @@ using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
+using TaxBeacon.Administration.Divisions;
+using TaxBeacon.Administration.Divisions.Models;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.Tenants;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Divisions;
-using TaxBeacon.UserManagement.Divisions.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Divisions;
 

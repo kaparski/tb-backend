@@ -22,7 +22,7 @@ using TaxBeacon.Administration.Departments.Activities.Factories;
 using TaxBeacon.Administration.Departments.Activities.Models;
 using TaxBeacon.Administration.Departments.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services;
+namespace TaxBeacon.Administration.UnitTests.Services;
 
 public class DepartmentServiceTests
 {
