@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using System.Text.Json;
-using TaxBeacon.UserManagement.Users.Activities.Factories;
-using TaxBeacon.UserManagement.Users.Activities.Models;
+using TaxBeacon.Administration.Users.Activities.Factories;
+using TaxBeacon.Administration.Users.Activities.Models;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities;
 

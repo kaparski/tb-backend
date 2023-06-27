@@ -6,14 +6,14 @@ using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.API.Middlewares;
 using TaxBeacon.Common;
 using TaxBeacon.Email;
-using TaxBeacon.UserManagement;
+using TaxBeacon.Administration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddLogging();
 
 builder.Services.AddApiServices(builder.Configuration);
-builder.Services.AddUserManagementServices();
+builder.Services.AddAdministrationServices();
 builder.Services.AddCommonServices();
 builder.Services.AddAccountsServices();
 builder.Services.AddEmailServices();

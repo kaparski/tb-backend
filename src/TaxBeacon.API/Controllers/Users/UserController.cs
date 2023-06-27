@@ -6,8 +6,8 @@ using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Users;
-using TaxBeacon.UserManagement.Users.Models;
+using TaxBeacon.Administration.Users;
+using TaxBeacon.Administration.Users.Models;
 
 namespace TaxBeacon.API.Controllers.Users;
 

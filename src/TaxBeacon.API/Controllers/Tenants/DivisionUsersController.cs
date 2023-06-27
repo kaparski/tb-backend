@@ -6,7 +6,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Exceptions;
-using TaxBeacon.UserManagement.Divisions;
+using TaxBeacon.Administration.Divisions;
 
 namespace TaxBeacon.API.Controllers.Tenants;
 

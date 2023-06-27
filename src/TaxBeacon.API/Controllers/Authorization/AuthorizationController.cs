@@ -5,7 +5,7 @@ using System.Net.Mail;
 using TaxBeacon.API.Controllers.Authorization.Requests;
 using TaxBeacon.API.Controllers.Authorization.Responses;
 using TaxBeacon.API.Exceptions;
-using TaxBeacon.UserManagement.Users;
+using TaxBeacon.Administration.Users;
 
 namespace TaxBeacon.API.Controllers.Authorization;
 

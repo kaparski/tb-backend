@@ -9,8 +9,8 @@ using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.UserManagement.Tenants;
-using TaxBeacon.UserManagement.Tenants.Models;
+using TaxBeacon.Administration.Tenants;
+using TaxBeacon.Administration.Tenants.Models;
 
 namespace TaxBeacon.API.Controllers.Tenants;
 

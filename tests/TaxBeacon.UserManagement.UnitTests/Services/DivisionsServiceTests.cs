@@ -15,9 +15,9 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Divisions;
-using TaxBeacon.UserManagement.Divisions.Activities.Factories;
-using TaxBeacon.UserManagement.Divisions.Models;
+using TaxBeacon.Administration.Divisions;
+using TaxBeacon.Administration.Divisions.Activities.Factories;
+using TaxBeacon.Administration.Divisions.Models;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using System.Net.Mail;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Users;
+using TaxBeacon.Administration.Users;
 
 namespace TaxBeacon.API.Authentication;
 

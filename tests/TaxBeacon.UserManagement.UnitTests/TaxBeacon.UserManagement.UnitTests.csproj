@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\TaxBeacon.UserManagement\TaxBeacon.UserManagement.csproj" />
+      <ProjectReference Include="..\..\src\TaxBeacon.Administration\TaxBeacon.Administration.csproj" />
     </ItemGroup>
 
 </Project>

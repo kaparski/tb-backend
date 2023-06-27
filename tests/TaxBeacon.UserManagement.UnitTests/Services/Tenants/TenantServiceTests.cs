@@ -16,10 +16,10 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Tenants;
-using TaxBeacon.UserManagement.Tenants.Activities;
-using TaxBeacon.UserManagement.Tenants.Activities.Models;
-using TaxBeacon.UserManagement.Tenants.Models;
+using TaxBeacon.Administration.Tenants;
+using TaxBeacon.Administration.Tenants.Activities;
+using TaxBeacon.Administration.Tenants.Activities.Models;
+using TaxBeacon.Administration.Tenants.Models;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services.Tenants;
 

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.API.Exceptions;
-using TaxBeacon.UserManagement.Roles;
+using TaxBeacon.Administration.Roles;
 
 namespace TaxBeacon.API.Controllers.Roles;
 

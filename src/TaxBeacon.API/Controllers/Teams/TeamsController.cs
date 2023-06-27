@@ -8,8 +8,8 @@ using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.UserManagement.Teams;
-using TaxBeacon.UserManagement.Teams.Models;
+using TaxBeacon.Administration.Teams;
+using TaxBeacon.Administration.Teams.Models;
 
 namespace TaxBeacon.API.Controllers.Teams;
 

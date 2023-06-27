@@ -9,8 +9,8 @@ using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.UserManagement.JobTitles;
-using TaxBeacon.UserManagement.JobTitles.Models;
+using TaxBeacon.Administration.JobTitles;
+using TaxBeacon.Administration.JobTitles.Models;
 
 namespace TaxBeacon.API.Controllers.JobTitles;
 

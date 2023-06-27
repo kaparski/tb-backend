@@ -20,10 +20,10 @@ using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.Email;
-using TaxBeacon.UserManagement.Users;
-using TaxBeacon.UserManagement.Users.Activities.Factories;
-using TaxBeacon.UserManagement.Users.Activities.Models;
-using TaxBeacon.UserManagement.Users.Models;
+using TaxBeacon.Administration.Users;
+using TaxBeacon.Administration.Users.Activities.Factories;
+using TaxBeacon.Administration.Users.Activities.Models;
+using TaxBeacon.Administration.Users.Models;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;

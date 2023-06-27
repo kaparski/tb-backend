@@ -12,7 +12,7 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Roles;
+using TaxBeacon.Administration.Roles;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 

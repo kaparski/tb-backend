@@ -8,8 +8,8 @@ using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.UserManagement.Divisions;
-using TaxBeacon.UserManagement.Divisions.Models;
+using TaxBeacon.Administration.Divisions;
+using TaxBeacon.Administration.Divisions.Models;
 
 namespace TaxBeacon.API.Controllers.Tenants;
 

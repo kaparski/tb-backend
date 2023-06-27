@@ -12,8 +12,8 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.TableFilters;
-using TaxBeacon.UserManagement.TableFilters.Models;
+using TaxBeacon.Administration.TableFilters;
+using TaxBeacon.Administration.TableFilters.Models;
 
 namespace TaxBeacon.UserManagement.UnitTests.Services;
 

@@ -10,7 +10,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.API", "src\TaxBea
 		{B5D3EDE5-3410-4C66-940C-C2F31248C06B} = {B5D3EDE5-3410-4C66-940C-C2F31248C06B}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.UserManagement", "src\TaxBeacon.UserManagement\TaxBeacon.UserManagement.csproj", "{76DACBB4-458E-4840-A5DB-FEA9D837467E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Administration", "src\TaxBeacon.Administration\TaxBeacon.Administration.csproj", "{76DACBB4-458E-4840-A5DB-FEA9D837467E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.DAL", "src\TaxBeacon.DAL\TaxBeacon.DAL.csproj", "{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}"
 EndProject

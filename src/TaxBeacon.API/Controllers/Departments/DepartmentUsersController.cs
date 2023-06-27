@@ -7,7 +7,7 @@ using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Exceptions;
-using TaxBeacon.UserManagement.Departments;
+using TaxBeacon.Administration.Departments;
 
 namespace TaxBeacon.API.Controllers.Departments;
 
