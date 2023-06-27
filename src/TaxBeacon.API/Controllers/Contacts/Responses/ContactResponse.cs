@@ -29,4 +29,6 @@ public class ContactResponse
     public State State { get; set; } = State.None;
 
     public Guid AccountId { get; set; }
+
+    public string AccountName { get; set; } = null!;
 }

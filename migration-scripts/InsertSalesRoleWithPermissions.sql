@@ -38,6 +38,7 @@ BEGIN TRY
            ('Accounts.ReadExport'),
            ('Contacts.Read'),
            ('Contacts.ReadWrite'),
+           ('Contacts.ReadExport'),
            ('Entities.Read'),
            ('Locations.Read'),
            ('TableFilters.Read'),
