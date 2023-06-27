@@ -37,6 +37,7 @@ BEGIN TRY
     VALUES ('Accounts.Read'),
            ('Contacts.Read'),
            ('Contacts.ReadWrite'),
+           ('Contacts.ReadExport'),
            ('Locations.Read'),
            ('TableFilters.Read'),
            ('TableFilters.ReadWrite');

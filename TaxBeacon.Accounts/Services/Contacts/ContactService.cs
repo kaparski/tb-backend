@@ -10,6 +10,8 @@ using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.DAL.Entities.Accounts;
 using Microsoft.Extensions.Logging;
 using Mapster;
+using System.Collections.Immutable;
+using TaxBeacon.Common.Converters;
 
 namespace TaxBeacon.Accounts.Services.Contacts;
 
@@ -19,30 +21,28 @@ public class ContactService: IContactService
     private readonly IDateTimeService _dateTimeService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IAccountDbContext _context;
+    private readonly IImmutableDictionary<FileType, IListToFileConverter> _listToFileConverters;
 
     public ContactService(ILogger<ContactService> logger,
         ICurrentUserService currentUserService,
         IAccountDbContext context,
-        IDateTimeService dateTimeService)
+        IDateTimeService dateTimeService,
+        IEnumerable<IListToFileConverter> listToFileConverters)
     {
         _logger = logger;
         _dateTimeService = dateTimeService;
         _currentUserService = currentUserService;
         _context = context;
+        _listToFileConverters = listToFileConverters?.ToImmutableDictionary(x => x.FileType)
+                                ?? ImmutableDictionary<FileType, IListToFileConverter>.Empty;
     }
 
-    public async Task<OneOf<Success<IQueryable<ContactDto>>, NotFound>> QueryContactsAsync(Guid accountId)
+    public IQueryable<ContactDto> QueryContacts()
     {
         var currentTenantId = _currentUserService.TenantId;
-        var accountExists = await _context.Accounts.AnyAsync(x => x.Id == accountId && x.TenantId == currentTenantId);
-        if (!accountExists)
-        {
-            return new NotFound();
-        }
 
-        var contacts = _context
-            .Contacts
-            .Where(x => x.AccountId == accountId)
+        var contacts = _context.Contacts
+            .Where(x => x.TenantId == currentTenantId)
             .Select(d => new ContactDto
             {
                 Id = d.Id,
@@ -57,10 +57,11 @@ public class ContactService: IContactService
                 Country = d.Country,
                 City = d.City,
                 State = d.State,
-                AccountId = d.AccountId
+                AccountId = d.AccountId,
+                AccountName = d.Account.Name
             });
 
-        return new Success<IQueryable<ContactDto>>(contacts);
+        return contacts;
     }
 
     public async Task<OneOf<ContactDetailsDto, NotFound>> GetContactDetailsAsync(Guid contactId, Guid accountId, CancellationToken cancellationToken)
@@ -177,5 +178,23 @@ public class ContactService: IContactService
             _currentUserService.UserId);
 
         return contact.Adapt<ContactDetailsDto>();
+    }
+
+    public async Task<byte[]> ExportContactsAsync(FileType fileType,
+        CancellationToken cancellationToken = default)
+    {
+        var list = await _context
+            .Contacts
+            .Where(a => a.TenantId == _currentUserService.TenantId)
+            .OrderBy(a => a.LastName)
+            .ThenBy(a => a.FirstName)
+            .ProjectToType<ContactExportModel>()
+            .ToListAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Contacts export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(list);
     }
 }

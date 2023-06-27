@@ -151,6 +151,7 @@ public static class ConfigureServices
         modelBuilder.EntitySet<TeamResponse>("Teams");
         modelBuilder.EntitySet<ProgramResponse>("Programs");
         modelBuilder.EntitySet<ProgramResponse>("TenantPrograms");
+        modelBuilder.EntitySet<ContactResponse>("Contacts");
 
         modelBuilder.EnableLowerCamelCase();
 
@@ -178,7 +179,6 @@ public static class ConfigureServices
     {
         var modelBuilder = new ODataConventionModelBuilder();
 
-        modelBuilder.EntitySet<ContactResponse>("Contacts");
         modelBuilder.EntitySet<LocationResponse>("Locations");
         modelBuilder.EntitySet<EntityResponse>("Entities");
 
