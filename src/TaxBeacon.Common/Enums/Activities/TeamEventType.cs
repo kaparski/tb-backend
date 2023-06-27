@@ -1,8 +1,7 @@
-﻿namespace TaxBeacon.Common.Enums.Activities
+﻿namespace TaxBeacon.Common.Enums.Activities;
+
+public enum TeamEventType
 {
-    public enum TeamEventType
-    {
-        None = 0,
-        TeamUpdatedEvent = 1,
-    }
+    None = 0,
+    TeamUpdatedEvent = 1,
 }

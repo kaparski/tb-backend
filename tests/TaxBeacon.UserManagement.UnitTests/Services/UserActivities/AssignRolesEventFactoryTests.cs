@@ -1,40 +1,39 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using System.Text.Json;
-using TaxBeacon.UserManagement.Models.Activities;
-using TaxBeacon.UserManagement.Services.Activities;
+using TaxBeacon.UserManagement.Users.Activities.Factories;
+using TaxBeacon.UserManagement.Users.Activities.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
+namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities;
+
+public sealed class AssignRolesEventFactoryTests
 {
-    public sealed class AssignRolesEventFactoryTests
+    private readonly IUserActivityFactory _sut;
+
+    public AssignRolesEventFactoryTests() => _sut = new AssignRolesEventFactory();
+
+    [Fact]
+    public void Create_CheckMapping()
     {
-        private readonly IUserActivityFactory _sut;
+        //Arrange
+        var assignedByUserId = Guid.NewGuid();
+        var date = DateTime.UtcNow;
+        var userEvent = new AssignRolesEvent("Admin",
+            date,
+            assignedByUserId,
+            "Test",
+            "Test");
 
-        public AssignRolesEventFactoryTests() => _sut = new AssignRolesEventFactory();
+        //Act
+        var result = _sut.Create(JsonSerializer.Serialize(userEvent));
 
-        [Fact]
-        public void Create_CheckMapping()
+        //Arrange
+        using (new AssertionScope())
         {
-            //Arrange
-            var assignedByUserId = Guid.NewGuid();
-            var date = DateTime.UtcNow;
-            var userEvent = new AssignRolesEvent("Admin",
-                date,
-                assignedByUserId,
-                "Test",
-                "Test");
+            result.Date.Should().Be(date);
+            result.FullName.Should().Be("Test");
+            result.Message.Should().Be("User assigned to the following role(s): Admin");
+        };
 
-            //Act
-            var result = _sut.Create(JsonSerializer.Serialize(userEvent));
-
-            //Arrange
-            using (new AssertionScope())
-            {
-                result.Date.Should().Be(date);
-                result.FullName.Should().Be("Test");
-                result.Message.Should().Be("User assigned to the following role(s): Admin");
-            };
-
-        }
     }
 }

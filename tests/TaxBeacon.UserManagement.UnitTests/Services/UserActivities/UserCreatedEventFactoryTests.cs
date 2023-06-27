@@ -1,37 +1,36 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using System.Text.Json;
-using TaxBeacon.UserManagement.Models.Activities;
-using TaxBeacon.UserManagement.Services.Activities;
+using TaxBeacon.UserManagement.Users.Activities.Factories;
+using TaxBeacon.UserManagement.Users.Activities.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
+namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities;
+
+public class UserCreatedEventFactoryTests
 {
-    public class UserCreatedEventFactoryTests
+    private readonly IUserActivityFactory _sut;
+
+    public UserCreatedEventFactoryTests() => _sut = new UserCreatedEventFactory();
+
+    [Fact]
+    public void Create_CheckMapping()
     {
-        private readonly IUserActivityFactory _sut;
+        //Arrange
+        var createdById = Guid.NewGuid();
+        var createdUserEmail = "test@test.com";
+        var date = DateTime.UtcNow;
+        var userEvent = new UserCreatedEvent(createdById, createdUserEmail, date, "Test", "Admin");
 
-        public UserCreatedEventFactoryTests() => _sut = new UserCreatedEventFactory();
+        //Act
+        var result = _sut.Create(JsonSerializer.Serialize(userEvent));
 
-        [Fact]
-        public void Create_CheckMapping()
+        //Arrange
+        using (new AssertionScope())
         {
-            //Arrange
-            var createdById = Guid.NewGuid();
-            var createdUserEmail = "test@test.com";
-            var date = DateTime.UtcNow;
-            var userEvent = new UserCreatedEvent(createdById, createdUserEmail, date, "Test", "Admin");
+            result.Date.Should().Be(date);
+            result.FullName.Should().Be("Test");
+            result.Message.Should().Be("User created");
+        };
 
-            //Act
-            var result = _sut.Create(JsonSerializer.Serialize(userEvent));
-
-            //Arrange
-            using (new AssertionScope())
-            {
-                result.Date.Should().Be(date);
-                result.FullName.Should().Be("Test");
-                result.Message.Should().Be("User created");
-            };
-
-        }
     }
 }

@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Accounts.Services.Contacts.Models;
+using TaxBeacon.Accounts.Services.Contacts.Models.Export;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;

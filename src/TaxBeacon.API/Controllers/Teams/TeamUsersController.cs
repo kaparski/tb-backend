@@ -6,7 +6,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Exceptions;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Teams;
 
 namespace TaxBeacon.API.Controllers.Teams;
 

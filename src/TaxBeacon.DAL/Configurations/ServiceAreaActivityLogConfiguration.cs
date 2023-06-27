@@ -1,50 +1,49 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace TaxBeacon.DAL.Configurations
+namespace TaxBeacon.DAL.Configurations;
+
+public class ServiceAreaActivityLogConfiguration: IEntityTypeConfiguration<ServiceAreaActivityLog>
 {
-    public class ServiceAreaActivityLogConfiguration: IEntityTypeConfiguration<ServiceAreaActivityLog>
+    public void Configure(EntityTypeBuilder<ServiceAreaActivityLog> builder)
     {
-        public void Configure(EntityTypeBuilder<ServiceAreaActivityLog> builder)
-        {
-            builder
-                .HasOne<ServiceArea>(x => x.ServiceArea)
-                .WithMany(x => x.ServiceAreaActivityLogs)
-                .HasForeignKey(x => x.ServiceAreaId);
+        builder
+            .HasOne<ServiceArea>(x => x.ServiceArea)
+            .WithMany(x => x.ServiceAreaActivityLogs)
+            .HasForeignKey(x => x.ServiceAreaId);
 
-            builder
-                .HasOne<Tenant>(x => x.Tenant)
-                .WithMany(x => x.ServiceAreaActivityLogs)
-                .HasForeignKey(x => x.TenantId)
-                .OnDelete(DeleteBehavior.ClientNoAction);
+        builder
+            .HasOne<Tenant>(x => x.Tenant)
+            .WithMany(x => x.ServiceAreaActivityLogs)
+            .HasForeignKey(x => x.TenantId)
+            .OnDelete(DeleteBehavior.ClientNoAction);
 
-            builder
-                .HasKey(x => new { x.TenantId, x.ServiceAreaId, x.Date });
+        builder
+            .HasKey(x => new { x.TenantId, x.ServiceAreaId, x.Date });
 
-            builder
-                .Property(x => x.Event)
-                .HasColumnType("nvarchar(max)")
-                .IsRequired();
+        builder
+            .Property(x => x.Event)
+            .HasColumnType("nvarchar(max)")
+            .IsRequired();
 
-            builder
-                .Property(x => x.EventType)
-                .IsRequired();
+        builder
+            .Property(x => x.EventType)
+            .IsRequired();
 
-            builder
-                .Property(x => x.Revision)
-                .IsRequired();
+        builder
+            .Property(x => x.Revision)
+            .IsRequired();
 
-            builder
-                .Property(x => x.TenantId)
-                .IsRequired();
+        builder
+            .Property(x => x.TenantId)
+            .IsRequired();
 
-            builder
-                .Property(x => x.ServiceAreaId)
-                .IsRequired();
+        builder
+            .Property(x => x.ServiceAreaId)
+            .IsRequired();
 
-            builder
-                .Property(x => x.Date)
-                .IsRequired();
-        }
+        builder
+            .Property(x => x.Date)
+            .IsRequired();
     }
 }

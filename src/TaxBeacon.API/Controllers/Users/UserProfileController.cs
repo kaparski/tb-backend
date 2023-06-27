@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Services;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Users;
 
 namespace TaxBeacon.API.Controllers.Users;
 

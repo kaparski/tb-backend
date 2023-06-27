@@ -12,8 +12,8 @@ using TaxBeacon.API.Controllers.TableFilters.Requests;
 using TaxBeacon.API.Controllers.TableFilters.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Errors;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.TableFilters;
+using TaxBeacon.UserManagement.TableFilters.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.TableFilters;
 

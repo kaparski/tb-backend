@@ -15,42 +15,40 @@ using TaxBeacon.API.Controllers.Tenants;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Divisions;
 
-namespace TaxBeacon.API.UnitTests.Controllers.Divisions
+namespace TaxBeacon.API.UnitTests.Controllers.Divisions;
+
+public class DivisionUsersControllerTest
 {
-    public class DivisionUsersControllerTest
+    private readonly Mock<IDivisionsService> _divisionsServiceMock;
+    private readonly DivisionUsersController _controller;
+
+    public DivisionUsersControllerTest()
     {
-        private readonly Mock<IDivisionsService> _divisionsServiceMock;
-        private readonly DivisionUsersController _controller;
+        _divisionsServiceMock = new();
+        _controller = new DivisionUsersController(_divisionsServiceMock.Object);
+    }
 
-        public DivisionUsersControllerTest()
+    [Fact]
+    public void Get_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, Task<IActionResult>>)_controller.Get).Method;
+        var permissions = new object[]
         {
-            _divisionsServiceMock = new();
-            _controller = new DivisionUsersController(_divisionsServiceMock.Object);
-        }
-
-        [Fact]
-        public void Get_MarkedWithCorrectHasPermissionsAttribute()
-        {
-            // Arrange
-            var methodInfo = ((Func<Guid, Task<IActionResult>>)_controller.Get).Method;
-            var permissions = new object[]
-            {
             Common.Permissions.Divisions.Read,
             Common.Permissions.Divisions.ReadWrite
-            };
+        };
 
-            // Act
-            var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
 
-            // Assert
-            using (new AssertionScope())
-            {
-                hasPermissionsAttribute.Should().NotBeNull();
-                hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
-            }
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 }

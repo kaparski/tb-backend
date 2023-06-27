@@ -10,8 +10,8 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Roles;
 using TaxBeacon.API.Controllers.Roles.Responses;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Roles;
+using TaxBeacon.UserManagement.Roles.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Role;
 

@@ -15,8 +15,8 @@ using TaxBeacon.API.Controllers.ServiceAreas.Requests;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Models;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.ServiceAreas;
+using TaxBeacon.UserManagement.ServiceAreas.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.ServiceArea;
 

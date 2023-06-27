@@ -1,20 +1,19 @@
 ﻿using Npoi.Mapper;
 using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.Common.Converters
+namespace TaxBeacon.Common.Converters;
+
+public sealed class ListToXlsxConverter: IListToFileConverter
 {
-    public sealed class ListToXlsxConverter: IListToFileConverter
+    public FileType FileType => FileType.Xlsx;
+
+    public byte[] Convert<T>(List<T> data)
     {
-        public FileType FileType => FileType.Xlsx;
+        var mapper = new Mapper();
 
-        public byte[] Convert<T>(List<T> data)
-        {
-            var mapper = new Mapper();
+        using var stream = new MemoryStream();
+        mapper.Save(stream, data);
 
-            using var stream = new MemoryStream();
-            mapper.Save(stream, data);
-
-            return stream.ToArray();
-        }
+        return stream.ToArray();
     }
 }

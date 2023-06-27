@@ -13,9 +13,9 @@ using TaxBeacon.API.Controllers.Departments.Requests;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models;
 using TaxBeacon.Common.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Departments;
+using TaxBeacon.UserManagement.Departments.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Department;
 

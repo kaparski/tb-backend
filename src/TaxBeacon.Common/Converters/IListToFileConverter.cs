@@ -1,11 +1,10 @@
 ﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.Common.Converters
-{
-    public interface IListToFileConverter
-    {
-        public FileType FileType { get; }
+namespace TaxBeacon.Common.Converters;
 
-        byte[] Convert<T>(List<T> data);
-    }
+public interface IListToFileConverter
+{
+    public FileType FileType { get; }
+
+    byte[] Convert<T>(List<T> data);
 }

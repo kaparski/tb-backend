@@ -15,8 +15,8 @@ using TaxBeacon.API.Controllers.Teams;
 using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Teams;
+using TaxBeacon.UserManagement.Teams.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Team;
 

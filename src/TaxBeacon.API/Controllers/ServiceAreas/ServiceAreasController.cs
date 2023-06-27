@@ -9,8 +9,8 @@ using TaxBeacon.API.Controllers.ServiceAreas.Requests;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.ServiceAreas;
+using TaxBeacon.UserManagement.ServiceAreas.Models;
 
 namespace TaxBeacon.API.Controllers.ServiceAreas;
 

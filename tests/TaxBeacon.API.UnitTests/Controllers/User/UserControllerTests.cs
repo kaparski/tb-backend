@@ -13,8 +13,8 @@ using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Errors;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Users;
+using TaxBeacon.UserManagement.Users.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.User;
 

@@ -1,15 +1,25 @@
 ﻿using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using TaxBeacon.UserManagement.Services;
-using TaxBeacon.UserManagement.Services.Activities;
-using TaxBeacon.UserManagement.Services.Activities.Department;
-using TaxBeacon.UserManagement.Services.Activities.JobTitle;
-using TaxBeacon.UserManagement.Services.Activities.ServiceArea;
-using TaxBeacon.UserManagement.Services.Program;
-using TaxBeacon.UserManagement.Services.Program.Activities;
-using TaxBeacon.UserManagement.Services.Tenants;
-using TaxBeacon.UserManagement.Services.Tenants.Activities;
+using TaxBeacon.UserManagement.Departments;
+using TaxBeacon.UserManagement.Departments.Activities.Factories;
+using TaxBeacon.UserManagement.Divisions;
+using TaxBeacon.UserManagement.Divisions.Activities.Factories;
+using TaxBeacon.UserManagement.JobTitles;
+using TaxBeacon.UserManagement.JobTitles.Activities.Factories;
+using TaxBeacon.UserManagement.PasswordGenerator;
+using TaxBeacon.UserManagement.Programs;
+using TaxBeacon.UserManagement.Programs.Activities;
+using TaxBeacon.UserManagement.Roles;
+using TaxBeacon.UserManagement.ServiceAreas;
+using TaxBeacon.UserManagement.ServiceAreas.Activities.Factories;
+using TaxBeacon.UserManagement.TableFilters;
+using TaxBeacon.UserManagement.Teams;
+using TaxBeacon.UserManagement.Teams.Activities.Factories;
+using TaxBeacon.UserManagement.Tenants;
+using TaxBeacon.UserManagement.Tenants.Activities;
+using TaxBeacon.UserManagement.Users;
+using TaxBeacon.UserManagement.Users.Activities.Factories;
 
 namespace TaxBeacon.UserManagement;
 
@@ -21,7 +31,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IUserService, UserService>();
         serviceCollection.AddScoped<ITenantService, TenantService>();
         serviceCollection.AddScoped<IRoleService, RoleService>();
-        serviceCollection.AddScoped<IPasswordGenerator, PasswordGenerator>();
+        serviceCollection.AddScoped<IPasswordGenerator, PasswordGenerator.PasswordGenerator>();
         serviceCollection.AddScoped<IUserExternalStore, UserExternalStore>();
         serviceCollection.AddScoped<IDivisionsService, DivisionsService>();
         serviceCollection.AddScoped<ITableFiltersService, TableFilterService>();

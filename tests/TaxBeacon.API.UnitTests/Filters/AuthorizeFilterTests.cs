@@ -14,8 +14,8 @@ using System.Security.Claims;
 using System.Security.Principal;
 using TaxBeacon.API.Filters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Users;
+using TaxBeacon.UserManagement.Users.Models;
 
 namespace TaxBeacon.API.UnitTests.Filters;
 

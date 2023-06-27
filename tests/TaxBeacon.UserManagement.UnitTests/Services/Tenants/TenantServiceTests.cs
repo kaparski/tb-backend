@@ -6,26 +6,22 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Roles;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
-using TaxBeacon.UserManagement.Services.Tenants;
-using TaxBeacon.UserManagement.Services.Tenants.Activities;
-using TaxBeacon.UserManagement.Services.Tenants.Activities.Models;
-using TaxBeacon.UserManagement.Services.Tenants.Models;
+using TaxBeacon.UserManagement.Tenants;
+using TaxBeacon.UserManagement.Tenants.Activities;
+using TaxBeacon.UserManagement.Tenants.Activities.Models;
+using TaxBeacon.UserManagement.Tenants.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services;
+namespace TaxBeacon.UserManagement.UnitTests.Services.Tenants;
 
 public class TenantServiceTests
 {
@@ -407,7 +403,7 @@ public class TenantServiceTests
     {
         //Arrange
         var user = TestData.UserFaker.Generate();
-        user.UserRoles.Add(new UserRole { Role = new Role { Name = Roles.SuperAdmin } });
+        user.UserRoles.Add(new UserRole { Role = new Role { Name = Common.Roles.Roles.SuperAdmin } });
         await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
 
@@ -436,7 +432,7 @@ public class TenantServiceTests
     {
         //Arrange
         var user = TestData.UserFaker.Generate();
-        user.UserRoles.Add(new UserRole { Role = new Role { Name = Roles.SuperAdmin } });
+        user.UserRoles.Add(new UserRole { Role = new Role { Name = Common.Roles.Roles.SuperAdmin } });
         await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
 
@@ -465,7 +461,7 @@ public class TenantServiceTests
     {
         //Arrange
         var user = TestData.UserFaker.Generate();
-        user.UserRoles.Add(new UserRole { Role = new Role { Name = Roles.SuperAdmin } });
+        user.UserRoles.Add(new UserRole { Role = new Role { Name = Common.Roles.Roles.SuperAdmin } });
         await _dbContextMock.Users.AddAsync(user);
         await _dbContextMock.SaveChangesAsync();
 

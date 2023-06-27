@@ -1,9 +1,8 @@
-﻿namespace TaxBeacon.Common.Permissions
+﻿namespace TaxBeacon.Common.Permissions;
+
+public enum Users
 {
-    public enum Users
-    {
-        Read,
-        ReadWrite,
-        ReadExport
-    }
+    Read,
+    ReadWrite,
+    ReadExport
 }

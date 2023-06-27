@@ -1,36 +1,35 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using System.Text.Json;
-using TaxBeacon.UserManagement.Models.Activities;
-using TaxBeacon.UserManagement.Services.Activities;
+using TaxBeacon.UserManagement.Users.Activities.Factories;
+using TaxBeacon.UserManagement.Users.Activities.Models;
 
-namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities
+namespace TaxBeacon.UserManagement.UnitTests.Services.UserActivities;
+
+public class UserDeactivatedEventFactoryTests
 {
-    public class UserDeactivatedEventFactoryTests
+    private readonly IUserActivityFactory _sut;
+
+    public UserDeactivatedEventFactoryTests() => _sut = new UserDeactivatedEventFactory();
+
+    [Fact]
+    public void Create_CheckMapping()
     {
-        private readonly IUserActivityFactory _sut;
+        //Arrange
+        var deactivatedById = Guid.NewGuid();
+        var date = DateTime.UtcNow;
+        var userEvent = new UserDeactivatedEvent(deactivatedById, date, "Test", "Admin");
 
-        public UserDeactivatedEventFactoryTests() => _sut = new UserDeactivatedEventFactory();
+        //Act
+        var result = _sut.Create(JsonSerializer.Serialize(userEvent));
 
-        [Fact]
-        public void Create_CheckMapping()
+        //Arrange
+        using (new AssertionScope())
         {
-            //Arrange
-            var deactivatedById = Guid.NewGuid();
-            var date = DateTime.UtcNow;
-            var userEvent = new UserDeactivatedEvent(deactivatedById, date, "Test", "Admin");
+            result.Date.Should().Be(date);
+            result.FullName.Should().Be("Test");
+            result.Message.Should().Be("User deactivated");
+        };
 
-            //Act
-            var result = _sut.Create(JsonSerializer.Serialize(userEvent));
-
-            //Arrange
-            using (new AssertionScope())
-            {
-                result.Date.Should().Be(date);
-                result.FullName.Should().Be("Test");
-                result.Message.Should().Be("User deactivated");
-            };
-
-        }
     }
 }

@@ -6,7 +6,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Roles.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Exceptions;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Roles;
 
 namespace TaxBeacon.API.Controllers.Roles;
 

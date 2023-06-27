@@ -10,8 +10,8 @@ using System.Net.Mail;
 using TaxBeacon.API.Controllers.Authorization;
 using TaxBeacon.API.Controllers.Authorization.Requests;
 using TaxBeacon.API.Controllers.Authorization.Responses;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Users;
+using TaxBeacon.UserManagement.Users.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Authorization;
 

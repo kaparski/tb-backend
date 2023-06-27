@@ -6,7 +6,7 @@ using Moq;
 using System.Reflection;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Teams;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Teams;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Team;
 

@@ -1,10 +1,9 @@
-﻿namespace TaxBeacon.Common.Enums
+﻿namespace TaxBeacon.Common.Enums;
+
+public enum Jurisdiction
 {
-    public enum Jurisdiction
-    {
-        None = 0,
-        Federal = 1,
-        State = 2,
-        Local = 3
-    }
+    None = 0,
+    Federal = 1,
+    State = 2,
+    Local = 3
 }

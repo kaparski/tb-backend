@@ -1,9 +1,8 @@
-﻿namespace TaxBeacon.Common.Permissions
+﻿namespace TaxBeacon.Common.Permissions;
+
+public enum Teams
 {
-    public enum Teams
-    {
-        Read,
-        ReadWrite,
-        ReadExport
-    }
+    Read,
+    ReadWrite,
+    ReadExport
 }

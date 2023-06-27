@@ -7,8 +7,8 @@ using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Services.Program;
-using TaxBeacon.UserManagement.Services.Program.Models;
+using TaxBeacon.UserManagement.Programs;
+using TaxBeacon.UserManagement.Programs.Models;
 
 namespace TaxBeacon.API.Controllers.Programs;
 

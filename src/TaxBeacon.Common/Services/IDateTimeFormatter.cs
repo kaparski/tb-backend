@@ -1,10 +1,9 @@
-﻿namespace TaxBeacon.Common.Services
+﻿namespace TaxBeacon.Common.Services;
+
+public interface IDateTimeFormatter
 {
-    public interface IDateTimeFormatter
-    {
-        string FormatDate(DateTime date);
+    string FormatDate(DateTime date);
 
-        string FormatDate(DateTime? date);
+    string FormatDate(DateTime? date);
 
-    }
 }

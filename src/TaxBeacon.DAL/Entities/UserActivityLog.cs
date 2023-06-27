@@ -1,21 +1,20 @@
 ﻿using TaxBeacon.Common.Enums.Activities;
 
-namespace TaxBeacon.DAL.Entities
+namespace TaxBeacon.DAL.Entities;
+
+public class UserActivityLog
 {
-    public class UserActivityLog
-    {
-        public Guid TenantId { get; set; }
+    public Guid TenantId { get; set; }
 
-        public Guid UserId { get; set; }
+    public Guid UserId { get; set; }
 
-        public DateTime Date { get; set; }
+    public DateTime Date { get; set; }
 
-        public UserEventType EventType { get; set; }
+    public UserEventType EventType { get; set; }
 
-        public uint Revision { get; set; }
+    public uint Revision { get; set; }
 
-        public string Event { get; set; } = string.Empty;
+    public string Event { get; set; } = string.Empty;
 
-        public User User { get; set; } = null!;
-    }
+    public User User { get; set; } = null!;
 }

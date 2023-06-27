@@ -15,8 +15,7 @@ using TaxBeacon.API.Controllers.JobTitles.Requests;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.JobTitles;
 
 namespace TaxBeacon.API.UnitTests.Controllers.JobTitle;
 

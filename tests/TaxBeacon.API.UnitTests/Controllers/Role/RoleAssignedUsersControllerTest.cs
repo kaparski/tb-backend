@@ -7,7 +7,7 @@ using OneOf.Types;
 using System.Reflection;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Roles;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.UserManagement.Roles;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Role;
 
