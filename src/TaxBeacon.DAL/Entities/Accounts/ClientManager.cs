@@ -7,7 +7,7 @@ public class ClientManager
 
     public Guid TenantId { get; set; }
 
-    public TenantUser User { get; set; } = null!;
+    public TenantUser TenantUser { get; set; } = null!;
 
     public Client Client { get; set; } = null!;
 }
