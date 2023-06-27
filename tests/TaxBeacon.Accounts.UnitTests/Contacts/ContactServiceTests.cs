@@ -6,9 +6,10 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
+using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Accounts.Services.Contacts.Models;
-using TaxBeacon.Accounts.Services.Entities;
+using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -25,12 +26,28 @@ public class ContactServiceTests
     private readonly TaxBeaconDbContext _dbContext;
     private readonly IContactService _contactService;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
+    private readonly Mock<IListToFileConverter> _csvMock;
+    private readonly Mock<IListToFileConverter> _xlsxMock;
+    private readonly Mock<IEnumerable<IListToFileConverter>> _listToFileConverters;
 
     public ContactServiceTests()
     {
         _loggerMock = new();
         _dateTimeServiceMock = new();
         _currentUserServiceMock = new();
+
+        _csvMock = new();
+        _xlsxMock = new();
+        _listToFileConverters = new();
+
+        _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
+        _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
+
+        _listToFileConverters
+            .Setup(x => x.GetEnumerator())
+            .Returns(new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
+                .GetEnumerator());
+
         Mock<EntitySaveChangesInterceptor> entitySaveChangesInterceptorMock = new();
         _dbContext = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
@@ -38,7 +55,7 @@ public class ContactServiceTests
                 .Options,
             entitySaveChangesInterceptorMock.Object);
 
-        _contactService = new ContactService(_loggerMock.Object, _currentUserServiceMock.Object, _dbContext, _dateTimeServiceMock.Object);
+        _contactService = new ContactService(_loggerMock.Object, _currentUserServiceMock.Object, _dbContext, _dateTimeServiceMock.Object, _listToFileConverters.Object);
     }
 
     [Fact]
@@ -60,13 +77,11 @@ public class ContactServiceTests
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var oneOf = await _contactService.QueryContactsAsync(items[0].Account.Id);
+        var result = _contactService.QueryContacts();
 
         // Assert
         using (new AssertionScope())
         {
-            oneOf.IsT0.Should().BeTrue();
-            var result = oneOf.AsT0.Value;
             result.Should().HaveCount(3);
 
             foreach (var dto in result)
@@ -75,36 +90,6 @@ public class ContactServiceTests
 
                 dto.Should().BeEquivalentTo(item, opt => opt.ExcludingMissingMembers());
             }
-        }
-    }
-
-    [Fact]
-    public async Task QueryContacts_AccountDoesNotExist_ReturnsNotFound()
-    {
-        // Arrange
-        var tenant = TestData.TestTenant.Generate();
-        TestData.TestContact.RuleFor(x => x.Tenant, tenant);
-        TestData.TestAccount.RuleFor(x => x.Tenant, tenant);
-        var account = TestData.TestAccount.Generate();
-
-        TestData.TestContact.RuleFor(x => x.Account, account);
-        await _dbContext.Tenants.AddAsync(tenant);
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
-
-        var items = TestData.TestContact.Generate(3);
-        await _dbContext.Contacts.AddRangeAsync(items);
-        await _dbContext.Accounts.AddRangeAsync(account);
-        await _dbContext.SaveChangesAsync();
-
-        // Act
-        var oneOf = await _contactService.QueryContactsAsync(new Guid());
-
-        // Assert
-        using (new AssertionScope())
-        {
-            oneOf.IsT1.Should().BeTrue();
-            var result = oneOf.AsT1;
-            result.Should().BeOfType<NotFound>();
         }
     }
 
@@ -248,6 +233,40 @@ public class ContactServiceTests
         using (new AssertionScope())
         {
             actualResult.TryPickT1(out _, out _).Should().BeTrue();
+        }
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportContactsAsync_ValidInputData_AppropriateConverterShouldBeCalled(FileType fileType)
+    {
+        // Arrange
+        var items = TestData.TestContact
+            .RuleFor(a => a.TenantId, _ => TestData.TestTenantId)
+            .Generate(5);
+
+        await _dbContext.Contacts.AddRangeAsync(items);
+        await _dbContext.SaveChangesAsync();
+
+        _currentUserServiceMock
+            .Setup(service => service.TenantId)
+            .Returns(TestData.TestTenantId);
+
+        // Act
+        _ = await _contactService.ExportContactsAsync(fileType);
+
+        // Assert
+        switch (fileType)
+        {
+            case FileType.Csv:
+                _csvMock.Verify(x => x.Convert(It.IsAny<List<ContactExportModel>>()), Times.Once());
+                break;
+            case FileType.Xlsx:
+                _xlsxMock.Verify(x => x.Convert(It.IsAny<List<ContactExportModel>>()), Times.Once());
+                break;
+            default:
+                throw new InvalidOperationException();
         }
     }
 
