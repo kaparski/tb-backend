@@ -15,4 +15,8 @@ public class TenantUser
     public ICollection<TenantUserRole> TenantUserRoles { get; set; } = new HashSet<TenantUserRole>();
 
     public ICollection<TenantUserAccount> TenantUserAccounts { get; set; } = new HashSet<TenantUserAccount>();
+
+    public ICollection<ClientManager> ClientManagers { get; set; } = new HashSet<ClientManager>();
+
+    public ICollection<Referral> Referrals { get; set; } = new HashSet<Referral>();
 }

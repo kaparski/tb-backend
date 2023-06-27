@@ -93,6 +93,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<StateId> StateIds => Set<StateId>();
 
+    public DbSet<ClientManager> ClientManagers => Set<ClientManager>();
+
     public DbSet<EntityActivityLog> EntityActivityLogs => Set<EntityActivityLog>();
 
     public DbSet<ContactActivityLog> ContactActivityLogs => Set<ContactActivityLog>();

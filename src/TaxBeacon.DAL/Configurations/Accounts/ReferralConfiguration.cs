@@ -25,7 +25,7 @@ public class ReferralConfiguration: IEntityTypeConfiguration<Referral>
         referral
             .HasOne(r => r.Manager)
             .WithMany(m => m.Referrals)
-            .HasForeignKey(r => r.ManagerId);
+            .HasForeignKey(r => new { r.TenantId, r.ManagerId });
 
         referral
             .Property(r => r.Status)

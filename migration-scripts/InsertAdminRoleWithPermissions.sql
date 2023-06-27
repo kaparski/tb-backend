@@ -74,7 +74,15 @@ BEGIN TRY
            ('Entities.Read'),
            ('Entities.ReadWrite'),
            ('Entities.ReadExport'),
-           ('Entities.Activation');
+           ('Entities.Activation'),
+           ('Clients.Read'),
+           ('Clients.ReadWrite'),
+           ('Clients.ReadExport'),
+           ('Clients.Activation'),
+           ('Referrals.Read'),
+           ('Referrals.ReadWrite'),
+           ('Referrals.ReadExport'),
+           ('Referrals.Activation');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
     SELECT NEWID(),

@@ -50,4 +50,6 @@ public class Contact: BaseEntity
     public string? Address { get; set; }
 
     public ICollection<ContactActivityLog> ContactActivityLogs { get; set; } = new HashSet<ContactActivityLog>();
+
+    public ICollection<Client> Clients { get; set; } = new HashSet<Client>();
 }

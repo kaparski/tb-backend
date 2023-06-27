@@ -92,4 +92,60 @@ public class AccountsController: BaseController
             result => Ok(result.Adapt<AccountDetailsResponse>()),
             _ => NotFound());
     }
+
+    /// <summary>
+    /// Get client by accountId
+    /// </summary>
+    /// <response code="200">Returns Client Details</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Client is not found</response>
+    /// <returns>Client details</returns>
+    [HasPermissions(
+        Common.Permissions.Clients.Read,
+        Common.Permissions.Clients.ReadWrite,
+        Common.Permissions.Clients.ReadExport)]
+    [HttpGet("{id:guid}/client", Name = "ClientDetails")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(ClientDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetClientDetailsAsync([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var getClientDetailsResult = await _accountService.GetClientDetailsByIdAsync(id, cancellationToken);
+
+        return getClientDetailsResult.Match<IActionResult>(
+            result => Ok(result.Adapt<ClientDetailsResponse>()),
+            _ => NotFound());
+    }
+
+    // <summary>
+    /// Get referral by accountId
+    /// </summary>
+    /// <response code="200">Returns referral details</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Referral is not found</response>
+    /// <returns>Referral details</returns>
+    [HasPermissions(
+        Common.Permissions.Referrals.Read,
+        Common.Permissions.Referrals.ReadWrite,
+        Common.Permissions.Referrals.ReadExport)]
+    [HttpGet("{id:guid}/referral", Name = "ReferralDetails")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(ReferralDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetReferralDetailsAsync([FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var getReferralDetailsResult = await _accountService.GetReferralDetailsByIdAsync(id, cancellationToken);
+
+        return getReferralDetailsResult.Match<IActionResult>(
+            result => Ok(result.Adapt<ReferralDetailsResponse>()),
+            _ => NotFound());
+    }
 }
