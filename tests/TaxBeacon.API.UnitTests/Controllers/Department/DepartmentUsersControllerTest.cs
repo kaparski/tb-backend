@@ -1,12 +1,11 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Reflection;
+using TaxBeacon.Administration.Departments;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Departments;
-using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Department;
 

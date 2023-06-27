@@ -1,6 +1,4 @@
-﻿using System.Net.Mail;
-using TaxBeacon.Common.Accounts;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.DAL.Entities.Accounts;
 public class Contact: BaseEntity

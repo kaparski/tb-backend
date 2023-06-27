@@ -1,20 +1,16 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using OneOf;
 using OneOf.Types;
 using System.Reflection;
 using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Accounts.Services.Contacts.Models;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Accounts.Requests;
 using TaxBeacon.API.Controllers.Contacts;
 using TaxBeacon.API.Controllers.Contacts.Requests;
 using TaxBeacon.API.Controllers.Contacts.Responses;
-using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Contacts;

@@ -1,7 +1,6 @@
-﻿namespace TaxBeacon.API.Authentication
+﻿namespace TaxBeacon.API.Authentication;
+
+public static class Headers
 {
-    public static class Headers
-    {
-        public const string SuperAdminTenantId = "x-superadmin-tenant-id";
-    }
+    public const string SuperAdminTenantId = "x-superadmin-tenant-id";
 }

@@ -6,11 +6,10 @@ using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
-using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.UserManagement.Services.Tenants;
-using TaxBeacon.UserManagement.Services.Tenants.Models;
+using TaxBeacon.Administration.Tenants;
+using TaxBeacon.Administration.Tenants.Models;
 
 namespace TaxBeacon.API.Controllers.Tenants;
 

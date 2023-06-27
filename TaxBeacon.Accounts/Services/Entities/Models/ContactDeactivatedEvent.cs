@@ -1,6 +1,6 @@
 ﻿using TaxBeacon.Common.Models;
 
-namespace TaxBeacon.Accounts.Services.Contacts.Models;
+namespace TaxBeacon.Accounts.Services.Entities.Models;
 public sealed class ContactDeactivatedEvent: EventBase
 {
     public DateTime DeactivatedDate { get; }

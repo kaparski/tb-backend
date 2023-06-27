@@ -1,22 +1,11 @@
-﻿using Bogus;
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using OneOf.Types;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Security.Claims;
+using TaxBeacon.Administration.JobTitles;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.JobTitles;
-using TaxBeacon.API.Controllers.JobTitles.Requests;
-using TaxBeacon.API.Controllers.JobTitles.Responses;
-using TaxBeacon.API.Controllers.Tenants.Responses;
-using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Controllers.JobTitle;
 

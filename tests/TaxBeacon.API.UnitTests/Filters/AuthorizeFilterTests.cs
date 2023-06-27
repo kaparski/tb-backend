@@ -12,10 +12,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Principal;
+using TaxBeacon.Administration.Users;
+using TaxBeacon.Administration.Users.Models;
 using TaxBeacon.API.Filters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.UnitTests.Filters;
 

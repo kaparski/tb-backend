@@ -11,6 +11,8 @@ using TaxBeacon.DAL.Entities.Accounts;
 using Microsoft.Extensions.Logging;
 using Mapster;
 using System.Collections.Immutable;
+using TaxBeacon.Accounts.Services.Contacts.Models.Export;
+using TaxBeacon.Accounts.Services.Entities.Models;
 using TaxBeacon.Common.Converters;
 
 namespace TaxBeacon.Accounts.Services.Contacts;

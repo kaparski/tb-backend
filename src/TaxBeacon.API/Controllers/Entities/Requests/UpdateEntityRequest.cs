@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Entities.Accounts;

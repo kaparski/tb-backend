@@ -1,6 +1,6 @@
 ﻿using Mapster;
 using TaxBeacon.API.Controllers.Users.Responses;
-using TaxBeacon.UserManagement.Models;
+using TaxBeacon.Administration.Users.Models;
 
 namespace TaxBeacon.API.Mappings;
 

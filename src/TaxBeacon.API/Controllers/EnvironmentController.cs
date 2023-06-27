@@ -1,14 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace TaxBeacon.API.Controllers
+namespace TaxBeacon.API.Controllers;
+
+public class EnvironmentController: BaseController
 {
-    public class EnvironmentController: BaseController
-    {
-        private readonly IConfiguration _configuration;
+    private readonly IConfiguration _configuration;
 
-        public EnvironmentController(IConfiguration configuration) => _configuration = configuration;
+    public EnvironmentController(IConfiguration configuration) => _configuration = configuration;
 
-        [HttpGet]
-        public IActionResult Index() => Ok(_configuration["ConnectionStrings:DefaultConnection"]);
-    }
+    [HttpGet]
+    public IActionResult Index() => Ok(_configuration["ConnectionStrings:DefaultConnection"]);
 }

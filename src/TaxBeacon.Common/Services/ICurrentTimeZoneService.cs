@@ -1,7 +1,6 @@
-﻿namespace TaxBeacon.Common.Services
+﻿namespace TaxBeacon.Common.Services;
+
+public interface ICurrentTimeZoneService
 {
-    public interface ICurrentTimeZoneService
-    {
-        public string IanaTimeZone { get; }
-    }
+    public string IanaTimeZone { get; }
 }

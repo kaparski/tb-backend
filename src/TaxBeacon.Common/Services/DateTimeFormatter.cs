@@ -1,30 +1,29 @@
 ﻿using TaxBeacon.Common.Extensions;
 using TimeZoneNames;
 
-namespace TaxBeacon.Common.Services
+namespace TaxBeacon.Common.Services;
+
+public sealed class DateTimeFormatter: IDateTimeFormatter
 {
-    public sealed class DateTimeFormatter: IDateTimeFormatter
+    private readonly ICurrentTimeZoneService _currentTimeZoneService;
+    private const string Format = "MM.dd.yyyy hh:mm:ss tt";
+
+    public DateTimeFormatter(ICurrentTimeZoneService currentTimeZoneService) => _currentTimeZoneService = currentTimeZoneService;
+
+    public string FormatDate(DateTime date)
     {
-        private readonly ICurrentTimeZoneService _currentTimeZoneService;
-        private const string Format = "MM.dd.yyyy hh:mm:ss tt";
+        TimeZoneInfo.TryConvertIanaIdToWindowsId(_currentTimeZoneService.IanaTimeZone, out var windowsId);
 
-        public DateTimeFormatter(ICurrentTimeZoneService currentTimeZoneService) => _currentTimeZoneService = currentTimeZoneService;
+        windowsId ??= "UTC";
 
-        public string FormatDate(DateTime date)
-        {
-            TimeZoneInfo.TryConvertIanaIdToWindowsId(_currentTimeZoneService.IanaTimeZone, out var windowsId);
+        var tz = TimeZoneInfo.FindSystemTimeZoneById(windowsId);
+        var abbreviations = TZNames.GetAbbreviationsForTimeZone(windowsId, "en-US");
+        var value = date.ConvertUtcDateToTimeZone(_currentTimeZoneService.IanaTimeZone);
 
-            windowsId ??= "UTC";
-
-            var tz = TimeZoneInfo.FindSystemTimeZoneById(windowsId);
-            var abbreviations = TZNames.GetAbbreviationsForTimeZone(windowsId, "en-US");
-            var value = date.ConvertUtcDateToTimeZone(_currentTimeZoneService.IanaTimeZone);
-
-            return tz.IsDaylightSavingTime(value)
-                    ? $"{value.ToString(Format)} {abbreviations.Daylight}"
-                    : $"{value.ToString(Format)} {abbreviations.Standard}";
-        }
-
-        public string FormatDate(DateTime? date) => date.HasValue ? FormatDate(date.Value) : string.Empty;
+        return tz.IsDaylightSavingTime(value)
+            ? $"{value.ToString(Format)} {abbreviations.Daylight}"
+            : $"{value.ToString(Format)} {abbreviations.Standard}";
     }
+
+    public string FormatDate(DateTime? date) => date.HasValue ? FormatDate(date.Value) : string.Empty;
 }

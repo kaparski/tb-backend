@@ -1,8 +1,7 @@
-﻿namespace TaxBeacon.Common.Enums
+﻿namespace TaxBeacon.Common.Enums;
+
+public enum FileType
 {
-    public enum FileType
-    {
-        Csv = 1,
-        Xlsx = 2
-    }
+    Csv = 1,
+    Xlsx = 2
 }

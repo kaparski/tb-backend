@@ -8,13 +8,13 @@ using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
+using TaxBeacon.Administration.Programs;
+using TaxBeacon.Administration.Programs.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs;
 using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.UserManagement.Services.Program;
-using TaxBeacon.UserManagement.Services.Program.Models;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Programs;
 

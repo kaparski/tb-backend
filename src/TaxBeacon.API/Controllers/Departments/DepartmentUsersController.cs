@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Tenants.Responses;
+using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Exceptions;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.Administration.Departments;
 
 namespace TaxBeacon.API.Controllers.Departments;
 

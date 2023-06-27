@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaxBeacon.Common.Accounts;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Entities.Accounts;
 
 namespace TaxBeacon.DAL.Configurations.Accounts;
