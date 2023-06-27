@@ -37,9 +37,16 @@ public class SendGridEmailSender: IEmailSender
         {
             var msg = new SendGridMessage()
             {
-                From = new EmailAddress(_sendGridOptions.From),
-                Subject = "New User Created",
-                PlainTextContent = $"User: {userCreatedMessage.Email}{Environment.NewLine}Password: {userCreatedMessage.Password}"
+                From = new EmailAddress(_sendGridOptions.From, "Tax Beacon System"),
+                Subject = "Tax Beacon account details",
+                PlainTextContent =
+                $"""
+                You have been registered in Tax Beacon system with the following credentials:
+
+                Username: {userCreatedMessage.Email}
+
+                Password: {userCreatedMessage.Password}
+                """
             };
 
             msg.AddTos(recipients.Select(r => new EmailAddress(r)).ToList());
