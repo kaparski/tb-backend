@@ -1,4 +1,4 @@
-﻿using TaxBeacon.Accounts.Services.Contacts.Models;
+﻿using TaxBeacon.Accounts.Contacts.Models;
 using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.Accounts.Accounts.Models;

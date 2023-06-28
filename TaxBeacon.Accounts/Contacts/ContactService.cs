@@ -1,21 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
-using System.Text.Json;
-using TaxBeacon.Accounts.Services.Contacts.Models;
-using TaxBeacon.Common.Enums.Activities;
-using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Interfaces;
-using TaxBeacon.DAL.Entities.Accounts;
-using Microsoft.Extensions.Logging;
-using Mapster;
 using System.Collections.Immutable;
-using TaxBeacon.Accounts.Services.Contacts.Models.Export;
-using TaxBeacon.Accounts.Services.Entities.Models;
+using System.Text.Json;
+using TaxBeacon.Accounts.Contacts.Activities.Models;
+using TaxBeacon.Accounts.Contacts.Models;
 using TaxBeacon.Common.Converters;
+using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Services;
+using TaxBeacon.DAL.Entities.Accounts;
+using TaxBeacon.DAL.Interfaces;
 
-namespace TaxBeacon.Accounts.Services.Contacts;
+namespace TaxBeacon.Accounts.Contacts;
 
 public class ContactService: IContactService
 {

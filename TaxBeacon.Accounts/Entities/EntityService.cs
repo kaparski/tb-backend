@@ -5,15 +5,16 @@ using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
 using System.Text.Json;
-using TaxBeacon.Accounts.Services.Entities.Activities;
-using TaxBeacon.Accounts.Services.Entities.Models;
+using TaxBeacon.Accounts.Entities.Activities.Factories;
+using TaxBeacon.Accounts.Entities.Activities.Models;
+using TaxBeacon.Accounts.Entities.Models;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Entities.Accounts;
 using TaxBeacon.DAL.Interfaces;
 
-namespace TaxBeacon.Accounts.Services.Entities;
+namespace TaxBeacon.Accounts.Entities;
 
 public class EntityService: IEntityService
 {

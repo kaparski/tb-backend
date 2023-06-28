@@ -1,6 +1,7 @@
 ﻿using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.Accounts.Services.Entities.Models;
+namespace TaxBeacon.Accounts.Entities.Models;
+
 public record EntityDto
 {
     public Guid Id { get; init; }

@@ -2,7 +2,8 @@
 using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Entities.Accounts;
 
-namespace TaxBeacon.Accounts.Services.Entities.Models;
+namespace TaxBeacon.Accounts.Entities.Models;
+
 public record EntityDetailsDto(
     Guid Id,
     string Name,

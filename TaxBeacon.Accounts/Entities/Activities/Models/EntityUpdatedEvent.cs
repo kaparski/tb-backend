@@ -1,6 +1,7 @@
 ﻿using TaxBeacon.Common.Models;
 
-namespace TaxBeacon.Accounts.Services.Entities.Models;
+namespace TaxBeacon.Accounts.Entities.Activities.Models;
+
 public class EntityUpdatedEvent: EventBase
 {
     public EntityUpdatedEvent(Guid executorId, string executorRoles, string executorFullName, DateTime updatedDate,

@@ -1,9 +1,9 @@
-﻿using OneOf.Types;
-using OneOf;
-using TaxBeacon.Accounts.Services.Entities.Models;
+﻿using OneOf;
+using OneOf.Types;
+using TaxBeacon.Accounts.Entities.Models;
 using TaxBeacon.Common.Models;
 
-namespace TaxBeacon.Accounts.Services.Entities;
+namespace TaxBeacon.Accounts.Entities;
 public interface IEntityService
 {
     OneOf<IQueryable<EntityDto>, NotFound> QueryEntitiesAsync(Guid accountId);
