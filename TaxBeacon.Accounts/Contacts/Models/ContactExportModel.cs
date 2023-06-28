@@ -15,7 +15,7 @@ public class ContactExportModel
     public string JobTitle { get; set; } = string.Empty;
 
     [Column("Contact Type")]
-    public string ContactType { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
 
     [Column("Role")]
     public string? Role { get; set; }
