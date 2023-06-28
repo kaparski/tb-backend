@@ -19,11 +19,11 @@ using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Entities;
-using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.Email;
 using TaxBeacon.Email.Messages;
 using TaxBeacon.Administration.Users.Extensions;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 using RolesConstants = TaxBeacon.Common.Roles.Roles;
 
 namespace TaxBeacon.Administration.Users;

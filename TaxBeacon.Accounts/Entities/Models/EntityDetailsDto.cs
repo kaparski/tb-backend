@@ -1,6 +1,6 @@
 ﻿using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.Accounts.Entities.Models;
 

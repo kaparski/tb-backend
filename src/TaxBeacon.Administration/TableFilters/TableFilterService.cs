@@ -7,8 +7,8 @@ using TaxBeacon.Administration.TableFilters.Models;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Entities;
-using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.TableFilters;
 

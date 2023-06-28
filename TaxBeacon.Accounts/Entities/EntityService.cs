@@ -11,8 +11,8 @@ using TaxBeacon.Accounts.Entities.Models;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Entities.Accounts;
-using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.DAL.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.Accounts.Entities;
 

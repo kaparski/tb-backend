@@ -16,14 +16,14 @@ using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
-using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.Email;
 using TaxBeacon.Administration.Users;
 using TaxBeacon.Administration.Users.Activities.Factories;
 using TaxBeacon.Administration.Users.Activities.Models;
 using TaxBeacon.Administration.Users.Models;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace TaxBeacon.Administration.UnitTests.Services;

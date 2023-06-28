@@ -11,8 +11,8 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Entities.Accounts;
-using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.DAL.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.Accounts.Contacts;
 

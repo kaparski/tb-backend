@@ -8,7 +8,7 @@ using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.DAL.Accounts;
 
 namespace TaxBeacon.Accounts.Accounts;
 

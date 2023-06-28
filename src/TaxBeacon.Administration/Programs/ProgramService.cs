@@ -17,8 +17,8 @@ using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Entities;
-using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.Programs;
 
@@ -70,7 +70,7 @@ public class ProgramService: IProgramService
             return new NameAlreadyExists();
         }
 
-        var newProgram = createProgramDto.Adapt<DAL.Entities.Program>();
+        var newProgram = createProgramDto.Adapt<Program>();
         await _context.Programs.AddAsync(newProgram, cancellationToken);
 
         var (userFullName, userRoles) = _currentUserService.UserInfo;
@@ -397,9 +397,9 @@ public class ProgramService: IProgramService
         _context.ProgramActivityLogs
             .Where(log => log.ProgramId == programId && log.TenantId == tenantId);
 
-    private Task<DAL.Entities.Program?> GetProgramByIdAsync(Guid programId, CancellationToken cancellationToken)
+    private Task<Program?> GetProgramByIdAsync(Guid programId, CancellationToken cancellationToken)
     {
-        Expression<Func<DAL.Entities.Program, bool>> predicate =
+        Expression<Func<Program, bool>> predicate =
             _currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
                 ? program => program.Id == programId
                 : program => program.Id == programId &&

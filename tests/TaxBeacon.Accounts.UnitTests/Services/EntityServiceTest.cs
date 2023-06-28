@@ -11,10 +11,11 @@ using TaxBeacon.Accounts.Entities.Models;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
-using TaxBeacon.DAL.Entities;
-using TaxBeacon.DAL.Entities.Accounts;
+using TaxBeacon.DAL.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 using TaxBeacon.DAL.Interceptors;
-using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.Accounts.UnitTests.Services;
 public class EntityServiceTest

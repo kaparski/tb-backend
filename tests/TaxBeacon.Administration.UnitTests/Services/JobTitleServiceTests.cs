@@ -13,13 +13,13 @@ using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
-using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.Administration.JobTitles;
 using TaxBeacon.Administration.JobTitles.Activities.Factories;
 using TaxBeacon.Administration.JobTitles.Activities.Models;
 using TaxBeacon.Administration.JobTitles.Models;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.UnitTests.Services;
 
