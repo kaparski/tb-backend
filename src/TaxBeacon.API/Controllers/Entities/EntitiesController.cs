@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using TaxBeacon.Accounts.Services.Entities;
-using TaxBeacon.Accounts.Services.Entities.Models;
+using TaxBeacon.Accounts.Entities;
+using TaxBeacon.Accounts.Entities.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Entities.Requests;
 using TaxBeacon.API.Controllers.Entities.Responses;

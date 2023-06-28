@@ -5,7 +5,6 @@ using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
 using TaxBeacon.Accounts.Accounts.Models;
-using TaxBeacon.Accounts.Services.Contacts.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;

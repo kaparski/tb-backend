@@ -1,10 +1,10 @@
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Accounts.Accounts;
+using TaxBeacon.Accounts.Contacts;
+using TaxBeacon.Accounts.Entities;
 using TaxBeacon.Accounts.Locations;
-using TaxBeacon.Accounts.Services.Entities;
 
 namespace TaxBeacon.Accounts;
 

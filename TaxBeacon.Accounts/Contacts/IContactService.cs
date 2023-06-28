@@ -1,9 +1,9 @@
-﻿using TaxBeacon.Accounts.Services.Contacts.Models;
-using OneOf;
+﻿using OneOf;
 using OneOf.Types;
+using TaxBeacon.Accounts.Contacts.Models;
 using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.Accounts.Services.Contacts;
+namespace TaxBeacon.Accounts.Contacts;
 
 public interface IContactService
 {

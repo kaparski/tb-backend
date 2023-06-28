@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaxBeacon.DAL.Entities.Accounts;
 
-namespace TaxBeacon.DAL.Configurations;
+namespace TaxBeacon.DAL.Configurations.Accounts;
 
 public class ClientManagerConfiguration: IEntityTypeConfiguration<ClientManager>
 {

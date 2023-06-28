@@ -1,7 +1,7 @@
 using Npoi.Mapper.Attributes;
 using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.Accounts.Services.Contacts.Models.Export;
+namespace TaxBeacon.Accounts.Contacts.Models;
 
 public class ContactExportModel
 {

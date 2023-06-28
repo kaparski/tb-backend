@@ -1,9 +1,10 @@
 ﻿using System.Text.Json;
-using TaxBeacon.Accounts.Services.Entities.Models;
+using TaxBeacon.Accounts.Entities.Activities.Models;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Models;
 
-namespace TaxBeacon.Accounts.Services.Entities.Activities;
+namespace TaxBeacon.Accounts.Entities.Activities.Factories;
+
 public class EntityUpdatedEventFactory: IEntityActivityFactory
 {
     public uint Revision => 1;
