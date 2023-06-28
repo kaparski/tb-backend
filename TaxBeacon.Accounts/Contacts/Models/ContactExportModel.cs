@@ -5,11 +5,8 @@ namespace TaxBeacon.Accounts.Contacts.Models;
 
 public class ContactExportModel
 {
-    [Column("First Name")]
-    public string FirstName { get; set; } = string.Empty;
-
-    [Column("Last Name")]
-    public string LastName { get; set; } = string.Empty;
+    [Column("Name")]
+    public string FullName { get; set; } = string.Empty;
 
     [Column("Email")]
     public string Email { get; set; } = string.Empty;
