@@ -50,7 +50,7 @@ public class TenantProgramsControllerTests
     public void Get_HasAppropriatePermissions()
     {
         // Arrange
-        var methodInfo = ((Func<IQueryable<ProgramResponse>>)_controller.Get)
+        var methodInfo = ((Func<IQueryable<TenantProgramResponse>>)_controller.Get)
             .Method;
         var permissions = new object[]
         {
