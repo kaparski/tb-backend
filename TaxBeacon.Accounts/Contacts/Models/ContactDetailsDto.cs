@@ -36,7 +36,7 @@ public class ContactDetailsDto
 
     public string? SubRole { get; set; }
 
-    public State State { get; set; } = State.None;
+    public State? State { get; set; }
 
     public Guid AccountId { get; set; }
 

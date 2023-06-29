@@ -1,6 +1,6 @@
 ﻿using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.API.Controllers.Entities.Responses;
 
@@ -20,7 +20,7 @@ public record EntityDetailsResponse
     string? Fax,
     string? Phone,
     string? Extension,
-    State State,
+    State? State,
     string Type,
     TaxYearEndType TaxYearEndType,
     Status Status,

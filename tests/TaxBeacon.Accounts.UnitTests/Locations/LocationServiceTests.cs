@@ -10,8 +10,8 @@ using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
-using TaxBeacon.DAL.Entities;
-using TaxBeacon.DAL.Entities.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
+using TaxBeacon.DAL.Administration.Entities;
 using TaxBeacon.DAL.Interceptors;
 
 namespace TaxBeacon.Accounts.UnitTests.Locations;

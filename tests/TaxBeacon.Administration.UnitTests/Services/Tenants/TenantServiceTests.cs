@@ -13,13 +13,13 @@ using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
-using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.Administration.Tenants;
 using TaxBeacon.Administration.Tenants.Activities;
 using TaxBeacon.Administration.Tenants.Activities.Models;
 using TaxBeacon.Administration.Tenants.Models;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.UnitTests.Services.Tenants;
 

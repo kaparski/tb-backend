@@ -11,8 +11,8 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Entities.Accounts;
-using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.DAL.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.Accounts.Contacts;
 
@@ -72,7 +72,7 @@ public class ContactService: IContactService
         var contactDetailsDto = await _context
             .Contacts
             .Where(x => x.AccountId == accountId && x.Id == contactId && x.TenantId == currentTenantId)
-            .Select(x => new ContactDetailsDto()
+            .Select(x => new ContactDetailsDto
             {
                 Id = x.Id,
                 FirstName = x.FirstName,

@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using TaxBeacon.DAL.Entities.Accounts;
+using TaxBeacon.DAL.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 using TaxBeacon.DAL.Interceptors;
-using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.DAL;
 

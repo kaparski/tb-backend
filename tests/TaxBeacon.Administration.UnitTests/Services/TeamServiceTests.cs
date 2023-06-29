@@ -12,12 +12,12 @@ using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
-using TaxBeacon.DAL.Entities;
 using TaxBeacon.DAL.Interceptors;
-using TaxBeacon.DAL.Interfaces;
 using TaxBeacon.Administration.Teams;
 using TaxBeacon.Administration.Teams.Activities.Factories;
 using TaxBeacon.Administration.Teams.Models;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.UnitTests.Services;
 

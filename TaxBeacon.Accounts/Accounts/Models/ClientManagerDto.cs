@@ -1,5 +1,5 @@
 ﻿using Mapster;
-using TaxBeacon.DAL.Entities.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.Accounts.Accounts.Models;
 public record ClientManagerDto: IRegister

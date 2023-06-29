@@ -14,7 +14,7 @@ public record EntityResponse
 
     public string? City { get; init; }
 
-    public State State { get; init; }
+    public State? State { get; init; }
 
     public string Type { get; init; } = null!;
 

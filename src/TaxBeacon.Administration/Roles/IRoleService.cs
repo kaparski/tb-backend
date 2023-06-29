@@ -2,7 +2,7 @@ using Gridify;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.Administration.Roles.Models;
-using TaxBeacon.DAL.Entities;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.Roles;
 

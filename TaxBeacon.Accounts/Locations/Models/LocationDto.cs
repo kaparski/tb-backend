@@ -13,7 +13,7 @@ public record LocationDto
 
     public LocationType Type { get; init; }
 
-    public State State { get; init; }
+    public State? State { get; init; }
 
     public string County { get; init; }
 

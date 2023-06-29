@@ -2,7 +2,7 @@
 using Npoi.Mapper.Attributes;
 using System.ComponentModel.DataAnnotations;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.Users.Models;
 

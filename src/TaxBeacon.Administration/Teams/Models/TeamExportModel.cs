@@ -1,6 +1,6 @@
 ﻿using Mapster;
 using Npoi.Mapper.Attributes;
-using TaxBeacon.DAL.Entities;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.Teams.Models;
 

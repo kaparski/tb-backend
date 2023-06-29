@@ -1,6 +1,6 @@
 ﻿using Mapster;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Entities;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.Programs.Models;
 

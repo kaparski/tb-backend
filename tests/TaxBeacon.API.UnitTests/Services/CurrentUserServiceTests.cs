@@ -12,9 +12,9 @@ using TaxBeacon.API.Services;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
-using TaxBeacon.DAL.Entities;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 using TaxBeacon.DAL.Interceptors;
-using TaxBeacon.DAL.Interfaces;
 using RolesConstants = TaxBeacon.Common.Roles.Roles;
 
 namespace TaxBeacon.API.UnitTests.Services;
