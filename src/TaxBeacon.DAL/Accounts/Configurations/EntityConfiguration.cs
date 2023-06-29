@@ -120,10 +120,10 @@ public class EntityConfiguration: IEntityTypeConfiguration<Entity>
            .IsRequired();
 
         builder
-            .HasMany(d => d.StateIds)
-            .WithOne(jt => jt.Entity)
-            .HasForeignKey(jt => jt.EntityId)
-             .IsRequired(false);
+            .HasMany(e => e.StateIds)
+            .WithOne(si => si.Entity)
+            .HasForeignKey(si => si.EntityId)
+            .IsRequired(false);
 
         builder
             .HasIndex(e => new { e.TenantId, e.Fein })

@@ -7,7 +7,7 @@ public static class ConfigureServices
     public static IServiceCollection AddAccounts(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddScoped<IAccountService, AccountService>();
-        
+
         return serviceCollection;
     }
 }
