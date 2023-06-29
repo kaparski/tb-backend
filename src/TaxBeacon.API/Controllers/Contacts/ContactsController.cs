@@ -81,7 +81,7 @@ public class ContactsController: BaseController
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>Updated contact</returns>
-    [HasPermissions(Common.Permissions.Contacts.ReadWrite)]
+    [HasPermissions(Common.Permissions.Contacts.Activation)]
     [HttpPut("/api/accounts/{accountId:guid}/contacts/{contactId:guid}/status", Name = "UpdateContactStatus")]
     [ProducesResponseType(typeof(ContactDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
