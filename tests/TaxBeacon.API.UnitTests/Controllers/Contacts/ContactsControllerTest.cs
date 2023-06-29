@@ -117,7 +117,7 @@ public class ContactsControllerTest
         var methodInfo = ((Func<Guid, Guid, Status, CancellationToken, Task<IActionResult>>)_controller.UpdateContactStatusAsync).Method;
         var permissions = new object[]
         {
-            Common.Permissions.Contacts.ReadWrite
+            Common.Permissions.Contacts.Activation
         };
 
         // Act
