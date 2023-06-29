@@ -20,7 +20,7 @@ public record EntityDetailsResponse
     string? Fax,
     string? Phone,
     string? Extension,
-    State State,
+    State? State,
     string Type,
     TaxYearEndType TaxYearEndType,
     Status Status,

@@ -3,6 +3,7 @@ using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.DAL.Accounts.Entities;
+
 public class Location: BaseEntity
 {
     public Guid TenantId { get; set; }
@@ -21,7 +22,7 @@ public class Location: BaseEntity
 
     public LocationType Type { get; set; }
 
-    public State State { get; set; }
+    public State? State { get; set; }
 
     public string? County { get; set; }
 

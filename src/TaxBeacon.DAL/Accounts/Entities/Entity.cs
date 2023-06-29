@@ -3,6 +3,7 @@ using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.DAL.Accounts.Entities;
+
 public class Entity: BaseEntity
 {
     public Guid TenantId { get; set; }
@@ -35,11 +36,11 @@ public class Entity: BaseEntity
 
     public string Country { get; set; } = null!;
 
-    public State State { get; set; }
+    public State? State { get; set; }
 
     public string Type { get; set; } = null!;
 
-    public TaxYearEndType TaxYearEndType { get; set; } = TaxYearEndType.None;
+    public TaxYearEndType? TaxYearEndType { get; set; }
 
     public string? Fax { get; set; }
 

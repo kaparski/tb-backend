@@ -12,8 +12,8 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    [Migration("20230628111204_UpdatedDBSnapshot")]
-    partial class UpdatedDBSnapshot
+    [Migration("20230629080721_ChangeStateFiledTONullableInEntities")]
+    partial class ChangeStateFiledTONullableInEntities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -351,7 +351,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("State")
-                        .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("nvarchar");
 
@@ -483,7 +482,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("State")
-                        .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("nvarchar");
 
@@ -502,7 +500,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("TaxYearEndType")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar");
 
@@ -611,7 +608,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("State")
-                        .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("nvarchar");
 

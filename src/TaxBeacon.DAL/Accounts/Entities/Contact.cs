@@ -2,6 +2,7 @@
 using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.DAL.Accounts.Entities;
+
 public class Contact: BaseEntity
 {
     public Guid TenantId { get; set; }
@@ -40,7 +41,7 @@ public class Contact: BaseEntity
 
     public string FullName { get; private set; } = string.Empty;
 
-    public State State { get; set; } = State.None;
+    public State? State { get; set; }
 
     public string? City { get; set; }
 

@@ -26,7 +26,7 @@ public class ContactResponse
 
     public string? City { get; set; }
 
-    public State State { get; set; } = State.None;
+    public State? State { get; set; }
 
     public Guid AccountId { get; set; }
 

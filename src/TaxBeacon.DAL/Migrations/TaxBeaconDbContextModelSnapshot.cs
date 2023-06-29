@@ -348,7 +348,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("State")
-                        .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("nvarchar");
 
@@ -480,7 +479,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("State")
-                        .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("nvarchar");
 
@@ -499,7 +497,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("TaxYearEndType")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar");
 
@@ -608,7 +605,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("State")
-                        .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("nvarchar");
 

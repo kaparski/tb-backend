@@ -72,7 +72,7 @@ public class ContactService: IContactService
         var contactDetailsDto = await _context
             .Contacts
             .Where(x => x.AccountId == accountId && x.Id == contactId && x.TenantId == currentTenantId)
-            .Select(x => new ContactDetailsDto()
+            .Select(x => new ContactDetailsDto
             {
                 Id = x.Id,
                 FirstName = x.FirstName,

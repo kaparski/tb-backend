@@ -24,10 +24,11 @@ public class ContactDto
 
     public string? Country { get; set; }
 
-    public string? City { get; set; } = null!;
+    public string? City { get; set; }
 
-    public State State { get; set; } = State.None;
+    public State? State { get; set; }
 
     public Guid AccountId { get; set; }
+    
     public string AccountName { get; set; } = null!;
 }
