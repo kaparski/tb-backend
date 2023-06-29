@@ -83,7 +83,7 @@ public class EntitiesController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetTeamDetails([FromRoute] Guid id,
+    public async Task<IActionResult> GetEntityDetails([FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
         var oneOfEntityDetails = await _entityService.GetEntityDetailsAsync(id, cancellationToken);
