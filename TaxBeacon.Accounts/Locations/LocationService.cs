@@ -3,7 +3,7 @@ using OneOf;
 using OneOf.Types;
 using TaxBeacon.Accounts.Locations.Models;
 using TaxBeacon.Common.Services;
-using TaxBeacon.DAL.Interfaces;
+using TaxBeacon.DAL.Accounts;
 
 namespace TaxBeacon.Accounts.Locations;
 

@@ -21,7 +21,7 @@
   <ItemGroup>
     <PackageReference Include="Gridify" Version="[2.8.4]" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="[11.3.0]" />
-    <PackageReference Include="Microsoft.AspNetCore.OData" Version="[8.0.1]" />
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="[8.2.0]" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="[7.0.5]" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="[2.21.0]" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="[7.0.5]">
@@ -36,12 +36,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\TaxBeacon.Accounts\TaxBeacon.Accounts.csproj" />
-    <ProjectReference Include="..\TaxBeacon.UserManagement\TaxBeacon.UserManagement.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\Contacts\Requests" />
-    <Folder Include="Controllers\Locations\Requests\" />
+    <ProjectReference Include="..\..\TaxBeacon.Email\TaxBeacon.Email.csproj" />
+    <ProjectReference Include="..\TaxBeacon.Administration\TaxBeacon.Administration.csproj" />
   </ItemGroup>
 
 </Project>

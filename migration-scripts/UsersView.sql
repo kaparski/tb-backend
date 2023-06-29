@@ -26,23 +26,17 @@ CREATE VIEW dbo.UsersView AS
 		sa.Name as ServiceArea,
 		u.TeamId,
 		t.Name as Team,
-		tu.TenantId,
-		CAST(u.Id as varchar(50)) + ISNULL(CAST(tu.TenantId as varchar(50)), '') as UserIdPlusTenantId,
 		STRING_AGG(r.Name, ', ') as Roles
 	from 
 		dbo.Users u
 		left join
-		dbo.TenantUsers tu
+		dbo.UserRoles ur
 		on
-		u.Id = tu.UserId
-		left join
-		dbo.TenantUserRoles tur
-		on
-		tur.UserId = u.Id and tur.TenantId = tu.TenantId
+		ur.UserId = u.Id
 		left join
 		dbo.Roles r
 		on
-		r.Id = tur.RoleId
+		r.Id = ur.RoleId
 		left join
 		dbo.Divisions di
 		on
@@ -64,7 +58,8 @@ CREATE VIEW dbo.UsersView AS
 		on
 		u.TeamId = t.Id
 	where
-		u.IsDeleted IS NULL OR u.IsDeleted = CAST(0 AS bit)
+		(u.IsDeleted IS NULL OR u.IsDeleted = CAST(0 AS bit))
+	    AND NOT EXISTS(SELECT 1 FROM TenantUsers tu WHERE tu.UserId = u.Id)
 	group by
 		u.Id,
 		u.FirstName,
@@ -87,6 +82,5 @@ CREATE VIEW dbo.UsersView AS
 		d.Name,
 		jt.Name,
 		sa.Name,
-		t.Name,
-		tu.TenantId
+		t.Name
 GO

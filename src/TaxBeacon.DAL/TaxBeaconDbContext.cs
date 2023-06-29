@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using TaxBeacon.DAL.Entities.Accounts;
+using TaxBeacon.DAL.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
+using TaxBeacon.DAL.Administration;
+using TaxBeacon.DAL.Administration.Entities;
 using TaxBeacon.DAL.Interceptors;
-using TaxBeacon.DAL.Interfaces;
 
 namespace TaxBeacon.DAL;
 
@@ -71,6 +73,8 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<UserView> UsersView => Set<UserView>();
 
+    public DbSet<TenantUserView> TenantUsersView => Set<TenantUserView>();
+
     public DbSet<Account> Accounts => Set<Account>();
 
     public DbSet<Client> Clients => Set<Client>();
@@ -86,6 +90,16 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
     public DbSet<Location> Locations => Set<Location>();
 
     public DbSet<Contact> Contacts => Set<Contact>();
+
+    public DbSet<AccountView> AccountsView => Set<AccountView>();
+
+    public DbSet<StateId> StateIds => Set<StateId>();
+
+    public DbSet<ClientManager> ClientManagers => Set<ClientManager>();
+
+    public DbSet<EntityActivityLog> EntityActivityLogs => Set<EntityActivityLog>();
+
+    public DbSet<ContactActivityLog> ContactActivityLogs => Set<ContactActivityLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

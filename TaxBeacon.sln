@@ -6,8 +6,11 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1D7F782A-6727-4216-A75A-986158A288A6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.API", "src\TaxBeacon.API\TaxBeacon.API.csproj", "{34C51C43-6755-4DEB-9CFD-5CB9FF18E104}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5D3EDE5-3410-4C66-940C-C2F31248C06B} = {B5D3EDE5-3410-4C66-940C-C2F31248C06B}
+	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.UserManagement", "src\TaxBeacon.UserManagement\TaxBeacon.UserManagement.csproj", "{76DACBB4-458E-4840-A5DB-FEA9D837467E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Administration", "src\TaxBeacon.Administration\TaxBeacon.Administration.csproj", "{76DACBB4-458E-4840-A5DB-FEA9D837467E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.DAL", "src\TaxBeacon.DAL\TaxBeacon.DAL.csproj", "{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}"
 EndProject
@@ -22,23 +25,32 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Common", "src\Tax
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{78103266-2E2B-4710-9139-0AB800F12A71}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.UserManagement.UnitTests", "tests\TaxBeacon.UserManagement.UnitTests\TaxBeacon.UserManagement.UnitTests.csproj", "{BF40CE7B-1B35-4BAF-819E-998431E1C239}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Administration.UnitTests", "tests\TaxBeacon.Administration.UnitTests\TaxBeacon.Administration.UnitTests.csproj", "{BF40CE7B-1B35-4BAF-819E-998431E1C239}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.API.UnitTests", "tests\TaxBeacon.API.UnitTests\TaxBeacon.API.UnitTests.csproj", "{FA27BB92-9E96-4117-84C8-95787C922BED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migration-scripts", "{E149189A-4D39-48F3-9B5A-DBDA8D351B70}"
 	ProjectSection(SolutionItems) = preProject
-		InsertAccountManagerRoleWithPermissions.sql = InsertAccountManagerRoleWithPermissions.sql
-		InsertSalesOpsRoleWithPermissions.sql = InsertSalesOpsRoleWithPermissions.sql
-		InsertSalesRoleWithPermissions.sql = InsertSalesRoleWithPermissions.sql
-		migration-scripts\InsertSuperAdminRoleWithPermissions.sql = migration-scripts\InsertSuperAdminRoleWithPermissions.sql
+		migration-scripts\AccountsView.sql = migration-scripts\AccountsView.sql
+		migration-scripts\InsertAccountManagerRoleWithPermissions.sql = migration-scripts\InsertAccountManagerRoleWithPermissions.sql
 		migration-scripts\InsertAdminRoleWithPermissions.sql = migration-scripts\InsertAdminRoleWithPermissions.sql
+		migration-scripts\InsertProjectManagerRoleWithPermissions.sql = migration-scripts\InsertProjectManagerRoleWithPermissions.sql
+		migration-scripts\InsertSalesOpsRoleWithPermissions.sql = migration-scripts\InsertSalesOpsRoleWithPermissions.sql
+		migration-scripts\InsertSalesRoleWithPermissions.sql = migration-scripts\InsertSalesRoleWithPermissions.sql
+		migration-scripts\InsertSubjectMatterExpertRoleWithPermissions.sql = migration-scripts\InsertSubjectMatterExpertRoleWithPermissions.sql
+		migration-scripts\InsertSuperAdminRoleWithPermissions.sql = migration-scripts\InsertSuperAdminRoleWithPermissions.sql
+		migration-scripts\TenantUsersView.sql = migration-scripts\TenantUsersView.sql
 		migration-scripts\UsersView.sql = migration-scripts\UsersView.sql
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Accounts", "TaxBeacon.Accounts\TaxBeacon.Accounts.csproj", "{B5D3EDE5-3410-4C66-940C-C2F31248C06B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6} = {F9EF7E0A-ADF0-44BC-8FDF-5669D32944A6}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Accounts.UnitTests", "tests\TaxBeacon.Accounts.UnitTests\TaxBeacon.Accounts.UnitTests.csproj", "{7737CC30-B5DD-4EC4-9325-A16089464D93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Accounts.UnitTests", "tests\TaxBeacon.Accounts.UnitTests\TaxBeacon.Accounts.UnitTests.csproj", "{7737CC30-B5DD-4EC4-9325-A16089464D93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Email", "TaxBeacon.Email\TaxBeacon.Email.csproj", "{157028CA-D228-4A56-9D5E-7FEB2FB05978}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +90,10 @@ Global
 		{7737CC30-B5DD-4EC4-9325-A16089464D93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7737CC30-B5DD-4EC4-9325-A16089464D93}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7737CC30-B5DD-4EC4-9325-A16089464D93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{157028CA-D228-4A56-9D5E-7FEB2FB05978}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{157028CA-D228-4A56-9D5E-7FEB2FB05978}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{157028CA-D228-4A56-9D5E-7FEB2FB05978}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{157028CA-D228-4A56-9D5E-7FEB2FB05978}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +107,7 @@ Global
 		{FA27BB92-9E96-4117-84C8-95787C922BED} = {78103266-2E2B-4710-9139-0AB800F12A71}
 		{B5D3EDE5-3410-4C66-940C-C2F31248C06B} = {1D7F782A-6727-4216-A75A-986158A288A6}
 		{7737CC30-B5DD-4EC4-9325-A16089464D93} = {78103266-2E2B-4710-9139-0AB800F12A71}
+		{157028CA-D228-4A56-9D5E-7FEB2FB05978} = {1D7F782A-6727-4216-A75A-986158A288A6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F4F2EB9-1E83-4F40-B890-0589652A15CA}

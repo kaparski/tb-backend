@@ -3,4 +3,6 @@
 public enum Contacts
 {
     Read,
+    ReadWrite,
+    ReadExport
 }

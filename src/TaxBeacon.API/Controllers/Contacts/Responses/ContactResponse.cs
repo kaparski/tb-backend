@@ -1,5 +1,4 @@
-﻿using TaxBeacon.Common.Accounts;
-using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Contacts.Responses;
 
@@ -15,7 +14,7 @@ public class ContactResponse
 
     public string Email { get; set; } = null!;
 
-    public string JobTitle { get; set; } = null!;
+    public string? JobTitle { get; set; }
 
     public string ContactType { get; set; } = null!;
 
@@ -23,11 +22,13 @@ public class ContactResponse
 
     public Status Status { get; set; }
 
-    public string Country { get; set; } = null!;
+    public string? Country { get; set; }
 
-    public string City { get; set; } = null!;
+    public string? City { get; set; }
 
-    public State State { get; set; } = State.None;
+    public State? State { get; set; }
 
     public Guid AccountId { get; set; }
+
+    public string AccountName { get; set; } = null!;
 }

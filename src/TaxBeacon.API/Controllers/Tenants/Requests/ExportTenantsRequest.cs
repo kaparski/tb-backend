@@ -1,19 +1,18 @@
 ﻿using FluentValidation;
 using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.API.Controllers.Users.Requests
+namespace TaxBeacon.API.Controllers.Tenants.Requests;
+
+public record ExportTenantsRequest(FileType FileType, string IanaTimeZone);
+
+public class ExportTenantsRequestValidator: AbstractValidator<ExportTenantsRequest>
 {
-    public record ExportTenantsRequest(FileType FileType, string IanaTimeZone);
-
-    public class ExportTenantsRequestValidator: AbstractValidator<ExportTenantsRequest>
+    public ExportTenantsRequestValidator()
     {
-        public ExportTenantsRequestValidator()
-        {
-            RuleFor(x => x.FileType)
-                .IsInEnum();
+        RuleFor(x => x.FileType)
+            .IsInEnum();
 
-            RuleFor(x => x.IanaTimeZone)
-                .Must(x => TimeZoneConverter.TZConvert.KnownIanaTimeZoneNames.Contains(x));
-        }
+        RuleFor(x => x.IanaTimeZone)
+            .Must(x => TimeZoneConverter.TZConvert.KnownIanaTimeZoneNames.Contains(x));
     }
 }

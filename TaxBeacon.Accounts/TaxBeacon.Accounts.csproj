@@ -7,17 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services" />
+    <PackageReference Include="Mapster" Version="7.3.0" />
+    <PackageReference Include="OneOf" Version="3.0.243" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\src\TaxBeacon.Common\TaxBeacon.Common.csproj" />
     <ProjectReference Include="..\src\TaxBeacon.DAL\TaxBeacon.DAL.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Mapster" Version="7.3.0" />
-    <PackageReference Include="OneOf" Version="3.0.243" />
   </ItemGroup>
 
 </Project>

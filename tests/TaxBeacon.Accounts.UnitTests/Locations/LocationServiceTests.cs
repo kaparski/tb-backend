@@ -6,13 +6,12 @@ using Moq;
 using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Accounts.Locations;
-using TaxBeacon.Accounts.Services.Contacts;
 using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
-using TaxBeacon.DAL.Entities;
-using TaxBeacon.DAL.Entities.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
+using TaxBeacon.DAL.Administration.Entities;
 using TaxBeacon.DAL.Interceptors;
 
 namespace TaxBeacon.Accounts.UnitTests.Locations;
@@ -36,7 +35,7 @@ public class LocationServiceTests
         _locationService = new LocationService(_dbContext, _currentUserServiceMock.Object);
 
     }
-  
+
     [Fact]
     public async Task QueryLocations_AccountExists_ReturnsLocations()
     {
@@ -48,12 +47,12 @@ public class LocationServiceTests
         var locations = TestData.TestLocation
             .RuleFor(l => l.Account, f => account)
             .Generate(5);
-        
+
         await _dbContext.Tenants.AddAsync(tenant);
         await _dbContext.Accounts.AddRangeAsync(account);
         await _dbContext.Locations.AddRangeAsync(locations);
         await _dbContext.SaveChangesAsync();
-        
+
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
         // Act
@@ -69,7 +68,7 @@ public class LocationServiceTests
             {
                 var location = locations.Single(u => u.Id == dto.Id);
 
-                dto.Should().BeEquivalentTo(location, 
+                dto.Should().BeEquivalentTo(location,
                     opt => opt.ExcludingMissingMembers());
             }
         }
@@ -86,12 +85,12 @@ public class LocationServiceTests
         var locations = TestData.TestLocation
             .RuleFor(l => l.Account, f => account)
             .Generate(5);
-        
+
         await _dbContext.Tenants.AddAsync(tenant);
         await _dbContext.Accounts.AddRangeAsync(account);
         await _dbContext.Locations.AddRangeAsync(locations);
         await _dbContext.SaveChangesAsync();
-        
+
         _currentUserServiceMock.Setup(x => x.TenantId).Returns(tenant.Id);
 
         // Act
@@ -129,8 +128,9 @@ public class LocationServiceTests
 
         public static readonly Faker<Account> TestAccount =
             new Faker<Account>()
-                .RuleFor(t => t.Id, f => Guid.NewGuid())
-                .RuleFor(t => t.Website, f => f.Internet.Url())
-                .RuleFor(t => t.Name, f => f.Company.CompanyName());
+                .RuleFor(a => a.Id, f => Guid.NewGuid())
+                .RuleFor(a => a.Website, f => f.Internet.Url())
+                .RuleFor(a => a.Name, f => f.Company.CompanyName())
+                .RuleFor(a => a.Country, f => f.Address.Country());
     }
 }

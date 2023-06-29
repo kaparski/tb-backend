@@ -4,13 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Controllers.Teams.Requests;
 using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
-using TaxBeacon.UserManagement.Models;
-using TaxBeacon.UserManagement.Services;
+using TaxBeacon.Administration.Teams;
+using TaxBeacon.Administration.Teams.Models;
 
 namespace TaxBeacon.API.Controllers.Teams;
 

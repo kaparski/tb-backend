@@ -17,6 +17,8 @@ public class DepartmentResponse
 
     public IEnumerable<Guid>? ServiceAreaIds { get; set; }
 
+    public IEnumerable<Guid>? JobTitleIds { get; set; }
+
     public DateTime CreatedDateTimeUtc { get; set; }
 
     public int AssignedUsersCount { get; set; }
