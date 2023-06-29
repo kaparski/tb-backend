@@ -33,15 +33,15 @@ public class TenantProgramsController: BaseController
     [EnableQuery]
     [HttpGet("api/odata/tenantprograms")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(IQueryable<ProgramResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IQueryable<TenantProgramResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IQueryable<ProgramResponse> Get()
+    public IQueryable<TenantProgramResponse> Get()
     {
         var query = _programService.QueryTenantPrograms();
 
-        return query.ProjectToType<ProgramResponse>();
+        return query.ProjectToType<TenantProgramResponse>();
     }
 
     /// <summary>

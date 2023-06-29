@@ -151,7 +151,7 @@ public static class ConfigureServices
         modelBuilder.EntitySet<ServiceAreaResponse>("ServiceAreas");
         modelBuilder.EntitySet<TeamResponse>("Teams");
         modelBuilder.EntitySet<ProgramResponse>("Programs");
-        modelBuilder.EntitySet<ProgramResponse>("TenantPrograms");
+        modelBuilder.EntitySet<TenantProgramResponse>("TenantPrograms");
         modelBuilder.EntitySet<ContactResponse>("Contacts");
 
         modelBuilder.EnableLowerCamelCase();
