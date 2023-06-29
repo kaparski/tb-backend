@@ -243,6 +243,7 @@ public class TenantService: ITenantService
         return await _context.TenantsPrograms
             .Where(tp => tp.TenantId == tenantId && tp.IsDeleted == false)
             .Select(tp => tp.Program)
+            .OrderBy(x => x.Name)
             .ProjectToType<AssignedTenantProgramDto>()
             .ToListAsync(cancellationToken);
     }
