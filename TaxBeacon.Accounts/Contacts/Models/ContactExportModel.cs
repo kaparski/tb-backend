@@ -33,7 +33,7 @@ public class ContactExportModel
     public string? City { get; set; }
 
     [Column("State")]
-    public State State { get; set; } = State.None;
+    public State? State { get; set; }
 
     [Column("Zip")]
     public string? Zip { get; set; }
