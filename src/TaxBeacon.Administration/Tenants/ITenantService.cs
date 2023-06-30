@@ -27,7 +27,7 @@ public interface ITenantService
         UpdateTenantDto updateTenantDto,
         CancellationToken cancellationToken);
 
-    Task<TenantDto> SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId,
+    Task<TenantDto?> SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId,
         CancellationToken cancellationToken = default);
 
     Task<OneOf<Success, NotFound>> ToggleDivisionsAsync(bool divisionEnabled, CancellationToken cancellationToken);

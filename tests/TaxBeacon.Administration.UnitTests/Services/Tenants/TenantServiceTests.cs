@@ -384,43 +384,36 @@ public class TenantServiceTests
     }
 
     [Fact]
-    public async Task SwitchToTenantAsync_UserIsNotSuperAdmin_Throws()
-    {
-        //Act
-        var act = async () => await _tenantService.SwitchToTenantAsync(null, TestData.TestTenantId);
-
-        //Assert
-        using (new AssertionScope())
-        {
-            await act.Should()
-                .ThrowAsync<InvalidOperationException>()
-                .WithMessage("Sequence contains no elements");
-        }
-    }
-
-    [Fact]
     public async Task SwitchToTenantAsync_NoOldTenant_ProducesTenantEnteredEvent()
     {
         //Arrange
+        var tenant = TestData.TenantFaker.Generate();
         var user = TestData.UserFaker.Generate();
-        user.UserRoles.Add(new UserRole { Role = new Role { Name = Common.Roles.Roles.SuperAdmin } });
-        await _dbContextMock.Users.AddAsync(user);
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.SaveChangesAsync();
 
         _currentUserServiceMock
             .Setup(s => s.UserId)
             .Returns(user.Id);
 
+        _currentUserServiceMock
+            .Setup(s => s.UserInfo)
+            .Returns((user.FullName, Common.Roles.Roles.SuperAdmin));
+
         //Act
-        await _tenantService.SwitchToTenantAsync(null, TestData.TestTenantId);
+        var actualResult = await _tenantService.SwitchToTenantAsync(null, tenant.Id);
 
         //Assert
         using (new AssertionScope())
         {
+            actualResult.Should().NotBeNull()
+                .And.BeEquivalentTo(tenant, opt => opt.ExcludingMissingMembers());
+
             var item = _dbContextMock.TenantActivityLogs.Single();
             var evt = JsonSerializer.Deserialize<TenantEnteredEvent>(item.Event);
 
-            item.TenantId.Should().Be(TestData.TestTenantId);
+            item.TenantId.Should().Be(tenant.Id);
             item.EventType.Should().Be(TenantEventType.TenantEnteredEvent);
             evt?.ExecutorId.Should().Be(user.Id);
             evt?.ExecutorFullName.Should().Be(user.FullName);
@@ -432,20 +425,22 @@ public class TenantServiceTests
     {
         //Arrange
         var user = TestData.UserFaker.Generate();
-        user.UserRoles.Add(new UserRole { Role = new Role { Name = Common.Roles.Roles.SuperAdmin } });
-        await _dbContextMock.Users.AddAsync(user);
-        await _dbContextMock.SaveChangesAsync();
-
         _currentUserServiceMock
             .Setup(s => s.UserId)
             .Returns(user.Id);
 
+        _currentUserServiceMock
+            .Setup(s => s.UserInfo)
+            .Returns((user.FullName, Common.Roles.Roles.SuperAdmin));
+
         //Act
-        await _tenantService.SwitchToTenantAsync(TestData.TestTenantId, null);
+        var actualResult = await _tenantService.SwitchToTenantAsync(TestData.TestTenantId, null);
 
         //Assert
         using (new AssertionScope())
         {
+            actualResult.Should().BeNull();
+
             var item = _dbContextMock.TenantActivityLogs.Single();
             var evt = JsonSerializer.Deserialize<TenantExitedEvent>(item.Event);
 
@@ -460,24 +455,31 @@ public class TenantServiceTests
     public async Task SwitchToTenantAsync_ProducesBothEvents()
     {
         //Arrange
+        var tenant = TestData.TenantFaker.Generate();
         var user = TestData.UserFaker.Generate();
-        user.UserRoles.Add(new UserRole { Role = new Role { Name = Common.Roles.Roles.SuperAdmin } });
-        await _dbContextMock.Users.AddAsync(user);
+
+        await _dbContextMock.Tenants.AddAsync(tenant);
         await _dbContextMock.SaveChangesAsync();
 
         _currentUserServiceMock
             .Setup(s => s.UserId)
             .Returns(user.Id);
 
+        _currentUserServiceMock
+            .Setup(s => s.UserInfo)
+            .Returns((user.FullName, Common.Roles.Roles.SuperAdmin));
+
         var oldTenantId = Guid.NewGuid();
-        var newTenantId = Guid.NewGuid();
 
         //Act
-        await _tenantService.SwitchToTenantAsync(oldTenantId, newTenantId);
+        var actualResult = await _tenantService.SwitchToTenantAsync(oldTenantId, tenant.Id);
 
         //Assert
         using (new AssertionScope())
         {
+            actualResult.Should().NotBeNull()
+                .And.BeEquivalentTo(tenant, opt => opt.ExcludingMissingMembers());
+
             var items = _dbContextMock.TenantActivityLogs.OrderBy(a => a.Date).ToList();
             items.Should().HaveCount(2);
 
@@ -489,7 +491,7 @@ public class TenantServiceTests
             exitEvt?.ExecutorId.Should().Be(user.Id);
             exitEvt?.ExecutorFullName.Should().Be(user.FullName);
 
-            items[1].TenantId.Should().Be(newTenantId);
+            items[1].TenantId.Should().Be(tenant.Id);
             items[1].EventType.Should().Be(TenantEventType.TenantEnteredEvent);
             enterEvt?.ExecutorId.Should().Be(user.Id);
             enterEvt?.ExecutorFullName.Should().Be(user.FullName);

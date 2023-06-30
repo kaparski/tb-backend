@@ -153,7 +153,7 @@ public class TenantService: ITenantService
         return tenant.Adapt<TenantDto>();
     }
 
-    public async Task<TenantDto> SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId,
+    public async Task<TenantDto?> SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId,
         CancellationToken cancellationToken = default)
     {
         var currentUserId = _currentUserService.UserId;
