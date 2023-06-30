@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.API.Controllers.Tenants.Responses;
 
-public class TenantResponse
+public record TenantResponse
 {
     public Guid Id { get; set; }
 
@@ -11,4 +11,6 @@ public class TenantResponse
     public Status Status { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
+
+    public bool? DivisionEnabled { get; set; }
 }
