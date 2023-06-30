@@ -191,6 +191,7 @@ public class TenantsController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>Returns success response</returns>
     [HttpPost("switch", Name = "SwitchToTenant")]
+    [HasPermissions(Common.Permissions.Tenants.Switch)]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(TenantResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -210,7 +211,7 @@ public class TenantsController: BaseController
         }
 
         var tenantDto = await _tenantService.SwitchToTenantAsync(oldTenantId, newTenantId, cancellationToken);
-        return Ok(tenantDto.Adapt<TenantResponse>());
+        return Ok(tenantDto?.Adapt<TenantResponse>());
     }
 
     /// <summary>

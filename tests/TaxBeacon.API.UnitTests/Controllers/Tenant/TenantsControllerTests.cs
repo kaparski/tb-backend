@@ -17,6 +17,7 @@ using TaxBeacon.API.Controllers.Tenants.Requests;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Models;
+using TaxBeacon.Common.Permissions;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Tenant;
 
@@ -34,7 +35,13 @@ public class TenantsControllerTests
             {
                 HttpContext = new DefaultHttpContext
                 {
-                    User = new ClaimsPrincipal(new[] { new ClaimsIdentity(new[] { new Claim(Claims.TenantId, Guid.NewGuid().ToString()) }) })
+                    User = new ClaimsPrincipal(new[]
+                    {
+                        new ClaimsIdentity(new[]
+                        {
+                            new Claim(Claims.TenantId, Guid.NewGuid().ToString())
+                        })
+                    })
                 }
             }
         };
@@ -140,7 +147,8 @@ public class TenantsControllerTests
     public void ExportTenantsAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<ExportTenantsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportTenantsAsync).Method;
+        var methodInfo =
+            ((Func<ExportTenantsRequest, CancellationToken, Task<IActionResult>>)_controller.ExportTenantsAsync).Method;
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -189,7 +197,6 @@ public class TenantsControllerTests
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-
         }
     }
 
@@ -198,7 +205,7 @@ public class TenantsControllerTests
     {
         // Arrange
         var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetTenantAsync).Method;
-        var permissions = new object[] { Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite };
+        var permissions = new object[] { Tenants.Read, Tenants.ReadWrite };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -207,7 +214,8 @@ public class TenantsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -220,7 +228,8 @@ public class TenantsControllerTests
             .ReturnsAsync(new ActivityDto(0, new ActivityItemDto[] { }));
 
         // Act
-        var actualResponse = await _controller.GetActivityHistoryAsync(Guid.NewGuid(), new TenantActivityHistoryRequest(1, 1), default);
+        var actualResponse =
+            await _controller.GetActivityHistoryAsync(Guid.NewGuid(), new TenantActivityHistoryRequest(1, 1), default);
 
         // Assert
         using (new AssertionScope())
@@ -259,8 +268,10 @@ public class TenantsControllerTests
     public void GetActivityHistoryAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, TenantActivityHistoryRequest, CancellationToken, Task<IActionResult>>)_controller.GetActivityHistoryAsync).Method;
-        var permissions = new object[] { Common.Permissions.Tenants.Read, Common.Permissions.Tenants.ReadWrite };
+        var methodInfo =
+            ((Func<Guid, TenantActivityHistoryRequest, CancellationToken, Task<IActionResult>>)_controller
+                .GetActivityHistoryAsync).Method;
+        var permissions = new object[] { Tenants.Read, Tenants.ReadWrite };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -269,7 +280,8 @@ public class TenantsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -279,7 +291,8 @@ public class TenantsControllerTests
         // Arrange
         var request = TestData.TestUpdateTenantRequest.Generate();
         var tenantDto = TestData.TestTenant.Generate();
-        _tenantServiceMock.Setup(x => x.UpdateTenantAsync(It.Is<Guid>(id => id == tenantDto.Id), It.IsAny<UpdateTenantDto>(), default))
+        _tenantServiceMock.Setup(x =>
+                x.UpdateTenantAsync(It.Is<Guid>(id => id == tenantDto.Id), It.IsAny<UpdateTenantDto>(), default))
             .ReturnsAsync(tenantDto);
 
         // Act
@@ -321,8 +334,10 @@ public class TenantsControllerTests
     public void UpdateTenantAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, UpdateTenantRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateTenantAsync).Method;
-        var permissions = new object[] { Common.Permissions.Tenants.ReadWrite };
+        var methodInfo =
+            ((Func<Guid, UpdateTenantRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateTenantAsync)
+            .Method;
+        var permissions = new object[] { Tenants.ReadWrite };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -331,7 +346,8 @@ public class TenantsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -389,7 +405,8 @@ public class TenantsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -440,12 +457,12 @@ public class TenantsControllerTests
     public void GetAssignedProgramsAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetAssignedProgramsAsync).Method;
+        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetAssignedProgramsAsync)
+            .Method;
         var permissions = new object[]
         {
-            Common.Permissions.Tenants.Read,
-            Common.Permissions.Tenants.ReadWrite,
-            Common.Permissions.Tenants.ReadExport
+            Tenants.Read, Tenants.ReadWrite,
+            Tenants.ReadExport
         };
 
         // Act
@@ -455,7 +472,8 @@ public class TenantsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -468,7 +486,8 @@ public class TenantsControllerTests
             .ReturnsAsync(new Success());
 
         // Act
-        var actualResponse = await _controller.ChangeProgramsAsync(Guid.NewGuid(), new ChangeTenantProgramsRequest(Array.Empty<Guid>()), default);
+        var actualResponse = await _controller.ChangeProgramsAsync(Guid.NewGuid(),
+            new ChangeTenantProgramsRequest(Array.Empty<Guid>()), default);
 
         // Assert
         using (new AssertionScope())
@@ -488,7 +507,8 @@ public class TenantsControllerTests
             .ReturnsAsync(new NotFound());
 
         // Act
-        var actualResponse = await _controller.ChangeProgramsAsync(Guid.NewGuid(), new ChangeTenantProgramsRequest(Array.Empty<Guid>()), default);
+        var actualResponse = await _controller.ChangeProgramsAsync(Guid.NewGuid(),
+            new ChangeTenantProgramsRequest(Array.Empty<Guid>()), default);
 
         // Assert
         using (new AssertionScope())
@@ -503,8 +523,10 @@ public class TenantsControllerTests
     public void ChangeProgramsAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, ChangeTenantProgramsRequest, CancellationToken, Task<IActionResult>>)_controller.ChangeProgramsAsync).Method;
-        var permissions = new object[] { Common.Permissions.Tenants.ReadWrite };
+        var methodInfo =
+            ((Func<Guid, ChangeTenantProgramsRequest, CancellationToken, Task<IActionResult>>)_controller
+                .ChangeProgramsAsync).Method;
+        var permissions = new object[] { Tenants.ReadWrite };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -513,7 +535,8 @@ public class TenantsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -525,9 +548,8 @@ public class TenantsControllerTests
         var methodInfo = ((Func<IQueryable<TenantResponse>>)_controller.Get).Method;
         var permissions = new object[]
         {
-            Common.Permissions.Tenants.Read,
-            Common.Permissions.Tenants.ReadWrite,
-            Common.Permissions.Tenants.ReadExport
+            Tenants.Read, Tenants.ReadWrite,
+            Tenants.ReadExport
         };
 
         // Act
@@ -537,7 +559,103 @@ public class TenantsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public void SwitchToTenantAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid?, CancellationToken, Task<IActionResult>>)_controller.SwitchToTenantAsync).Method;
+
+        var permissions = new object[] { Tenants.Switch, };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public async Task SwitchToTenantAsync_ValidNewTenantId_ReturnsTenantResponse()
+    {
+        // Arrange
+        _tenantServiceMock
+            .Setup(x => x.SwitchToTenantAsync(It.IsAny<Guid?>(), It.IsAny<Guid?>(), default))
+            .ReturnsAsync(new TenantDto());
+
+        // Act
+        var actualResponse = await _controller.SwitchToTenantAsync(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<TenantResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task SwitchToTenantAsync_RequestHasOldTenantIdAndWithoutNewTenantId_ReturnsSuccessfulStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock
+            .Setup(x => x.SwitchToTenantAsync(It.IsAny<Guid?>(), It.IsAny<Guid?>(), default))
+            .ReturnsAsync((TenantDto?)null);
+
+        var controller = new TenantsController(_tenantServiceMock.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    Request = { Headers = { new(Headers.SuperAdminTenantId, Guid.NewGuid().ToString()) } }
+                }
+            }
+        };
+
+        // Act
+        var actualResponse = await controller.SwitchToTenantAsync(null, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public async Task SwitchToTenantAsync_WithoutOldTenantIdAndNewTenantId_ReturnsSuccessfulStatusCode()
+    {
+        // Arrange
+        _tenantServiceMock
+            .Setup(x => x.SwitchToTenantAsync(It.IsAny<Guid?>(), It.IsAny<Guid?>(), default))
+            .ReturnsAsync((TenantDto?)null);
+
+        // Act
+        var actualResponse = await _controller.SwitchToTenantAsync(null, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResponse
+                .Should().NotBeNull()
+                .And.BeOfType<OkResult>();
         }
     }
 
