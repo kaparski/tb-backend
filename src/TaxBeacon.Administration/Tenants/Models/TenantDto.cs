@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.Administration.Tenants.Models;
 
-public class TenantDto
+public record TenantDto
 {
     public Guid Id { get; set; }
 
@@ -11,4 +11,6 @@ public class TenantDto
     public DateTime CreatedDateTimeUtc { get; set; }
 
     public Status Status { get; set; }
+
+    public bool? DivisionEnabled { get; set; }
 }
