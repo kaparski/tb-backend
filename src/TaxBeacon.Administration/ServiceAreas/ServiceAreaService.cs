@@ -55,7 +55,7 @@ public class ServiceAreaService: IServiceAreaService
     {
         var items = _context.ServiceAreas.Where(d => d.TenantId == _currentUserService.TenantId);
 
-        var itemDtos = items.Select(d => new ServiceAreaDto()
+        var itemDtos = items.Select(d => new ServiceAreaDto
         {
             Id = d.Id,
             Name = d.Name,
