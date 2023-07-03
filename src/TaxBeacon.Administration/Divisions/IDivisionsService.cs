@@ -1,5 +1,4 @@
-﻿using Gridify;
-using OneOf;
+﻿using OneOf;
 using OneOf.Types;
 using TaxBeacon.Administration.Divisions.Models;
 using TaxBeacon.Common.Enums;
@@ -12,9 +11,6 @@ public interface IDivisionsService
 {
     IQueryable<DivisionDto> QueryDivisions();
 
-    Task<QueryablePaging<DivisionDto>> GetDivisionsAsync(GridifyQuery gridifyQuery,
-    CancellationToken cancellationToken = default);
-
     Task<byte[]> ExportDivisionsAsync(FileType fileType,
     CancellationToken cancellationToken);
 
@@ -22,8 +18,6 @@ public interface IDivisionsService
         uint pageSize = 10, CancellationToken cancellationToken = default);
 
     Task<OneOf<DivisionDetailsDto, NotFound>> GetDivisionDetailsAsync(Guid divisionId, CancellationToken cancellationToken = default);
-
-    Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default);
 
     Task<OneOf<DivisionDetailsDto, NotFound, InvalidOperation>> UpdateDivisionAsync(Guid id, UpdateDivisionDto updateDivisionDto, CancellationToken cancellationToken = default);
 

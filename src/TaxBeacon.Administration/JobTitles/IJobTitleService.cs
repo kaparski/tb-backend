@@ -1,4 +1,3 @@
-using Gridify;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.Administration.JobTitles.Models;
@@ -10,9 +9,6 @@ namespace TaxBeacon.Administration.JobTitles;
 public interface IJobTitleService
 {
     IQueryable<JobTitleDto> QueryJobTitles();
-
-    Task<QueryablePaging<JobTitleDto>> GetJobTitlesAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken);
 
     Task<byte[]> ExportJobTitlesAsync(FileType fileType,
         CancellationToken cancellationToken);
@@ -27,10 +23,6 @@ public interface IJobTitleService
     Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id,
         int page,
         int pageSize,
-        CancellationToken cancellationToken);
-
-    Task<OneOf<QueryablePaging<JobTitleUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId,
-        GridifyQuery gridifyQuery,
         CancellationToken cancellationToken);
 
     Task<IQueryable<JobTitleUserDto>> QueryUsersAsync(Guid jobTitleId);

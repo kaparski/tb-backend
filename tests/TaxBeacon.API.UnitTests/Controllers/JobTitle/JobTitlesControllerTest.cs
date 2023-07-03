@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -42,53 +41,6 @@ public class JobTitlesControllerTest
         };
     }
 
-    [Fact]
-    public async Task GetJobTitleList_ValidQuery_ReturnSuccessStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _jobTitleServiceMock.Setup(p => p.GetJobTitlesAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<JobTitleDto>(0,
-                Enumerable.Empty<JobTitleDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetJobTitleList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<JobTitleResponse>>();
-        }
-    }
-
-    [Fact]
-    public async Task GetJobTitleList_OrderByNonExistingProperty_ReturnBadRequestStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
-        _jobTitleServiceMock.Setup(p => p.GetJobTitlesAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<JobTitleDto>(0,
-                Enumerable.Empty<JobTitleDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetJobTitleList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as BadRequestResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<BadRequestResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
-    }
-
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
@@ -118,32 +70,6 @@ public class JobTitlesControllerTest
                 FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 _ => throw new InvalidOperationException()
             });
-        }
-    }
-
-    [Fact]
-    public void GetJobTitleList_MarkedWithCorrectHasPermissionsAttribute()
-    {
-        // Arrange
-        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetJobTitleList).Method;
-        var permissions = new object[]
-        {
-            Common.Permissions.Departments.Read,
-            Common.Permissions.Departments.ReadWrite,
-            Common.Permissions.Departments.ReadExport,
-            Common.Permissions.JobTitles.Read,
-            Common.Permissions.JobTitles.ReadWrite,
-            Common.Permissions.JobTitles.ReadExport
-        };
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 

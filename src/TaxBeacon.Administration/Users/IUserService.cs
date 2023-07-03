@@ -1,5 +1,4 @@
-﻿using Gridify;
-using OneOf;
+﻿using OneOf;
 using OneOf.Types;
 using System.Net.Mail;
 using TaxBeacon.Administration.Users.Models;
@@ -11,9 +10,6 @@ namespace TaxBeacon.Administration.Users;
 
 public interface IUserService
 {
-    Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
-
     IQueryable<UserDto> QueryUsers();
 
     Task<OneOf<LoginUserDto, NotFound>> LoginAsync(MailAddress mailAddress,

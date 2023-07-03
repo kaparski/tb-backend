@@ -1,7 +1,6 @@
 using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -86,74 +85,6 @@ public class ProgramServiceTests
             listToFileConverters.Object,
             dateTimeFormatterMock.Object,
             activityFactoriesMock.Object);
-    }
-
-    [Fact]
-    public async Task GetAllProgramsAsync_QueryIsValidOrderByNameAscending_ReturnsListOfPrograms()
-    {
-        // Arrange
-        var programs = TestData.ProgramFaker.Generate(10);
-        await _dbContextMock.Programs.AddRangeAsync(programs);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name asc", };
-
-        // Act
-        var actualResult = await _programService.GetAllProgramsAsync(query);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.Should().NotBeNull();
-            actualResult.Count.Should().Be(10);
-            var listOfPrograms = actualResult.Query.ToList();
-            listOfPrograms.Count.Should().Be(5);
-            listOfPrograms.Select(x => x.Name).Should().BeInAscendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetAllProgramsAsync_QueryIsValidOrderByNameDescending_ReturnsListOfPrograms()
-    {
-        // Arrange
-        var programs = TestData.ProgramFaker.Generate(10);
-        await _dbContextMock.Programs.AddRangeAsync(programs);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name desc", };
-
-        // Act
-        var actualResult = await _programService.GetAllProgramsAsync(query);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.Should().NotBeNull();
-            actualResult.Count.Should().Be(10);
-            var listOfPrograms = actualResult.Query.ToList();
-            listOfPrograms.Count.Should().Be(5);
-            listOfPrograms.Select(x => x.Name).Should().BeInDescendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetAllProgramsAsync_PageNumberIsOutOfRange_ReturnsEmptyList()
-    {
-        // Arrange
-        var programs = TestData.ProgramFaker.Generate(10);
-        await _dbContextMock.Programs.AddRangeAsync(programs);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
-
-        // Act
-        var actualResult = await _programService.GetAllProgramsAsync(query);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.Should().NotBeNull();
-            actualResult.Count.Should().Be(10);
-            var listOfPrograms = actualResult.Query.ToList();
-            listOfPrograms.Count.Should().Be(0);
-        }
     }
 
     [Fact]
@@ -244,52 +175,6 @@ public class ProgramServiceTests
     }
 
     [Fact]
-    public async Task GetAllTenantProgramsAsync_QueryIsValidOrderByNameAscending_ReturnsListOfPrograms()
-    {
-        // Arrange
-        var programs = TestData.TenantProgramFaker.Generate(10);
-        await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name asc", };
-
-        // Act
-        var actualResult = await _programService.GetAllTenantProgramsAsync(query);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.Should().NotBeNull();
-            actualResult.Count.Should().Be(10);
-            var tenantProgramDtos = actualResult.Query.ToList();
-            tenantProgramDtos.Count.Should().Be(5);
-            tenantProgramDtos.Select(x => x.Name).Should().BeInAscendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetAllTenantProgramsAsync_QueryIsValidOrderByNameDescending_ReturnsListOfPrograms()
-    {
-        // Arrange
-        var programs = TestData.TenantProgramFaker.Generate(10);
-        await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name desc", };
-
-        // Act
-        var actualResult = await _programService.GetAllTenantProgramsAsync(query);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.Should().NotBeNull();
-            actualResult.Count.Should().Be(10);
-            var tenantProgramDtos = actualResult.Query.ToList();
-            tenantProgramDtos.Count.Should().Be(5);
-            tenantProgramDtos.Select(x => x.Name).Should().BeInDescendingOrder();
-        }
-    }
-
-    [Fact]
     public async Task QueryTenantPrograms_QueryIsValidOrderByNameDescending_ReturnsListOfPrograms()
     {
         // Arrange
@@ -309,28 +194,6 @@ public class ProgramServiceTests
         {
             tenantProgramDtos.Length.Should().Be(5);
             tenantProgramDtos.Select(x => x.Name).Should().BeInDescendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetAllTenantProgramsAsync_PageNumberIsOutOfRange_ReturnsEmptyList()
-    {
-        // Arrange
-        var programs = TestData.TenantProgramFaker.Generate(10);
-        await _dbContextMock.TenantsPrograms.AddRangeAsync(programs);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc", };
-
-        // Act
-        var actualResult = await _programService.GetAllTenantProgramsAsync(query);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.Should().NotBeNull();
-            actualResult.Count.Should().Be(10);
-            var tenantProgramDtos = actualResult.Query.ToList();
-            tenantProgramDtos.Count.Should().Be(0);
         }
     }
 

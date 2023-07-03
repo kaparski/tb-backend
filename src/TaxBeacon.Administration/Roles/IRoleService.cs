@@ -1,4 +1,3 @@
-using Gridify;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.Administration.Roles.Models;
@@ -11,13 +10,6 @@ public interface IRoleService
     IQueryable<RoleDto> QueryRoles();
 
     Task<IQueryable<RoleAssignedUserDto>> QueryRoleAssignedUsersAsync(Guid roleId);
-
-    Task<QueryablePaging<RoleDto>> GetRolesAsync(IGridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
-
-    Task<OneOf<QueryablePaging<RoleAssignedUserDto>, NotFound>> GetRoleAssignedUsersAsync(Guid roleId,
-        IGridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
 
     Task<OneOf<Success, NotFound>> UnassignUsersAsync(Guid roleId,
         List<Guid> users,

@@ -1,7 +1,6 @@
 using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -76,74 +75,6 @@ public class JobTitleServiceTests
             dateTimeFormatterMock.Object,
             listToFileConverters.Object,
             activityFactoriesMock.Object);
-    }
-
-    [Fact]
-    public async Task GetJobTitlesAsync_TenantIdExistsAndQueryIsValidOrderByNameAscending_ReturnsJobTitles()
-    {
-        // Arrange
-        var items = TestData.TestJobTitle.Generate(5);
-        await _dbContextMock.JobTitles.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name asc", };
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var pageOfJobTitles = await _serviceAreaService.GetJobTitlesAsync(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            pageOfJobTitles.Should().NotBeNull();
-            pageOfJobTitles.Count.Should().Be(5);
-            var listOfJobTitles = pageOfJobTitles.Query.ToList();
-            listOfJobTitles.Count.Should().Be(5);
-            listOfJobTitles.Select(x => x.Name).Should().BeInAscendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetJobTitlesAsync_TenantIdExistsAndQueryIsValidOrderByNameDescending_ReturnsJobTitles()
-    {
-        // Arrange
-        var items = TestData.TestJobTitle.Generate(5);
-        await _dbContextMock.JobTitles.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name desc", };
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var pageOfJobTitles = await _serviceAreaService.GetJobTitlesAsync(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            pageOfJobTitles.Should().NotBeNull();
-            pageOfJobTitles.Count.Should().Be(5);
-            var listOfJobTitles = pageOfJobTitles.Query.ToList();
-            listOfJobTitles.Count.Should().Be(5);
-            listOfJobTitles.Select(x => x.Name).Should().BeInDescendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetJobTitlesAsync_TenantIdExistsAndPageNumberIsOutOfRange_ReturnsNotFound()
-    {
-        // Arrange
-        var items = TestData.TestJobTitle.Generate(5);
-        await _dbContextMock.JobTitles.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 5, OrderBy = "name asc", };
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var actualResult = await _serviceAreaService.GetJobTitlesAsync(query, default);
-
-        // Arrange
-        actualResult.Query.Count().Should().Be(0);
     }
 
     [Fact]
@@ -441,80 +372,6 @@ public class JobTitleServiceTests
         {
             actualResult.IsT1.Should().BeTrue();
             actualResult.IsT0.Should().BeFalse();
-        }
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_JobTitleExists_ShouldReturnUsersInAscendingOrder()
-    {
-        // Arrange
-        TestData.TestJobTitle.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(4));
-        var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "fullname asc", };
-        var serviceArea = TestData.TestJobTitle.Generate();
-        await _dbContextMock.JobTitles.AddAsync(serviceArea);
-        await _dbContextMock.SaveChangesAsync();
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var actualResult = await _serviceAreaService.GetUsersAsync(serviceArea.Id, query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.TryPickT0(out var pageOfUsers, out _);
-            pageOfUsers.Should().NotBeNull();
-            pageOfUsers.Count.Should().Be(4);
-            var listOfUsers = pageOfUsers.Query.ToList();
-            listOfUsers.Count.Should().Be(2);
-            listOfUsers.Select(x => x.FullName).Should().BeInAscendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_JobTitleDoesNotExists_ShouldReturnNotFound()
-    {
-        // Arrange
-        TestData.TestJobTitle.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(1));
-        var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "fullname asc", };
-        var serviceArea = TestData.TestJobTitle.Generate();
-        await _dbContextMock.JobTitles.AddAsync(serviceArea);
-        await _dbContextMock.SaveChangesAsync();
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var actualResult = await _serviceAreaService.GetUsersAsync(new Guid(), query, default);
-
-        // Arrange
-        actualResult.IsT1.Should().BeTrue();
-        actualResult.IsT0.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_JobTitleExists_ShouldReturnUsersInDescendingOrderByEmail()
-    {
-        // Arrange
-        TestData.TestJobTitle.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(3));
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "email desc", };
-        var serviceArea = TestData.TestJobTitle.Generate();
-        await _dbContextMock.JobTitles.AddAsync(serviceArea);
-        await _dbContextMock.SaveChangesAsync();
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var actualResult = await _serviceAreaService.GetUsersAsync(serviceArea.Id, query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.TryPickT0(out var pageOfUsers, out _);
-            pageOfUsers.Should().NotBeNull();
-            pageOfUsers.Count.Should().Be(3);
-            var listOfUsers = pageOfUsers.Query.ToList();
-            listOfUsers.Count.Should().Be(3);
-            listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
         }
     }
 

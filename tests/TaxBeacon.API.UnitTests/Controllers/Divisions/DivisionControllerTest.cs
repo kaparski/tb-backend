@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -37,53 +36,6 @@ public class DivisionControllerTest
                 }
             }
         };
-    }
-
-    [Fact]
-    public async Task GetDivisionsList_ValidQuery_ReturnSuccessStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _divisionsServiceMock.Setup(p => p.GetDivisionsAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<DivisionDto>(0,
-                Enumerable.Empty<DivisionDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetDivisionsList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<DivisionResponse>>();
-        }
-    }
-
-    [Fact]
-    public async Task GetDivisionsList_InvalidQuery_ReturnBadRequest()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _divisionsServiceMock.Setup(p => p.GetDivisionsAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<DivisionDto>(0,
-                Enumerable.Empty<DivisionDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetDivisionsList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as BadRequestResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<BadRequestResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
     }
 
     [Theory]
@@ -143,23 +95,6 @@ public class DivisionControllerTest
     }
 
     [Fact]
-    public void GetDivisionsList_MarkedWithCorrectHasPermissionsAttribute()
-    {
-        // Arrange
-        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetDivisionsList).Method;
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Divisions.Read;Divisions.ReadWrite;Divisions.ReadExport");
-        }
-    }
-
-    [Fact]
     public void ExportDivisionsAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
@@ -213,55 +148,6 @@ public class DivisionControllerTest
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
 
-        }
-    }
-
-    [Fact]
-    public async Task GetDivisionUsers_ValidQuery_ShouldReturnSuccessStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
-        _divisionsServiceMock.Setup(p => p.GetDivisionUsersAsync(It.IsAny<Guid>(), query, default))
-            .ReturnsAsync(
-                new QueryablePaging<DivisionUserDto>(0,
-                    Enumerable.Empty<DivisionUserDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetDivisionUsers(query, new Guid(), default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<DivisionUserResponse>>();
-        }
-    }
-
-    [Fact]
-    public async Task GetDivisionUsers_InvalidQuery_ShouldReturnBadRequest()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _divisionsServiceMock.Setup(p => p.GetDivisionUsersAsync(It.IsAny<Guid>(), query, default))
-            .ReturnsAsync(
-                new QueryablePaging<DivisionUserDto>(0,
-                    Enumerable.Empty<DivisionUserDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetDivisionUsers(query, new Guid(), default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as BadRequestResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<BadRequestResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         }
     }
 

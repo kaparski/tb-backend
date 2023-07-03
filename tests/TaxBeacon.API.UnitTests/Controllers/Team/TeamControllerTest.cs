@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -39,53 +38,6 @@ public class TeamControllerTest
         };
     }
 
-    [Fact]
-    public async Task GetTeamsList_ValidQuery_ReturnSuccessStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _teamServiceMock.Setup(p => p.GetTeamsAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<TeamDto>(0,
-                Enumerable.Empty<TeamDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetTeamList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<TeamResponse>>();
-        }
-    }
-
-    [Fact]
-    public async Task GetTeamList_InvalidQuery_ReturnBadRequest()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _teamServiceMock.Setup(p => p.GetTeamsAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<TeamDto>(0,
-                Enumerable.Empty<TeamDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetTeamList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as BadRequestResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<BadRequestResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
-    }
-
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
@@ -115,23 +67,6 @@ public class TeamControllerTest
                 FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 _ => throw new InvalidOperationException()
             });
-        }
-    }
-
-    [Fact]
-    public void GetTeamList_MarkedWithCorrectHasPermissionsAttribute()
-    {
-        // Arrange
-        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetTeamList).Method;
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Teams.Read;Teams.ReadExport;Teams.ReadWrite");
         }
     }
 
@@ -260,94 +195,6 @@ public class TeamControllerTest
         {
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
-        }
-    }
-
-    [Fact]
-    public void GetTeamUsers_MarkedWithCorrectHasPermissionsAttribute()
-    {
-        // Arrange
-        var methodInfo = ((Func<GridifyQuery, Guid, CancellationToken, Task<IActionResult>>)_controller.GetTeamUsers).Method;
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Teams.Read;Teams.ReadWrite");
-        }
-    }
-
-    [Fact]
-    public async Task GetTeamUsers_ValidQuery_ShouldReturnSuccessStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
-        _teamServiceMock.Setup(p => p.GetTeamUsersAsync(It.IsAny<Guid>(), query, default))
-            .ReturnsAsync(
-            new QueryablePaging<TeamUserDto>(0,
-                Enumerable.Empty<TeamUserDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetTeamUsers(query, new Guid(), default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<TeamUserResponse>>();
-        }
-    }
-
-    [Fact]
-    public async Task GetTeamUsers_InvalidQuery_ShouldReturnBadRequest()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _teamServiceMock.Setup(p => p.GetTeamUsersAsync(It.IsAny<Guid>(), query, default))
-            .ReturnsAsync(
-            new QueryablePaging<TeamUserDto>(0,
-                Enumerable.Empty<TeamUserDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetTeamUsers(query, new Guid(), default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as BadRequestResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<BadRequestResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
-    }
-
-    [Fact]
-    public async Task GetTeamUsers_TeamDoesNotExist_ShouldReturnNotFoundStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "email desc", };
-        _teamServiceMock
-            .Setup(x => x.GetTeamUsersAsync(It.IsAny<Guid>(), query, default))
-            .ReturnsAsync(new NotFound());
-
-        // Act
-        var actualResponse = await _controller.GetTeamUsers(query, Guid.NewGuid(), default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as NotFoundResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }
     }
 

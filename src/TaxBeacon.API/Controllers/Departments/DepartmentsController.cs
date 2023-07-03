@@ -1,5 +1,4 @@
-﻿using Gridify;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -47,45 +46,6 @@ public class DepartmentsController: BaseController
         var query = _service.QueryDepartments();
 
         return query.ProjectToType<DepartmentResponse>();
-    }
-
-    /// <summary>
-    /// List of tenant's departments
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /departments?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
-    /// </remarks>
-    /// <response code="200">Returns departments in a given tenant</response>
-    /// <response code="400">Invalid filtering or sorting</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <returns>List of departments</returns>
-    [HasPermissions(
-        Common.Permissions.Departments.Read,
-        Common.Permissions.Departments.ReadWrite,
-        Common.Permissions.Departments.ReadExport,
-        Common.Permissions.ServiceAreas.Read,
-        Common.Permissions.ServiceAreas.ReadWrite,
-        Common.Permissions.ServiceAreas.ReadExport)]
-    [HttpGet(Name = "GetDepartments")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<DepartmentResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetDepartmentList([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<DepartmentDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var departments = await _service.GetDepartmentsAsync(query, cancellationToken);
-        return Ok(new QueryablePaging<DepartmentResponse>(departments.Count,
-            departments.Query.ProjectToType<DepartmentResponse>()));
     }
 
     /// <summary>
@@ -192,39 +152,6 @@ public class DepartmentsController: BaseController
             result => Ok(result.Adapt<DepartmentDetailsResponse>()),
             notFound => NotFound(),
             error => Conflict(error.Message));
-    }
-
-    /// <summary>
-    /// Get Department Users
-    /// </summary>
-    /// <response code="200">Returns Department Users</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">User does not have the required permission</response>
-    /// <response code="404">Department is not found</response>
-    /// <returns>A collection of users assigned to a particular department</returns>
-    [HasPermissions(Common.Permissions.Departments.Read, Common.Permissions.Departments.ReadWrite)]
-    [HttpGet("{id:guid}/users", Name = "DepartmentUsers")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<DepartmentUserResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetDepartmentUsers([FromQuery] GridifyQuery query, [FromRoute] Guid id,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<DepartmentUserDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var oneOfDepartmentUsers = await _service.GetDepartmentUsersAsync(id, query, cancellationToken);
-
-        return oneOfDepartmentUsers.Match<IActionResult>(
-            result => Ok(new QueryablePaging<DepartmentUserResponse>(result.Count,
-                result.Query.ProjectToType<DepartmentUserResponse>())),
-            _ => NotFound());
     }
 
     /// <summary>

@@ -1,5 +1,3 @@
-using Gridify;
-using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -68,22 +66,6 @@ public class JobTitleService: IJobTitleService
 
         return itemDtos;
     }
-
-    public async Task<QueryablePaging<JobTitleDto>> GetJobTitlesAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .JobTitles
-            .Where(d => d.TenantId == _currentUserService.TenantId)
-            .Select(d => new JobTitleDto()
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Description = d.Description,
-                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
-                Department = d.Department == null ? string.Empty : d.Department.Name
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<byte[]> ExportJobTitlesAsync(FileType fileType,
         CancellationToken cancellationToken)
@@ -201,36 +183,6 @@ public class JobTitleService: IJobTitleService
 
         return new ActivityDto(pageCount,
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
-    }
-
-    public async Task<OneOf<QueryablePaging<JobTitleUserDto>, NotFound>> GetUsersAsync(Guid jobTitleId, GridifyQuery gridifyQuery, CancellationToken cancellationToken)
-    {
-        var currentTenantId = _currentUserService.TenantId;
-        var jobTitle = await _context.JobTitles
-            .FirstOrDefaultAsync(sa => sa.Id == jobTitleId && sa.TenantId == currentTenantId,
-                cancellationToken);
-
-        if (jobTitle is null)
-        {
-            return new NotFound();
-        }
-
-        var users = await _context
-            .Users
-            .AsNoTracking()
-            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.JobTitleId == jobTitleId)
-            .Select(d => new JobTitleUserDto()
-            {
-                Id = d.Id,
-                FullName = d.FullName,
-                Email = d.Email,
-                Department = d.Department != null ? d.Department.Name : string.Empty,
-                ServiceArea = d.ServiceArea != null ? d.ServiceArea.Name : string.Empty,
-                Team = d.Team != null ? d.Team.Name : string.Empty,
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        return users;
     }
 
     public async Task<IQueryable<JobTitleUserDto>> QueryUsersAsync(Guid jobTitleId)
