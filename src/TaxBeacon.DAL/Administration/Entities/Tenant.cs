@@ -35,7 +35,8 @@ public class Tenant: BaseEntity
 
     public ICollection<DivisionActivityLog> DivisionActivityLogs { get; set; } = new HashSet<DivisionActivityLog>();
 
-    public ICollection<DepartmentActivityLog> DepartmentActivityLogs { get; set; } = new HashSet<DepartmentActivityLog>();
+    public ICollection<DepartmentActivityLog> DepartmentActivityLogs { get; set; } =
+        new HashSet<DepartmentActivityLog>();
 
     public ICollection<TeamActivityLog> TeamActivityLogs { get; set; } = new HashSet<TeamActivityLog>();
 
@@ -59,7 +60,12 @@ public class Tenant: BaseEntity
     public ICollection<Client> Clients { get; set; } = new HashSet<Client>();
 
     public ICollection<Referral> Referrals { get; set; } = new HashSet<Referral>();
+
     public ICollection<Entity> Entities { get; set; } = new HashSet<Entity>();
+
     public ICollection<Location> Locations { get; set; } = new HashSet<Location>();
+
     public ICollection<Contact> Contacts { get; set; } = new HashSet<Contact>();
+
+    public ICollection<AccountActivityLog> AccountActivityLogs { get; set; } = new HashSet<AccountActivityLog>();
 }
