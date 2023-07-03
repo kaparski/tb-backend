@@ -34,6 +34,7 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.Email.Options;
 using TaxBeacon.API.Controllers.Programs.Responses;
+using TaxBeacon.API.Extensions.Cors;
 using TaxBeacon.DAL.Accounts;
 using TaxBeacon.DAL.Administration;
 
@@ -45,10 +46,12 @@ public static class ConfigureServices
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddCorsService(configuration);
+
         services.AddRouting(options => options.LowercaseUrls = true);
         services.AddControllers(/*options => options.Filters.Add<AuthorizeFilter>()*/)
             .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
-        // Configuring OData. Routing to OData endpoints is separate from normal Web API routing
+            // Configuring OData. Routing to OData endpoints is separate from normal Web API routing
             .AddOData(options => options
                 .EnableQueryFeatures()
                 .AddRouteComponents(
@@ -108,12 +111,6 @@ public static class ConfigureServices
         services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
         services.AddSingleton<IAuthorizationHandler, PermissionsAuthorizationHandler>();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionsAuthorizationPolicyProvider>();
-
-        services.AddCors(o => o.AddPolicy("DefaultCorsPolicy", builder =>
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .WithExposedHeaders("Content-Disposition")));
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICurrentTimeZoneService, CurrentTimeZoneService>();
