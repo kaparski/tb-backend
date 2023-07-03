@@ -17,7 +17,8 @@ public class AccountActivityLogConfiguration: IEntityTypeConfiguration<AccountAc
         accountActivityLog
             .HasOne<Tenant>(acl => acl.Tenant)
             .WithMany(t => t.AccountActivityLogs)
-            .HasForeignKey(acl => acl.TenantId);
+            .HasForeignKey(acl => acl.TenantId)
+            .OnDelete(DeleteBehavior.ClientNoAction);
 
         accountActivityLog.HasKey(acl => new { acl.TenantId, acl.AccountId, acl.Date });
 
