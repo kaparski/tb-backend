@@ -36,8 +36,7 @@ namespace TaxBeacon.DAL.Migrations
                         name: "FK_AccountActivityLogs_Tenants_TenantId",
                         column: x => x.TenantId,
                         principalTable: "Tenants",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(

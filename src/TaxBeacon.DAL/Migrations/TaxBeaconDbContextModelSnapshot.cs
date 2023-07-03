@@ -1962,7 +1962,7 @@ namespace TaxBeacon.DAL.Migrations
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("AccountActivityLogs")
                         .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientNoAction)
                         .IsRequired();
 
                     b.Navigation("Account");
