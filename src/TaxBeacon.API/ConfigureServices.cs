@@ -50,8 +50,9 @@ public static class ConfigureServices
 
         services.AddRouting(options => options.LowercaseUrls = true);
         services.AddControllers(/*options => options.Filters.Add<AuthorizeFilter>()*/)
-            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
-            // Configuring OData. Routing to OData endpoints is separate from normal Web API routing
+            .AddJsonOptions(options =>
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+        // Configuring OData. Routing to OData endpoints is separate from normal Web API routing
             .AddOData(options => options
                 .EnableQueryFeatures()
                 .AddRouteComponents(
