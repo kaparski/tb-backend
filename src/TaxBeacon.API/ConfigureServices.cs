@@ -119,6 +119,7 @@ public static class ConfigureServices
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICurrentTimeZoneService, CurrentTimeZoneService>();
+        services.AddScoped<IGlobalSearchService, GlobalSearchService>();
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
         return services;

@@ -2,7 +2,9 @@ using Mapster;
 
 namespace TaxBeacon.API.Controllers.GlobalSearch.Responses;
 
-public record SearchResultResponse
+public record SearchResultsResponse(long Count, SearchResultItemResponse[] Items);
+
+public record SearchResultItemResponse
 {
     public Guid Id { get; init; }
 
@@ -13,4 +15,8 @@ public record SearchResultResponse
     public DateTime CreatedDateTimeUtc { get; init; }
 
     public DateTime? LastModifiedDateTimeUtc { get; init; }
+
+    public HighlightResponse[]? Highlights { get; init; }
 }
+
+public record HighlightResponse(string Field, string[] Values);
