@@ -117,7 +117,7 @@ public sealed class AccountsControllerTests
     {
         // Arrange
         _accountServiceMock
-            .Setup(x => x.GetAccountDetailsByIdAsync(It.IsAny<Guid>(), default))
+            .Setup(x => x.GetAccountDetailsByIdAsync(It.IsAny<Guid>(), It.IsAny<AccountInfoType>(), default))
             .ReturnsAsync(new AccountDetailsDto());
 
         // Act
@@ -139,7 +139,7 @@ public sealed class AccountsControllerTests
     {
         // Arrange
         _accountServiceMock
-            .Setup(x => x.GetAccountDetailsByIdAsync(It.IsAny<Guid>(), default))
+            .Setup(x => x.GetAccountDetailsByIdAsync(It.IsAny<Guid>(), It.IsAny<AccountInfoType>(), default))
             .ReturnsAsync(new NotFound());
 
         // Act
@@ -171,130 +171,6 @@ public sealed class AccountsControllerTests
         {
             hasPermissionsAttribute.Should().NotBeNull();
             hasPermissionsAttribute?.Policy.Should().Be("Accounts.Read;Accounts.ReadWrite;Accounts.ReadExport");
-        }
-    }
-
-    [Fact]
-    public async Task GetClientDetailsAsync_ClientExists_ReturnsSuccessfulStatusCode()
-    {
-        // Arrange
-        _accountServiceMock
-            .Setup(x => x.GetClientDetailsByIdAsync(It.IsAny<Guid>(), default))
-            .ReturnsAsync(new ClientDetailsDto());
-
-        // Act
-        var actualResponse = await _controller.GetClientDetailsAsync(Guid.NewGuid(), default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<ClientDetailsResponse>();
-        }
-    }
-
-    [Fact]
-    public async Task GetClientDetailsAsync_ClientDoesNotExist_ReturnsNotFoundStatusCode()
-    {
-        // Arrange
-        _accountServiceMock
-            .Setup(x => x.GetClientDetailsByIdAsync(It.IsAny<Guid>(), default))
-            .ReturnsAsync(new NotFound());
-
-        // Act
-        var actualResponse = await _controller.GetClientDetailsAsync(Guid.NewGuid(), default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as NotFoundResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-        }
-    }
-
-    [Fact]
-    public void GetClientDetailsAsync_MarkedWithCorrectHasPermissionsAttribute()
-    {
-        // Arrange
-        var methodInfo =
-            ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetClientDetailsAsync)
-            .Method;
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Clients.Read;Clients.ReadWrite;Clients.ReadExport");
-        }
-    }
-
-    [Fact]
-    public async Task GetReferralDetailsAsync_ReferralExists_ReturnsSuccessfulStatusCode()
-    {
-        // Arrange
-        _accountServiceMock
-            .Setup(x => x.GetReferralDetailsByIdAsync(It.IsAny<Guid>(), default))
-            .ReturnsAsync(new ReferralDetailsDto());
-
-        // Act
-        var actualResponse = await _controller.GetReferralDetailsAsync(Guid.NewGuid(), default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<ReferralDetailsResponse>();
-        }
-    }
-
-    [Fact]
-    public async Task GetReferralDetailsAsync_ReferralDoesNotExist_ReturnsNotFoundStatusCode()
-    {
-        // Arrange
-        _accountServiceMock
-            .Setup(x => x.GetReferralDetailsByIdAsync(It.IsAny<Guid>(), default))
-            .ReturnsAsync(new NotFound());
-
-        // Act
-        var actualResponse = await _controller.GetReferralDetailsAsync(Guid.NewGuid(), default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as NotFoundResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-        }
-    }
-
-    [Fact]
-    public void GetReferralDetailsAsync_MarkedWithCorrectHasPermissionsAttribute()
-    {
-        // Arrange
-        var methodInfo =
-            ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetReferralDetailsAsync)
-            .Method;
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Referrals.Read;Referrals.ReadWrite;Referrals.ReadExport");
         }
     }
 }

@@ -40,9 +40,27 @@ public class AccountService: IAccountService
             .ProjectToType<AccountDto>();
 
     public async Task<OneOf<AccountDetailsDto, NotFound>> GetAccountDetailsByIdAsync(Guid id,
+        AccountInfoType accountInfoType,
         CancellationToken cancellationToken = default)
     {
-        var accountDetails = await _context.Accounts
+        var accountDetailsQuery = accountInfoType switch
+        {
+            AccountInfoType.Full => _context.Accounts
+                .Include(a => a.Client)
+                .ThenInclude(c => c!.ClientManagers)
+                .Include(a => a.Client)
+                .ThenInclude(c => c!.PrimaryContact)
+                .Include(a => a.Referral),
+            AccountInfoType.Client => _context.Accounts
+                .Include(a => a.Client)
+                .ThenInclude(c => c!.ClientManagers)
+                .Include(a => a.Client)
+                .ThenInclude(c => c!.PrimaryContact),
+            AccountInfoType.Referral => _context.Accounts.Include(a => a.Referral),
+            _ => _context.Accounts.AsQueryable()
+        };
+
+        var accountDetails = await accountDetailsQuery
             .Where(a => a.Id == id && a.TenantId == _currentUserService.TenantId)
             .ProjectToType<AccountDetailsDto>()
             .SingleOrDefaultAsync(cancellationToken);
@@ -50,34 +68,6 @@ public class AccountService: IAccountService
         return accountDetails is not null
             ? accountDetails
             : new NotFound();
-    }
-
-    public async Task<OneOf<ClientDetailsDto, NotFound>> GetClientDetailsByIdAsync(Guid accountId,
-        CancellationToken cancellationToken = default)
-    {
-        var clientDetails = await _context.Clients
-            .Include(c => c.ClientManagers)
-            .Include(c => c.PrimaryContact)
-            .Where(c => c.AccountId == accountId && c.TenantId == _currentUserService.TenantId)
-            .ProjectToType<ClientDetailsDto>()
-            .SingleOrDefaultAsync(cancellationToken);
-
-        return clientDetails is not null
-           ? clientDetails
-           : new NotFound();
-    }
-
-    public async Task<OneOf<ReferralDetailsDto, NotFound>> GetReferralDetailsByIdAsync(Guid accountId,
-       CancellationToken cancellationToken = default)
-    {
-        var referralDetails = await _context.Referrals
-            .Where(c => c.AccountId == accountId && c.TenantId == _currentUserService.TenantId)
-            .ProjectToType<ReferralDetailsDto>()
-            .SingleOrDefaultAsync(cancellationToken);
-
-        return referralDetails is not null
-           ? referralDetails
-           : new NotFound();
     }
 
     public async Task<byte[]> ExportAccountsAsync(FileType fileType,
