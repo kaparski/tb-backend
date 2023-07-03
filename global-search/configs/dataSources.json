@@ -1,0 +1,170 @@
+[
+  {
+    "name": "tenants-ds",
+    "description": "a data source for tenants",
+    "type": "azuresql",
+    "credentials": {
+      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+    },
+    "container": {
+      "name": "[dbo].[TenantsSearchView]"
+    },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "users-ds",
+    "description": "a data source for users",
+    "type": "azuresql",
+    "credentials": {
+      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+    },
+    "container": {
+      "name": "[dbo].[UsersSearchView]"
+    },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "roles-ds",
+    "description": "a data source for roles",
+    "type": "azuresql",
+    "credentials": {
+      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+    },
+    "container": {
+      "name": "[dbo].[RolesSearchView]"
+    },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "programs-ds",
+    "description": "a data source for programs",
+    "type": "azuresql",
+    "credentials": {
+      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+    },
+    "container": { "name": "[dbo].[ProgramsSearchView]" },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "divisions-ds",
+    "description": "a data source for divisions",
+    "type": "azuresql",
+    "credentials": {
+      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+    },
+    "container": { "name": "[dbo].[DivisionsSearchView]" },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "departments-ds",
+    "description": "a data source for departments",
+    "type": "azuresql",
+    "credentials": {
+      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+    },
+    "container": { "name": "[dbo].[DepartmentsSearchView]" },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "jobtitles-ds",
+    "description": "a data source for job titles",
+    "type": "azuresql",
+    "credentials": {
+      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+    },
+    "container": { "name": "[dbo].[JobTitlesSearchView]" },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "serviceareas-ds",
+    "description": "a data source for service areas",
+    "type": "azuresql",
+    "credentials": {
+      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+    },
+    "container": { "name": "[dbo].[ServiceAreasSearchView]" },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "teams-ds",
+    "description": "a data source for teams",
+    "type": "azuresql",
+    "credentials": {
+      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+    },
+    "container": { "name": "[dbo].[TeamsSearchView]" },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  }
+]

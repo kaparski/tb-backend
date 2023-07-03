@@ -1,0 +1,192 @@
+[
+  {
+    "name": "tenants-indexer",
+    "description": "Indexer of tenants-ds",
+    "dataSourceName": "tenants-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+  },
+  {
+    "name": "users-indexer",
+    "description": "Indexer of users-ds",
+    "dataSourceName": "users-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "FullName",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "FullName",
+        "targetFieldName": "FullName"
+      }
+    ],
+    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+  },
+  {
+    "name": "roles-indexer",
+    "description": "Indexer of roles-ds",
+    "dataSourceName": "roles-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+  },
+  {
+    "name": "programs-indexer",
+    "description": "Indexer of programs-ds datasource",
+    "dataSourceName": "programs-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+  },
+  {
+    "name": "divisions-indexer",
+    "description": "Indexer of divisions-ds",
+    "dataSourceName": "divisions-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+  },
+  {
+    "name": "departments-indexer",
+    "description": "Indexer of departments-ds",
+    "dataSourceName": "departments-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+  },
+  {
+    "name": "jobtitles-indexer",
+    "description": "Indexer of jobtitles-ds",
+    "dataSourceName": "jobtitles-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+  },
+  {
+    "name": "serviceareas-indexer",
+    "description": "Indexer of serviceareas-ds",
+    "dataSourceName": "serviceareas-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+  },
+  {
+    "name": "teams-indexer",
+    "description": "Indexer of teams-ds",
+    "dataSourceName": "teams-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+  }
+]
+

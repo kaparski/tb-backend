@@ -1,0 +1,235 @@
+{
+    "name": "global-search-dev",
+    "fields": [
+        {
+            "name": "DocumentId",
+            "type": "Edm.String",
+            "searchable": false,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": true,
+            "retrievable": true
+        },
+        {
+            "name": "OriginalId",
+            "type": "Edm.String",
+            "searchable": false,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "TenantId",
+            "type": "Edm.String",
+            "searchable": false,
+            "filterable": true,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "DisplayName",
+            "type": "Edm.String",
+            "searchable": false,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "Name",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "Description",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "LegalName",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "FullName",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "Email",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "Reference",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "Overview",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "LegalAuthority",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "Agency",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "JurisdictionName",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "State",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "County",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "City",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "IncentivesArea",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "IncentivesType",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "CreatedDateTimeUtc",
+            "type": "Edm.DateTimeOffset",
+            "searchable": false,
+            "filterable": true,
+            "sortable": true,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "LastModifiedDateTimeUtc",
+            "type": "Edm.DateTimeOffset",
+            "searchable": false,
+            "filterable": true,
+            "sortable": true,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "EntityType",
+            "type": "Edm.String",
+            "searchable": false,
+            "filterable": true,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": true
+        },
+        {
+            "name": "Permissions",
+            "type": "Collection(Edm.String)",
+            "searchable": false,
+            "filterable": true,
+            "sortable": false,
+            "facetable": false,
+            "key": false,
+            "retrievable": false
+        }
+    ]
+}
