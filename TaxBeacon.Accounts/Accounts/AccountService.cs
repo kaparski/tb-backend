@@ -153,11 +153,9 @@ public class AccountService: IAccountService
         {
             case Status.Deactivated:
                 client.DeactivationDateTimeUtc = _dateTimeService.UtcNow;
-                client.ReactivationDateTimeUtc = null;
                 break;
             case Status.Active:
                 client.ReactivationDateTimeUtc = _dateTimeService.UtcNow;
-                client.DeactivationDateTimeUtc = null;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(status), status, null);
