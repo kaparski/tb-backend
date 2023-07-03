@@ -7,9 +7,11 @@ using Moq;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using TaxBeacon.Accounts.Accounts;
+using TaxBeacon.Accounts.Accounts.Activities.Factories;
 using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Accounts.Entities;
@@ -27,6 +29,8 @@ public sealed class AccountsServiceTests
     private readonly Mock<IListToFileConverter> _xlsxMock;
     private readonly Mock<IDateTimeService> _dateTimeServiceMock;
     private readonly Mock<EntitySaveChangesInterceptor> _entitySaveChangesInterceptorMock;
+    private readonly Mock<IAccountActivityFactory> _accountActivityFactoryMock;
+    private readonly Mock<IEnumerable<IAccountActivityFactory>> _activityFactoriesMock;
     private readonly TaxBeaconDbContext _dbContextMock;
     private readonly IAccountService _accountService;
 
@@ -48,6 +52,13 @@ public sealed class AccountsServiceTests
             .Returns(new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
                 .GetEnumerator());
 
+        _accountActivityFactoryMock.Setup(x => x.EventType).Returns(AccountEventType.AccountCreated);
+        _accountActivityFactoryMock.Setup(x => x.Revision).Returns(1);
+        
+        _activityFactoriesMock
+            .Setup(x => x.GetEnumerator())
+            .Returns(new[] { _accountActivityFactoryMock.Object }.ToList().GetEnumerator());
+
         _dbContextMock = new TaxBeaconDbContext(
             new DbContextOptionsBuilder<TaxBeaconDbContext>()
                 .UseInMemoryDatabase($"{nameof(AccountsServiceTests)}-InMemoryDb-{Guid.NewGuid()}")
@@ -59,7 +70,8 @@ public sealed class AccountsServiceTests
             _dbContextMock,
             _currentUserServiceMock.Object,
             _dateTimeServiceMock.Object,
-            _listToFileConverters.Object);
+            _listToFileConverters.Object,
+            _activityFactoriesMock.Object);
     }
 
     [Fact]
