@@ -1098,7 +1098,7 @@ public class UserServiceTests
             .Returns(tenant.Id);
 
         // Act
-        var actualResult = await _userService.GetUserPermissionsAsync(user.Id);
+        var actualResult = await _userService.GetUserPermissionsAsync(user.Id, tenant.Id);
 
         // Assert
         actualResult.Should().BeEquivalentTo(permissions.Select(perm => perm.Name));

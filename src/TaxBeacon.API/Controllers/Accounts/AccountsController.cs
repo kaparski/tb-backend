@@ -7,6 +7,7 @@ using TaxBeacon.API.Controllers.Accounts.Requests;
 using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Accounts;
 
@@ -76,7 +77,13 @@ public class AccountsController: BaseController
     [HasPermissions(
         Common.Permissions.Accounts.Read,
         Common.Permissions.Accounts.ReadWrite,
-        Common.Permissions.Accounts.ReadExport)]
+        Common.Permissions.Accounts.ReadExport,
+        Common.Permissions.Clients.Read,
+        Common.Permissions.Clients.ReadWrite,
+        Common.Permissions.Clients.ReadExport,
+        Common.Permissions.Referrals.Read,
+        Common.Permissions.Referrals.ReadWrite,
+        Common.Permissions.Referrals.ReadExport)]
     [HttpGet("{id:guid}", Name = "AccountDetails")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(AccountDetailsResponse), StatusCodes.Status200OK)]
@@ -86,7 +93,10 @@ public class AccountsController: BaseController
     public async Task<IActionResult> GetAccountDetailsAsync([FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        var getAccountDetailsResult = await _accountService.GetAccountDetailsByIdAsync(id, cancellationToken);
+        var accountInfoType = GetAccountInfoTypeByPermissions();
+
+        var getAccountDetailsResult =
+            await _accountService.GetAccountDetailsByIdAsync(id, accountInfoType, cancellationToken);
 
         return getAccountDetailsResult.Match<IActionResult>(
             result => Ok(result.Adapt<AccountDetailsResponse>()),
@@ -94,58 +104,89 @@ public class AccountsController: BaseController
     }
 
     /// <summary>
-    /// Get client by accountId
+    /// Get Account's Activity History
     /// </summary>
-    /// <response code="200">Returns Client Details</response>
+    /// <response code="200">Returns activity logs</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
-    /// <response code="404">Client is not found</response>
-    /// <returns>Client details</returns>
+    /// <response code="404">Account is not found</response>
+    /// <returns>Activity history for a specific account</returns>
     [HasPermissions(
-        Common.Permissions.Clients.Read,
-        Common.Permissions.Clients.ReadWrite,
-        Common.Permissions.Clients.ReadExport)]
-    [HttpGet("{id:guid}/client", Name = "ClientDetails")]
+        Common.Permissions.Accounts.Read,
+        Common.Permissions.Accounts.ReadWrite)]
+    [HttpGet("{id:guid}/activities", Name = "AccountActivityHistory")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(ClientDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<AccountActivityHistoryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetClientDetailsAsync([FromRoute] Guid id,
+    public async Task<IActionResult> ActivitiesHistory([FromRoute] Guid id,
+        [FromQuery] AccountActivityHistoryRequest request,
         CancellationToken cancellationToken)
     {
-        var getClientDetailsResult = await _accountService.GetClientDetailsByIdAsync(id, cancellationToken);
+        var accountInfoType = GetAccountInfoTypeByPermissions();
+        var activities = await _accountService.GetActivityHistoryAsync(id,
+            accountInfoType,
+            request.Page,
+            request.PageSize,
+            cancellationToken);
 
-        return getClientDetailsResult.Match<IActionResult>(
-            result => Ok(result.Adapt<ClientDetailsResponse>()),
+        return activities.Match<IActionResult>(
+            result => Ok(result.Adapt<AccountActivityHistoryResponse>()),
+            notFound => NotFound());
+    }
+
+    /// <summary>
+    /// Update client status
+    /// </summary>
+    /// <param name="accountId">Account id</param>
+    /// <param name="clientStatus">New client status</param>
+    /// <param name="cancellationToken"></param>
+    /// <response code="200">Returns updated client</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <returns>Updated client</returns>
+    [HasPermissions(Common.Permissions.Clients.Activation)]
+    [HttpPatch("{accountId:guid}/client/status", Name = "UpdateClientStatus")]
+    [ProducesResponseType(typeof(AccountDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> UpdateClientStatusAsync([FromRoute] Guid accountId,
+        [FromBody] Status clientStatus,
+        CancellationToken cancellationToken)
+    {
+        var accountInfoType = GetAccountInfoTypeByPermissions();
+        var updatedStatusResult = await _accountService.UpdateClientStatusAsync(accountId,
+            clientStatus,
+            accountInfoType,
+            cancellationToken);
+
+        return updatedStatusResult.Match<IActionResult>(
+            user => Ok(user.Adapt<AccountDetailsResponse>()),
             _ => NotFound());
     }
 
-    // <summary>
-    /// Get referral by accountId
-    /// </summary>
-    /// <response code="200">Returns referral details</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <response code="404">Referral is not found</response>
-    /// <returns>Referral details</returns>
-    [HasPermissions(
-        Common.Permissions.Referrals.Read,
-        Common.Permissions.Referrals.ReadWrite,
-        Common.Permissions.Referrals.ReadExport)]
-    [HttpGet("{id:guid}/referral", Name = "ReferralDetails")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(ReferralDetailsResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetReferralDetailsAsync([FromRoute] Guid id,
-        CancellationToken cancellationToken)
+    private AccountInfoType GetAccountInfoTypeByPermissions()
     {
-        var getReferralDetailsResult = await _accountService.GetReferralDetailsByIdAsync(id, cancellationToken);
+        var accountsPermissions = Enum.GetValues<Common.Permissions.Accounts>();
+        var clientPermissions = Enum.GetValues<Common.Permissions.Clients>();
+        var referralPermissions = Enum.GetValues<Common.Permissions.Clients>();
 
-        return getReferralDetailsResult.Match<IActionResult>(
-            result => Ok(result.Adapt<ReferralDetailsResponse>()),
-            _ => NotFound());
+        if (User.HasAnyPermission(accountsPermissions))
+        {
+            return AccountInfoType.Full;
+        }
+
+        if (User.HasAnyPermission(clientPermissions) && !User.HasAnyPermission(referralPermissions))
+        {
+            return AccountInfoType.Client;
+        }
+
+        if (User.HasAnyPermission(referralPermissions) && !User.HasAnyPermission(clientPermissions))
+        {
+            return AccountInfoType.Referral;
+        }
+
+        return AccountInfoType.Account;
     }
 }
