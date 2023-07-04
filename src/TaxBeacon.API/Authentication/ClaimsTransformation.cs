@@ -14,11 +14,13 @@ public sealed class ClaimsTransformation: IClaimsTransformation
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
         var email = principal.Claims
-                        .SingleOrDefault(claim => claim.Type.Equals(Claims.EmailClaimName, StringComparison.OrdinalIgnoreCase))
+                        .SingleOrDefault(claim =>
+                            claim.Type.Equals(Claims.EmailClaimName, StringComparison.OrdinalIgnoreCase))
                         ?.Value
                     ??
                     principal.Claims
-                        .SingleOrDefault(claim => claim.Type.Equals(Claims.OtherMails, StringComparison.OrdinalIgnoreCase))
+                        .SingleOrDefault(claim =>
+                            claim.Type.Equals(Claims.OtherMails, StringComparison.OrdinalIgnoreCase))
                         ?.Value;
 
         if (email == null)
@@ -64,6 +66,9 @@ public sealed class ClaimsTransformation: IClaimsTransformation
         {
             claimsIdentity.AddClaim(new Claim(Claims.DivisionEnabled, userInfo.DivisionEnabled.ToString()));
         }
+
+        var permissions = await _userService.GetUserPermissionsAsync(userInfo.Id, userInfo.TenantId);
+        claimsIdentity.AddClaims(permissions.Select(p => new Claim(Claims.Permission, p)));
 
         principal.AddIdentity(claimsIdentity);
         return principal;
