@@ -14,7 +14,7 @@ public class SearchRequestValidatorTests
     {
         //Arrange
         var searchRequest = new Faker<SearchRequest>()
-            .CustomInstantiator(f => new SearchRequest(f.Name.FirstName(), 1, 10))
+            .CustomInstantiator(f => new SearchRequest(f.Name.FirstName(), 1, 10, DateTime.UtcNow - TimeSpan.FromDays(1)))
             .Generate();
 
         //Act
@@ -24,6 +24,7 @@ public class SearchRequestValidatorTests
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Text);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Page);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.PageSize);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastUpdatedDateTime);
     }
 
     [Theory]
@@ -43,6 +44,7 @@ public class SearchRequestValidatorTests
         actualResult.ShouldHaveValidationErrorFor(r => r.Text);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Page);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.PageSize);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastUpdatedDateTime);
     }
 
     [Fact]
@@ -60,6 +62,7 @@ public class SearchRequestValidatorTests
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Text);
         actualResult.ShouldHaveValidationErrorFor(r => r.Page);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.PageSize);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastUpdatedDateTime);
     }
 
     [Fact]
@@ -77,5 +80,24 @@ public class SearchRequestValidatorTests
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Text);
         actualResult.ShouldNotHaveValidationErrorFor(r => r.Page);
         actualResult.ShouldHaveValidationErrorFor(r => r.PageSize);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.LastUpdatedDateTime);
+    }
+
+    [Fact]
+    public void Validation_InvalidLastUpdatedDateTime_ShouldHaveLastUpdatedDateTimeErrors()
+    {
+        //Arrange
+        var searchRequest = new Faker<SearchRequest>()
+            .CustomInstantiator(f => new SearchRequest(f.Name.FirstName(), 1, 5, DateTime.UtcNow + TimeSpan.FromDays(1)))
+            .Generate();
+
+        //Act
+        var actualResult = _searchRequestValidator.TestValidate(searchRequest);
+
+        //Assert
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Text);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.Page);
+        actualResult.ShouldNotHaveValidationErrorFor(r => r.PageSize);
+        actualResult.ShouldHaveValidationErrorFor(r => r.LastUpdatedDateTime);
     }
 }

@@ -27,7 +27,7 @@ public class GlobalSearchControllerTests
             .CustomInstantiator(f => new SearchRequest(f.Name.FirstName(), 1, 10))
             .Generate();
         _serviceMock.Setup(x => x.SearchAsync(
-                It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), default))
+                It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), null, default))
             .ReturnsAsync(new SearchResultsDto());
 
         // Act
