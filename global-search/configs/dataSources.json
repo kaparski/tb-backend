@@ -4,7 +4,7 @@
     "description": "a data source for tenants",
     "type": "azuresql",
     "credentials": {
-      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+      "connectionString": ""
     },
     "container": {
       "name": "[dbo].[TenantsSearchView]"
@@ -24,7 +24,7 @@
     "description": "a data source for users",
     "type": "azuresql",
     "credentials": {
-      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+      "connectionString": ""
     },
     "container": {
       "name": "[dbo].[UsersSearchView]"
@@ -44,7 +44,7 @@
     "description": "a data source for roles",
     "type": "azuresql",
     "credentials": {
-      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+      "connectionString": ""
     },
     "container": {
       "name": "[dbo].[RolesSearchView]"
@@ -64,7 +64,7 @@
     "description": "a data source for programs",
     "type": "azuresql",
     "credentials": {
-      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+      "connectionString": ""
     },
     "container": { "name": "[dbo].[ProgramsSearchView]" },
     "dataChangeDetectionPolicy": {
@@ -82,7 +82,7 @@
     "description": "a data source for divisions",
     "type": "azuresql",
     "credentials": {
-      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+      "connectionString": ""
     },
     "container": { "name": "[dbo].[DivisionsSearchView]" },
     "dataChangeDetectionPolicy": {
@@ -100,7 +100,7 @@
     "description": "a data source for departments",
     "type": "azuresql",
     "credentials": {
-      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+      "connectionString": ""
     },
     "container": { "name": "[dbo].[DepartmentsSearchView]" },
     "dataChangeDetectionPolicy": {
@@ -118,7 +118,7 @@
     "description": "a data source for job titles",
     "type": "azuresql",
     "credentials": {
-      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+      "connectionString": ""
     },
     "container": { "name": "[dbo].[JobTitlesSearchView]" },
     "dataChangeDetectionPolicy": {
@@ -136,7 +136,7 @@
     "description": "a data source for service areas",
     "type": "azuresql",
     "credentials": {
-      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+      "connectionString": ""
     },
     "container": { "name": "[dbo].[ServiceAreasSearchView]" },
     "dataChangeDetectionPolicy": {
@@ -154,7 +154,7 @@
     "description": "a data source for teams",
     "type": "azuresql",
     "credentials": {
-      "connectionString": "Server=tcp:development-tb.database.windows.net,1433;Initial Catalog=dev-taxbeacon;Persist Security Info=False;User ID=taxbeacon;Password=NEWappforTB123{};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30"
+      "connectionString": ""
     },
     "container": { "name": "[dbo].[TeamsSearchView]" },
     "dataChangeDetectionPolicy": {

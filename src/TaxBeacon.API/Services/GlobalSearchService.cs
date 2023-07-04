@@ -1,9 +1,8 @@
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
-using Microsoft.Graph;
+using TaxBeacon.Administration.Users;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
-using TaxBeacon.UserManagement.Services;
 
 namespace TaxBeacon.API.Services;
 
