@@ -148,7 +148,7 @@ public class AccountsController: BaseController
     /// <returns>Updated client</returns>
     [HasPermissions(Common.Permissions.Clients.Activation)]
     [HttpPatch("{accountId:guid}/client/status", Name = "UpdateClientStatus")]
-    [ProducesResponseType(typeof(ClientDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AccountDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateClientStatusAsync([FromRoute] Guid accountId,
@@ -162,7 +162,7 @@ public class AccountsController: BaseController
             cancellationToken);
 
         return updatedStatusResult.Match<IActionResult>(
-            user => Ok(user.Adapt<ClientDetailsResponse>()),
+            user => Ok(user.Adapt<AccountDetailsResponse>()),
             _ => NotFound());
     }
 
