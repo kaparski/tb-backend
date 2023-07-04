@@ -1,5 +1,5 @@
 {
-    "name": "global-search-dev",
+    "name": "global-search",
     "fields": [
         {
             "name": "DocumentId",
