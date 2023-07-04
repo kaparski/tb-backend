@@ -65,7 +65,7 @@ public class GlobalSearchService: IGlobalSearchService
     {
         var filterExpressions = new List<string>();
 
-        var userPermissions = await _userService.GetUserPermissionsAsync(_currentUserService.UserId);
+        var userPermissions = await _userService.GetUserPermissionsAsync(_currentUserService.UserId, _currentUserService.TenantId);
         filterExpressions.Add($"Permissions/any(p:search.in(p, '{string.Join(',', userPermissions)}'))");
 
         filterExpressions.Add(_currentUserService is { IsSuperAdmin: true, IsUserInTenant: false }
