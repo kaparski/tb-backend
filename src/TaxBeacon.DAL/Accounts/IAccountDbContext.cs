@@ -27,5 +27,7 @@ public interface IAccountDbContext
 
     DbSet<ContactActivityLog> ContactActivityLogs { get; }
 
+    DbSet<AccountActivityLog> AccountActivityLogs { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

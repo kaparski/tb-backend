@@ -52,4 +52,6 @@ public class Account: BaseEntity
     public ICollection<Contact> Contacts { get; set; } = new HashSet<Contact>();
 
     public ICollection<TenantUserAccount> TenantUserAccounts { get; set; } = new HashSet<TenantUserAccount>();
+
+    public ICollection<AccountActivityLog> AccountActivityLogs { get; set; } = new HashSet<AccountActivityLog>();
 }
