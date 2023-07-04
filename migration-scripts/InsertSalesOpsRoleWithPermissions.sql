@@ -37,6 +37,8 @@ BEGIN TRY
            ('Clients.Read'),
            ('Clients.ReadWrite'),
            ('Clients.ReadExport'),
+           ('Clients.Activation'),
+           ('Prospects.Activation'),
            ('Referrals.Read'),
            ('Referrals.ReadWrite'),
            ('Referrals.ReadExport'),
