@@ -2,7 +2,7 @@ CREATE OR ALTER VIEW UsersSearchView AS
     SELECT
         CONCAT_WS('_', U.Id, TU.TenantId) AS DocumentId,
         U.Id AS OriginalId,
-        TU.TenantId AS TenantId
+        TU.TenantId AS TenantId,
         FullName,
         LegalName,
         Email,
