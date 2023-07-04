@@ -1,8 +1,8 @@
 namespace TaxBeacon.Common.Models;
 
-public class Highlight
+public record Highlight
 {
-    public string Field { get; set; }
+    public string Field { get; init; } = null!;
 
-    public string[] Values { get; set; } = { };
+    public string[] Values { get; init; } = { };
 }
