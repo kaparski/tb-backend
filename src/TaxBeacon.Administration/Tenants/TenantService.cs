@@ -240,7 +240,7 @@ public class TenantService: ITenantService
         }
 
         return await _context.TenantsPrograms
-            .Where(tp => tp.TenantId == tenantId && tp.IsDeleted == false)
+            .Where(tp => tp.TenantId == tenantId && tp.IsDeleted != true)
             .Select(tp => tp.Program)
             .OrderBy(x => x.Name)
             .ProjectToType<AssignedTenantProgramDto>()
@@ -366,7 +366,7 @@ public class TenantService: ITenantService
         CancellationToken cancellationToken)
     {
         var deletedProgramsIds = existingPrograms
-            .Where(tp => !newProgramsIds.Contains(tp.ProgramId) && tp.IsDeleted == false)
+            .Where(tp => !newProgramsIds.Contains(tp.ProgramId) && tp.IsDeleted != true)
             .Select(tp => tp.ProgramId)
             .ToArray();
 
