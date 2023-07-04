@@ -43,6 +43,8 @@ public sealed class AccountsServiceTests
         _xlsxMock = new();
         _listToFileConverters = new();
         _dateTimeServiceMock = new();
+        _accountActivityFactoryMock = new();
+        _activityFactoriesMock = new();
 
         _csvMock.Setup(x => x.FileType).Returns(FileType.Csv);
         _xlsxMock.Setup(x => x.FileType).Returns(FileType.Xlsx);
@@ -52,9 +54,14 @@ public sealed class AccountsServiceTests
             .Returns(new[] { _csvMock.Object, _xlsxMock.Object }.ToList()
                 .GetEnumerator());
 
-        _accountActivityFactoryMock.Setup(x => x.EventType).Returns(AccountEventType.AccountCreated);
-        _accountActivityFactoryMock.Setup(x => x.Revision).Returns(1);
-        
+        _accountActivityFactoryMock
+            .Setup(x => x.EventType)
+            .Returns(AccountEventType.AccountCreated);
+
+        _accountActivityFactoryMock
+            .Setup(x => x.Revision)
+            .Returns(1);
+
         _activityFactoriesMock
             .Setup(x => x.GetEnumerator())
             .Returns(new[] { _accountActivityFactoryMock.Object }.ToList().GetEnumerator());

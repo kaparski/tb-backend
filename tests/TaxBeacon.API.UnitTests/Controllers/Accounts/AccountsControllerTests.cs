@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
 using System.Reflection;
+using System.Security.Claims;
 using TaxBeacon.Accounts.Accounts;
 using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.API.Authentication;
@@ -23,7 +24,19 @@ public sealed class AccountsControllerTests
     public AccountsControllerTests()
     {
         _accountServiceMock = new();
-        _controller = new AccountsController(_accountServiceMock.Object);
+        _controller = new AccountsController(_accountServiceMock.Object)
+        {
+            ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new[]
+                    {
+                        new ClaimsIdentity(new[] { new Claim(Claims.Permission, "Accounts.Read") })
+                    })
+                }
+            }
+        };
     }
 
     [Fact]
@@ -163,6 +176,19 @@ public sealed class AccountsControllerTests
             ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetAccountDetailsAsync)
             .Method;
 
+        var permissions = new object[]
+        {
+            Common.Permissions.Accounts.Read,
+            Common.Permissions.Accounts.ReadWrite,
+            Common.Permissions.Accounts.ReadExport,
+            Common.Permissions.Clients.Read,
+            Common.Permissions.Clients.ReadWrite,
+            Common.Permissions.Clients.ReadExport,
+            Common.Permissions.Referrals.Read,
+            Common.Permissions.Referrals.ReadWrite,
+            Common.Permissions.Referrals.ReadExport,
+        };
+
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
 
@@ -170,7 +196,8 @@ public sealed class AccountsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Accounts.Read;Accounts.ReadWrite;Accounts.ReadExport");
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 }
