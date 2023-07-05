@@ -1,8 +1,9 @@
 using FluentValidation;
+using System.Data;
 
 namespace TaxBeacon.API.Controllers.GlobalSearch.Requests;
 
-public record SearchRequest(string Text, int Page = 1, int PageSize = 5);
+public record SearchRequest(string Text, int Page = 1, int PageSize = 5, DateTime? LastUpdatedDateTime = null);
 
 public class SearchRequestValidator: AbstractValidator<SearchRequest>
 {
@@ -17,5 +18,9 @@ public class SearchRequestValidator: AbstractValidator<SearchRequest>
 
         RuleFor(x => x.PageSize)
             .GreaterThan(0);
+
+        RuleFor(x => x.LastUpdatedDateTime)
+            .LessThanOrEqualTo(DateTime.UtcNow)
+            .When(x => x.LastUpdatedDateTime is not null);
     }
 }

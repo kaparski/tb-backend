@@ -27,7 +27,11 @@ public class SearchController: BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> SearchAsync([FromBody] SearchRequest searchRequest, CancellationToken cancellationToken)
     {
-        var resultsDto = await _service.SearchAsync(searchRequest.Text, searchRequest.Page, searchRequest.PageSize,
+        var resultsDto = await _service.SearchAsync(
+            searchRequest.Text,
+            searchRequest.Page,
+            searchRequest.PageSize,
+            searchRequest.LastUpdatedDateTime,
             cancellationToken);
 
         return Ok(resultsDto.Adapt<SearchResultsResponse>());
