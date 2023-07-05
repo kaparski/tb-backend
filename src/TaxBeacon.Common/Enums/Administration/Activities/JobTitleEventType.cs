@@ -1,4 +1,4 @@
-namespace TaxBeacon.Common.Enums.Activities;
+namespace TaxBeacon.Common.Enums.Administration.Activities;
 
 public enum JobTitleEventType
 {

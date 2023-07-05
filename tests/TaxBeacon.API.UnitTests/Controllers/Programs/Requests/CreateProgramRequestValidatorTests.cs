@@ -3,6 +3,7 @@ using FluentAssertions.Execution;
 using FluentValidation.TestHelper;
 using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Administration;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Programs.Requests;
 

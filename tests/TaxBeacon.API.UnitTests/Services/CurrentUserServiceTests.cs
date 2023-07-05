@@ -15,7 +15,7 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
 using TaxBeacon.DAL.Interceptors;
-using RolesConstants = TaxBeacon.Common.Roles.Roles;
+using RolesConstants = TaxBeacon.Common.Constants.Roles;
 
 namespace TaxBeacon.API.UnitTests.Services;
 

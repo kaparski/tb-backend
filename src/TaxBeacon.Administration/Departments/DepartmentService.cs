@@ -12,7 +12,7 @@ using TaxBeacon.Administration.Departments.Activities.Models;
 using TaxBeacon.Administration.Departments.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Models;

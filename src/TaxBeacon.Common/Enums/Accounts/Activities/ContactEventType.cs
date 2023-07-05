@@ -1,4 +1,4 @@
-﻿namespace TaxBeacon.Common.Enums.Activities;
+﻿namespace TaxBeacon.Common.Enums.Accounts.Activities;
 public enum ContactEventType
 {
     None = 0,

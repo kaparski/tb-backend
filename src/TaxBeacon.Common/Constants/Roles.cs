@@ -1,4 +1,4 @@
-﻿namespace TaxBeacon.Common.Roles;
+﻿namespace TaxBeacon.Common.Constants;
 
 public static class Roles
 {

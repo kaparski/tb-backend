@@ -1,4 +1,4 @@
-﻿namespace TaxBeacon.Common.Accounts;
+﻿namespace TaxBeacon.Common.Enums.Accounts;
 public enum LocationType
 {
     None = 0,
