@@ -17,6 +17,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Controllers.Contacts.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.Divisions.Responses;
 using TaxBeacon.API.Controllers.Entities.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Locations.Responses;

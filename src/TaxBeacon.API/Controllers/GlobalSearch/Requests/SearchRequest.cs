@@ -1,5 +1,4 @@
 using FluentValidation;
-using System.Data;
 
 namespace TaxBeacon.API.Controllers.GlobalSearch.Requests;
 

@@ -1,7 +1,6 @@
 using Azure;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using TaxBeacon.Administration.Users;
 using TaxBeacon.Common.Models;

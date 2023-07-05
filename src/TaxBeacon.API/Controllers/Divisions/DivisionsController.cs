@@ -3,15 +3,15 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Tenants.Requests;
-using TaxBeacon.API.Controllers.Tenants.Responses;
-using TaxBeacon.API.Exceptions;
-using TaxBeacon.Common.Converters;
 using TaxBeacon.Administration.Divisions;
 using TaxBeacon.Administration.Divisions.Models;
+using TaxBeacon.API.Authentication;
+using TaxBeacon.API.Controllers.Divisions.Requests;
+using TaxBeacon.API.Controllers.Divisions.Responses;
+using TaxBeacon.API.Exceptions;
+using TaxBeacon.Common.Converters;
 
-namespace TaxBeacon.API.Controllers.Tenants;
+namespace TaxBeacon.API.Controllers.Divisions;
 
 [Authorize]
 public class DivisionsController: BaseController

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Administration.Users;
 
