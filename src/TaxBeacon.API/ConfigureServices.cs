@@ -26,7 +26,6 @@ using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Responses;
-using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.API.Services;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
