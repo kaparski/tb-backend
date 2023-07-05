@@ -300,7 +300,7 @@ public class ProgramService: IProgramService
         var tenantId = _currentUserService.TenantId;
 
         return _context.TenantsPrograms
-            .Where(x => x.TenantId == tenantId)
+            .Where(x => x.TenantId == tenantId && x.IsDeleted != true)
             .ProjectToType<TenantProgramDto>();
     }
 
