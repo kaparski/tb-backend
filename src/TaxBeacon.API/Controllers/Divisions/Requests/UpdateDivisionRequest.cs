@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace TaxBeacon.API.Controllers.Tenants.Requests;
+namespace TaxBeacon.API.Controllers.Divisions.Requests;
 
 public record UpdateDivisionRequest(string Name, string? Description, IEnumerable<Guid>? DepartmentIds);
 

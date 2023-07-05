@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+using TaxBeacon.Administration.Divisions;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Tenants.Responses;
+using TaxBeacon.API.Controllers.Divisions.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Exceptions;
-using TaxBeacon.Administration.Divisions;
 
-namespace TaxBeacon.API.Controllers.Tenants;
+namespace TaxBeacon.API.Controllers.Divisions;
 
 [Authorize]
 public class DivisionUsersController: BaseController

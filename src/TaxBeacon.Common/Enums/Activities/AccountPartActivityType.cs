@@ -6,5 +6,5 @@ public enum AccountPartActivityType
 
     Client = 2,
 
-    Referral
+    Referral = 3
 }

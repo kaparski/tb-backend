@@ -1,4 +1,4 @@
-﻿namespace TaxBeacon.API.Controllers.Tenants.Responses;
+﻿namespace TaxBeacon.API.Controllers.Divisions.Responses;
 
 public record DivisionActivityResponse(uint Count, IEnumerable<DivisionActivityItemResponse> Query);
 

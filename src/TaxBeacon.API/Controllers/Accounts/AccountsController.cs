@@ -187,6 +187,6 @@ public class AccountsController: BaseController
             return AccountInfoType.Referral;
         }
 
-        return AccountInfoType.Account;
+        return AccountInfoType.General;
     }
 }

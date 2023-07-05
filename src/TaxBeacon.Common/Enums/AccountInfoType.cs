@@ -2,7 +2,7 @@
 
 public enum AccountInfoType
 {
-    Account = 0,
+    General = 0,
 
     Full = 1,
 

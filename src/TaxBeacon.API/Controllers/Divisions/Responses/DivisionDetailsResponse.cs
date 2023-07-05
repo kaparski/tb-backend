@@ -1,6 +1,6 @@
 ﻿using TaxBeacon.API.Controllers.Departments.Responses;
 
-namespace TaxBeacon.API.Controllers.Tenants.Responses;
+namespace TaxBeacon.API.Controllers.Divisions.Responses;
 
 public class DivisionDetailsResponse
 {

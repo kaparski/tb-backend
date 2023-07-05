@@ -1,6 +1,6 @@
 ﻿using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 
-namespace TaxBeacon.API.Extensions.Logging;
+namespace TaxBeacon.API.Extensions;
 
 public static class LoggingExtensions
 {
@@ -18,7 +18,7 @@ public static class LoggingExtensions
             builder
                 .Logging
                 .AddApplicationInsights(configureTelemetryConfiguration: opt => opt.ConnectionString = connectionString,
-                    configureApplicationInsightsLoggerOptions: (options) => { });
+                    configureApplicationInsightsLoggerOptions: (_) => { });
         }
 
     }

@@ -1,6 +1,6 @@
 ﻿using Bogus;
 using FluentValidation.TestHelper;
-using TaxBeacon.API.Controllers.Tenants.Requests;
+using TaxBeacon.API.Controllers.Divisions.Requests;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Divisions.Requests;
 
