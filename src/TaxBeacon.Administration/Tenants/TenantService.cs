@@ -10,7 +10,7 @@ using TaxBeacon.Administration.Tenants.Activities.Models;
 using TaxBeacon.Administration.Tenants.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Administration;
@@ -232,7 +232,7 @@ public class TenantService: ITenantService
         }
 
         return await _context.TenantsPrograms
-            .Where(tp => tp.TenantId == tenantId && tp.IsDeleted == false)
+            .Where(tp => tp.TenantId == tenantId && tp.IsDeleted != true)
             .Select(tp => tp.Program)
             .OrderBy(x => x.Name)
             .ProjectToType<AssignedTenantProgramDto>()
@@ -358,7 +358,7 @@ public class TenantService: ITenantService
         CancellationToken cancellationToken)
     {
         var deletedProgramsIds = existingPrograms
-            .Where(tp => !newProgramsIds.Contains(tp.ProgramId) && tp.IsDeleted == false)
+            .Where(tp => !newProgramsIds.Contains(tp.ProgramId) && tp.IsDeleted != true)
             .Select(tp => tp.ProgramId)
             .ToArray();
 

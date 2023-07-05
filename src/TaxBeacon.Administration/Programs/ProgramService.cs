@@ -11,7 +11,7 @@ using TaxBeacon.Administration.Programs.Activities.Models;
 using TaxBeacon.Administration.Programs.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
@@ -285,7 +285,7 @@ public class ProgramService: IProgramService
         var tenantId = _currentUserService.TenantId;
 
         return _context.TenantsPrograms
-            .Where(x => x.TenantId == tenantId)
+            .Where(x => x.TenantId == tenantId && x.IsDeleted != true)
             .ProjectToType<TenantProgramDto>();
     }
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using System.Net.Mail;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Administration.Users;
 
@@ -21,30 +20,23 @@ public sealed class PermissionsAuthorizationHandler: AuthorizationHandler<Permis
         AuthorizationHandlerContext context,
         PermissionsRequirement requirement)
     {
-        var email = context.User.Claims
-                        .FirstOrDefault(claim =>
-                            claim.Type.Equals(Claims.EmailClaimName, StringComparison.OrdinalIgnoreCase))
-                        ?.Value
-                    ??
-                    context.User.Claims
-                        .FirstOrDefault(claim =>
-                            claim.Type.Equals(Claims.OtherMails, StringComparison.OrdinalIgnoreCase))
-                        ?.Value;
+        var idClaimValue = context.User
+            .FindFirst(claim => claim.Type.Equals(Claims.UserIdClaimName, StringComparison.OrdinalIgnoreCase))
+            ?.Value;
 
-        if (email is null)
+        if (!Guid.TryParse(idClaimValue, out var id))
         {
             return;
         }
 
         using var scope = _scopeFactory.CreateScope();
-
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        var getUserResult = await userService.GetUserByEmailAsync(new MailAddress(email));
+        var getUserResult = await userService.GetUserDetailsByIdAsync(id);
 
         if (!getUserResult.TryPickT0(out var user, out _))
         {
             context.Fail();
-            _logger.LogError("Failed to authenticate user with {@email}", email);
+            _logger.LogError("Failed to authenticate user with id = {@id}", id);
         }
 
         if (user.DeactivationDateTimeUtc is not null || user.Status == Status.Deactivated)
@@ -53,9 +45,7 @@ public sealed class PermissionsAuthorizationHandler: AuthorizationHandler<Permis
             return;
         }
 
-        IEnumerable<string> permissions = await userService.GetUserPermissionsAsync(user.Id);
-
-        if (permissions.Intersect(requirement.Permissions).Any())
+        if (context.User.HasAnyPermission(requirement.Permissions))
         {
             context.Succeed(requirement);
         }

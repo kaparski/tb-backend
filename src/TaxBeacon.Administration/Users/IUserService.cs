@@ -45,6 +45,7 @@ public interface IUserService
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Guid userId,
+        Guid tenantId = default,
         CancellationToken cancellationToken = default);
 
     Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);

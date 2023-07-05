@@ -9,7 +9,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
@@ -17,6 +16,7 @@ using TaxBeacon.Administration.Tenants;
 using TaxBeacon.Administration.Tenants.Activities;
 using TaxBeacon.Administration.Tenants.Activities.Models;
 using TaxBeacon.Administration.Tenants.Models;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
 
@@ -303,7 +303,7 @@ public class TenantServiceTests
 
         _currentUserServiceMock
             .Setup(s => s.UserInfo)
-            .Returns((user.FullName, Common.Roles.Roles.SuperAdmin));
+            .Returns((user.FullName, Common.Constants.Roles.SuperAdmin));
 
         //Act
         var actualResult = await _tenantService.SwitchToTenantAsync(null, tenant.Id);
@@ -335,7 +335,7 @@ public class TenantServiceTests
 
         _currentUserServiceMock
             .Setup(s => s.UserInfo)
-            .Returns((user.FullName, Common.Roles.Roles.SuperAdmin));
+            .Returns((user.FullName, Common.Constants.Roles.SuperAdmin));
 
         //Act
         var actualResult = await _tenantService.SwitchToTenantAsync(TestData.TestTenantId, null);
@@ -371,7 +371,7 @@ public class TenantServiceTests
 
         _currentUserServiceMock
             .Setup(s => s.UserInfo)
-            .Returns((user.FullName, Common.Roles.Roles.SuperAdmin));
+            .Returns((user.FullName, Common.Constants.Roles.SuperAdmin));
 
         var oldTenantId = Guid.NewGuid();
 

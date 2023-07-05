@@ -12,16 +12,17 @@ using TaxBeacon.Administration.Users.Activities.Models;
 using TaxBeacon.Administration.Users.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.Email;
 using TaxBeacon.Email.Messages;
+using TaxBeacon.Administration.Users.Extensions;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
-using RolesConstants = TaxBeacon.Common.Roles.Roles;
+using RolesConstants = TaxBeacon.Common.Constants.Roles;
 
 namespace TaxBeacon.Administration.Users;
 
@@ -93,7 +94,7 @@ public class UserService: IUserService
         return new LoginUserDto(
             user.Id,
             user.FullName,
-            await GetUserPermissionsAsync(user.Id, cancellationToken),
+            await GetUserPermissionsAsync(user.Id, _currentUserService.TenantId, cancellationToken),
             await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken),
             tenant?.DivisionEnabled);
     }
@@ -558,11 +559,11 @@ public class UserService: IUserService
             activities.Select(x => _userActivityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
     }
 
-    public async Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Guid userId,
+    public async Task<IReadOnlyCollection<string>> GetUserPermissionsAsync(Guid userId, Guid tenantId = default,
         CancellationToken cancellationToken = default) =>
-        _currentUserService.IsSuperAdmin
+        _currentUserService.IsSuperAdmin || tenantId == default
             ? await GetNoTenantUserPermissionsAsync(userId, cancellationToken)
-            : await GetTenantUserPermissionsAsync(_currentUserService.TenantId, userId, cancellationToken);
+            : await GetTenantUserPermissionsAsync(tenantId, userId, cancellationToken);
 
     public async Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken)
     {

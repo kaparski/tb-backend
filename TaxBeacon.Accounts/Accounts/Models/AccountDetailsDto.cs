@@ -1,8 +1,10 @@
-﻿using TaxBeacon.Common.Enums;
+﻿using Mapster;
+using TaxBeacon.Common.Enums;
+using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.Accounts.Accounts.Models;
 
-public record AccountDetailsDto
+public record AccountDetailsDto: IRegister
 {
     public Guid Id { get; init; }
 
@@ -42,5 +44,15 @@ public record AccountDetailsDto
 
     public int ContactsCount { get; init; }
 
+    public ClientDetailsDto? Client { get; set; }
+
+    public ReferralDetailsDto? Referral { get; set; }
+
     public IEnumerable<SalesPersonDto> SalesPersons { get; init; } = Enumerable.Empty<SalesPersonDto>();
+
+    public void Register(TypeAdapterConfig config) =>
+        config.NewConfig<Account, AccountDetailsDto>()
+            .Map(dest => dest.EntitiesCount, src => src.Entities.Count)
+            .Map(dest => dest.LocationsCount, src => src.Locations.Count)
+            .Map(dest => dest.ContactsCount, src => src.Contacts.Count);
 }

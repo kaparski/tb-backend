@@ -7,7 +7,7 @@ using System.Text.Json;
 using TaxBeacon.Administration.Roles.Models;
 using TaxBeacon.Administration.Users.Activities.Models;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Administration;

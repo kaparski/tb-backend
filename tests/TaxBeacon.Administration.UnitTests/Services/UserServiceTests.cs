@@ -11,7 +11,6 @@ using System.Net.Mail;
 using System.Text.RegularExpressions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -21,6 +20,7 @@ using TaxBeacon.Administration.Users;
 using TaxBeacon.Administration.Users.Activities.Factories;
 using TaxBeacon.Administration.Users.Activities.Models;
 using TaxBeacon.Administration.Users.Models;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -1004,7 +1004,7 @@ public class UserServiceTests
             .Returns(tenant.Id);
 
         // Act
-        var actualResult = await _userService.GetUserPermissionsAsync(user.Id);
+        var actualResult = await _userService.GetUserPermissionsAsync(user.Id, tenant.Id);
 
         // Assert
         actualResult.Should().BeEquivalentTo(permissions.Select(perm => perm.Name));
