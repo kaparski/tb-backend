@@ -26,7 +26,6 @@ using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Responses;
-using TaxBeacon.API.Extensions.GridifyServices;
 using TaxBeacon.API.Services;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
@@ -91,7 +90,6 @@ public static class ConfigureServices
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
         services.AddSwagger();
-        services.AddGridify(configuration);
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.Configure<AzureAd>(configuration.GetSection(nameof(AzureAd)));

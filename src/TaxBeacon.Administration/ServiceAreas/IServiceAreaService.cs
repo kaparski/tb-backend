@@ -1,4 +1,3 @@
-using Gridify;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.Administration.ServiceAreas.Models;
@@ -10,9 +9,6 @@ namespace TaxBeacon.Administration.ServiceAreas;
 public interface IServiceAreaService
 {
     IQueryable<ServiceAreaDto> QueryServiceAreas();
-
-    Task<QueryablePaging<ServiceAreaDto>> GetServiceAreasAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken);
 
     Task<byte[]> ExportServiceAreasAsync(FileType fileType,
         CancellationToken cancellationToken);
@@ -27,10 +23,6 @@ public interface IServiceAreaService
     Task<OneOf<ActivityDto, NotFound>> GetActivityHistoryAsync(Guid id,
         int page,
         int pageSize,
-        CancellationToken cancellationToken);
-
-    Task<OneOf<QueryablePaging<ServiceAreaUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId,
-        GridifyQuery gridifyQuery,
         CancellationToken cancellationToken);
 
     Task<IQueryable<ServiceAreaUserDto>> QueryUsersAsync(Guid serviceAreaId);

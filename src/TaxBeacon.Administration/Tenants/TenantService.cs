@@ -1,6 +1,4 @@
-﻿using Gridify;
-using Gridify.EntityFramework;
-using Mapster;
+﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -53,12 +51,6 @@ public class TenantService: ITenantService
     public IQueryable<TenantDto> QueryTenants() => _context
         .Tenants
         .ProjectToType<TenantDto>();
-
-    public async Task<QueryablePaging<TenantDto>> GetTenantsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) => await _context
-        .Tenants
-        .ProjectToType<TenantDto>()
-        .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<byte[]> ExportTenantsAsync(FileType fileType,
         CancellationToken cancellationToken)

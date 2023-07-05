@@ -1,5 +1,4 @@
-﻿using Gridify;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -47,46 +46,6 @@ public class JobTitlesController: BaseController
         var query = _jobTitleService.QueryJobTitles();
 
         return query.ProjectToType<JobTitleResponse>();
-    }
-
-    /// <summary>
-    /// List of job titles
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /jobtitles?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
-    /// </remarks>
-    /// <response code="200">Returns all job titles</response>
-    /// <response code="400">Invalid filtering or sorting</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <returns>List of job titles</returns>
-    [HasPermissions(
-        Common.Permissions.Departments.Read,
-        Common.Permissions.Departments.ReadWrite,
-        Common.Permissions.Departments.ReadExport,
-        Common.Permissions.JobTitles.Read,
-        Common.Permissions.JobTitles.ReadWrite,
-        Common.Permissions.JobTitles.ReadExport)]
-    [HttpGet(Name = "GetJobTitles")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(JobTitleResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetJobTitleList([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<JobTitleDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var jobTitles = await _jobTitleService.GetJobTitlesAsync(query, cancellationToken);
-
-        return Ok(new QueryablePaging<JobTitleResponse>(jobTitles.Count,
-            jobTitles.Query.ProjectToType<JobTitleResponse>()));
     }
 
     /// <summary>
@@ -176,41 +135,6 @@ public class JobTitlesController: BaseController
 
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<JobTitleDetailsResponse>()),
-            notFound => NotFound());
-    }
-
-    /// <summary>
-    /// Get Users of job title
-    /// </summary>
-    /// <response code="200">Returns Users of job title</response>
-    /// <response code="400">Invalid query parameters</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <response code="404">Job title is not found</response>
-    /// <returns>Users of job title</returns>
-    [HasPermissions(Common.Permissions.JobTitles.ReadWrite)]
-    [HttpGet("{id:guid}/users", Name = "GetUsersOfJobTitle")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(JobTitleUserResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-
-    public async Task<IActionResult> GetUsers([FromRoute] Guid id, [FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<JobTitleUserDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var resultOneOf = await _jobTitleService.GetUsersAsync(
-            id, query, cancellationToken);
-
-        return resultOneOf.Match<IActionResult>(
-            users => Ok(new QueryablePaging<JobTitleUserResponse>(users.Count,
-                users.Query.ProjectToType<JobTitleUserResponse>())),
             notFound => NotFound());
     }
 }

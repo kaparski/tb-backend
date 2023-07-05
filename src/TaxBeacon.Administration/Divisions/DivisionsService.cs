@@ -1,6 +1,4 @@
-﻿using Gridify;
-using Gridify.EntityFramework;
-using Mapster;
+﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -71,25 +69,6 @@ public class DivisionsService: IDivisionsService
 
         return itemDtos;
     }
-
-    public async Task<QueryablePaging<DivisionDto>> GetDivisionsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) => await _context
-        .Divisions
-        .Where(div => div.TenantId == _currentUserService.TenantId)
-        .Select(div => new DivisionDto
-        {
-            Id = div.Id,
-            Name = div.Name,
-            Description = div.Description,
-            CreatedDateTimeUtc = div.CreatedDateTimeUtc,
-            NumberOfUsers = div.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
-            Departments = string.Join(", ", div.Departments.Select(dep => dep.Name)),
-            Department = div.Departments.Select(dep => dep.Name)
-                .GroupBy(dep => 1)
-                .Select(g => string.Join(string.Empty, g.Select(s => "|" + s + "|")))
-                .FirstOrDefault() ?? string.Empty
-        })
-        .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<byte[]> ExportDivisionsAsync(FileType fileType,
         CancellationToken cancellationToken)
@@ -257,35 +236,6 @@ public class DivisionsService: IDivisionsService
                 .Where(sa => sa.DivisionId == id)
                 .ProjectToType<DivisionDepartmentDto>()
                 .ToArrayAsync(cancellationToken);
-    }
-
-    public async Task<OneOf<QueryablePaging<DivisionUserDto>, NotFound>> GetDivisionUsersAsync(Guid divisionId,
-        GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
-    {
-        var tenantId = _currentUserService.TenantId;
-
-        var division = await _context.Divisions
-            .FirstOrDefaultAsync(d => d.Id == divisionId && d.TenantId == tenantId, cancellationToken);
-
-        if (division is null)
-        {
-            return new NotFound();
-        }
-
-        var users = await _context
-            .Users
-            .Where(u => u.DivisionId == divisionId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
-            .Select(u => new DivisionUserDto()
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FullName = u.FullName,
-                Department = u.Department == null ? string.Empty : u.Department.Name,
-                JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        return users;
     }
 
     public async Task<IQueryable<DivisionUserDto>> QueryDivisionUsersAsync(Guid divisionId)

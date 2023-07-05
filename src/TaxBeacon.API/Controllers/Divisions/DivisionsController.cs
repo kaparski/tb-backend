@@ -1,5 +1,4 @@
-﻿using Gridify;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -43,43 +42,6 @@ public class DivisionsController: BaseController
         var query = _divisionsService.QueryDivisions();
 
         return query.ProjectToType<DivisionResponse>();
-    }
-
-    /// <summary>
-    /// List of tenant divisions
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /divisions?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
-    ///     ```GET /divisons?page=2&amp;pageSize=5&amp;orderBy=name```
-    /// </remarks>
-    /// <response code="200">Returns tenant divisions</response>
-    /// <response code="400">Invalid filtering or sorting</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <returns>List of tenant divisions</returns>
-    [HasPermissions(
-        Common.Permissions.Divisions.Read,
-        Common.Permissions.Divisions.ReadWrite,
-        Common.Permissions.Divisions.ReadExport)]
-    [HttpGet(Name = "GetDivisions")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<DivisionResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetDivisionsList([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<DivisionDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var divisions = await _divisionsService.GetDivisionsAsync(query, cancellationToken);
-        return Ok(new QueryablePaging<DivisionResponse>(divisions.Count,
-            divisions.Query.ProjectToType<DivisionResponse>()));
     }
 
     /// <summary>
@@ -158,39 +120,6 @@ public class DivisionsController: BaseController
 
         return oneOfDivisionDetails.Match<IActionResult>(
             result => Ok(result.Adapt<DivisionDetailsResponse>()),
-            _ => NotFound());
-    }
-
-    /// <summary>
-    /// Get Users of Division
-    /// </summary>
-    /// <response code="200">Returns Division Users</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <response code="404">Division is not found</response>
-    /// <returns>A collection of users assigned to a particular division</returns>
-    [HasPermissions(Common.Permissions.Divisions.Read, Common.Permissions.Divisions.ReadWrite)]
-    [HttpGet("{id:guid}/users", Name = "DivisionUsers")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<DivisionUserResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetDivisionUsers([FromQuery] GridifyQuery query, [FromRoute] Guid id,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<DivisionUserDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var oneOfDivisionUsers = await _divisionsService.GetDivisionUsersAsync(id, query, cancellationToken);
-
-        return oneOfDivisionUsers.Match<IActionResult>(
-            result => Ok(new QueryablePaging<DivisionUserResponse>(result.Count,
-                result.Query.ProjectToType<DivisionUserResponse>())),
             _ => NotFound());
     }
 

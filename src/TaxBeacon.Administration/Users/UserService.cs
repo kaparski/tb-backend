@@ -1,6 +1,4 @@
-﻿using Gridify;
-using Gridify.EntityFramework;
-using Mapster;
+﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -99,23 +97,6 @@ public class UserService: IUserService
             await GetUserPermissionsAsync(user.Id, _currentUserService.TenantId, cancellationToken),
             await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken),
             tenant?.DivisionEnabled);
-    }
-
-    public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var users = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
-            ? _context.Users
-                .AsNoTracking()
-                .Where(u => !u.TenantUsers.Any())
-                .MapToUserDtoWithNoTenantRoleNames(_context)
-            : _context
-                .Users
-                .AsNoTracking()
-                .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
-                .MapToUserDtoWithTenantRoleNames(_context, _currentUserService);
-
-        return await users.GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
 
     class UserRoleContainer

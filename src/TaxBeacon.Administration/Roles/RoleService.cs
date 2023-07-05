@@ -1,5 +1,3 @@
-using Gridify;
-using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -57,35 +55,6 @@ public class RoleService: IRoleService
             : GetNotTenantRoleAssignedUsersQuery(roleId);
 
         return users.ProjectToType<RoleAssignedUserDto>();
-    }
-
-    public async Task<QueryablePaging<RoleDto>> GetRolesAsync(IGridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var roles = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
-            ? GetNotTenantRolesQuery()
-            : GetTenantRolesQuery();
-
-        return await roles.GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-    }
-
-    public async Task<OneOf<QueryablePaging<RoleAssignedUserDto>, NotFound>> GetRoleAssignedUsersAsync(Guid roleId,
-        IGridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var getRoleResult = await GetRoleByIdAsync(roleId, cancellationToken);
-        if (!getRoleResult.TryPickT0(out var role, out var notFound))
-        {
-            return notFound;
-        }
-
-        var users = role.Type == SourceType.Tenant
-            ? GetTenantRoleAssignedUsersQuery(roleId)
-            : GetNotTenantRoleAssignedUsersQuery(roleId);
-
-        return await users
-            .ProjectToType<RoleAssignedUserDto>()
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
 
     public async Task<OneOf<Success, NotFound>> UnassignUsersAsync(Guid roleId,
