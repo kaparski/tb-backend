@@ -14,7 +14,6 @@ using TaxBeacon.Administration.Users.Activities.Models;
 using TaxBeacon.Administration.Users.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Options;
@@ -22,9 +21,10 @@ using TaxBeacon.Common.Services;
 using TaxBeacon.Email;
 using TaxBeacon.Email.Messages;
 using TaxBeacon.Administration.Users.Extensions;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
-using RolesConstants = TaxBeacon.Common.Roles.Roles;
+using RolesConstants = TaxBeacon.Common.Constants.Roles;
 
 namespace TaxBeacon.Administration.Users;
 

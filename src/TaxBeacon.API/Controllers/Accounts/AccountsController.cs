@@ -8,6 +8,7 @@ using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Accounts;
 
 namespace TaxBeacon.API.Controllers.Accounts;
 

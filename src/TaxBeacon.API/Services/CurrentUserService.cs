@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.Common.Services;
-using RolesConstants = TaxBeacon.Common.Roles.Roles;
+using RolesConstants = TaxBeacon.Common.Constants.Roles;
 
 namespace TaxBeacon.API.Services;
 

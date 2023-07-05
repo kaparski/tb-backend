@@ -1,5 +1,5 @@
 ﻿
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 
 namespace TaxBeacon.DAL.Administration.Entities;
 

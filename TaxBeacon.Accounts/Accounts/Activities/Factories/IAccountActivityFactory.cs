@@ -1,4 +1,4 @@
-﻿using TaxBeacon.Common.Enums.Activities;
+﻿using TaxBeacon.Common.Enums.Accounts.Activities;
 using TaxBeacon.Common.Models;
 
 namespace TaxBeacon.Accounts.Accounts.Activities.Factories;

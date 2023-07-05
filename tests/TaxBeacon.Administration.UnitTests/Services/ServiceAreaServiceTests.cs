@@ -9,7 +9,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -18,6 +17,7 @@ using TaxBeacon.Administration.ServiceAreas;
 using TaxBeacon.Administration.ServiceAreas.Activities.Factories;
 using TaxBeacon.Administration.ServiceAreas.Activities.Models;
 using TaxBeacon.Administration.ServiceAreas.Models;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
 

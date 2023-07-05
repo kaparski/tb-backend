@@ -9,6 +9,7 @@ using TaxBeacon.Accounts.Entities;
 using TaxBeacon.Accounts.Entities.Activities.Factories;
 using TaxBeacon.Accounts.Entities.Models;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Accounts;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Accounts;
@@ -152,7 +153,7 @@ public class EntityServiceTest
             new Faker<Entity>()
                 .RuleFor(t => t.Id, f => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
-                .RuleFor(t => t.Type, t => Common.Accounts.AccountEntityType.LLC.Name)
+                .RuleFor(t => t.Type, t => AccountEntityType.LLC.Name)
                 .RuleFor(t => t.City, f => f.Address.City())
                 .RuleFor(t => t.State, t => State.NM)
                 .RuleFor(t => t.CreatedDateTimeUtc, f => DateTime.UtcNow)

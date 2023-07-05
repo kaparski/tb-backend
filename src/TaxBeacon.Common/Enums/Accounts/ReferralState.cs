@@ -1,6 +1,6 @@
 ﻿using Ardalis.SmartEnum;
 
-namespace TaxBeacon.Common.Accounts;
+namespace TaxBeacon.Common.Enums.Accounts;
 
 public class ReferralState: SmartEnum<ReferralState>
 {

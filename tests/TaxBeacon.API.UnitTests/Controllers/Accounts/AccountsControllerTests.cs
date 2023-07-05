@@ -13,6 +13,7 @@ using TaxBeacon.API.Controllers.Accounts;
 using TaxBeacon.API.Controllers.Accounts.Requests;
 using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Accounts;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Accounts;
 

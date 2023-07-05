@@ -1,4 +1,4 @@
-﻿namespace TaxBeacon.Common.Enums;
+﻿namespace TaxBeacon.Common.Enums.Accounts;
 
 public enum AccountInfoType
 {

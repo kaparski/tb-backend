@@ -8,7 +8,6 @@ using Moq;
 using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -16,6 +15,7 @@ using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.Administration.Divisions;
 using TaxBeacon.Administration.Divisions.Activities.Factories;
 using TaxBeacon.Administration.Divisions.Models;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
 
