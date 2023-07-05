@@ -2,7 +2,7 @@
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
 
-namespace TaxBeacon.API.Extensions.SwaggerServices;
+namespace TaxBeacon.API.Extensions;
 
 public static class SwaggerServiceExtension
 {

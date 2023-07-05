@@ -27,7 +27,6 @@ using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Responses;
 using TaxBeacon.API.Extensions.GridifyServices;
-using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.API.Services;
 using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Options;
@@ -36,6 +35,7 @@ using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.Email.Options;
 using TaxBeacon.API.Controllers.Programs.Responses;
+using TaxBeacon.API.Extensions;
 using TaxBeacon.DAL.Accounts;
 using TaxBeacon.DAL.Administration;
 
