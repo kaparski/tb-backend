@@ -1,5 +1,4 @@
-﻿using Gridify;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -44,41 +43,6 @@ public class TeamsController: BaseController
         var query = _teamService.QueryTeams();
 
         return query.ProjectToType<TeamResponse>();
-    }
-
-    /// <summary>
-    /// Get teams for Table
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /teams?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DPeter```<br/><br/>
-    ///     ```GET /teams?page=2&amp;pageSize=5&amp;orderBy=name```
-    /// </remarks>
-    /// <response code="200">Returns teams</response>
-    /// <response code="400">Invalid filtering or sorting</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <returns>List of teams</returns>
-    [HasPermissions(
-        Common.Permissions.Teams.Read,
-        Common.Permissions.Teams.ReadExport,
-        Common.Permissions.Teams.ReadWrite)]
-    [HttpGet(Name = "GetTeams")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<TeamResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetTeamList([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<TeamDto>())
-        {
-            return BadRequest();
-        }
-
-        var teams = await _teamService.GetTeamsAsync(query, cancellationToken);
-        return Ok(new QueryablePaging<TeamResponse>(teams.Count, teams.Query.ProjectToType<TeamResponse>()));
     }
 
     /// <summary>
@@ -178,38 +142,5 @@ public class TeamsController: BaseController
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<TeamResponse>()),
             notFound => NotFound());
-    }
-
-    /// <summary>
-    /// Get Team Users
-    /// </summary>
-    /// <response code="200">Returns Team Users</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">User does not have the required permission</response>
-    /// <response code="404">Team is not found</response>
-    /// <returns>A collection of users assigned to a particular team</returns>
-    [HasPermissions(Common.Permissions.Teams.Read, Common.Permissions.Teams.ReadWrite)]
-    [HttpGet("{id:guid}/users", Name = "TeamUsers")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<TeamUserResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetTeamUsers([FromQuery] GridifyQuery query, [FromRoute] Guid id,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<TeamUserDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var oneOfTeamUsers = await _teamService.GetTeamUsersAsync(id, query, cancellationToken);
-
-        return oneOfTeamUsers.Match<IActionResult>(
-            result => Ok(new QueryablePaging<TeamUserResponse>(result.Count,
-                result.Query.ProjectToType<TeamUserResponse>())),
-            _ => NotFound());
     }
 }

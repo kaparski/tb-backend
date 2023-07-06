@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
@@ -16,6 +17,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Controllers.Contacts.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.Divisions.Responses;
 using TaxBeacon.API.Controllers.Entities.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Locations.Responses;
@@ -24,17 +26,16 @@ using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Responses;
-using TaxBeacon.API.Extensions.GridifyServices;
-using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.API.Services;
-using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.Email.Options;
 using TaxBeacon.API.Controllers.Programs.Responses;
+using TaxBeacon.API.Extensions;
 using TaxBeacon.API.Extensions.Cors;
+using TaxBeacon.Common.Enums.Accounts;
 using TaxBeacon.DAL.Accounts;
 using TaxBeacon.DAL.Administration;
 
@@ -46,6 +47,7 @@ public static class ConfigureServices
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddAzureClients(builder => builder.AddSearchClient(configuration.GetSection("SearchClient")));
         services.AddCorsService(configuration);
 
         services.AddRouting(options => options.LowercaseUrls = true);
@@ -92,7 +94,6 @@ public static class ConfigureServices
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
         services.AddSwagger();
-        services.AddGridify(configuration);
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.Configure<AzureAd>(configuration.GetSection(nameof(AzureAd)));
@@ -115,6 +116,7 @@ public static class ConfigureServices
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICurrentTimeZoneService, CurrentTimeZoneService>();
+        services.AddScoped<IGlobalSearchService, GlobalSearchService>();
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
         return services;

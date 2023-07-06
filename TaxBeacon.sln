@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -51,6 +50,22 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Accounts.UnitTests", "tests\TaxBeacon.Accounts.UnitTests\TaxBeacon.Accounts.UnitTests.csproj", "{7737CC30-B5DD-4EC4-9325-A16089464D93}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Email", "TaxBeacon.Email\TaxBeacon.Email.csproj", "{157028CA-D228-4A56-9D5E-7FEB2FB05978}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "global-search", "global-search", "{544BE82C-921A-4121-AA2A-749C4A0E4A3E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "views", "views", "{A9C78954-3276-4DEF-BD61-1B140EF0ABE9}"
+	ProjectSection(SolutionItems) = preProject
+		global-search\views\AccountsSearchView.sql = global-search\views\AccountsSearchView.sql
+		global-search\views\DivisionsSearchView.sql = global-search\views\DivisionsSearchView.sql
+		global-search\views\ProgramsSearchView.sql = global-search\views\ProgramsSearchView.sql
+		global-search\views\RolesSearchView.sql = global-search\views\RolesSearchView.sql
+		global-search\views\TenantsSearchView.sql = global-search\views\TenantsSearchView.sql
+		global-search\views\DepartmentsSearchView.sql = global-search\views\DepartmentsSearchView.sql
+		global-search\views\ServiceAreasSearchView.sql = global-search\views\ServiceAreasSearchView.sql
+		global-search\views\JobTitlesSearchView.sql = global-search\views\JobTitlesSearchView.sql
+		global-search\views\UsersSearchView.sql = global-search\views\UsersSearchView.sql
+		global-search\views\TeamsSearchView.sql = global-search\views\TeamsSearchView.sql
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -108,6 +123,7 @@ Global
 		{B5D3EDE5-3410-4C66-940C-C2F31248C06B} = {1D7F782A-6727-4216-A75A-986158A288A6}
 		{7737CC30-B5DD-4EC4-9325-A16089464D93} = {78103266-2E2B-4710-9139-0AB800F12A71}
 		{157028CA-D228-4A56-9D5E-7FEB2FB05978} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{A9C78954-3276-4DEF-BD61-1B140EF0ABE9} = {544BE82C-921A-4121-AA2A-749C4A0E4A3E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F4F2EB9-1E83-4F40-B890-0589652A15CA}

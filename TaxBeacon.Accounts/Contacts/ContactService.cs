@@ -9,7 +9,7 @@ using TaxBeacon.Accounts.Contacts.Activities.Models;
 using TaxBeacon.Accounts.Contacts.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Accounts.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Accounts;
 using TaxBeacon.DAL.Accounts.Entities;

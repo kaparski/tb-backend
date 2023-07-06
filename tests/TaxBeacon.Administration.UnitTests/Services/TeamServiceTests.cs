@@ -1,14 +1,12 @@
 ﻿using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -16,6 +14,7 @@ using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.Administration.Teams;
 using TaxBeacon.Administration.Teams.Activities.Factories;
 using TaxBeacon.Administration.Teams.Models;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
 
@@ -90,110 +89,6 @@ public class TeamServiceTests
         _teamService = new TeamService(_currentUserServiceMock.Object, _teamServiceLoggerMock.Object, _dbContextMock, _dateTimeFormatterMock.Object,
             _dateTimeServiceMock.Object, _listToFileConverters.Object, _activityFactories.Object);
 
-    }
-
-    [Fact]
-    public async Task GetTeamsAsync_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfTeamsAndCorrectPage()
-    {
-        // Arrange
-        var teams = TestData.TestTeam.Generate(5);
-        _currentUser.Team = teams[0];
-        await _dbContextMock.Teams.AddRangeAsync(teams);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery
-        {
-            Page = 1,
-            PageSize = 10,
-            OrderBy = "name asc"
-        };
-
-        // Act
-        var pageOfTeams = await _teamService.GetTeamsAsync(query, default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            pageOfTeams.Should().NotBeNull();
-            var listOfTeams = pageOfTeams.Query.ToList();
-            listOfTeams.Count.Should().Be(5);
-            listOfTeams.Select(x => x.Name).Should().BeInAscendingOrder((o1, o2) => string.Compare(o1, o2, StringComparison.InvariantCultureIgnoreCase));
-            pageOfTeams.Count.Should().Be(5);
-        }
-    }
-
-    [Fact]
-    public async Task GetTeamsAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfTeamsInDescendingOrder()
-    {
-        // Arrange
-        var teams = TestData.TestTeam.Generate(7);
-        await _dbContextMock.Teams.AddRangeAsync(teams);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery
-        {
-            Page = 1,
-            PageSize = 4,
-            OrderBy = "name desc"
-        };
-
-        // Act
-        var pageOfTeams = await _teamService.GetTeamsAsync(query, default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            pageOfTeams.Should().NotBeNull();
-            var listOfTeams = pageOfTeams.Query.ToList();
-            listOfTeams.Count.Should().Be(4);
-            listOfTeams.Select(x => x.Name).Should().BeInDescendingOrder();
-            pageOfTeams.Count.Should().Be(7);
-        }
-    }
-
-    [Fact]
-    public async Task GetTeamsAsync_NoTeams_NumberOfTeamsEmpty()
-    {
-        // Arrange
-        var query = new GridifyQuery
-        {
-            Page = 1,
-            PageSize = 123,
-            OrderBy = "name desc"
-        };
-
-        // Act
-        var pageOfTeams = await _teamService.GetTeamsAsync(query, default);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            pageOfTeams.Should().NotBeNull();
-            var listOfTeams = pageOfTeams.Query.ToList();
-            listOfTeams.Count.Should().Be(0);
-            pageOfTeams.Count.Should().Be(0);
-        }
-    }
-
-    [Theory]
-    [InlineData(7, 25, 2)]
-    [InlineData(10, 5, 3)]
-    public async Task GetTeamsAsync_PageNumberOutsideOfTotalRange_TeamListIsEmpty(int numberOfTeams, int pageSize, int pageNumber)
-    {
-        // Arrange
-        var teams = TestData.TestTeam.Generate(numberOfTeams);
-        await _dbContextMock.Teams.AddRangeAsync(teams);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery
-        {
-            Page = pageNumber,
-            PageSize = pageSize,
-            OrderBy = "name asc",
-        };
-
-        // Act
-        var pageOfTeams = await _teamService.GetTeamsAsync(query, default);
-
-        // Assert
-        pageOfTeams.Query.Count().Should().Be(0);
     }
 
     [Theory]
@@ -439,121 +334,6 @@ public class TeamServiceTests
         {
             actualResult.TryPickT1(out _, out _).Should().BeTrue();
         }
-    }
-
-    [Fact]
-    public async Task GetTeamUsersAsync_TeamExists_ShouldReturnAscOrderOfUsersAndCorrectPage()
-    {
-        //Arrange
-        var team = TestData.TestTeam.Generate();
-        team.TenantId = TenantId;
-        team.Users = TestData.TestUser.Generate(5);
-        await _dbContextMock.TenantUsers.AddRangeAsync(team.Users.Select(u => new TenantUser { UserId = u.Id, TenantId = TenantId }));
-        await _dbContextMock.Teams.AddRangeAsync(team);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery
-        {
-            Page = 3,
-            PageSize = 2,
-            OrderBy = "email asc"
-        };
-
-        //Act
-        var resultOneOf = await _teamService.GetTeamUsersAsync(team.Id, query);
-
-        //Assert
-        using (new AssertionScope())
-        {
-            resultOneOf.TryPickT0(out var teamUsers, out _).Should().BeTrue();
-            teamUsers.Count.Should().Be(5);
-            teamUsers.Query.Count().Should().Be(1);
-            var users = teamUsers.Query.ToList();
-            users.Should().BeInAscendingOrder((o1, o2) => string.Compare(o1.Email, o2.Email, StringComparison.InvariantCultureIgnoreCase));
-            users.Should().AllSatisfy(u => u.FullName.Should().NotBeNullOrEmpty());
-            users.Should().AllSatisfy(u => u.JobTitle.Should().NotBeNullOrEmpty());
-        }
-    }
-
-    [Fact]
-    public async Task GetTeamUsersAsync_TeamExistsAndFilterApplied_ShouldReturnUsersWithSpecificTeam()
-    {
-        //Arrange
-        var team = TestData.TestTeam.Generate();
-        team.TenantId = TenantId;
-        var listOfUsers = TestData.TestUser.Generate(5);
-        team.Users = listOfUsers;
-        await _dbContextMock.TenantUsers.AddRangeAsync(team.Users.Select(u => new TenantUser { UserId = u.Id, TenantId = TenantId }));
-        await _dbContextMock.Teams.AddRangeAsync(team);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery
-        {
-            Page = 1,
-            PageSize = 5,
-            OrderBy = "department asc",
-            Filter = "department=" + listOfUsers.First().Department!.Name
-        };
-
-        //Act
-        var resultOneOf = await _teamService.GetTeamUsersAsync(team.Id, query);
-
-        //Assert
-        using (new AssertionScope())
-        {
-            resultOneOf.TryPickT0(out var teamUsers, out _).Should().BeTrue();
-            teamUsers.Count.Should().BeGreaterThan(0);
-            teamUsers.Query.Count().Should().BeGreaterThan(0);
-            var users = teamUsers.Query.ToList();
-            users.Should().BeInAscendingOrder((o1, o2) => string.Compare(o1.Department, o2.Department, StringComparison.InvariantCultureIgnoreCase));
-            users.Should().AllSatisfy(u => u.Department.Should().Be(users.First().Department));
-        }
-    }
-
-    [Fact]
-    public async Task GetTeamUsersAsync_TeamDoesNotExist_ShouldReturnNotFound()
-    {
-        //Arrange
-        var team = TestData.TestTeam.Generate();
-        team.TenantId = TenantId;
-        await _dbContextMock.Teams.AddRangeAsync(team);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery
-        {
-            Page = 3,
-            PageSize = 2,
-            OrderBy = "email asc"
-        };
-
-        //Act
-        var resultOneOf = await _teamService.GetTeamUsersAsync(new Guid(), query);
-
-        //Assert
-        resultOneOf.IsT0.Should().BeFalse();
-        resultOneOf.IsT1.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetTeamUsersAsync_UserIsFromDifferentTenant_ShouldReturnNotFound()
-    {
-        //Arrange
-        var team = TestData.TestTeam.Generate();
-        team.TenantId = TenantId;
-        await _dbContextMock.Teams.AddRangeAsync(team);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery
-        {
-            Page = 3,
-            PageSize = 2,
-            OrderBy = "email asc"
-        };
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(Guid.NewGuid());
-
-        //Act
-        var resultOneOf = await _teamService.GetTeamUsersAsync(new Guid(), query);
-
-        //Assert
-        resultOneOf.IsT0.Should().BeFalse();
-        resultOneOf.IsT1.Should().BeTrue();
     }
 
     [Fact]

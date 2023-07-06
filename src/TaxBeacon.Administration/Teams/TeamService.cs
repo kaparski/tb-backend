@@ -1,6 +1,4 @@
-﻿using Gridify;
-using Gridify.EntityFramework;
-using Mapster;
+﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -12,7 +10,7 @@ using TaxBeacon.Administration.Teams.Activities.Models;
 using TaxBeacon.Administration.Teams.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
@@ -67,21 +65,6 @@ public class TeamService: ITeamService
 
         return itemDtos;
     }
-
-    public async Task<QueryablePaging<TeamDto>> GetTeamsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) => await _context
-            .Teams
-            .Where(x => x.TenantId == _currentUserService.TenantId)
-            .Select(t => new TeamDto()
-            {
-                Id = t.Id,
-                Name = t.Name,
-                NumberOfUsers = t.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
-                CreatedDateTimeUtc = t.CreatedDateTimeUtc,
-                Description = t.Description
-            })
-            .AsNoTracking()
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<byte[]> ExportTeamsAsync(FileType fileType, CancellationToken cancellationToken = default)
     {
@@ -189,36 +172,6 @@ CancellationToken cancellationToken = default)
             _currentUserService.UserId);
 
         return team.Adapt<TeamDto>();
-    }
-
-    public async Task<OneOf<QueryablePaging<TeamUserDto>, NotFound>> GetTeamUsersAsync(Guid teamId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
-    {
-        var tenantId = _currentUserService.TenantId;
-
-        var entity = await _context
-            .Teams
-            .SingleOrDefaultAsync(t => t.Id == teamId && t.TenantId == tenantId, cancellationToken);
-
-        if (entity is null)
-        {
-            return new NotFound();
-        }
-
-        var users = await _context
-            .Users
-            .Where(u => u.TeamId == teamId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
-            .Select(u => new TeamUserDto
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FullName = u.FullName,
-                JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
-                ServiceArea = u.ServiceArea == null ? string.Empty : u.ServiceArea.Name,
-                Department = u.Department == null ? string.Empty : u.Department.Name,
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        return users;
     }
 
     public async Task<IQueryable<TeamUserDto>> QueryTeamUsersAsync(Guid teamId)

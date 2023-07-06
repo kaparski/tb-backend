@@ -124,6 +124,37 @@ namespace TaxBeacon.DAL.Migrations
                     b.ToTable("Accounts");
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountActivityLog", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("AccountPartType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Event")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<long>("Revision")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("TenantId", "AccountId", "Date");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("AccountActivityLogs");
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountView", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1920,6 +1951,25 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountActivityLog", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                        .WithMany("AccountActivityLogs")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("AccountActivityLogs")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.ClientNoAction)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Client", b =>
                 {
                     b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
@@ -2562,6 +2612,8 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Account", b =>
                 {
+                    b.Navigation("AccountActivityLogs");
+
                     b.Navigation("Client");
 
                     b.Navigation("Contacts");
@@ -2664,6 +2716,8 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Administration.Entities.Tenant", b =>
                 {
+                    b.Navigation("AccountActivityLogs");
+
                     b.Navigation("Accounts");
 
                     b.Navigation("Clients");

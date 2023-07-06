@@ -1,4 +1,3 @@
-using Gridify;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -43,46 +42,6 @@ public class ProgramsController: BaseController
         var query = _programService.QueryPrograms();
 
         return query.ProjectToType<ProgramResponse>();
-    }
-
-    /// <summary>
-    /// List of all programs
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /programs?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
-    /// </remarks>
-    /// <response code="200">Returns list of all programs</response>
-    /// <response code="400">Invalid filtering or sorting</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <returns>List of all programs</returns>
-    [HasPermissions(
-        Common.Permissions.Programs.Read,
-        Common.Permissions.Programs.ReadWrite,
-        Common.Permissions.Programs.ReadExport)]
-    [HttpGet(Name = "GetAllPrograms")]
-    [HasSuperAdminRole]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<ProgramResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetAllProgramsAsync([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<ProgramDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var programs = await _programService.GetAllProgramsAsync(query, cancellationToken);
-
-        var response = new QueryablePaging<ProgramResponse>(programs.Count,
-            programs.Query.ProjectToType<ProgramResponse>());
-
-        return Ok(response);
     }
 
     /// <summary>
@@ -170,47 +129,6 @@ public class ProgramsController: BaseController
         return oneOfActivities.Match<IActionResult>(
             result => Ok(result.Adapt<ProgramActivityHistoryResponse>()),
             _ => NotFound());
-    }
-
-    /// <summary>
-    /// Get tenant programs for table
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /tenants/programs?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DPeter```<br/><br/>
-    ///     ```GET /tenants/programs?page=2&amp;pageSize=5&amp;orderBy=name```
-    /// </remarks>
-    /// <response code="200">Returns programs</response>
-    /// <response code="400">Invalid filtering or sorting</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <returns>List of Tenant Programs</returns>
-    [HasPermissions(
-        Common.Permissions.Programs.Read,
-        Common.Permissions.Programs.ReadExport,
-        Common.Permissions.Programs.ReadWrite)]
-    [HttpGet("/api/tenants/programs", Name = "GetTenantPrograms")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<TenantProgramResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetAllTenantProgramsAsync([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<TenantProgramDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var programs = await _programService.GetAllTenantProgramsAsync(query, cancellationToken);
-
-        var response = new QueryablePaging<TenantProgramResponse>(programs.Count,
-            programs.Query.ProjectToType<TenantProgramResponse>());
-
-        return Ok(response);
     }
 
     /// <summary>

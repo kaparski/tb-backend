@@ -1,7 +1,6 @@
 using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -9,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -18,6 +16,7 @@ using TaxBeacon.Administration.ServiceAreas;
 using TaxBeacon.Administration.ServiceAreas.Activities.Factories;
 using TaxBeacon.Administration.ServiceAreas.Activities.Models;
 using TaxBeacon.Administration.ServiceAreas.Models;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
 
@@ -76,74 +75,6 @@ public class ServiceAreaServiceTests
             dateTimeFormatterMock.Object,
             listToFileConverters.Object,
             activityFactoriesMock.Object);
-    }
-
-    [Fact]
-    public async Task GetServiceAreasAsync_TenantIdExistsAndQueryIsValidOrderByNameAscending_ReturnsServiceAreas()
-    {
-        // Arrange
-        var items = TestData.TestServiceArea.Generate(5);
-        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name asc", };
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var pageOfServiceAreas = await _serviceAreaService.GetServiceAreasAsync(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            pageOfServiceAreas.Should().NotBeNull();
-            pageOfServiceAreas.Count.Should().Be(5);
-            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
-            listOfServiceAreas.Count.Should().Be(5);
-            listOfServiceAreas.Select(x => x.Name).Should().BeInAscendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetServiceAreasAsync_TenantIdExistsAndQueryIsValidOrderByNameDescending_ReturnsServiceAreas()
-    {
-        // Arrange
-        var items = TestData.TestServiceArea.Generate(5);
-        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "name desc", };
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var pageOfServiceAreas = await _serviceAreaService.GetServiceAreasAsync(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            pageOfServiceAreas.Should().NotBeNull();
-            pageOfServiceAreas.Count.Should().Be(5);
-            var listOfServiceAreas = pageOfServiceAreas.Query.ToList();
-            listOfServiceAreas.Count.Should().Be(5);
-            listOfServiceAreas.Select(x => x.Name).Should().BeInDescendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetServiceAreasAsync_TenantIdExistsAndPageNumberIsOutOfRange_ReturnsNotFound()
-    {
-        // Arrange
-        var items = TestData.TestServiceArea.Generate(5);
-        await _dbContextMock.ServiceAreas.AddRangeAsync(items);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 5, OrderBy = "name asc", };
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var actualResult = await _serviceAreaService.GetServiceAreasAsync(query, default);
-
-        // Arrange
-        actualResult.Query.Count().Should().Be(0);
     }
 
     [Fact]
@@ -441,80 +372,6 @@ public class ServiceAreaServiceTests
         {
             actualResult.IsT1.Should().BeTrue();
             actualResult.IsT0.Should().BeFalse();
-        }
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_ServiceAreaExists_ShouldReturnUsersInAscendingOrder()
-    {
-        // Arrange
-        TestData.TestServiceArea.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(4));
-        var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "fullname asc", };
-        var serviceArea = TestData.TestServiceArea.Generate();
-        await _dbContextMock.ServiceAreas.AddAsync(serviceArea);
-        await _dbContextMock.SaveChangesAsync();
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var actualResult = await _serviceAreaService.GetUsersAsync(serviceArea.Id, query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.TryPickT0(out var pageOfUsers, out _);
-            pageOfUsers.Should().NotBeNull();
-            pageOfUsers.Count.Should().Be(4);
-            var listOfUsers = pageOfUsers.Query.ToList();
-            listOfUsers.Count.Should().Be(2);
-            listOfUsers.Select(x => x.FullName).Should().BeInAscendingOrder();
-        }
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_ServiceAreaDoesNotExists_ShouldReturnNotFound()
-    {
-        // Arrange
-        TestData.TestServiceArea.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(1));
-        var query = new GridifyQuery { Page = 2, PageSize = 2, OrderBy = "fullname asc", };
-        var serviceArea = TestData.TestServiceArea.Generate();
-        await _dbContextMock.ServiceAreas.AddAsync(serviceArea);
-        await _dbContextMock.SaveChangesAsync();
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var actualResult = await _serviceAreaService.GetUsersAsync(new Guid(), query, default);
-
-        // Arrange
-        actualResult.IsT1.Should().BeTrue();
-        actualResult.IsT0.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_ServiceAreaExists_ShouldReturnUsersInDescendingOrderByEmail()
-    {
-        // Arrange
-        TestData.TestServiceArea.RuleFor(x => x.Users, _ => TestData.TestUser.Generate(3));
-        var query = new GridifyQuery { Page = 1, PageSize = 5, OrderBy = "email desc", };
-        var serviceArea = TestData.TestServiceArea.Generate();
-        await _dbContextMock.ServiceAreas.AddAsync(serviceArea);
-        await _dbContextMock.SaveChangesAsync();
-
-        _currentUserServiceMock.Setup(x => x.TenantId).Returns(TestData.TestTenantId);
-
-        // Act
-        var actualResult = await _serviceAreaService.GetUsersAsync(serviceArea.Id, query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            actualResult.TryPickT0(out var pageOfUsers, out _);
-            pageOfUsers.Should().NotBeNull();
-            pageOfUsers.Count.Should().Be(3);
-            var listOfUsers = pageOfUsers.Query.ToList();
-            listOfUsers.Count.Should().Be(3);
-            listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
         }
     }
 

@@ -5,7 +5,7 @@ using Moq;
 using System.Reflection;
 using TaxBeacon.Administration.Divisions;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Tenants;
+using TaxBeacon.API.Controllers.Divisions;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Divisions;
 

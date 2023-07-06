@@ -1,6 +1,4 @@
-﻿using Gridify;
-using Gridify.EntityFramework;
-using Mapster;
+﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -12,7 +10,7 @@ using TaxBeacon.Administration.Tenants.Activities.Models;
 using TaxBeacon.Administration.Tenants.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Administration;
@@ -53,12 +51,6 @@ public class TenantService: ITenantService
     public IQueryable<TenantDto> QueryTenants() => _context
         .Tenants
         .ProjectToType<TenantDto>();
-
-    public async Task<QueryablePaging<TenantDto>> GetTenantsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) => await _context
-        .Tenants
-        .ProjectToType<TenantDto>()
-        .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<byte[]> ExportTenantsAsync(FileType fileType,
         CancellationToken cancellationToken)
@@ -153,18 +145,15 @@ public class TenantService: ITenantService
         return tenant.Adapt<TenantDto>();
     }
 
-    public async Task SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId,
+    public async Task<TenantDto?> SwitchToTenantAsync(Guid? oldTenantId, Guid? newTenantId,
         CancellationToken cancellationToken = default)
     {
         var currentUserId = _currentUserService.UserId;
-
-        var currentUser = await _context
-            .Users
-            .Where(u => u.Id == currentUserId && u.UserRoles.Any(ur => ur.Role.Name == Common.Roles.Roles.SuperAdmin))
-            .Select(u => new { u.FullName, Roles = string.Join(", ", u.UserRoles.Select(r => r.Role.Name)) })
-            .SingleAsync(cancellationToken);
-
+        var currentUserInfo = _currentUserService.UserInfo;
         var now = _dateTimeService.UtcNow;
+        var tenant = await _context.Tenants
+            .ProjectToType<TenantDto>()
+            .SingleOrDefaultAsync(t => t.Id == newTenantId, cancellationToken);
 
         if (oldTenantId != null)
         {
@@ -173,8 +162,8 @@ public class TenantService: ITenantService
                 EventType = TenantEventType.TenantExitedEvent,
                 Event = JsonSerializer.Serialize(
                     new TenantExitedEvent(currentUserId,
-                        currentUser.Roles,
-                        currentUser.FullName,
+                        currentUserInfo.Roles,
+                        currentUserInfo.FullName,
                         now)),
                 TenantId = oldTenantId.Value,
                 Date = now,
@@ -194,8 +183,8 @@ public class TenantService: ITenantService
                 EventType = TenantEventType.TenantEnteredEvent,
                 Event = JsonSerializer.Serialize(
                     new TenantEnteredEvent(currentUserId,
-                        currentUser.Roles,
-                        currentUser.FullName,
+                        currentUserInfo.Roles,
+                        currentUserInfo.FullName,
                         now)),
                 TenantId = newTenantId.Value,
                 Date = now,
@@ -213,6 +202,8 @@ public class TenantService: ITenantService
             currentUserId,
             oldTenantId,
             newTenantId);
+
+        return tenant;
     }
 
     public async Task<OneOf<Success, NotFound>> ToggleDivisionsAsync(bool divisionEnabled,
@@ -241,7 +232,7 @@ public class TenantService: ITenantService
         }
 
         return await _context.TenantsPrograms
-            .Where(tp => tp.TenantId == tenantId && tp.IsDeleted == false)
+            .Where(tp => tp.TenantId == tenantId && tp.IsDeleted != true)
             .Select(tp => tp.Program)
             .OrderBy(x => x.Name)
             .ProjectToType<AssignedTenantProgramDto>()
@@ -262,13 +253,16 @@ public class TenantService: ITenantService
             .ToArrayAsync(cancellationToken);
 
         var currentUserInfo = _currentUserService.UserInfo;
-        var assignedProgramsIds = await AssignProgramsAsync(tenantId, existingPrograms, programsIds, currentUserInfo, cancellationToken);
-        var unassignProgramsIds = await UnassignProgramsAsync(tenantId, existingPrograms, programsIds, currentUserInfo, cancellationToken);
+        var assignedProgramsIds =
+            await AssignProgramsAsync(tenantId, existingPrograms, programsIds, currentUserInfo, cancellationToken);
+        var unassignProgramsIds = await UnassignProgramsAsync(tenantId, existingPrograms, programsIds, currentUserInfo,
+            cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         if (assignedProgramsIds.Any())
         {
-            _logger.LogInformation("{dateTime} - The tenant ({tenantId}) has been assigned programs: {programsIds} by the user({userId})",
+            _logger.LogInformation(
+                "{dateTime} - The tenant ({tenantId}) has been assigned programs: {programsIds} by the user({userId})",
                 _dateTimeService.UtcNow,
                 tenantId,
                 assignedProgramsIds,
@@ -277,7 +271,8 @@ public class TenantService: ITenantService
 
         if (unassignProgramsIds.Any())
         {
-            _logger.LogInformation("{dateTime} - The tenant ({tenantId}) has been unassigned programs: {programsIds} by the user({userId})",
+            _logger.LogInformation(
+                "{dateTime} - The tenant ({tenantId}) has been unassigned programs: {programsIds} by the user({userId})",
                 _dateTimeService.UtcNow,
                 tenantId,
                 unassignProgramsIds,
@@ -311,9 +306,16 @@ public class TenantService: ITenantService
             addedProgramsIds.Select(id => new TenantProgram
             {
                 TenantId = tenantId,
+                Tenant = null,
                 ProgramId = id,
+                Program = null,
+                DeactivationDateTimeUtc = null,
+                ReactivationDateTimeUtc = null,
                 Status = Status.Active,
-                IsDeleted = false
+                IsDeleted = false,
+                DeletedDateTimeUtc = null,
+                DepartmentTenantPrograms = null,
+                ServiceAreaTenantPrograms = null
             }),
             cancellationToken);
         _context.TenantsPrograms.UpdateRange(returnedPrograms);
@@ -356,7 +358,7 @@ public class TenantService: ITenantService
         CancellationToken cancellationToken)
     {
         var deletedProgramsIds = existingPrograms
-            .Where(tp => !newProgramsIds.Contains(tp.ProgramId) && tp.IsDeleted == false)
+            .Where(tp => !newProgramsIds.Contains(tp.ProgramId) && tp.IsDeleted != true)
             .Select(tp => tp.ProgramId)
             .ToArray();
 

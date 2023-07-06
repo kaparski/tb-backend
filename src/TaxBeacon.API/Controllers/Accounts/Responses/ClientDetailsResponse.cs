@@ -14,5 +14,4 @@ public record ClientDetailsResponse(
     DateTime? ReactivationDateTimeUtc,
     DateTime CreatedDateTimeUtc,
     ContactDto? PrimaryContact,
-    ICollection<ClientManagerDto> ClientManagers
-    );
+    ICollection<ClientManagerDto> ClientManagers);

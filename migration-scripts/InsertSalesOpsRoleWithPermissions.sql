@@ -32,10 +32,13 @@ BEGIN TRY
 
     INSERT INTO @salesOpsRolePermissions (Name)
     VALUES ('Accounts.Read'),
+           ('Accounts.ReadWrite'),
            ('Accounts.ReadExport'),
            ('Clients.Read'),
            ('Clients.ReadWrite'),
            ('Clients.ReadExport'),
+           ('Clients.Activation'),
+           ('Prospects.Activation'),
            ('Referrals.Read'),
            ('Referrals.ReadWrite'),
            ('Referrals.ReadExport'),
@@ -43,10 +46,10 @@ BEGIN TRY
            ('Contacts.Read'),
            ('Contacts.ReadWrite'),
            ('Contacts.ReadExport'),
+           ('Contacts.Activation'),
            ('Locations.Read'),
-           ('TableFilters.Read'),
            ('Entities.Read'),
-           ('Entities.ReadWrite'),
+           ('TableFilters.Read'),
            ('TableFilters.ReadWrite');
 
     INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)

@@ -11,7 +11,7 @@ public class ServiceAreaResponse
 
     public Guid? DepartmentId { get; set; }
 
-    public string Department { get; set; } = string.Empty;
+    public string? Department { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
 

@@ -5,4 +5,5 @@ public enum Tenants
     Read,
     ReadWrite,
     ReadExport,
+    Switch
 }

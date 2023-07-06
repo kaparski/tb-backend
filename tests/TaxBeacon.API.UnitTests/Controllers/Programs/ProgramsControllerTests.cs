@@ -1,7 +1,6 @@
 using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -16,6 +15,7 @@ using TaxBeacon.API.Controllers.Programs.Requests;
 using TaxBeacon.API.Controllers.Programs;
 using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Administration;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 
@@ -47,77 +47,6 @@ public class ProgramsControllerTests
                 }
             }
         };
-    }
-
-    [Fact]
-    public async Task GetAllProgramsAsync_ValidQuery_ReturnsSuccessfulStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _programServiceMock.Setup(p => p.GetAllProgramsAsync(query, default))
-            .ReturnsAsync(
-                new QueryablePaging<ProgramDto>(0, Enumerable.Empty<ProgramDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetAllProgramsAsync(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<ProgramResponse>>();
-        }
-    }
-
-    [Fact]
-    public async Task GetAllProgramsAsync_InvalidQuery_ReturnsBadRequest()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _programServiceMock.Setup(p => p.GetAllProgramsAsync(query, default))
-            .ReturnsAsync(
-                new QueryablePaging<ProgramDto>(0, Enumerable.Empty<ProgramDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetAllProgramsAsync(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as BadRequestResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<BadRequestResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
-    }
-
-    [Fact]
-    public void GetAllProgramsAsync_HasAppropriatePermissions()
-    {
-        // Arrange
-        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetAllProgramsAsync)
-            .Method;
-        var permissions = new object[]
-        {
-            Common.Permissions.Programs.Read, Common.Permissions.Programs.ReadWrite,
-            Common.Permissions.Programs.ReadExport
-        };
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should()
-                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
-        }
     }
 
     [Fact]
@@ -290,77 +219,6 @@ public class ProgramsControllerTests
     {
         // Arrange
         var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetProgramDetailsAsync)
-            .Method;
-        var permissions = new object[]
-        {
-            Common.Permissions.Programs.Read, Common.Permissions.Programs.ReadWrite,
-            Common.Permissions.Programs.ReadExport
-        };
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should()
-                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
-        }
-    }
-
-    [Fact]
-    public async Task GetAllTenantProgramsAsync_ValidQuery_ReturnsSuccessfulStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _programServiceMock.Setup(p => p.GetAllTenantProgramsAsync(query, default))
-            .ReturnsAsync(
-                new QueryablePaging<TenantProgramDto>(0, Enumerable.Empty<TenantProgramDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetAllTenantProgramsAsync(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<TenantProgramResponse>>();
-        }
-    }
-
-    [Fact]
-    public async Task GetAllTenantProgramsAsync_InvalidQuery_ReturnsBadRequest()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _programServiceMock.Setup(p => p.GetAllTenantProgramsAsync(query, default))
-            .ReturnsAsync(
-                new QueryablePaging<TenantProgramDto>(0, Enumerable.Empty<TenantProgramDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetAllTenantProgramsAsync(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as BadRequestResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<BadRequestResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
-    }
-
-    [Fact]
-    public void GetAllTenantProgramsAsync_HasAppropriatePermissions()
-    {
-        // Arrange
-        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetAllProgramsAsync)
             .Method;
         var permissions = new object[]
         {
