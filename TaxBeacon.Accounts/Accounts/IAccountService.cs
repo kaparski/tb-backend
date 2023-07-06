@@ -22,9 +22,12 @@ public interface IAccountService
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
-    
+
     Task<OneOf<AccountDetailsDto, NotFound>> UpdateClientStatusAsync(Guid accountId,
         Status status,
         AccountInfoType accountInfoType,
+        CancellationToken cancellationToken = default);
+
+    Task<OneOf<ClientDto, NotFound>> QueryClients(Guid accountId,
         CancellationToken cancellationToken = default);
 }

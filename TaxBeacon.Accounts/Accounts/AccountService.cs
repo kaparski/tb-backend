@@ -112,7 +112,7 @@ public class AccountService: IAccountService
         };
 
         var query = _context.AccountActivityLogs
-            .Where(log => log.AccountId == id 
+            .Where(log => log.AccountId == id
                           && log.TenantId == _currentUserService.TenantId
                           && accountParts.Contains(log.AccountPartType));
 
@@ -211,5 +211,10 @@ public class AccountService: IAccountService
             _currentUserService.UserId);
 
         return await GetAccountDetailsByIdAsync(accountId, accountInfoType, cancellationToken);
+    }
+
+    public Task<OneOf<ClientDto, NotFound>> QueryClients(Guid accountId, CancellationToken cancellationToken = default)
+    {
+
     }
 }
