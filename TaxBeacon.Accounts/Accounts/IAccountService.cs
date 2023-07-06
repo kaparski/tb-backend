@@ -29,4 +29,6 @@ public interface IAccountService
         CancellationToken cancellationToken = default);
 
     IQueryable<ClientProspectDto> QueryClientsProspects();
+
+    Task<byte[]> ExportClientsProspects(FileType fileType, CancellationToken cancellationToken);
 }
