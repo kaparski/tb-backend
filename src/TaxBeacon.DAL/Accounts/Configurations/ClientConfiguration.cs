@@ -42,5 +42,9 @@ public class ClientConfiguration: IEntityTypeConfiguration<Client>
             .Property(c => c.AnnualRevenue)
             .HasColumnType("decimal")
             .HasPrecision(15, 2);
+
+        client
+            .Property(u => u.DaysOpen)
+            .HasComputedColumnSql("DATEDIFF(second, COALESCE(ActivationDateTimeUtc, CreatedDateTimeUtc), GETUTCDATE()) / 86400");
     }
 }

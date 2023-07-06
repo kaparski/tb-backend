@@ -8,6 +8,7 @@ using System.Text.Json;
 using TaxBeacon.Accounts.Accounts.Activities.Factories;
 using TaxBeacon.Accounts.Accounts.Activities.Models;
 using TaxBeacon.Accounts.Accounts.Models;
+using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Activities;
@@ -213,8 +214,16 @@ public class AccountService: IAccountService
         return await GetAccountDetailsByIdAsync(accountId, accountInfoType, cancellationToken);
     }
 
-    public Task<OneOf<ClientDto, NotFound>> QueryClients(Guid accountId, CancellationToken cancellationToken = default)
-    {
-
-    }
+    public IQueryable<ClientProspectDto> QueryClientsProspects() =>
+        _context.Clients
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.ClientProspect.Name)
+            .Select(x => new ClientProspectDto
+            {
+                AccountId = x.AccountId,
+                Name = x.Account.Name,
+                City = x.Account.City,
+                State = x.Account.State,
+                Status = x.Status,
+                DaysOpen = x.DaysOpen
+            });
 }

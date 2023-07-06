@@ -31,6 +31,10 @@ public class Client: BaseEntity
 
     public int? FoundationYear { get; set; }
 
+    public int DaysOpen { get; set; }
+
+    public DateTime? ActivationDateTimeUtc { get; set; }
+
     public DateTime? DeactivationDateTimeUtc { get; set; }
 
     public DateTime? ReactivationDateTimeUtc { get; set; }

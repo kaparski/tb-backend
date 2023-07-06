@@ -28,6 +28,5 @@ public interface IAccountService
         AccountInfoType accountInfoType,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<ClientDto, NotFound>> QueryClients(Guid accountId,
-        CancellationToken cancellationToken = default);
+    IQueryable<ClientProspectDto> QueryClientsProspects();
 }
