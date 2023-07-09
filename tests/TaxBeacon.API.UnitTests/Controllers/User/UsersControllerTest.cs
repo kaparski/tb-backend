@@ -150,6 +150,7 @@ public class UsersControllerTest
                 f.Name.FirstName(),
                 f.Name.LastName(),
                 f.Internet.Email(),
+                null,
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Guid.NewGuid(),

@@ -49,4 +49,6 @@ public class UserDto
     public Guid? TeamId { get; set; }
 
     public string? Team { get; set; }
+
+    public UserType UserType { get; set; }
 }

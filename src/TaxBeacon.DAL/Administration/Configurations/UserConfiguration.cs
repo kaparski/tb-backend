@@ -48,7 +48,7 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
 
         user
             .HasIndex(u => u.Email)
-            .IsUnique();
+            .IsUnique(false);
 
         user
             .Property(u => u.Id)
@@ -57,5 +57,20 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
         user
             .Property(u => u.CreatedDateTimeUtc)
             .HasDefaultValueSql("GETUTCDATE()");
+
+        user
+            .Property(u => u.AadB2CObjectId)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(256);
+
+        user
+            .HasIndex(u => u.AadB2CObjectId)
+            .IsClustered(false);
+
+        user
+            .Property(u => u.UserType)
+            .HasConversion<string>()
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
     }
 }

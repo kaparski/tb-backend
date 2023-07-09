@@ -6,6 +6,10 @@ public class User: BaseEntity
 {
     public Guid Id { get; set; }
 
+    public string? AadB2CObjectId { get; set; }
+
+    public UserType UserType { get; set; }
+
     public string FirstName { get; set; } = null!;
 
     public string LegalName { get; set; } = null!;

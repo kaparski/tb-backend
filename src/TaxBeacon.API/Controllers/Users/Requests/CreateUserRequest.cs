@@ -8,6 +8,7 @@ public record CreateUserRequest(
     string LegalName,
     string LastName,
     string Email,
+    string? ExternalAadUserObjectId,
     Guid? DivisionId,
     Guid? DepartmentId,
     Guid? ServiceAreaId,
