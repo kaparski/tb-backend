@@ -241,7 +241,7 @@ public sealed class AccountsServiceTests
     }
 
     [Fact]
-    public async Task QueryClientsProspects_ReturnsAccountsDto()
+    public async Task QueryClientsProspectsAsync_ReturnsAccountsDto()
     {
         // Arrange
         var tenants = TestData.TenantFaker.Generate(2);
@@ -279,7 +279,7 @@ public sealed class AccountsServiceTests
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
-    public async Task ExportClientsProspects_ReturnsAccountExportDto(FileType fileType)
+    public async Task ExportClientsProspectsAsync_ReturnsAccountExportDto(FileType fileType)
     {
         // Arrange
         var tenants = TestData.TenantFaker.Generate(2);

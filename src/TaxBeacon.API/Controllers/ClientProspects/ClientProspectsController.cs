@@ -37,7 +37,7 @@ public class ClientProspectsController: BaseController
     /// <summary>
     /// Export client prospects
     /// </summary>
-    /// <response code="200">Returns client prospects</response>
+    /// <response code="200">Export client prospects</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <returns>Export client prospects</returns>

@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.Accounts.Accounts;
-using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts.Requests;
 using TaxBeacon.API.Controllers.Accounts.Responses;
