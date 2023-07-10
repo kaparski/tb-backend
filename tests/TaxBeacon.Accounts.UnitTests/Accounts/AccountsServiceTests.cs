@@ -187,6 +187,7 @@ public sealed class AccountsServiceTests
         var tenant = TestData.TenantFaker.Generate();
         var accounts = TestData.AccountsFaker
             .RuleFor(a => a.TenantId, _ => tenant.Id)
+            .RuleFor(a => a.Phones, _ => TestData.PhoneFaker.Generate(3))
             .Generate(3);
 
         await _dbContextMock.Tenants.AddAsync(tenant);
@@ -203,6 +204,7 @@ public sealed class AccountsServiceTests
         // Assert
         actualResult.TryPickT0(out var actualAccount, out _).Should().BeTrue();
         actualAccount.Should().BeEquivalentTo(accounts[0], opt => opt.ExcludingMissingMembers());
+        actualAccount.Phones.Should().BeEquivalentTo(accounts[0].Phones, opt => opt.ExcludingMissingMembers());
     }
 
     [Fact]
@@ -263,11 +265,10 @@ public sealed class AccountsServiceTests
                 .RuleFor(a => a.Country, f => f.Address.Country())
                 .RuleFor(a => a.State, f => f.PickRandom<State>())
                 .RuleFor(a => a.City, f => f.Address.City())
-                .RuleFor(a => a.StreetAddress1, f => f.Address.StreetAddress())
+                .RuleFor(a => a.Address1, f => f.Address.StreetAddress())
+                .RuleFor(a => a.Address2, f => f.Address.StreetAddress())
                 .RuleFor(a => a.Zip, f => f.Random.Number(10000, 9999999).ToString())
-                .RuleFor(a => a.County, f => f.Address.County())
-                .RuleFor(a => a.Phone, f => f.Random.Number(100000000, 99999999).ToString())
-                .RuleFor(a => a.Fax, f => f.Random.Number(100000000, 99999999).ToString());
+                .RuleFor(a => a.County, f => f.Address.County());
 
         public static readonly Faker<Client> ClientsFaker =
             new Faker<Client>()
@@ -291,5 +292,11 @@ public sealed class AccountsServiceTests
                 .RuleFor(t => t.Id, _ => Guid.NewGuid())
                 .RuleFor(t => t.Name, f => f.Company.CompanyName())
                 .RuleFor(t => t.CreatedDateTimeUtc, _ => DateTime.UtcNow);
+
+        public static readonly Faker<Phone> PhoneFaker =
+            new Faker<Phone>()
+                .RuleFor(p => p.Id, _ => Guid.NewGuid())
+                .RuleFor(p => p.Number, f => f.Phone.PhoneNumber())
+                .RuleFor(p => p.Type, f => f.PickRandom("Office", "Mobile", "Fax"));
     }
 }
