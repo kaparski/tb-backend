@@ -113,7 +113,7 @@ public class AccountService: IAccountService
         };
 
         var query = _context.AccountActivityLogs
-            .Where(log => log.AccountId == id 
+            .Where(log => log.AccountId == id
                           && log.TenantId == _currentUserService.TenantId
                           && accountParts.Contains(log.AccountPartType));
 
@@ -212,5 +212,41 @@ public class AccountService: IAccountService
             _currentUserService.UserId);
 
         return await GetAccountDetailsByIdAsync(accountId, accountInfoType, cancellationToken);
+    }
+
+    public IQueryable<ClientProspectDto> QueryClientsProspects() =>
+        _context.Clients
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.ClientProspect.Name)
+            .Select(x => new ClientProspectDto
+            {
+                AccountId = x.AccountId,
+                Name = x.Account.Name,
+                City = x.Account.City,
+                State = x.Account.State,
+                Status = x.Status,
+                DaysOpen = x.DaysOpen
+            });
+
+    public async Task<byte[]> ExportClientsProspectsAsync(FileType fileType, CancellationToken cancellationToken)
+    {
+        var list = await _context
+            .Clients
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.ClientProspect.Name)
+            .OrderBy(x => x.Account.Name)
+            .Select(x => new ClientProspectExportDto()
+            {
+                Name = x.Account.Name,
+                City = x.Account.City,
+                State = x.Account.State,
+                Status = x.Status,
+                DaysOpen = x.DaysOpen
+            })
+            .ToListAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Client prospects export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(list);
     }
 }

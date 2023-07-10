@@ -23,9 +23,13 @@ public interface IAccountService
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
-    
+
     Task<OneOf<AccountDetailsDto, NotFound>> UpdateClientStatusAsync(Guid accountId,
         Status status,
         AccountInfoType accountInfoType,
         CancellationToken cancellationToken = default);
+
+    IQueryable<ClientProspectDto> QueryClientsProspects();
+
+    Task<byte[]> ExportClientsProspectsAsync(FileType fileType, CancellationToken cancellationToken);
 }

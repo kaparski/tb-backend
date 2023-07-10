@@ -243,6 +243,77 @@ public sealed class AccountsServiceTests
         actualResult.IsT0.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task QueryClientsProspects_ReturnsAccountsDto()
+    {
+        // Arrange
+        var tenants = TestData.TenantFaker.Generate(2);
+        await _dbContextMock.Tenants.AddRangeAsync(tenants);
+
+        var tenantId = tenants[0].Id;
+        var clients = TestData.ClientsFaker
+            .RuleFor(a => a.TenantId, f => tenants[0].Id)
+            .RuleFor(a => a.State, f => "Client prospect")
+            .Generate(3);
+        await _dbContextMock.Clients.AddRangeAsync(clients);
+        await _dbContextMock.SaveChangesAsync();
+        var expectedClients = _dbContextMock
+            .Clients
+            .Where(a => a.TenantId == tenantId)
+            .ToList();
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantId)
+            .Returns(tenants[0].Id);
+
+        // Act
+        var actualResult = await _accountService
+            .QueryClientsProspects()
+            .ToListAsync();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.Should().HaveCount(expectedClients.Count)
+                .And.AllBeOfType<ClientProspectDto>();
+        }
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportClientsProspectsAsync_ReturnsAccountExportDto(FileType fileType)
+    {
+        // Arrange
+        var tenants = TestData.TenantFaker.Generate(2);
+        await _dbContextMock.Tenants.AddRangeAsync(tenants);
+        var currentTenantId = tenants[0].Id;
+
+        var clients = TestData.ClientsFaker
+            .RuleFor(a => a.TenantId, f => currentTenantId)
+            .Generate(2);
+
+        await _dbContextMock.Clients.AddRangeAsync(clients);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        await  _accountService.ExportClientsProspectsAsync(fileType, default);
+
+        // Assert
+        if (fileType == FileType.Csv)
+        {
+            _csvMock.Verify(x => x.Convert(It.IsAny<List<ClientProspectExportDto>>()), Times.Once());
+        }
+        else if (fileType == FileType.Xlsx)
+        {
+            _xlsxMock.Verify(x => x.Convert(It.IsAny<List<ClientProspectExportDto>>()), Times.Once());
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
@@ -272,6 +343,7 @@ public sealed class AccountsServiceTests
 
         public static readonly Faker<Client> ClientsFaker =
             new Faker<Client>()
+                .RuleFor(a => a.Account, _ => AccountsFaker.Generate())
                 .RuleFor(a => a.CreatedDateTimeUtc, _ => DateTime.UtcNow)
                 .RuleFor(a => a.ReactivationDateTimeUtc, _ => DateTime.UtcNow)
                 .RuleFor(a => a.DeactivationDateTimeUtc, _ => DateTime.UtcNow)
@@ -279,7 +351,8 @@ public sealed class AccountsServiceTests
                 .RuleFor(a => a.FoundationYear, f => f.Random.Number(1900, 2023))
                 .RuleFor(a => a.State, f => f.PickRandom("Client", "Client prospect"))
                 .RuleFor(a => a.EmployeeCount, f => f.Random.Number(0, 1000))
-                .RuleFor(a => a.Status, f => f.PickRandom<Status>());
+                .RuleFor(a => a.Status, f => f.PickRandom<Status>())
+                .RuleFor(a => a.DaysOpen, f => f.Random.Number(0, 1000));
 
         public static readonly Faker<Referral> ReferralsFaker =
             new Faker<Referral>()
