@@ -28,5 +28,7 @@ public enum EntityType
 
     Locations = 13,
 
-    Entity = 14
+    Entity = 14,
+
+    ClientProspects = 15,
 }
