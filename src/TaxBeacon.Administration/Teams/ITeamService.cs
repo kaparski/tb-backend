@@ -1,5 +1,4 @@
-﻿using Gridify;
-using OneOf;
+﻿using OneOf;
 using OneOf.Types;
 using TaxBeacon.Administration.Teams.Models;
 using TaxBeacon.Common.Enums;
@@ -11,9 +10,6 @@ public interface ITeamService
 {
     IQueryable<TeamDto> QueryTeams();
 
-    Task<QueryablePaging<TeamDto>> GetTeamsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
-
     Task<byte[]> ExportTeamsAsync(FileType fileType, CancellationToken cancellationToken = default);
 
     Task<OneOf<TeamDto, NotFound>> UpdateTeamAsync(Guid id, UpdateTeamDto updateTeamDto,
@@ -23,8 +19,6 @@ public interface ITeamService
 
     Task<OneOf<ActivityDto, NotFound>> GetActivitiesAsync(Guid teamId, int page = 1,
         int pageSize = 10, CancellationToken cancellationToken = default);
-
-    Task<OneOf<QueryablePaging<TeamUserDto>, NotFound>> GetTeamUsersAsync(Guid teamId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default);
 
     Task<IQueryable<TeamUserDto>> QueryTeamUsersAsync(Guid teamId);
 }

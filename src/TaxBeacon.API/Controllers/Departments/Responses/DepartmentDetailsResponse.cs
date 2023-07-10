@@ -1,7 +1,7 @@
 ﻿
+using TaxBeacon.API.Controllers.Divisions.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
-using TaxBeacon.API.Controllers.Tenants.Responses;
 
 namespace TaxBeacon.API.Controllers.Departments.Responses;
 

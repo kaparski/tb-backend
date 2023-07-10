@@ -1,6 +1,4 @@
-﻿using Gridify;
-using Gridify.EntityFramework;
-using Mapster;
+﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -12,7 +10,7 @@ using TaxBeacon.Administration.Departments.Activities.Models;
 using TaxBeacon.Administration.Departments.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Models;
@@ -72,26 +70,6 @@ public class DepartmentService: IDepartmentService
 
         return itemDtos;
     }
-
-    public async Task<QueryablePaging<DepartmentDto>> GetDepartmentsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Departments
-            .Where(d => d.TenantId == _currentUserService.TenantId)
-            .Select(d => new DepartmentDto
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Description = d.Description,
-                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
-                Division = d.Division == null ? string.Empty : d.Division.Name,
-                ServiceArea = d.ServiceAreas.Select(sa => sa.Name)
-                    .GroupBy(sa => 1)
-                    .Select(g => string.Join(string.Empty, g.Select(s => "|" + s + "|")))
-                    .FirstOrDefault() ?? string.Empty
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<byte[]> ExportDepartmentsAsync(FileType fileType,
         CancellationToken cancellationToken)
@@ -309,36 +287,6 @@ public class DepartmentService: IDepartmentService
             _currentUserService.UserId);
 
         return (await GetDepartmentDetailsAsync(id, cancellationToken)).AsT0;
-    }
-
-    public async Task<OneOf<QueryablePaging<DepartmentUserDto>, NotFound>> GetDepartmentUsersAsync(Guid departmentId, GridifyQuery gridifyQuery, CancellationToken cancellationToken = default)
-    {
-        var tenantId = _currentUserService.TenantId;
-
-        var entity = await _context
-            .Departments
-            .SingleOrDefaultAsync(t => t.Id == departmentId && t.TenantId == tenantId, cancellationToken);
-
-        if (entity is null)
-        {
-            return new NotFound();
-        }
-
-        var users = await _context
-            .Users
-            .Where(u => u.DepartmentId == departmentId && u.TenantUsers.Any(x => x.TenantId == tenantId && x.UserId == u.Id))
-            .Select(u => new DepartmentUserDto
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FullName = u.FullName,
-                JobTitle = u.JobTitle == null ? string.Empty : u.JobTitle.Name,
-                ServiceArea = u.ServiceArea == null ? string.Empty : u.ServiceArea.Name,
-                Team = u.Team == null ? string.Empty : u.Team.Name,
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        return users;
     }
 
     public async Task<IQueryable<DepartmentUserDto>> QueryDepartmentUsersAsync(Guid departmentId)

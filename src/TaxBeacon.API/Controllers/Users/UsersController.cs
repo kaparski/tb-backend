@@ -1,5 +1,4 @@
-﻿using Gridify;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -46,42 +45,6 @@ public class UsersController: BaseController
         var query = _userService.QueryUsers();
 
         return query.ProjectToType<UserResponse>();
-    }
-
-    /// <summary>
-    /// List of users
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /users?page=1&amp;pageSize=10&amp;orderBy=email%20desc&amp;filter=firstName%3DPeter```<br/><br/>
-    ///     ```GET /users?page=2&amp;pageSize=5&amp;orderBy=email```
-    /// </remarks>
-    /// <response code="200">Returns users</response>
-    /// <response code="400">Invalid filtering or sorting</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <returns>List of users</returns>
-    [HasPermissions(
-        Common.Permissions.Users.Read,
-        Common.Permissions.Users.ReadWrite,
-        Common.Permissions.Users.ReadExport)]
-    [HttpGet(Name = "GetUsers")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<UserResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetUserList([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<UserDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var users = await _userService.GetUsersAsync(query, cancellationToken);
-        return Ok(new QueryablePaging<UserResponse>(users.Count, users.Query.ProjectToType<UserResponse>()));
     }
 
     /// <summary>

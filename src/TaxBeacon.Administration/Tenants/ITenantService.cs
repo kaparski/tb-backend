@@ -1,5 +1,4 @@
-﻿using Gridify;
-using OneOf;
+﻿using OneOf;
 using OneOf.Types;
 using TaxBeacon.Administration.Tenants.Models;
 using TaxBeacon.Common.Enums;
@@ -10,9 +9,6 @@ namespace TaxBeacon.Administration.Tenants;
 public interface ITenantService
 {
     IQueryable<TenantDto> QueryTenants();
-
-    Task<QueryablePaging<TenantDto>> GetTenantsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportTenantsAsync(FileType fileType, CancellationToken cancellationToken);
 

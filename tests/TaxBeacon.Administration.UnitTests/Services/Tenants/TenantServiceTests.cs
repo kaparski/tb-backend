@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,7 +9,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
@@ -18,6 +16,7 @@ using TaxBeacon.Administration.Tenants;
 using TaxBeacon.Administration.Tenants.Activities;
 using TaxBeacon.Administration.Tenants.Activities.Models;
 using TaxBeacon.Administration.Tenants.Models;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
 
@@ -80,101 +79,6 @@ public class TenantServiceTests
             _activityFactoriesMock.Object);
 
         TypeAdapterConfig.GlobalSettings.Scan(typeof(ITenantService).Assembly);
-    }
-
-    [Fact]
-    public async Task GetTenantsAsync_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfTenantsAndCorrectPage()
-    {
-        // Arrange
-        var tenants = TestData.TenantFaker.Generate(5);
-        await _dbContextMock.Tenants.AddRangeAsync(tenants);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "name asc" };
-
-        // Act
-        var pageOfTenants = await _tenantService.GetTenantsAsync(query);
-
-        // Assert
-        pageOfTenants.Should().NotBeNull();
-        var listOfTenants = pageOfTenants.Query.ToList();
-        listOfTenants.Count.Should().Be(5);
-        listOfTenants.Select(x => x.Name).Should().BeInAscendingOrder();
-        pageOfTenants.Count.Should().Be(5);
-    }
-
-    [Fact]
-    public async Task
-        GetTenantsAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfTenantsInDescendingOrder()
-    {
-        // Arrange
-        var tenants = TestData.TenantFaker.Generate(7);
-        await _dbContextMock.Tenants.AddRangeAsync(tenants);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "name desc" };
-
-        // Act
-        var pageOfTenants = await _tenantService.GetTenantsAsync(query);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            pageOfTenants.Should().NotBeNull();
-            var listOfTenants = pageOfTenants.Query.ToList();
-            listOfTenants.Count.Should().Be(4);
-            listOfTenants.Select(x => x.Name).Should().BeInDescendingOrder();
-            pageOfTenants.Count.Should().Be(7);
-        }
-    }
-
-    [Fact]
-    public async Task GetTenantsAsync_NoTenants_CorrectNumberOfTenants()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 123, OrderBy = "name desc" };
-
-        // Act
-        var pageOfTenants = await _tenantService.GetTenantsAsync(query);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            pageOfTenants.Should().NotBeNull();
-            var listOfTenants = pageOfTenants.Query.ToList();
-            listOfTenants.Count.Should().Be(0);
-            pageOfTenants.Count.Should().Be(0);
-        }
-    }
-
-    [Fact]
-    public async Task GetTenantsAsync_PageNumberOutsideOfTotalRange_TenantListIsEmpty()
-    {
-        // Arrange
-        var tenants = TestData.TenantFaker.Generate(7);
-        await _dbContextMock.Tenants.AddRangeAsync(tenants);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "name asc" };
-
-        // Act
-        var pageOfTenants = await _tenantService.GetTenantsAsync(query);
-
-        // Assert
-        pageOfTenants.Query.Count().Should().Be(0);
-    }
-
-    [Fact]
-    public async Task GetTenantsAsync_PageNumberRightOutsideOfTotalRange_TenantListIsEmpty()
-    {
-        // Arrange
-        var tenants = TestData.TenantFaker.Generate(10);
-        await _dbContextMock.Tenants.AddRangeAsync(tenants);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 3, PageSize = 5, OrderBy = "name asc" };
-
-        // Act
-        var pageOfTenants = await _tenantService.GetTenantsAsync(query);
-
-        // Assert
-        pageOfTenants.Query.Count().Should().Be(0);
     }
 
     [Theory]
@@ -399,7 +303,7 @@ public class TenantServiceTests
 
         _currentUserServiceMock
             .Setup(s => s.UserInfo)
-            .Returns((user.FullName, Common.Roles.Roles.SuperAdmin));
+            .Returns((user.FullName, Common.Constants.Roles.SuperAdmin));
 
         //Act
         var actualResult = await _tenantService.SwitchToTenantAsync(null, tenant.Id);
@@ -431,7 +335,7 @@ public class TenantServiceTests
 
         _currentUserServiceMock
             .Setup(s => s.UserInfo)
-            .Returns((user.FullName, Common.Roles.Roles.SuperAdmin));
+            .Returns((user.FullName, Common.Constants.Roles.SuperAdmin));
 
         //Act
         var actualResult = await _tenantService.SwitchToTenantAsync(TestData.TestTenantId, null);
@@ -467,7 +371,7 @@ public class TenantServiceTests
 
         _currentUserServiceMock
             .Setup(s => s.UserInfo)
-            .Returns((user.FullName, Common.Roles.Roles.SuperAdmin));
+            .Returns((user.FullName, Common.Constants.Roles.SuperAdmin));
 
         var oldTenantId = Guid.NewGuid();
 

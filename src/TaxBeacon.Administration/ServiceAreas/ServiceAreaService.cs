@@ -1,5 +1,3 @@
-using Gridify;
-using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -12,7 +10,7 @@ using TaxBeacon.Administration.ServiceAreas.Activities.Models;
 using TaxBeacon.Administration.ServiceAreas.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Exceptions;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
@@ -68,22 +66,6 @@ public class ServiceAreaService: IServiceAreaService
 
         return itemDtos;
     }
-
-    public async Task<QueryablePaging<ServiceAreaDto>> GetServiceAreasAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .ServiceAreas
-            .Where(d => d.TenantId == _currentUserService.TenantId)
-            .Select(d => new ServiceAreaDto()
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Description = d.Description,
-                CreatedDateTimeUtc = d.CreatedDateTimeUtc,
-                AssignedUsersCount = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
-                Department = d.Department == null ? string.Empty : d.Department.Name
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public async Task<byte[]> ExportServiceAreasAsync(FileType fileType,
         CancellationToken cancellationToken)
@@ -203,35 +185,6 @@ public class ServiceAreaService: IServiceAreaService
 
         return new ActivityDto(pageCount,
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
-    }
-
-    public async Task<OneOf<QueryablePaging<ServiceAreaUserDto>, NotFound>> GetUsersAsync(Guid serviceAreaId, GridifyQuery gridifyQuery, CancellationToken cancellationToken)
-    {
-        var currentTenantId = _currentUserService.TenantId;
-        var serviceArea = await _context.ServiceAreas
-            .FirstOrDefaultAsync(sa => sa.Id == serviceAreaId && sa.TenantId == currentTenantId,
-                cancellationToken);
-
-        if (serviceArea is null)
-        {
-            return new NotFound();
-        }
-
-        var users = await _context
-            .Users
-            .AsNoTracking()
-            .Where(sa => sa.TenantUsers.Any(x => x.TenantId == currentTenantId) && sa.ServiceAreaId == serviceAreaId)
-            .Select(d => new ServiceAreaUserDto()
-            {
-                Id = d.Id,
-                FullName = d.FullName,
-                Email = d.Email,
-                Team = d.Team != null ? d.Team.Name : string.Empty,
-                JobTitle = d.JobTitle != null ? d.JobTitle.Name : string.Empty,
-            })
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
-
-        return users;
     }
 
     public async Task<IQueryable<ServiceAreaUserDto>> QueryUsersAsync(Guid serviceAreaId)

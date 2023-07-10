@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -12,7 +11,6 @@ using System.Net.Mail;
 using System.Text.RegularExpressions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
@@ -22,6 +20,7 @@ using TaxBeacon.Administration.Users;
 using TaxBeacon.Administration.Users.Activities.Factories;
 using TaxBeacon.Administration.Users.Activities.Models;
 using TaxBeacon.Administration.Users.Models;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -207,99 +206,6 @@ public class UserServiceTests
             _dateTimeServiceMock
                 .Verify(ds => ds.UtcNow, Times.Never);
         }
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_AscendingOrderingAndPaginationOfLastPage_AscendingOrderOfUsersAndCorrectPage()
-    {
-        // Arrange
-        var users = TestData.TestUser.Generate(5);
-        var tenant = TestData.TestTenant.Generate();
-
-        await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.Users.AddRangeAsync(users);
-        await _dbContextMock.TenantUsers.AddRangeAsync(users.Select(u => new TenantUser
-        {
-            TenantId = tenant.Id,
-            UserId = u.Id
-        }));
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 10, OrderBy = "email asc" };
-
-        _currentUserServiceMock
-            .Setup(service => service.TenantId)
-            .Returns(tenant.Id);
-
-        _currentUserServiceMock
-            .Setup(service => service.IsSuperAdmin)
-            .Returns(false);
-
-        // Act
-        var pageOfUsers = await _userService.GetUsersAsync(query);
-
-        // Assert
-        pageOfUsers.Should().NotBeNull();
-        var listOfUsers = pageOfUsers.Query.ToList();
-        listOfUsers.Count.Should().Be(5);
-        listOfUsers.Select(x => x.Email).Should().BeInAscendingOrder();
-        pageOfUsers.Count.Should().Be(5);
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_DescendingOrderingAndPaginationWithFirstPage_CorrectNumberOfUsersInDescendingOrder()
-    {
-        // Arrange
-        var users = TestData.TestUser.Generate(6);
-        var tenant = TestData.TestTenant.Generate();
-
-        await _dbContextMock.Tenants.AddAsync(tenant);
-        await _dbContextMock.Users.AddRangeAsync(users);
-        await _dbContextMock.TenantUsers.AddRangeAsync(users.Select(u => new TenantUser
-        {
-            TenantId = tenant.Id,
-            UserId = u.Id
-        }));
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 1, PageSize = 4, OrderBy = "email desc" };
-
-        _currentUserServiceMock
-            .Setup(service => service.TenantId)
-            .Returns(tenant.Id);
-
-        _currentUserServiceMock
-            .Setup(service => service.IsSuperAdmin)
-            .Returns(false);
-
-        // Act
-        var pageOfUsers = await _userService.GetUsersAsync(query);
-
-        // Assert
-        using (new AssertionScope())
-        {
-            pageOfUsers.Should().NotBeNull();
-            var listOfUsers = pageOfUsers.Query.ToList();
-            listOfUsers.Count.Should().Be(4);
-            listOfUsers.Select(x => x.Email).Should().BeInDescendingOrder();
-            pageOfUsers.Count.Should().Be(6);
-        }
-    }
-
-    [Fact]
-    public async Task GetUsersAsync_PageNumberOutsideOfTotalRange_UserListIsEmpty()
-    {
-        // Arrange
-        var users = TestData.TestUser.Generate(6);
-        await _dbContextMock.Users.AddRangeAsync(users);
-        await _dbContextMock.SaveChangesAsync();
-        var query = new GridifyQuery { Page = 2, PageSize = 25, OrderBy = "email asc", };
-
-        // Act
-        var pageOfUsers = await _userService.GetUsersAsync(query);
-
-        // Assert
-        pageOfUsers.Should().NotBeNull();
-        pageOfUsers.Query.Should().BeEmpty();
-        pageOfUsers.Count.Should().Be(0);
     }
 
     [Fact]

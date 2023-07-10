@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Gridify;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -47,53 +46,6 @@ public class TenantsControllerTests
         };
     }
 
-    [Fact]
-    public async Task GetTenantList_ValidQuery_ReturnSuccessStatusCode()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "name desc", };
-        _tenantServiceMock.Setup(p => p.GetTenantsAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<TenantDto>(0,
-                Enumerable.Empty<TenantDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetTenantList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as OkObjectResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<OkObjectResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeOfType<QueryablePaging<TenantResponse>>();
-        }
-    }
-
-    [Fact]
-    public async Task GetTenantList_InvalidQuery_ReturnBadRequest()
-    {
-        // Arrange
-        var query = new GridifyQuery { Page = 1, PageSize = 25, OrderBy = "nonexistentfield desc", };
-        _tenantServiceMock.Setup(p => p.GetTenantsAsync(query, default)).ReturnsAsync(
-            new QueryablePaging<TenantDto>(0,
-                Enumerable.Empty<TenantDto>().AsQueryable()));
-
-        // Act
-        var actualResponse = await _controller.GetTenantList(query, default);
-
-        // Arrange
-        using (new AssertionScope())
-        {
-            var actualResult = actualResponse as BadRequestResult;
-            actualResponse.Should().NotBeNull();
-            actualResult.Should().NotBeNull();
-            actualResponse.Should().BeOfType<BadRequestResult>();
-            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-        }
-    }
-
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
@@ -123,23 +75,6 @@ public class TenantsControllerTests
                 FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 _ => throw new InvalidOperationException()
             });
-        }
-    }
-
-    [Fact]
-    public void GetTenantList_MarkedWithCorrectHasPermissionsAttribute()
-    {
-        // Arrange
-        var methodInfo = ((Func<GridifyQuery, CancellationToken, Task<IActionResult>>)_controller.GetTenantList).Method;
-
-        // Act
-        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
-
-        // Assert
-        using (new AssertionScope())
-        {
-            hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Tenants.Read;Tenants.ReadWrite;Tenants.ReadExport");
         }
     }
 

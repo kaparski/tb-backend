@@ -1,5 +1,4 @@
-﻿using Gridify;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -44,43 +43,6 @@ public class TenantsController: BaseController
         var query = _tenantService.QueryTenants();
 
         return query.ProjectToType<TenantResponse>();
-    }
-
-    /// <summary>
-    /// List of tenants
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /tenants?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
-    ///     ```GET /tenants?page=2&amp;pageSize=5&amp;orderBy=name```
-    /// </remarks>
-    /// <response code="200">Returns tenants</response>
-    /// <response code="400">Invalid filtering or sorting</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <returns>List of tenants</returns>
-    [HasPermissions(
-        Common.Permissions.Tenants.Read,
-        Common.Permissions.Tenants.ReadWrite,
-        Common.Permissions.Tenants.ReadExport)]
-    [HttpGet(Name = "GetTenants")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(QueryablePaging<TenantResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetTenantList([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<TenantDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var tenants = await _tenantService.GetTenantsAsync(query, cancellationToken);
-        return Ok(new QueryablePaging<TenantResponse>(tenants.Count,
-            tenants.Query.ProjectToType<TenantResponse>()));
     }
 
     /// <summary>

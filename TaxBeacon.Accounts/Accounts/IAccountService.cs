@@ -2,6 +2,7 @@
 using OneOf.Types;
 using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Accounts;
 using TaxBeacon.Common.Models;
 
 namespace TaxBeacon.Accounts.Accounts;

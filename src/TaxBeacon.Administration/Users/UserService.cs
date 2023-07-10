@@ -1,6 +1,4 @@
-﻿using Gridify;
-using Gridify.EntityFramework;
-using Mapster;
+﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,7 +12,6 @@ using TaxBeacon.Administration.Users.Activities.Models;
 using TaxBeacon.Administration.Users.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Options;
@@ -22,9 +19,10 @@ using TaxBeacon.Common.Services;
 using TaxBeacon.Email;
 using TaxBeacon.Email.Messages;
 using TaxBeacon.Administration.Users.Extensions;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
-using RolesConstants = TaxBeacon.Common.Roles.Roles;
+using RolesConstants = TaxBeacon.Common.Constants.Roles;
 
 namespace TaxBeacon.Administration.Users;
 
@@ -99,23 +97,6 @@ public class UserService: IUserService
             await GetUserPermissionsAsync(user.Id, _currentUserService.TenantId, cancellationToken),
             await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken),
             tenant?.DivisionEnabled);
-    }
-
-    public async Task<QueryablePaging<UserDto>> GetUsersAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default)
-    {
-        var users = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
-            ? _context.Users
-                .AsNoTracking()
-                .Where(u => !u.TenantUsers.Any())
-                .MapToUserDtoWithNoTenantRoleNames(_context)
-            : _context
-                .Users
-                .AsNoTracking()
-                .Where(u => u.TenantUsers.Any(tu => tu.TenantId == _currentUserService.TenantId))
-                .MapToUserDtoWithTenantRoleNames(_context, _currentUserService);
-
-        return await users.GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
     }
 
     class UserRoleContainer

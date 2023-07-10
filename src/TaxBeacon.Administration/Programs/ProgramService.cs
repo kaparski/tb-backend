@@ -1,5 +1,3 @@
-using Gridify;
-using Gridify.EntityFramework;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,7 +11,7 @@ using TaxBeacon.Administration.Programs.Activities.Models;
 using TaxBeacon.Administration.Programs.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
@@ -51,12 +49,6 @@ public class ProgramService: IProgramService
         _activityFactories = programActivityFactories?.ToImmutableDictionary(x => (x.EventType, x.Revision))
                              ?? ImmutableDictionary<(ProgramEventType, uint), IProgramActivityFactory>.Empty;
     }
-
-    public Task<QueryablePaging<ProgramDto>> GetAllProgramsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) =>
-        _context.Programs
-            .ProjectToType<ProgramDto>()
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public IQueryable<ProgramDto> QueryPrograms() =>
         _context.Programs
@@ -287,13 +279,6 @@ public class ProgramService: IProgramService
 
         return await GetTenantProgramDetailsAsync(id, cancellationToken);
     }
-
-    public Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default) =>
-        _context.TenantsPrograms
-            .Where(x => x.TenantId == _currentUserService.TenantId && x.IsDeleted == false)
-            .ProjectToType<TenantProgramDto>()
-            .GridifyQueryableAsync(gridifyQuery, null, cancellationToken);
 
     public IQueryable<TenantProgramDto> QueryTenantPrograms()
     {

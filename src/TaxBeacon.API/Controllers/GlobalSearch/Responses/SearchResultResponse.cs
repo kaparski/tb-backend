@@ -1,5 +1,3 @@
-using Mapster;
-
 namespace TaxBeacon.API.Controllers.GlobalSearch.Responses;
 
 public record SearchResultsResponse(long Count, SearchResultItemResponse[] Items);

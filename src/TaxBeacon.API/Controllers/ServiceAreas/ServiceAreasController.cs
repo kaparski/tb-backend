@@ -1,5 +1,4 @@
-﻿using Gridify;
-using Mapster;
+﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -47,46 +46,6 @@ public class ServiceAreasController: BaseController
         var query = _serviceAreaService.QueryServiceAreas();
 
         return query.ProjectToType<ServiceAreaResponse>();
-    }
-
-    /// <summary>
-    /// List of service areas
-    /// </summary>
-    /// <remarks>
-    /// Sample requests: <br/><br/>
-    ///     ```GET /serviceareas?page=1&amp;pageSize=10&amp;orderBy=name%20desc&amp;filter=name%3DContoso```<br/><br/>
-    /// </remarks>
-    /// <response code="200">Returns all service areas</response>
-    /// <response code="400">Invalid filtering or sorting</response>
-    /// <response code="401">User is unauthorized</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <returns>List of service areas</returns>
-    [HasPermissions(
-        Common.Permissions.Departments.Read,
-        Common.Permissions.Departments.ReadWrite,
-        Common.Permissions.Departments.ReadExport,
-        Common.Permissions.ServiceAreas.Read,
-        Common.Permissions.ServiceAreas.ReadWrite,
-        Common.Permissions.ServiceAreas.ReadExport)]
-    [HttpGet(Name = "GetServiceAreas")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(ServiceAreaResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetServiceAreaList([FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<ServiceAreaDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var serviceAreas = await _serviceAreaService.GetServiceAreasAsync(query, cancellationToken);
-
-        return Ok(new QueryablePaging<ServiceAreaResponse>(serviceAreas.Count,
-            serviceAreas.Query.ProjectToType<ServiceAreaResponse>()));
     }
 
     /// <summary>
@@ -176,41 +135,6 @@ public class ServiceAreasController: BaseController
 
         return resultOneOf.Match<IActionResult>(
             result => Ok(result.Adapt<ServiceAreaDetailsResponse>()),
-            notFound => NotFound());
-    }
-
-    /// <summary>
-    /// Get Users of service area
-    /// </summary>
-    /// <response code="200">Returns Users of service area</response>
-    /// <response code="400">Invalid query parameters</response>
-    /// <response code="403">The user does not have the required permission</response>
-    /// <response code="404">Service area is not found</response>
-    /// <returns>Users of service area</returns>
-    [HasPermissions(Common.Permissions.ServiceAreas.ReadWrite)]
-    [HttpGet("{id:guid}/users", Name = "GetUsersOfServiceArea")]
-    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
-    [ProducesResponseType(typeof(ServiceAreaUserResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-
-    public async Task<IActionResult> GetUsers([FromRoute] Guid id, [FromQuery] GridifyQuery query,
-        CancellationToken cancellationToken)
-    {
-        if (!query.IsValid<ServiceAreaUserDto>())
-        {
-            // TODO: Add an object with errors that we can use to detail the answers
-            return BadRequest();
-        }
-
-        var resultOneOf = await _serviceAreaService.GetUsersAsync(
-            id, query, cancellationToken);
-
-        return resultOneOf.Match<IActionResult>(
-            users => Ok(new QueryablePaging<ServiceAreaUserResponse>(users.Count,
-                users.Query.ProjectToType<ServiceAreaUserResponse>())),
             notFound => NotFound());
     }
 }

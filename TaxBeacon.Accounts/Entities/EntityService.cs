@@ -8,7 +8,7 @@ using System.Text.Json;
 using TaxBeacon.Accounts.Entities.Activities.Factories;
 using TaxBeacon.Accounts.Entities.Activities.Models;
 using TaxBeacon.Accounts.Entities.Models;
-using TaxBeacon.Common.Enums.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Accounts;

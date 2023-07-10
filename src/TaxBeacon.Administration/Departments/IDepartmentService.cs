@@ -1,5 +1,4 @@
-﻿using Gridify;
-using OneOf;
+﻿using OneOf;
 using OneOf.Types;
 using TaxBeacon.Administration.Departments.Models;
 using TaxBeacon.Common.Enums;
@@ -12,9 +11,6 @@ public interface IDepartmentService
 {
     IQueryable<DepartmentDto> QueryDepartments();
 
-    Task<QueryablePaging<DepartmentDto>> GetDepartmentsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
-
     Task<byte[]> ExportDepartmentsAsync(FileType fileType,
         CancellationToken cancellationToken = default);
 
@@ -26,9 +22,6 @@ public interface IDepartmentService
 
     Task<OneOf<DepartmentDetailsDto, NotFound, InvalidOperation>> UpdateDepartmentAsync(Guid id, UpdateDepartmentDto updatedEntity,
             CancellationToken cancellationToken = default);
-
-    Task<OneOf<QueryablePaging<DepartmentUserDto>, NotFound>> GetDepartmentUsersAsync(Guid departmentId,
-        GridifyQuery gridifyQuery, CancellationToken cancellationToken = default);
 
     Task<IQueryable<DepartmentUserDto>> QueryDepartmentUsersAsync(Guid departmentId);
 

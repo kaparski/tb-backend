@@ -1,4 +1,3 @@
-using Gridify;
 using OneOf;
 using OneOf.Types;
 using TaxBeacon.Administration.Programs.Models;
@@ -15,12 +14,6 @@ public interface IProgramService
     Task<byte[]> ExportProgramsAsync(FileType fileType, CancellationToken cancellationToken = default);
 
     Task<byte[]> ExportTenantProgramsAsync(FileType fileType, CancellationToken cancellationToken = default);
-
-    Task<QueryablePaging<ProgramDto>> GetAllProgramsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
-
-    Task<QueryablePaging<TenantProgramDto>> GetAllTenantProgramsAsync(GridifyQuery gridifyQuery,
-        CancellationToken cancellationToken = default);
 
     Task<OneOf<ActivityDto, NotFound>> GetProgramActivityHistoryAsync(Guid id,
         int page = 1,

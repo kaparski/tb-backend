@@ -17,6 +17,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Controllers.Contacts.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
+using TaxBeacon.API.Controllers.Divisions.Responses;
 using TaxBeacon.API.Controllers.Entities.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.Locations.Responses;
@@ -25,16 +26,16 @@ using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 using TaxBeacon.API.Controllers.Teams.Responses;
 using TaxBeacon.API.Controllers.Tenants.Responses;
 using TaxBeacon.API.Controllers.Users.Responses;
-using TaxBeacon.API.Extensions.GridifyServices;
-using TaxBeacon.API.Extensions.SwaggerServices;
 using TaxBeacon.API.Services;
-using TaxBeacon.Common.Accounts;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Interceptors;
 using TaxBeacon.Email.Options;
 using TaxBeacon.API.Controllers.Programs.Responses;
+using TaxBeacon.API.Extensions;
+using TaxBeacon.API.Extensions.Cors;
+using TaxBeacon.Common.Enums.Accounts;
 using TaxBeacon.DAL.Accounts;
 using TaxBeacon.DAL.Administration;
 
@@ -47,9 +48,12 @@ public static class ConfigureServices
         IConfiguration configuration)
     {
         services.AddAzureClients(builder => builder.AddSearchClient(configuration.GetSection("SearchClient")));
+        services.AddCorsService(configuration);
+
         services.AddRouting(options => options.LowercaseUrls = true);
         services.AddControllers(/*options => options.Filters.Add<AuthorizeFilter>()*/)
-            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+            .AddJsonOptions(options =>
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
         // Configuring OData. Routing to OData endpoints is separate from normal Web API routing
             .AddOData(options => options
                 .EnableQueryFeatures()
@@ -94,7 +98,6 @@ public static class ConfigureServices
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
         services.AddSwagger();
-        services.AddGridify(configuration);
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.Configure<AzureAd>(configuration.GetSection(nameof(AzureAd)));
@@ -114,12 +117,6 @@ public static class ConfigureServices
         services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
         services.AddSingleton<IAuthorizationHandler, PermissionsAuthorizationHandler>();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionsAuthorizationPolicyProvider>();
-
-        services.AddCors(o => o.AddPolicy("DefaultCorsPolicy", builder =>
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .WithExposedHeaders("Content-Disposition")));
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICurrentTimeZoneService, CurrentTimeZoneService>();

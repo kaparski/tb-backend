@@ -8,6 +8,7 @@ using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Accounts;
 
 namespace TaxBeacon.API.Controllers.Accounts;
 
@@ -187,6 +188,6 @@ public class AccountsController: BaseController
             return AccountInfoType.Referral;
         }
 
-        return AccountInfoType.Account;
+        return AccountInfoType.General;
     }
 }
