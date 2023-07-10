@@ -5,9 +5,9 @@ using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.DAL.Accounts.Configurations;
 
-public class TenantUserAccountConfiguration: IEntityTypeConfiguration<TenantUserAccount>
+public class AccountSalespersonConfiguration: IEntityTypeConfiguration<AccountSalesperson>
 {
-    public void Configure(EntityTypeBuilder<TenantUserAccount> tenantUserAccount)
+    public void Configure(EntityTypeBuilder<AccountSalesperson> tenantUserAccount)
     {
         tenantUserAccount
             .HasOne<TenantUser>(tua => tua.TenantUser)
@@ -17,7 +17,7 @@ public class TenantUserAccountConfiguration: IEntityTypeConfiguration<TenantUser
 
         tenantUserAccount
             .HasOne<Account>(tua => tua.Account)
-            .WithMany(a => a.TenantUserAccounts)
+            .WithMany(a => a.Salespersons)
             .HasForeignKey(tua => tua.AccountId);
 
         tenantUserAccount.HasKey(tua => new { tua.TenantId, tua.AccountId, tua.UserId });
