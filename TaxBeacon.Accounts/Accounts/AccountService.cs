@@ -214,7 +214,7 @@ public class AccountService: IAccountService
         return await GetAccountDetailsByIdAsync(accountId, accountInfoType, cancellationToken);
     }
 
-    public IQueryable<ClientProspectDto> QueryClientsProspects() =>
+    public IQueryable<ClientProspectDto> QueryClientsProspectsAsync() =>
         _context.Clients
             .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.ClientProspect.Name)
             .Select(x => new ClientProspectDto
@@ -227,13 +227,13 @@ public class AccountService: IAccountService
                 DaysOpen = x.DaysOpen
             });
 
-    public async Task<byte[]> ExportClientsProspects(FileType fileType, CancellationToken cancellationToken)
+    public async Task<byte[]> ExportClientsProspectsAsync(FileType fileType, CancellationToken cancellationToken)
     {
         var list = await _context
             .Clients
             .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.ClientProspect.Name)
             .OrderBy(x => x.Account.Name)
-            .Select(x => new ExportClientProspectDto()
+            .Select(x => new ClientProspectExportDto()
             {
                 Name = x.Account.Name,
                 City = x.Account.City,

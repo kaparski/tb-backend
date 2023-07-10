@@ -30,7 +30,7 @@ public class ClientProspectsController: BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public IActionResult GetClientProspectsAsync()
     {
-        var clientProspects = _accountService.QueryClientsProspects();
+        var clientProspects = _accountService.QueryClientsProspectsAsync();
         return Ok(clientProspects.ProjectToType<ClientProspectResponse>());
     }
 
@@ -51,7 +51,7 @@ public class ClientProspectsController: BaseController
     {
         var mimeType = request.FileType.ToMimeType();
 
-        var clientProspects = await _accountService.ExportClientsProspects(
+        var clientProspects = await _accountService.ExportClientsProspectsAsync(
             request.FileType, cancellationToken);
 
         return File(clientProspects, mimeType,

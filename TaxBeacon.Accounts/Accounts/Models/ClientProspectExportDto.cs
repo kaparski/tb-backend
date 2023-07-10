@@ -3,7 +3,7 @@ using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.Accounts.Accounts.Models;
 
-public class ExportClientProspectDto
+public class ClientProspectExportDto
 {
     [Column("Account Name")]
     public string Name { get; set; } = null!;

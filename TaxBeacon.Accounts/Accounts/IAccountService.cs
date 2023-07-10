@@ -28,7 +28,7 @@ public interface IAccountService
         AccountInfoType accountInfoType,
         CancellationToken cancellationToken = default);
 
-    IQueryable<ClientProspectDto> QueryClientsProspects();
+    IQueryable<ClientProspectDto> QueryClientsProspectsAsync();
 
-    Task<byte[]> ExportClientsProspects(FileType fileType, CancellationToken cancellationToken);
+    Task<byte[]> ExportClientsProspectsAsync(FileType fileType, CancellationToken cancellationToken);
 }
