@@ -242,7 +242,7 @@ public sealed class AccountsServiceTests
     }
 
     [Fact]
-    public async Task QueryClientsProspectsAsync_ReturnsAccountsDto()
+    public async Task QueryClientsProspects_ReturnsAccountsDto()
     {
         // Arrange
         var tenants = TestData.TenantFaker.Generate(2);
@@ -266,7 +266,7 @@ public sealed class AccountsServiceTests
 
         // Act
         var actualResult = await _accountService
-            .QueryClientsProspectsAsync()
+            .QueryClientsProspects()
             .ToListAsync();
 
         // Assert

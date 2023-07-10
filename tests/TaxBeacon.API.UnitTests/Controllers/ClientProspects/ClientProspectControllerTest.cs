@@ -30,11 +30,11 @@ public class ClientProspectControllerTest
     {
         // Arrange
         _accountServiceMock
-            .Setup(p => p.QueryClientsProspectsAsync())
+            .Setup(p => p.QueryClientsProspects())
             .Returns(Enumerable.Empty<ClientProspectDto>().AsQueryable());
 
         // Act
-        var actualResponse = _controller.GetClientProspectsAsync();
+        var actualResponse = _controller.GetClientProspects();
 
         // Arrange
         using (new AssertionScope())
@@ -52,7 +52,7 @@ public class ClientProspectControllerTest
     public void GetClientProspects_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<IActionResult>)_controller.GetClientProspectsAsync).Method;
+        var methodInfo = ((Func<IActionResult>)_controller.GetClientProspects).Method;
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();

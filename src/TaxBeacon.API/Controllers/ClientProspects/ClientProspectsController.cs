@@ -28,9 +28,9 @@ public class ClientProspectsController: BaseController
     [ProducesResponseType(typeof(IQueryable<ClientProspectResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IActionResult GetClientProspectsAsync()
+    public IActionResult GetClientProspects()
     {
-        var clientProspects = _accountService.QueryClientsProspectsAsync();
+        var clientProspects = _accountService.QueryClientsProspects();
         return Ok(clientProspects.ProjectToType<ClientProspectResponse>());
     }
 

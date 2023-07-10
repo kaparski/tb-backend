@@ -214,7 +214,7 @@ public class AccountService: IAccountService
         return await GetAccountDetailsByIdAsync(accountId, accountInfoType, cancellationToken);
     }
 
-    public IQueryable<ClientProspectDto> QueryClientsProspectsAsync() =>
+    public IQueryable<ClientProspectDto> QueryClientsProspects() =>
         _context.Clients
             .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.ClientProspect.Name)
             .Select(x => new ClientProspectDto
