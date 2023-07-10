@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.DAL.Accounts.Entities;
 
-public class TenantUserAccount
+public class AccountSalesperson
 {
     public Guid TenantId { get; set; }
 

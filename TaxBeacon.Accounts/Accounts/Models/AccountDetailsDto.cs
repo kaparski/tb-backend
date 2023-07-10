@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using TaxBeacon.Accounts.Models;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Accounts.Entities;
 
@@ -18,9 +19,9 @@ public record AccountDetailsDto: IRegister
 
     public string Country { get; init; } = null!;
 
-    public string? StreetAddress1 { get; init; }
+    public string? Address1 { get; init; }
 
-    public string? StreetAddress2 { get; init; }
+    public string? Address2 { get; init; }
 
     public string? City { get; init; }
 
@@ -29,12 +30,6 @@ public record AccountDetailsDto: IRegister
     public string? Zip { get; init; }
 
     public string? County { get; init; }
-
-    public string? Phone { get; init; }
-
-    public string? Extension { get; init; }
-
-    public string? Fax { get; init; }
 
     public string? Address { get; init; }
 
@@ -48,11 +43,16 @@ public record AccountDetailsDto: IRegister
 
     public ReferralDetailsDto? Referral { get; set; }
 
-    public IEnumerable<SalesPersonDto> SalesPersons { get; init; } = Enumerable.Empty<SalesPersonDto>();
+    public IEnumerable<SalespersonDto> Salespersons { get; init; } = Enumerable.Empty<SalespersonDto>();
+
+    public IEnumerable<PhoneDto> Phones { get; init; } = Enumerable.Empty<PhoneDto>();
 
     public void Register(TypeAdapterConfig config) =>
         config.NewConfig<Account, AccountDetailsDto>()
             .Map(dest => dest.EntitiesCount, src => src.Entities.Count)
             .Map(dest => dest.LocationsCount, src => src.Locations.Count)
-            .Map(dest => dest.ContactsCount, src => src.Contacts.Count);
+            .Map(dest => dest.ContactsCount, src => src.Contacts.Count)
+            .Map(dest => dest.Salespersons, 
+                src => src.Salespersons.Select(sp => 
+                    new { Id = sp.UserId, sp.TenantUser.User.FullName}));
 }
