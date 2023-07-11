@@ -1,5 +1,4 @@
-﻿using Azure.Identity;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using System.Net.Mail;
 using TaxBeacon.Administration.PasswordGenerator;
@@ -11,11 +10,13 @@ namespace TaxBeacon.Administration.Users;
 public sealed class UserExternalStore: IUserExternalStore
 {
     private readonly IPasswordGenerator _passwordGenerator;
+    private readonly GraphServiceClient _graphClient;
     private readonly AzureAd _azureAd;
 
-    public UserExternalStore(IPasswordGenerator passwordGenerator, IOptions<AzureAd> azureAdOptions)
+    public UserExternalStore(IPasswordGenerator passwordGenerator, GraphServiceClient graphClient, IOptions<AzureAd> azureAdOptions)
     {
         _passwordGenerator = passwordGenerator;
+        _graphClient = graphClient;
         _azureAd = azureAdOptions.Value;
     }
 
@@ -26,10 +27,7 @@ public sealed class UserExternalStore: IUserExternalStore
         string? externalAadUserObjectId,
         CancellationToken cancellationToken)
     {
-        var credentials = new ClientSecretCredential(_azureAd.TenantId, _azureAd.ClientId, _azureAd.Secret);
-        var graphClient = new GraphServiceClient(credentials);
-
-        var existingUsers = await graphClient
+        var existingUsers = await _graphClient
             .Users
             .Request()
             .Filter($"(mail eq '{mailAddress.Address}') or (otherMails/any(m:m eq '{mailAddress.Address}'))")
@@ -100,7 +98,7 @@ public sealed class UserExternalStore: IUserExternalStore
             };
         }
 
-        var createdUser = await graphClient.Users
+        var createdUser = await _graphClient.Users
             .Request()
             .AddAsync(user, cancellationToken);
 

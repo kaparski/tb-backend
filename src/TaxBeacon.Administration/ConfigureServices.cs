@@ -1,5 +1,9 @@
-﻿using Mapster;
+﻿using Azure.Identity;
+using Mapster;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.Graph;
 using System.Reflection;
 using TaxBeacon.Administration.Departments;
 using TaxBeacon.Administration.Departments.Activities.Factories;
@@ -20,6 +24,7 @@ using TaxBeacon.Administration.Tenants;
 using TaxBeacon.Administration.Tenants.Activities;
 using TaxBeacon.Administration.Users;
 using TaxBeacon.Administration.Users.Activities.Factories;
+using TaxBeacon.Common.Options;
 
 namespace TaxBeacon.Administration;
 
@@ -28,6 +33,13 @@ public static class ConfigureServices
     public static IServiceCollection AddAdministrationServices(this IServiceCollection serviceCollection)
     {
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
+
+        serviceCollection.AddScoped(provider =>
+        {
+            var azureAdOptions = provider.GetRequiredService<IOptions<AzureAd>>();
+            var creds = new ClientSecretCredential(azureAdOptions.Value.TenantId, azureAdOptions.Value.ClientId, azureAdOptions.Value.Secret);
+            return new GraphServiceClient(creds);
+        });
         serviceCollection.AddScoped<IUserService, UserService>();
         serviceCollection.AddScoped<ITenantService, TenantService>();
         serviceCollection.AddScoped<IRoleService, RoleService>();
