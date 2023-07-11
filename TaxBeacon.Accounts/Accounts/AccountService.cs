@@ -113,7 +113,7 @@ public class AccountService: IAccountService
         };
 
         var query = _context.AccountActivityLogs
-            .Where(log => log.AccountId == id 
+            .Where(log => log.AccountId == id
                           && log.TenantId == _currentUserService.TenantId
                           && accountParts.Contains(log.AccountPartType));
 
@@ -129,6 +129,49 @@ public class AccountService: IAccountService
 
         return new ActivityDto(pageCount,
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
+    }
+
+    public async Task<OneOf<AccountDetailsDto, NotFound>> UpdateClientDetailsAsync(Guid accountId, UpdateClientDto updatedClient, CancellationToken cancellationToken)
+    {
+        var client = await _context.Clients
+            .SingleOrDefaultAsync(t => t.AccountId == accountId && t.TenantId == _currentUserService.TenantId, cancellationToken);
+
+        if (client is null)
+        {
+            return new NotFound();
+        }
+
+        var (userFullName, userRoles) = _currentUserService.UserInfo;
+        var previousValues = JsonSerializer.Serialize(client.Adapt<UpdateClientDto>());
+
+        var eventDateTime = _dateTimeService.UtcNow;
+
+        await _context.AccountActivityLogs.AddAsync(new AccountActivityLog
+        {
+            TenantId = client.TenantId,
+            AccountId = client.AccountId,
+            Date = eventDateTime,
+            Revision = 1,
+            EventType = AccountEventType.ClientDetailsUpdated,
+            Event = JsonSerializer.Serialize(new ClientUpdatedEvent(
+                _currentUserService.UserId,
+                userRoles ?? string.Empty,
+                userFullName,
+                eventDateTime,
+                previousValues,
+                JsonSerializer.Serialize(updatedClient)))
+        }, cancellationToken);
+
+        updatedClient.Adapt(client);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Service Area ({serviceArea}) was updated by {@userId}",
+            eventDateTime,
+            accountId,
+            _currentUserService.UserId);
+
+        return await GetAccountDetailsByIdAsync(accountId, AccountInfoType.Client, cancellationToken);
     }
 
     public async Task<OneOf<AccountDetailsDto, NotFound>> UpdateClientStatusAsync(Guid accountId,
