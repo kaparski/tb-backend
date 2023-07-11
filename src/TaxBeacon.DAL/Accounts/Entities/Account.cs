@@ -19,9 +19,9 @@ public class Account: BaseEntity
 
     public string Country { get; set; } = null!;
 
-    public string? StreetAddress1 { get; set; }
+    public string? Address1 { get; set; }
 
-    public string? StreetAddress2 { get; set; }
+    public string? Address2 { get; set; }
 
     public string? City { get; set; }
 
@@ -30,12 +30,6 @@ public class Account: BaseEntity
     public string? Zip { get; set; }
 
     public string? County { get; set; }
-
-    public string? Phone { get; set; }
-
-    public string? Extension { get; set; }
-
-    public string? Fax { get; set; }
 
     public string? Address { get; set; }
 
@@ -51,7 +45,9 @@ public class Account: BaseEntity
 
     public ICollection<Contact> Contacts { get; set; } = new HashSet<Contact>();
 
-    public ICollection<TenantUserAccount> TenantUserAccounts { get; set; } = new HashSet<TenantUserAccount>();
+    public ICollection<AccountSalesperson> Salespersons { get; set; } = new HashSet<AccountSalesperson>();
 
     public ICollection<AccountActivityLog> AccountActivityLogs { get; set; } = new HashSet<AccountActivityLog>();
+
+    public ICollection<Phone> Phones { get; set; } = new HashSet<Phone>();
 }

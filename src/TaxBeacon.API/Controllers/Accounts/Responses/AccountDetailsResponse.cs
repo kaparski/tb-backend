@@ -1,4 +1,5 @@
-﻿using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.API.Shared.Responses;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Accounts.Responses;
 
@@ -16,9 +17,9 @@ public record AccountDetailsResponse
 
     public string Country { get; init; } = null!;
 
-    public string? StreetAddress1 { get; init; }
+    public string? Address1 { get; init; }
 
-    public string? StreetAddress2 { get; init; }
+    public string? Address2 { get; init; }
 
     public string? City { get; init; }
 
@@ -27,12 +28,6 @@ public record AccountDetailsResponse
     public string? Zip { get; init; }
 
     public string? County { get; init; }
-
-    public string? Phone { get; init; }
-
-    public string? Extension { get; init; }
-
-    public string? Fax { get; init; }
 
     public string? Address { get; init; }
 
@@ -46,5 +41,7 @@ public record AccountDetailsResponse
 
     public ReferralDetailsResponse? Referral { get; set; }
 
-    public IEnumerable<SalesPersonResponse> SalesPersons { get; init; } = Enumerable.Empty<SalesPersonResponse>();
+    public IEnumerable<SalespersonResponse> Salespersons { get; init; } = Enumerable.Empty<SalespersonResponse>();
+
+    public IEnumerable<PhoneResponse> Phones { get; init; } = Enumerable.Empty<PhoneResponse>();
 }
