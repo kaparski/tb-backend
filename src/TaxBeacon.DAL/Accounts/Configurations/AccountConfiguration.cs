@@ -57,7 +57,7 @@ public class AccountConfiguration: IEntityTypeConfiguration<Account>
             .IsRequired();
 
         account
-            .Property(a => a.StreetAddress1)
+            .Property(a => a.Address1)
             .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
@@ -67,7 +67,7 @@ public class AccountConfiguration: IEntityTypeConfiguration<Account>
             .HasMaxLength(150);
 
         account
-            .Property(a => a.StreetAddress2)
+            .Property(a => a.Address2)
             .HasColumnType("nvarchar")
             .HasMaxLength(100);
 
@@ -77,24 +77,9 @@ public class AccountConfiguration: IEntityTypeConfiguration<Account>
             .HasMaxLength(100);
 
         account
-            .Property(a => a.Extension)
-            .HasColumnType("nvarchar")
-            .HasMaxLength(200);
-
-        account
             .Property(a => a.Address)
             .HasColumnType("nvarchar")
             .HasMaxLength(200);
-
-        account
-            .Property(a => a.Phone)
-            .HasColumnType("nvarchar")
-            .HasMaxLength(15);
-
-        account
-            .Property(a => a.Fax)
-            .HasColumnType("nvarchar")
-            .HasMaxLength(15);
 
         account
             .Property(a => a.Zip)

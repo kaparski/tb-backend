@@ -256,4 +256,40 @@ public class AccountService: IAccountService
 
         return await GetAccountDetailsByIdAsync(accountId, accountInfoType, cancellationToken);
     }
+
+    public IQueryable<ClientProspectDto> QueryClientsProspects() =>
+        _context.Clients
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.ClientProspect.Name)
+            .Select(x => new ClientProspectDto
+            {
+                AccountId = x.AccountId,
+                Name = x.Account.Name,
+                City = x.Account.City,
+                State = x.Account.State,
+                Status = x.Status,
+                DaysOpen = x.DaysOpen
+            });
+
+    public async Task<byte[]> ExportClientsProspectsAsync(FileType fileType, CancellationToken cancellationToken)
+    {
+        var list = await _context
+            .Clients
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.ClientProspect.Name)
+            .OrderBy(x => x.Account.Name)
+            .Select(x => new ClientProspectExportDto()
+            {
+                Name = x.Account.Name,
+                City = x.Account.City,
+                State = x.Account.State,
+                Status = x.Status,
+                DaysOpen = x.DaysOpen
+            })
+            .ToListAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Client prospects export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(list);
+    }
 }

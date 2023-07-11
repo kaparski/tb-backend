@@ -103,6 +103,10 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<AccountActivityLog> AccountActivityLogs => Set<AccountActivityLog>();
 
+    public DbSet<AccountSalesperson> Salespersons => Set<AccountSalesperson>();
+
+    public DbSet<Phone> Phones => Set<Phone>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
