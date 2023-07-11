@@ -89,6 +89,10 @@ public static class ConfigureServices
                     routePrefix: "api/accounts/{accountId}",
                     model: GetODataEdmModelForAccount()
                 )
+                .AddRouteComponents(
+                    routePrefix: "api/accounts",
+                    model: GetCustomODataEdmModel<ClientProspectResponse>("ClientProspects")
+                )
             );
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

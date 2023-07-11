@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxBeacon.DAL;
 
@@ -11,9 +12,11 @@ using TaxBeacon.DAL;
 namespace TaxBeacon.DAL.Migrations
 {
     [DbContext(typeof(TaxBeaconDbContext))]
-    partial class TaxBeaconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230706095644_AccountsUpdatedPhonesAndSalespersons")]
+    partial class AccountsUpdatedPhonesAndSalespersons
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -235,20 +238,12 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("ActivationDateTimeUtc")
-                        .HasColumnType("datetime2");
-
                     b.Property<decimal?>("AnnualRevenue")
                         .HasPrecision(15, 2)
                         .HasColumnType("decimal");
 
                     b.Property<DateTime>("CreatedDateTimeUtc")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("DaysOpen")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("int")
-                        .HasComputedColumnSql("DATEDIFF(second, COALESCE(ActivationDateTimeUtc, CreatedDateTimeUtc), GETUTCDATE()) / 86400");
 
                     b.Property<DateTime?>("DeactivationDateTimeUtc")
                         .HasColumnType("datetime2");
@@ -1744,10 +1739,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<string>("AadB2CObjectId")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar");
-
                     b.Property<DateTime>("CreatedDateTimeUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -1818,22 +1809,14 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<Guid?>("TeamId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UserType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("AadB2CObjectId");
-
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("AadB2CObjectId"), false);
 
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("DivisionId");
 
-                    b.HasIndex("Email");
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.HasIndex("JobTitleId");
 
