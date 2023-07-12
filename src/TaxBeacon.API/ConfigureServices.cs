@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts.Responses;
+using TaxBeacon.API.Controllers.Clients.Responses;
 using TaxBeacon.API.Controllers.Contacts.Responses;
 using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Controllers.Divisions.Responses;
@@ -91,7 +92,7 @@ public static class ConfigureServices
                 )
                 .AddRouteComponents(
                     routePrefix: "api/accounts",
-                    model: GetCustomODataEdmModel<ClientProspectResponse>("ClientProspects")
+                    model: GetODataEdmModelForAccounts()
                 )
             );
 
@@ -186,6 +187,21 @@ public static class ConfigureServices
 
         modelBuilder.EntitySet<LocationResponse>("Locations");
         modelBuilder.EntitySet<EntityResponse>("Entities");
+
+        modelBuilder.EnableLowerCamelCase();
+
+        return modelBuilder.GetEdmModel();
+    }
+
+    /// <summary>
+    /// Builds a dedicated EDM model for api/odata/accounts/ endpoint.
+    /// </summary>
+    private static IEdmModel GetODataEdmModelForAccounts()
+    {
+        var modelBuilder = new ODataConventionModelBuilder();
+
+        modelBuilder.EntitySet<ClientProspectResponse>("ClientProspects");
+        modelBuilder.EntitySet<ClientResponse>("Clients");
 
         modelBuilder.EnableLowerCamelCase();
 

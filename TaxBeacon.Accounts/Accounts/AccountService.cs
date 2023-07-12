@@ -164,6 +164,11 @@ public class AccountService: IAccountService
                 throw new ArgumentOutOfRangeException(nameof(status), status, null);
         }
 
+        if (client.State == ClientState.ClientProspect.Name && status == Status.Active)
+        {
+            client.ActivationDateTimeUtc = _dateTimeService.UtcNow;
+        }
+
         client.Status = status;
 
         var now = _dateTimeService.UtcNow;
@@ -244,6 +249,42 @@ public class AccountService: IAccountService
             .ToListAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - Client prospects export was executed by {@userId}",
+            _dateTimeService.UtcNow,
+            _currentUserService.UserId);
+
+        return _listToFileConverters[fileType].Convert(list);
+    }
+
+    public IQueryable<ClientDto> QueryClients() =>
+        _context.Clients
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.Client.Name)
+            .Select(x => new ClientDto
+            {
+                Id = x.AccountId,
+                Name = x.Account.Name,
+                City = x.Account.City,
+                State = x.Account.State,
+                PrimaryContactName = x.PrimaryContact == null ? string.Empty : x.PrimaryContact.FullName,
+                Status = x.Status,
+            });
+
+    public async Task<byte[]> ExportClientsAsync(FileType fileType, CancellationToken cancellationToken)
+    {
+        var list = await _context
+            .Clients
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.State == ClientState.Client.Name)
+            .OrderBy(x => x.Account.Name)
+            .Select(x => new ClientExportDto()
+            {
+                Name = x.Account.Name,
+                City = x.Account.City,
+                State = x.Account.State,
+                PrimaryContactName = x.PrimaryContact == null ? string.Empty : x.PrimaryContact.FullName,
+                Status = x.Status,
+            })
+            .ToListAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Clients export was executed by {@userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
