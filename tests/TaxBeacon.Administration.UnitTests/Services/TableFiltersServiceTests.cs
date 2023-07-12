@@ -61,6 +61,7 @@ public class TableFiltersServiceTests
     [InlineData(EntityType.Locations)]
     [InlineData(EntityType.Entity)]
     [InlineData(EntityType.ClientProspects)]
+    [InlineData(EntityType.Client)]
     public async Task GetFiltersAsync_TableType_ReturnsCollectionOfTableFilters(EntityType tableType)
     {
         // Arrange
