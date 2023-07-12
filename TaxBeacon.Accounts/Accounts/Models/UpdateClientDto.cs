@@ -4,5 +4,5 @@ public sealed record UpdateClientDto(
     int? FoundationYear,
     int? EmployeeCount,
     Guid? PrimaryContactId,
-    ICollection<ClientManagerDto> ClientManagers
+    IEnumerable<Guid> ClientManagersIds
 );
