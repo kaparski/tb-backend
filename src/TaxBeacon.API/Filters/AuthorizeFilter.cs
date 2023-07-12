@@ -7,6 +7,7 @@ using TaxBeacon.Administration.Users;
 
 namespace TaxBeacon.API.Filters;
 
+[Obsolete("Not used")]
 public class AuthorizeFilter: IAsyncAuthorizationFilter
 {
     private const string UserIdClaimName = "userId";
