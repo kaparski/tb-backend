@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NPOI.POIFS.FileSystem;
 using OneOf;
 using OneOf.Types;
 using System.Collections.Immutable;
@@ -12,10 +13,12 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Accounts;
 using TaxBeacon.Common.Enums.Accounts.Activities;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL.Accounts;
 using TaxBeacon.DAL.Accounts.Entities;
+using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Accounts.Accounts;
 
@@ -129,6 +132,81 @@ public class AccountService: IAccountService
 
         return new ActivityDto(pageCount,
             activities.Select(x => _activityFactories[(x.EventType, x.Revision)].Create(x.Event)).ToList());
+    }
+
+    public async Task<OneOf<AccountDetailsDto, NotFound>> UpdateClientDetailsAsync(Guid accountId, UpdateClientDto updatedClient, CancellationToken cancellationToken)
+    {
+        var client = await _context.Clients
+            .Include(c => c.ClientManagers)
+            .SingleOrDefaultAsync(t => t.AccountId == accountId && t.TenantId == _currentUserService.TenantId, cancellationToken);
+
+        if (client is null)
+        {
+            return new NotFound();
+        }
+        var currentManagersIds = client.ClientManagers.Select(cm => cm.UserId).ToList();
+
+        if (updatedClient.ClientManagersIds != null)
+        {
+
+            // Set up association with freshly added service areas
+            var managersToAddIds = updatedClient.ClientManagersIds.Except(currentManagersIds);
+
+            await _context.ClientManagers
+            .AddRangeAsync(managersToAddIds
+                .Select(mta => new ClientManager
+                {
+                    AccountId = accountId,
+                    TenantId = _currentUserService.TenantId,
+                    UserId = mta
+                }), cancellationToken);
+
+            // Removes association with ClientManagers
+            var managersToRemove = _context.ClientManagers
+                .Where(cm => currentManagersIds.Except(updatedClient.ClientManagersIds!).Contains(cm.UserId));
+
+            _context.ClientManagers.RemoveRange(managersToRemove);
+
+        }
+        else
+        {
+            // Removes association with ClientManagers
+            var managersToRemove = _context.ClientManagers
+                .Where(cm => cm.AccountId == accountId && cm.TenantId == _currentUserService.TenantId);
+
+            _context.ClientManagers.RemoveRange(managersToRemove);
+        }
+        var (userFullName, userRoles) = _currentUserService.UserInfo;
+        var previousValues = JsonSerializer.Serialize(client.Adapt<UpdateClientDto>());
+
+        var eventDateTime = _dateTimeService.UtcNow;
+
+        await _context.AccountActivityLogs.AddAsync(new AccountActivityLog
+        {
+            TenantId = client.TenantId,
+            AccountId = client.AccountId,
+            Date = eventDateTime,
+            Revision = 1,
+            EventType = AccountEventType.ClientDetailsUpdated,
+            Event = JsonSerializer.Serialize(new ClientUpdatedEvent(
+                _currentUserService.UserId,
+                userRoles ?? string.Empty,
+                userFullName,
+                eventDateTime,
+                previousValues,
+                JsonSerializer.Serialize(updatedClient)))
+        }, cancellationToken);
+
+        updatedClient.Adapt(client);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{dateTime} - Client account ({serviceArea}) was updated by {@userId}",
+            eventDateTime,
+            accountId,
+            _currentUserService.UserId);
+
+        return await GetAccountDetailsByIdAsync(accountId, AccountInfoType.Client, cancellationToken);
     }
 
     public async Task<OneOf<AccountDetailsDto, NotFound>> UpdateClientStatusAsync(Guid accountId,

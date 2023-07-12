@@ -36,4 +36,7 @@ public interface IAccountService
     IQueryable<ClientDto> QueryClients();
 
     Task<byte[]> ExportClientsAsync(FileType fileType, CancellationToken cancellationToken);
+
+    Task<OneOf<AccountDetailsDto, NotFound>> UpdateClientDetailsAsync(Guid accountId,
+        UpdateClientDto updatedClient, CancellationToken cancellationToken);
 }
