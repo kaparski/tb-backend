@@ -13,6 +13,7 @@ using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Accounts;
 using TaxBeacon.Common.Enums.Accounts.Activities;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Services;
 using TaxBeacon.DAL;
 using TaxBeacon.DAL.Accounts.Entities;
@@ -279,6 +280,24 @@ public sealed class AccountsServiceTests
         }
     }
 
+    [Fact]
+    public async Task UpdateClientAsync_ClientDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var updateClientDto = TestData.UpdateClientDtoFaker.Generate();
+        var client = TestData.ClientsFaker.Generate();
+
+        // Act
+        var actualResult = await _accountService.UpdateClientDetailsAsync(client.Account.Id, updateClientDto, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.IsT0.Should().BeFalse();
+            actualResult.IsT1.Should().BeTrue();
+        }
+    }
+
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
@@ -297,7 +316,7 @@ public sealed class AccountsServiceTests
         await _dbContextMock.SaveChangesAsync();
 
         // Act
-        await  _accountService.ExportClientsProspectsAsync(fileType, default);
+        await _accountService.ExportClientsProspectsAsync(fileType, default);
 
         // Assert
         if (fileType == FileType.Csv)
@@ -353,6 +372,13 @@ public sealed class AccountsServiceTests
                 .RuleFor(a => a.EmployeeCount, f => f.Random.Number(0, 1000))
                 .RuleFor(a => a.Status, f => f.PickRandom<Status>())
                 .RuleFor(a => a.DaysOpen, f => f.Random.Number(0, 1000));
+
+        public static readonly Faker<UpdateClientDto> UpdateClientDtoFaker =
+            new Faker<UpdateClientDto>()
+            .RuleFor(a => a.AnnualRevenue, f => f.Finance.Amount())
+            .RuleFor(a => a.EmployeeCount, f => f.Random.Number(0, 1000))
+            .RuleFor(a => a.FoundationYear, f => f.Random.Number(1900, 2023))
+            .RuleFor(dto => dto.ClientManagersIds, f => f.Make(3, Guid.NewGuid));
 
         public static readonly Faker<Referral> ReferralsFaker =
             new Faker<Referral>()
