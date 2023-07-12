@@ -179,7 +179,7 @@ public class AccountsController: BaseController
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Client is not found</response>
     /// <returns>Updated account client</returns>
-    [HasPermissions(Common.Permissions.Clients.ReadWrite)]
+    [HasPermissions(Common.Permissions.Clients.ReadWrite, Common.Permissions.Accounts.ReadWrite)]
     [HttpPut("{accountId:guid}/client", Name = "UpdateClient")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(AccountDetailsResponse), StatusCodes.Status200OK)]

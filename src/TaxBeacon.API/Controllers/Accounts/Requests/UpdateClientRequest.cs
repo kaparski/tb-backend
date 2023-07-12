@@ -16,8 +16,12 @@ public class UpdateClientRequestValidator: AbstractValidator<UpdateClientRequest
     public UpdateClientRequestValidator()
     {
         RuleFor(x => x.FoundationYear)
-            .InclusiveBetween(1800, DateTime.UtcNow.Year)
+            .InclusiveBetween(1900, DateTime.UtcNow.Year)
             .WithMessage("Not in years range");
+
+        RuleFor(x => x.FoundationYear)
+            .GreaterThan(0)
+            .WithMessage("Should be positive number");
 
         RuleFor(x => x.ClientManagersIds)
             .NotEmpty()

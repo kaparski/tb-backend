@@ -206,7 +206,7 @@ public sealed class AccountsControllerTests
     {
         // Arrange
         var methodInfo = ((Func<Guid, UpdateClientRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateClientAsync).Method;
-        var permissions = new object[] { Common.Permissions.Clients.ReadWrite };
+        var permissions = new object[] { Common.Permissions.Clients.ReadWrite, Common.Permissions.Accounts.ReadWrite };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();

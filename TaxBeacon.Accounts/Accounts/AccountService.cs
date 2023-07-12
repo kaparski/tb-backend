@@ -166,7 +166,6 @@ public class AccountService: IAccountService
                 .Where(cm => currentManagersIds.Except(updatedClient.ClientManagersIds!).Contains(cm.UserId));
 
             _context.ClientManagers.RemoveRange(managersToRemove);
-            await _context.SaveChangesAsync();
 
         }
         else
@@ -202,7 +201,7 @@ public class AccountService: IAccountService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Service Area ({serviceArea}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Client account ({serviceArea}) was updated by {@userId}",
             eventDateTime,
             accountId,
             _currentUserService.UserId);

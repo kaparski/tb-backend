@@ -19,5 +19,5 @@ public sealed class ClientUpdatedEvent: EventBase
 
     public DateTime UpdatedDate { get; set; }
 
-    public override string ToString() => "Client details updated";
+    public override string ToString() => "Client account details updated";
 }
