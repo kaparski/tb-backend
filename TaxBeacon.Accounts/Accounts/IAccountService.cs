@@ -32,4 +32,8 @@ public interface IAccountService
     IQueryable<ClientProspectDto> QueryClientsProspects();
 
     Task<byte[]> ExportClientsProspectsAsync(FileType fileType, CancellationToken cancellationToken);
+
+    IQueryable<ClientDto> QueryClients();
+
+    Task<byte[]> ExportClientsAsync(FileType fileType, CancellationToken cancellationToken);
 }
