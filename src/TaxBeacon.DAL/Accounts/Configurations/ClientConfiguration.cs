@@ -45,6 +45,6 @@ public class ClientConfiguration: IEntityTypeConfiguration<Client>
 
         client
             .Property(u => u.DaysOpen)
-            .HasComputedColumnSql("DATEDIFF(second, COALESCE(ActivationDateTimeUtc, CreatedDateTimeUtc), GETUTCDATE()) / 86400");
+            .HasComputedColumnSql("DATEDIFF(second, COALESCE(ActivationDateTimeUtc, CreatedDateTimeUtc), COALESCE(DeactivationDateTimeUtc, GETUTCDATE())) / 86400");
     }
 }
