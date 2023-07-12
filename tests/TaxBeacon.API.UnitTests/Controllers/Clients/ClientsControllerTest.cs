@@ -7,22 +7,22 @@ using System.Reflection;
 using TaxBeacon.Accounts.Accounts;
 using TaxBeacon.Accounts.Accounts.Models;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Accounts.Responses;
-using TaxBeacon.API.Controllers.ClientProspects;
-using TaxBeacon.API.Controllers.ClientProspects.Requests;
+using TaxBeacon.API.Controllers.Clients;
+using TaxBeacon.API.Controllers.Clients.Requests;
+using TaxBeacon.API.Controllers.Clients.Responses;
 using TaxBeacon.Common.Enums;
 
-namespace TaxBeacon.API.UnitTests.Controllers.ClientProspects;
+namespace TaxBeacon.API.UnitTests.Controllers.Clients;
 
-public class ClientProspectControllerTest
+public class ClientControllerTest
 {
     private readonly Mock<IAccountService> _accountServiceMock;
-    private readonly ClientProspectsController _controller;
+    private readonly ClientsController _controller;
 
-    public ClientProspectControllerTest()
+    public ClientControllerTest()
     {
         _accountServiceMock = new();
-        _controller = new ClientProspectsController(_accountServiceMock.Object);
+        _controller = new ClientsController(_accountServiceMock.Object);
     }
 
     [Fact]
@@ -30,11 +30,11 @@ public class ClientProspectControllerTest
     {
         // Arrange
         _accountServiceMock
-            .Setup(p => p.QueryClientsProspects())
-            .Returns(Enumerable.Empty<ClientProspectDto>().AsQueryable());
+            .Setup(p => p.QueryClients())
+            .Returns(Enumerable.Empty<ClientDto>().AsQueryable());
 
         // Act
-        var actualResponse = _controller.GetClientProspects();
+        var actualResponse = _controller.GetClients();
 
         // Arrange
         using (new AssertionScope())
@@ -44,7 +44,7 @@ public class ClientProspectControllerTest
             actualResult.Should().NotBeNull();
             actualResponse.Should().BeOfType<OkObjectResult>();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
-            actualResult?.Value.Should().BeAssignableTo<IQueryable<ClientProspectResponse>>();
+            actualResult?.Value.Should().BeAssignableTo<IQueryable<ClientResponse>>();
         }
     }
 
@@ -52,7 +52,7 @@ public class ClientProspectControllerTest
     public void GetClientProspects_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<IActionResult>)_controller.GetClientProspects).Method;
+        var methodInfo = ((Func<IActionResult>)_controller.GetClients).Method;
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -77,7 +77,7 @@ public class ClientProspectControllerTest
     public async Task ExportClientProspectAsync_ValidQuery_ReturnsFileContent(FileType fileType)
     {
         // Arrange
-        var request = new ExportClientProspectRequest(fileType, "America/New_York");
+        var request = new ExportClientRequest(fileType, "America/New_York");
         _accountServiceMock
             .Setup(x => x.ExportClientsProspectsAsync(
                 It.IsAny<FileType>(),
@@ -85,7 +85,7 @@ public class ClientProspectControllerTest
             .ReturnsAsync(Array.Empty<byte>());
 
         // Act
-        var actualResponse = await _controller.ExportClientProspectsAsync(request, default);
+        var actualResponse = await _controller.ExportClientAsync(request, default);
 
         // Assert
         using (new AssertionScope())
@@ -93,7 +93,7 @@ public class ClientProspectControllerTest
             actualResponse.Should().NotBeNull();
             var actualResult = actualResponse as FileContentResult;
             actualResult.Should().NotBeNull();
-            actualResult!.FileDownloadName.Should().Be($"client-prospects.{fileType.ToString().ToLowerInvariant()}");
+            actualResult!.FileDownloadName.Should().Be($"clients.{fileType.ToString().ToLowerInvariant()}");
             actualResult.ContentType.Should().Be(fileType switch
             {
                 FileType.Csv => "text/csv",
@@ -108,7 +108,7 @@ public class ClientProspectControllerTest
     {
         // Arrange
         var methodInfo =
-            ((Func<ExportClientProspectRequest, CancellationToken, Task<IActionResult>>)_controller.ExportClientProspectsAsync)
+            ((Func<ExportClientRequest, CancellationToken, Task<IActionResult>>)_controller.ExportClientAsync)
             .Method;
 
         // Act
