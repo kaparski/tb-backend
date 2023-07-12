@@ -367,10 +367,9 @@ public class UserService: IUserService
         // Also storing user type, just for the reference and (potentially) future use.
         user.UserType = userType;
 
-        // When password is empty, it means that a user with this email already exists in B2C.
-        if (userType == UserType.LocalB2C && !string.IsNullOrEmpty(password))
+        if (userType == UserType.LocalB2C)
         {
-            // So only sending the password email if the user was indeed just created.
+            // Only sending the password email if the user was indeed just created as a local B2C user
             await _emailSender.SendAsync(EmailType.UserCreated,
                 _createUserOptions.Recipients,
                 new UserCreatedMessage(userEmail.Address, password));
