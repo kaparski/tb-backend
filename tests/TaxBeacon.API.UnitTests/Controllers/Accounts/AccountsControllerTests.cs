@@ -1,19 +1,26 @@
-﻿using FluentAssertions;
+﻿using Bogus;
+using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
+using Org.BouncyCastle.Ocsp;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.Accounts.Accounts;
 using TaxBeacon.Accounts.Accounts.Models;
+using TaxBeacon.Administration.Divisions.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts;
 using TaxBeacon.API.Controllers.Accounts.Requests;
 using TaxBeacon.API.Controllers.Accounts.Responses;
+using TaxBeacon.API.Controllers.Divisions.Requests;
+using TaxBeacon.API.Controllers.Divisions.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Accounts;
+using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Accounts;
 
@@ -170,6 +177,49 @@ public sealed class AccountsControllerTests
     }
 
     [Fact]
+    public async Task UpdateClientAsync_InvalidAccountId_ReturnsNotFoundResponse()
+    {
+        // Arrange
+        var request = TestData.UpdateClientFaker.Generate();
+        _accountServiceMock
+            .Setup(service => service.UpdateClientDetailsAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<UpdateClientDto>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.UpdateClientAsync(Guid.NewGuid(), request, default);
+
+        // Arrange
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public void UpdateClientAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, UpdateClientRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateClientAsync).Method;
+        var permissions = new object[] { Common.Permissions.Clients.ReadWrite, Common.Permissions.Accounts.ReadWrite };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
     public void GetAccountDetailsAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
@@ -200,5 +250,29 @@ public sealed class AccountsControllerTests
             hasPermissionsAttribute?.Policy.Should()
                 .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
+    }
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    private static class TestData
+    {
+        public static readonly Faker<Client> ClientsFaker =
+            new Faker<Client>()
+                .RuleFor(a => a.CreatedDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(a => a.ReactivationDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(a => a.DeactivationDateTimeUtc, _ => DateTime.UtcNow)
+                .RuleFor(a => a.AnnualRevenue, f => f.Finance.Amount())
+                .RuleFor(a => a.FoundationYear, f => f.Random.Number(1900, 2023))
+                .RuleFor(a => a.State, f => f.PickRandom("Client", "Client prospect"))
+                .RuleFor(a => a.EmployeeCount, f => f.Random.Number(0, 1000))
+                .RuleFor(a => a.Status, f => f.PickRandom<Status>())
+                .RuleFor(a => a.DaysOpen, f => f.Random.Number(0, 1000));
+
+        public static readonly Faker<UpdateClientRequest> UpdateClientFaker =
+            new Faker<UpdateClientRequest>()
+            .RuleFor(a => a.AnnualRevenue, f => f.Finance.Amount())
+            .RuleFor(a => a.EmployeeCount, f => f.Random.Number(0, 1000))
+            .RuleFor(a => a.FoundationYear, f => f.Random.Number(1900, 2023))
+            .RuleFor(dto => dto.ClientManagersIds, f => f.Make(3, Guid.NewGuid));
+
     }
 }

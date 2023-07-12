@@ -2,9 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.Accounts.Accounts;
+using TaxBeacon.Accounts.Accounts.Models;
+using TaxBeacon.Administration.Departments.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts.Requests;
 using TaxBeacon.API.Controllers.Accounts.Responses;
+using TaxBeacon.API.Controllers.Departments.Requests;
+using TaxBeacon.API.Controllers.Departments.Responses;
 using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
@@ -165,6 +169,32 @@ public class AccountsController: BaseController
         return updatedStatusResult.Match<IActionResult>(
             user => Ok(user.Adapt<AccountDetailsResponse>()),
             _ => NotFound());
+    }
+
+    /// <summary>
+    /// Update client details
+    /// </summary>
+    /// <response code="200">Returns updated account</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Client is not found</response>
+    /// <returns>Updated account client</returns>
+    [HasPermissions(Common.Permissions.Clients.ReadWrite, Common.Permissions.Accounts.ReadWrite)]
+    [HttpPut("{accountId:guid}/client", Name = "UpdateClient")]
+    [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
+    [ProducesResponseType(typeof(AccountDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateClientAsync([FromRoute] Guid accountId,
+        [FromBody] UpdateClientRequest request, CancellationToken cancellationToken)
+    {
+        var resultOneOf =
+            await _accountService.UpdateClientDetailsAsync(accountId, request.Adapt<UpdateClientDto>(), cancellationToken);
+
+        return resultOneOf.Match<IActionResult>(
+            result => Ok(result.Adapt<AccountDetailsResponse>()),
+            notFound => NotFound());
     }
 
     private AccountInfoType GetAccountInfoTypeByPermissions()
