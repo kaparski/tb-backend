@@ -33,6 +33,10 @@ public interface IAccountService
 
     Task<byte[]> ExportClientsProspectsAsync(FileType fileType, CancellationToken cancellationToken);
 
+    IQueryable<ClientDto> QueryClients();
+
+    Task<byte[]> ExportClientsAsync(FileType fileType, CancellationToken cancellationToken);
+
     Task<OneOf<AccountDetailsDto, NotFound>> UpdateClientDetailsAsync(Guid accountId,
         UpdateClientDto updatedClient, CancellationToken cancellationToken);
 }

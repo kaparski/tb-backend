@@ -245,7 +245,7 @@ public sealed class AccountsServiceTests
     }
 
     [Fact]
-    public async Task QueryClientsProspects_ReturnsAccountsDto()
+    public async Task QueryClientsProspects_ReturnsClientProspectDto()
     {
         // Arrange
         var tenants = TestData.TenantFaker.Generate(2);
@@ -281,6 +281,42 @@ public sealed class AccountsServiceTests
     }
 
     [Fact]
+    public async Task QueryClients_ReturnsClientsDto()
+    {
+        // Arrange
+        var tenants = TestData.TenantFaker.Generate(2);
+        await _dbContextMock.Tenants.AddRangeAsync(tenants);
+
+        var tenantId = tenants[0].Id;
+        var clients = TestData.ClientsFaker
+            .RuleFor(a => a.TenantId, f => tenants[0].Id)
+            .RuleFor(a => a.State, f => ClientState.Client.Name)
+            .Generate(3);
+        await _dbContextMock.Clients.AddRangeAsync(clients);
+        await _dbContextMock.SaveChangesAsync();
+        var expectedClients = _dbContextMock
+            .Clients
+            .Where(a => a.TenantId == tenantId)
+            .ToList();
+
+        _currentUserServiceMock
+            .Setup(s => s.TenantId)
+            .Returns(tenants[0].Id);
+
+        // Act
+        var actualResult = await _accountService
+            .QueryClients()
+            .ToListAsync();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            actualResult.Should().HaveCount(expectedClients.Count)
+                .And.AllBeOfType<ClientDto>();
+        }
+    }
+
+    [Fact]
     public async Task UpdateClientAsync_ClientDoesNotExist_ReturnsNotFound()
     {
         // Arrange
@@ -301,7 +337,7 @@ public sealed class AccountsServiceTests
     [Theory]
     [InlineData(FileType.Csv)]
     [InlineData(FileType.Xlsx)]
-    public async Task ExportClientsProspectsAsync_ReturnsAccountExportDto(FileType fileType)
+    public async Task ExportClientsProspectsAsync_ReturnsClientProspectExportDto(FileType fileType)
     {
         // Arrange
         var tenants = TestData.TenantFaker.Generate(2);
@@ -310,6 +346,7 @@ public sealed class AccountsServiceTests
 
         var clients = TestData.ClientsFaker
             .RuleFor(a => a.TenantId, f => currentTenantId)
+            .RuleFor(a => a.State, f => ClientState.ClientProspect.Name)
             .Generate(2);
 
         await _dbContextMock.Clients.AddRangeAsync(clients);
@@ -326,6 +363,42 @@ public sealed class AccountsServiceTests
         else if (fileType == FileType.Xlsx)
         {
             _xlsxMock.Verify(x => x.Convert(It.IsAny<List<ClientProspectExportDto>>()), Times.Once());
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    [Theory]
+    [InlineData(FileType.Csv)]
+    [InlineData(FileType.Xlsx)]
+    public async Task ExportClientsAsync_ReturnsClientExportDto(FileType fileType)
+    {
+        // Arrange
+        var tenants = TestData.TenantFaker.Generate(2);
+        await _dbContextMock.Tenants.AddRangeAsync(tenants);
+        var currentTenantId = tenants[0].Id;
+
+        var clients = TestData.ClientsFaker
+            .RuleFor(a => a.TenantId, f => currentTenantId)
+            .RuleFor(a => a.State, f => ClientState.Client.Name)
+            .Generate(2);
+
+        await _dbContextMock.Clients.AddRangeAsync(clients);
+        await _dbContextMock.SaveChangesAsync();
+
+        // Act
+        await  _accountService.ExportClientsAsync(fileType, default);
+
+        // Assert
+        if (fileType == FileType.Csv)
+        {
+            _csvMock.Verify(x => x.Convert(It.IsAny<List<ClientExportDto>>()), Times.Once());
+        }
+        else if (fileType == FileType.Xlsx)
+        {
+            _xlsxMock.Verify(x => x.Convert(It.IsAny<List<ClientExportDto>>()), Times.Once());
         }
         else
         {
