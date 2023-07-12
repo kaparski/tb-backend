@@ -1141,6 +1141,7 @@ public class UserServiceTests
                 f.Name.FirstName(),
                 f.Name.LastName(),
                 f.Internet.Email(),
+                string.Empty,
                 Guid.NewGuid(),
                 departmentId,
                 serviceAreaId,
@@ -1150,8 +1151,8 @@ public class UserServiceTests
 
         _userExternalStore
             .Setup(x => x.CreateUserAsync(
-                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
-            .ReturnsAsync(string.Empty);
+                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+            .ReturnsAsync((string.Empty, UserType.ExistingB2C, string.Empty));
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
@@ -1177,6 +1178,7 @@ public class UserServiceTests
                 f.Name.FirstName(),
                 f.Name.LastName(),
                 f.Internet.Email(),
+                string.Empty,
                 divisionId,
                 Guid.NewGuid(),
                 serviceAreaId,
@@ -1186,8 +1188,8 @@ public class UserServiceTests
 
         _userExternalStore
             .Setup(x => x.CreateUserAsync(
-                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
-            .ReturnsAsync(string.Empty);
+                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+            .ReturnsAsync((string.Empty, UserType.ExistingB2C, string.Empty));
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
@@ -1213,6 +1215,7 @@ public class UserServiceTests
                 f.Name.FirstName(),
                 f.Name.LastName(),
                 f.Internet.Email(),
+                string.Empty,
                 divisionId,
                 departmentId,
                 Guid.NewGuid(),
@@ -1222,8 +1225,8 @@ public class UserServiceTests
 
         _userExternalStore
             .Setup(x => x.CreateUserAsync(
-                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
-            .ReturnsAsync(string.Empty);
+                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+            .ReturnsAsync((string.Empty, UserType.ExistingB2C, string.Empty));
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
@@ -1249,6 +1252,7 @@ public class UserServiceTests
                 f.Name.FirstName(),
                 f.Name.LastName(),
                 f.Internet.Email(),
+                string.Empty,
                 divisionId,
                 departmentId,
                 serviceAreaId,
@@ -1258,8 +1262,8 @@ public class UserServiceTests
 
         _userExternalStore
             .Setup(x => x.CreateUserAsync(
-                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
-            .ReturnsAsync(string.Empty);
+                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+            .ReturnsAsync((string.Empty, UserType.ExistingB2C, string.Empty));
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
@@ -1284,6 +1288,7 @@ public class UserServiceTests
                 f.Name.FirstName(),
                 f.Name.LastName(),
                 f.Internet.Email(),
+                string.Empty,
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Guid.NewGuid(),
@@ -1292,12 +1297,19 @@ public class UserServiceTests
             .Generate();
         var existingUser = TestData.TestUser.RuleFor(u => u.Email, newUser.Email);
         await _dbContextMock.Users.AddAsync(existingUser);
+
+        await _dbContextMock.TenantUsers.AddAsync(new TenantUser
+        {
+            TenantId = _tenantId,
+            User = existingUser
+        });
+
         await _dbContextMock.SaveChangesAsync();
 
         _userExternalStore
             .Setup(x => x.CreateUserAsync(
-                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
-            .ReturnsAsync(string.Empty);
+                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+            .ReturnsAsync((string.Empty, UserType.ExistingB2C, string.Empty));
 
         // Act
         var result = await _userService.CreateUserAsync(newUser);
@@ -1317,6 +1329,7 @@ public class UserServiceTests
                 f.Name.FirstName(),
                 f.Name.LastName(),
                 f.Internet.Email(),
+                string.Empty,
                 divisionId,
                 departmentId,
                 serviceAreaId,
@@ -1331,8 +1344,8 @@ public class UserServiceTests
 
         _userExternalStore
             .Setup(x => x.CreateUserAsync(
-                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
-            .ReturnsAsync(string.Empty);
+                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+            .ReturnsAsync((string.Empty, UserType.ExistingB2C, string.Empty));
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 
@@ -1379,6 +1392,7 @@ public class UserServiceTests
                 f.Name.FirstName(),
                 f.Name.LastName(),
                 f.Internet.Email(),
+                null,
                 divisionId,
                 departmentId,
                 serviceAreaId,
@@ -1394,8 +1408,8 @@ public class UserServiceTests
 
         _userExternalStore
             .Setup(x => x.CreateUserAsync(
-                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), default))
-            .ReturnsAsync(string.Empty);
+                It.IsAny<MailAddress>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+            .ReturnsAsync((string.Empty, UserType.ExistingB2C, string.Empty));
 
         _currentUserServiceMock.Setup(s => s.TenantId).Returns(tenantId);
 

@@ -1,8 +1,8 @@
-﻿using Azure.Identity;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using System.Net.Mail;
 using TaxBeacon.Administration.PasswordGenerator;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Options;
 
 namespace TaxBeacon.Administration.Users;
@@ -10,53 +10,99 @@ namespace TaxBeacon.Administration.Users;
 public sealed class UserExternalStore: IUserExternalStore
 {
     private readonly IPasswordGenerator _passwordGenerator;
+    private readonly GraphServiceClient _graphClient;
     private readonly AzureAd _azureAd;
 
-    public UserExternalStore(IPasswordGenerator passwordGenerator, IOptions<AzureAd> azureAdOptions)
+    public UserExternalStore(IPasswordGenerator passwordGenerator, GraphServiceClient graphClient, IOptions<AzureAd> azureAdOptions)
     {
         _passwordGenerator = passwordGenerator;
+        _graphClient = graphClient;
         _azureAd = azureAdOptions.Value;
     }
 
-    public async Task<string> CreateUserAsync(MailAddress mailAddress, string firstName, string lastName,
+    public async Task<(string aadB2CObjectId, UserType userType, string password)> CreateUserAsync(MailAddress mailAddress,
+        string firstName,
+        string lastName,
+        string? externalAadTenantIssuerUrl,
+        string? externalAadUserObjectId,
         CancellationToken cancellationToken)
     {
-        var credentials = new ClientSecretCredential(_azureAd.TenantId, _azureAd.ClientId, _azureAd.Secret);
-        var graphClient = new GraphServiceClient(credentials);
-
-        var existedUser = await graphClient.Users.Request().Filter($"mail eq '{mailAddress.Address}'")
+        var existingUsers = await _graphClient
+            .Users
+            .Request()
+            .Filter($"(mail eq '{mailAddress.Address}') or (otherMails/any(m:m eq '{mailAddress.Address}'))")
             .GetAsync(cancellationToken);
 
-        if (existedUser.Count != 0)
+        if (existingUsers.Count > 1)
         {
-            return string.Empty;
+            throw new InvalidOperationException("Multiple users with such an email found");
         }
 
-        var user = new User
+        if (existingUsers.Count == 1)
         {
-            Mail = mailAddress.Address,
-            DisplayName = $"{firstName} {lastName}",
-            Identities = new List<ObjectIdentity>()
-            {
-                new ObjectIdentity
-                {
-                    SignInType = "emailAddress",
-                    Issuer = _azureAd.Domain,
-                    IssuerAssignedId = mailAddress.Address
-                }
-            },
-            PasswordProfile = new PasswordProfile
-            {
-                Password = _passwordGenerator.GeneratePassword(),
-                ForceChangePasswordNextSignIn = false
-            },
-            PasswordPolicies = "DisablePasswordExpiration, DisableStrongPassword"
-        };
+            // Just returning this user's ID in our B2C tenant
+            var existingUser = existingUsers[0];
+            return (existingUser.Id, UserType.ExistingB2C, string.Empty);
+        }
 
-        await graphClient.Users
+        User user;
+        var password = string.Empty;
+        UserType userType;
+
+        if (string.IsNullOrEmpty(externalAadTenantIssuerUrl))
+        {
+            // Creating a B2C user
+            userType = UserType.LocalB2C;
+
+            password = _passwordGenerator.GeneratePassword();
+
+            user = new User
+            {
+                Mail = mailAddress.Address,
+                DisplayName = $"{firstName} {lastName}",
+                Identities = new List<ObjectIdentity>()
+                {
+                    new ObjectIdentity
+                    {
+                        SignInType = "emailAddress",
+                        Issuer = _azureAd.Domain,
+                        IssuerAssignedId = mailAddress.Address
+                    },
+                },
+                PasswordProfile = new PasswordProfile
+                {
+                    Password = password,
+                    ForceChangePasswordNextSignIn = false
+                },
+                PasswordPolicies = "DisablePasswordExpiration, DisableStrongPassword"
+            };
+        }
+        else
+        {
+            // Creating an external AAD tenant user
+            userType = UserType.ExternalAad;
+
+            user = new User
+            {
+                Mail = mailAddress.Address,
+                DisplayName = $"{firstName} {lastName}",
+                Identities = new List<ObjectIdentity>()
+                {
+                    new ObjectIdentity
+                    {
+                        SignInType = "federated",
+                        Issuer = externalAadTenantIssuerUrl,
+                        IssuerAssignedId = externalAadUserObjectId
+                    },
+                }
+            };
+        }
+
+        var createdUser = await _graphClient.Users
             .Request()
             .AddAsync(user, cancellationToken);
 
-        return user.PasswordProfile.Password;
+        // Returning user's ID in our B2C tenant. And a password, if it is a newly created B2C user.
+        return (createdUser.Id, userType, password);
     }
 }

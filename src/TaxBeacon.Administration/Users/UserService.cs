@@ -324,7 +324,7 @@ public class UserService: IUserService
 
         var userEmail = new MailAddress(newUserData.Email);
 
-        if (await EmailExistsAsync(user.Email, cancellationToken))
+        if (await EmailExistsAsync(user.Email, _currentUserService.TenantId, cancellationToken))
         {
             return new EmailAlreadyExists();
         }
@@ -341,13 +341,35 @@ public class UserService: IUserService
             return error;
         }
 
-        if (!_createUserOptions.RegisteredDomains.Contains(userEmail.Host, StringComparer.OrdinalIgnoreCase))
-        {
-            var password = await _userExternalStore.CreateUserAsync(userEmail,
-                newUserData.FirstName,
-                newUserData.LastName,
-                cancellationToken);
+        // Determining whether it should be a 'local' B2C user or a user that comes from an external AAD tenant.
+        // Trying to match 'Host' part of the email with our CreateUser/KnownAadTenants config section.
+        var externalAadIssuerUrl = _createUserOptions
+            .KnownAadTenants
+            .FirstOrDefault(t => t.DomainName.Equals(userEmail.Host, StringComparison.OrdinalIgnoreCase))?
+            .IssuerUrl;
 
+        if (string.IsNullOrEmpty(externalAadIssuerUrl) && !string.IsNullOrEmpty(newUserData.ExternalAadUserObjectId))
+        {
+            return new InvalidOperation("This email address is not associated with any external AAD tenant. Can only create a local B2C user for it, but in that case user's external ObjectId should not be specified.");
+        }
+
+        var (aadB2CObjectId, userType, password) = await _userExternalStore.CreateUserAsync(userEmail,
+            newUserData.FirstName,
+            newUserData.LastName,
+            externalAadIssuerUrl,
+            newUserData.ExternalAadUserObjectId,
+            cancellationToken);
+
+        // Storing this B2C user's ObjectId in a separate field in our Users table.
+        // This value will then be used as part of the login process.
+        user.AadB2CObjectId = aadB2CObjectId;
+
+        // Also storing user type, just for the reference and (potentially) future use.
+        user.UserType = userType;
+
+        if (userType == UserType.LocalB2C)
+        {
+            // Only sending the password email if the user was indeed just created as a local B2C user
             await _emailSender.SendAsync(EmailType.UserCreated,
                 _createUserOptions.Recipients,
                 new UserCreatedMessage(userEmail.Address, password));
@@ -377,6 +399,7 @@ public class UserService: IUserService
                     currentUserInfo.Roles)),
             EventType = UserEventType.UserCreated
         }, cancellationToken);
+
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("{dateTime} - User ({createdUserId}) was created by {@userId}",
@@ -625,8 +648,19 @@ public class UserService: IUserService
             .Join(_context.Permissions, id => id, p => p.Id, (id, p) => p.Name)
             .ToListAsync(cancellationToken);
 
-    private async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default) =>
-        await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
+    private async Task<bool> EmailExistsAsync(string email, Guid tenantId, CancellationToken cancellationToken = default)
+    {
+        if (tenantId == default)
+        {
+            // Checking among non-tenant users only
+            return await _context.Users.AnyAsync(x => x.Email == email && !x.TenantUsers.Any(), cancellationToken);
+        }
+        else
+        {
+            // Checking among users belonging to this particular tenant
+            return await _context.TenantUsers.AnyAsync(tu => tu.TenantId == tenantId && tu.User.Email == email, cancellationToken);
+        }
+    }
 
     private async Task<bool> HasNoTenantRoleAsync(Guid id,
         string roleName,

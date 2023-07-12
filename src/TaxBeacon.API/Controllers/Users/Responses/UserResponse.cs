@@ -49,4 +49,6 @@ public class UserResponse
     public string? Team { get; set; }
 
     public IEnumerable<Guid>? RoleIds { get; set; }
+
+    public UserType UserType { get; set; }
 }
