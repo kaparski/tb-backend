@@ -164,6 +164,11 @@ public class AccountService: IAccountService
                 throw new ArgumentOutOfRangeException(nameof(status), status, null);
         }
 
+        if (client.State == ClientState.ClientProspect.Name && status == Status.Active)
+        {
+            client.ActivationDateTimeUtc = _dateTimeService.UtcNow;
+        }
+
         client.Status = status;
 
         var now = _dateTimeService.UtcNow;
