@@ -67,6 +67,11 @@ public sealed class ClaimsTransformation: IClaimsTransformation
             claimsIdentity.AddClaim(new Claim(Claims.DivisionEnabled, userInfo.DivisionEnabled.ToString()));
         }
 
+        if (!principal.HasClaim(claim => claim.Type == Claims.UserStatus))
+        {
+            claimsIdentity.AddClaim(new Claim(Claims.UserStatus, userInfo.Status.ToString()));
+        }
+
         var permissions = await _userService.GetUserPermissionsAsync(userInfo.Id, userInfo.TenantId);
         claimsIdentity.AddClaims(permissions.Select(p => new Claim(Claims.Permission, p)));
 

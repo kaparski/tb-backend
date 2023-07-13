@@ -36,6 +36,7 @@ using TaxBeacon.Email.Options;
 using TaxBeacon.API.Controllers.Programs.Responses;
 using TaxBeacon.API.Extensions;
 using TaxBeacon.API.Extensions.Cors;
+using TaxBeacon.API.Filters;
 using TaxBeacon.Common.Enums.Accounts;
 using TaxBeacon.DAL.Accounts;
 using TaxBeacon.DAL.Administration;
@@ -52,7 +53,7 @@ public static class ConfigureServices
         services.AddCorsService(configuration);
 
         services.AddRouting(options => options.LowercaseUrls = true);
-        services.AddControllers(/*options => options.Filters.Add<AuthorizeFilter>()*/)
+        services.AddControllers(options => options.Filters.Add<AuthorizeFilter>())
             .AddJsonOptions(options =>
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
         // Configuring OData. Routing to OData endpoints is separate from normal Web API routing
