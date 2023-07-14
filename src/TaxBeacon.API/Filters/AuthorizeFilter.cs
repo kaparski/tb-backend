@@ -16,7 +16,7 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
         ArgumentNullException.ThrowIfNull(context);
 
         var idClaimValue = context.HttpContext.User
-            .FindFirst(claim => claim.Type.Equals(Claims.UserIdClaimName, StringComparison.OrdinalIgnoreCase))
+            .FindFirst(claim => claim.Type.Equals(Claims.UserId, StringComparison.OrdinalIgnoreCase))
             ?.Value;
 
         if (string.IsNullOrEmpty(idClaimValue))
@@ -29,12 +29,10 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
         var statusClaim = context.HttpContext.User
             .FindFirst(claim => claim.Type.Equals(Claims.UserStatus, StringComparison.OrdinalIgnoreCase))?.Value;
 
-        if (string.IsNullOrEmpty(statusClaim) || !string.IsNullOrEmpty(statusClaim)
-            && statusClaim.Equals(Status.Deactivated.ToString(), StringComparison.OrdinalIgnoreCase))
+        if (!Enum.TryParse(statusClaim, out Status status) || status == Status.Deactivated)
         {
             context.Result = new UnauthorizedResult();
             _logger.LogError("Failed to authenticate deactivated user");
-            return Task.CompletedTask;
         }
 
         return Task.CompletedTask;

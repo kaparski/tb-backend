@@ -46,7 +46,7 @@ public class CurrentUserServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var identity = new GenericIdentity("test", "test");
-        identity.AddClaim(new Claim(Claims.UserIdClaimName, userId.ToString()));
+        identity.AddClaim(new Claim(Claims.UserId, userId.ToString()));
         var contextUser = new ClaimsPrincipal(identity);
         var httpContext = new DefaultHttpContext { User = contextUser };
 

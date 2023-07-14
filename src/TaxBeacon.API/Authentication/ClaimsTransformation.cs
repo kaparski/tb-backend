@@ -37,9 +37,9 @@ public sealed class ClaimsTransformation: IClaimsTransformation
 
         var claimsIdentity = new ClaimsIdentity();
 
-        if (!principal.HasClaim(claim => claim.Type == Claims.UserIdClaimName))
+        if (!principal.HasClaim(claim => claim.Type == Claims.UserId))
         {
-            claimsIdentity.AddClaim(new Claim(Claims.UserIdClaimName, userInfo.Id.ToString()));
+            claimsIdentity.AddClaim(new Claim(Claims.UserId, userInfo.Id.ToString()));
         }
 
         if (!principal.HasClaim(claim => claim.Type == Claims.TenantId))
