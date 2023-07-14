@@ -156,8 +156,7 @@ public class UserService: IUserService
                     Team = u.Team,
                     Roles = u.Roles,
                     RoleIds = roles.Select(r => r.RoleId)
-                })
-            ;
+                });
 
             return userDtos;
         }
@@ -203,8 +202,7 @@ public class UserService: IUserService
                     Team = u.Team,
                     Roles = u.Roles,
                     RoleIds = roles.Select(r => r.RoleId)
-                })
-            ;
+                });
 
             return userDtos;
         }
@@ -606,18 +604,20 @@ public class UserService: IUserService
                         {
                             u.Id,
                             u.FullName,
+                            u.Status,
                             Role = userRole.Role.Name,
                             TenantRole = tenantUserRole.TenantRole.Role.Name
                         };
 
         return (await userQuery.ToListAsync(cancellationToken: cancellationToken))
-            .GroupBy(z => new { z.Id, z.FullName })
+            .GroupBy(z => new { z.Id, z.FullName, z.Status })
             .Select(g => new UserInfo
             (
                 tenantId,
-                tenant?.DivisionEnabled ?? false,
                 g.Key.Id,
                 g.Key.FullName,
+                g.Key.Status,
+                tenant?.DivisionEnabled ?? false,
                 g.Where(r => !string.IsNullOrEmpty(r.Role)).Select(r => r.Role).Distinct().ToList(),
                 g.Where(tr => !string.IsNullOrEmpty(tr.TenantRole)).Select(tr => tr.TenantRole).Distinct().ToList()))
             .SingleOrDefault();

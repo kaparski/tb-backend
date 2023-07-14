@@ -12,7 +12,7 @@ public class CurrentUserService: ICurrentUserService
     public CurrentUserService(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
     public Guid UserId =>
-        Guid.TryParse(UserClaims?.SingleOrDefault(c => c.Type == Claims.UserIdClaimName)?.Value, out var userId)
+        Guid.TryParse(UserClaims?.SingleOrDefault(c => c.Type == Claims.UserId)?.Value, out var userId)
             ? userId
             : Guid.Empty;
 
