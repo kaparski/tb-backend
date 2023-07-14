@@ -11,5 +11,4 @@ public static class Claims
     public const string FullName = "fullName";
     public const string DivisionEnabled = "divisionEnabled";
     public const string Permission = "permission";
-    public const string UserStatus = "userStatus";
 }

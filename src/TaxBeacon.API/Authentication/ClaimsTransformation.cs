@@ -2,6 +2,7 @@
 using System.Net.Mail;
 using System.Security.Claims;
 using TaxBeacon.Administration.Users;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Authentication;
 
@@ -30,7 +31,7 @@ public sealed class ClaimsTransformation: IClaimsTransformation
 
         var userInfo = await _userService.GetUserInfoAsync(new MailAddress(email), default);
 
-        if (userInfo == null)
+        if (userInfo == null || userInfo.Status == Status.Deactivated)
         {
             return principal;
         }
@@ -65,11 +66,6 @@ public sealed class ClaimsTransformation: IClaimsTransformation
         if (!principal.HasClaim(claim => claim.Type == Claims.DivisionEnabled))
         {
             claimsIdentity.AddClaim(new Claim(Claims.DivisionEnabled, userInfo.DivisionEnabled.ToString()));
-        }
-
-        if (!principal.HasClaim(claim => claim.Type == Claims.UserStatus))
-        {
-            claimsIdentity.AddClaim(new Claim(Claims.UserStatus, userInfo.Status.ToString()));
         }
 
         var permissions = await _userService.GetUserPermissionsAsync(userInfo.Id, userInfo.TenantId);

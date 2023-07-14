@@ -26,13 +26,13 @@ public class AuthorizeFilterTests
     }
 
     [Fact]
-    public async Task OnAuthorizationAsync_UserExistsInDbAndActive_SuccessfullyAuthorized()
+    public async Task OnAuthorizationAsync_UserIdExistsInClaims_SuccessfullyAuthorized()
     {
         // Arrange
-        var identity = new GenericIdentity("test", "test");
-        identity.AddClaim(new Claim(Claims.UserId, Guid.NewGuid().ToString()));
-        identity.AddClaim(new Claim(Claims.UserStatus, Status.Active.ToString()));
-        var contextUser = new ClaimsPrincipal(identity);
+        var contextUser = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(Claims.UserId, Guid.NewGuid().ToString())
+        }));
 
         var httpContext = new DefaultHttpContext { User = contextUser };
         var actionContext = new ActionContext(httpContext, Mock.Of<RouteData>(), Mock.Of<ActionDescriptor>());
@@ -47,32 +47,10 @@ public class AuthorizeFilterTests
     }
 
     [Fact]
-    public async Task OnAuthorizationAsync_UserIsNotInDb_ReturnsUnauthorizedResult()
+    public async Task OnAuthorizationAsync_UserIdIsNotExistsInClaims_ReturnsUnauthorizedResult()
     {
         // Arrange
-        var identity = new GenericIdentity("test", "test");
-        var contextUser = new ClaimsPrincipal(identity);
-        var httpContext = new DefaultHttpContext { User = contextUser };
-        var actionContext = new ActionContext(httpContext, Mock.Of<RouteData>(), Mock.Of<ActionDescriptor>());
-        var authorizationFilterContext = new AuthorizationFilterContext(
-            actionContext, new List<IFilterMetadata>());
-
-        // Act
-        await _authorizeFilter.OnAuthorizationAsync(authorizationFilterContext);
-
-        // Assert
-        authorizationFilterContext.Result.Should().BeOfType<UnauthorizedResult>();
-    }
-
-    [Fact]
-    public async Task OnAuthorizationAsync_UserExistsInDbAndHasDeactivatedStatus_ReturnsUnauthorizedResult()
-    {
-        // Arrange
-        var identity = new GenericIdentity("test", "test");
-        identity.AddClaim(new Claim(Claims.UserId, Guid.NewGuid().ToString()));
-        identity.AddClaim(new Claim(Claims.UserStatus, Status.Deactivated.ToString()));
-        var contextUser = new ClaimsPrincipal(identity);
-
+        var contextUser = new ClaimsPrincipal(new ClaimsIdentity());
         var httpContext = new DefaultHttpContext { User = contextUser };
         var actionContext = new ActionContext(httpContext, Mock.Of<RouteData>(), Mock.Of<ActionDescriptor>());
         var authorizationFilterContext = new AuthorizationFilterContext(

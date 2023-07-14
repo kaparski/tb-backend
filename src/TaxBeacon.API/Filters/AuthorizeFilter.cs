@@ -22,17 +22,7 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
         if (string.IsNullOrEmpty(idClaimValue))
         {
             context.Result = new UnauthorizedResult();
-            _logger.LogError("Failed to authenticate user that not exists in db");
-            return Task.CompletedTask;
-        }
-
-        var statusClaim = context.HttpContext.User
-            .FindFirst(claim => claim.Type.Equals(Claims.UserStatus, StringComparison.OrdinalIgnoreCase))?.Value;
-
-        if (!Enum.TryParse(statusClaim, out Status status) || status == Status.Deactivated)
-        {
-            context.Result = new UnauthorizedResult();
-            _logger.LogError("Failed to authenticate deactivated user");
+            _logger.LogError("Failed to authenticate a user");
         }
 
         return Task.CompletedTask;
