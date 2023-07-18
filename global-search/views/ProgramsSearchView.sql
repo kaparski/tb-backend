@@ -37,7 +37,7 @@ CREATE OR ALTER VIEW ProgramsSearchView AS
             IsDeleted,
             CreatedDateTimeUtc,
             LastModifiedDateTimeUtc,
-            JSON_ARRAY('Programs.Read', 'Programs.ReadWrite', 'Programs.ReadExport') as Permissions,
+            JSON_ARRAY('Programs.Read', 'Programs.ReadWrite', 'Programs.ReadExport') COLLATE DATABASE_DEFAULT as Permissions,
             'program' as EntityType
         FROM Programs
     )
