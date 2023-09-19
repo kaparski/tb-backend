@@ -31,7 +31,7 @@ jobs:
               run: dotnet test
 
     build:
-        runs-on: backend
+        runs-on: ubuntu-latest
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
         if: github.event_name == 'push'
         steps:
