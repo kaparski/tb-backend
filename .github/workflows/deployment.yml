@@ -1,4 +1,4 @@
-name: Test, Build, Deployment testing
+name: Test, Build, Deployment latest
 
 env:
     ACR_URL: taxbeacon.azurecr.io
@@ -11,7 +11,7 @@ on:
     pull_request:
         branches:
             - dev
-        types: [review_requested, ready_for_review]
+        types: [opened, review_requested, ready_for_review]
 
 jobs:
     test:
