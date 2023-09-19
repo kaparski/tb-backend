@@ -1,4 +1,4 @@
-name: Test, Build, Deployment latest
+name: Test, Build, Deployment
 
 env:
     ACR_URL: taxbeacon.azurecr.io
