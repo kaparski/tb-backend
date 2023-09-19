@@ -16,7 +16,7 @@ jobs:
     test:
         runs-on: ubuntu-latest
         environment:  ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'qa' && 'qa' || 'dev' }}
-        if: github.event_name == 'pull_request' &&  github.event.pull_request.draft == false
+        if: github.event_name == 'pull_request' &&  '! github.event.pull_request.draft'
         steps:
             - uses: actions/checkout@v3
             - name: Setup .NET Core SDK
