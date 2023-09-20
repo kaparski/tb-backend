@@ -11,7 +11,7 @@ on:
     pull_request:
         branches:
             - dev
-        types: [opened, review_requested, ready_for_review]
+        types: [reopened, review_requested, ready_for_review, synchronize]
 
 jobs:
     test:
