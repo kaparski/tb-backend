@@ -3,15 +3,12 @@ env:
     ACR_URL: taxbeacon.azurecr.io
 
 on:
-    push:
-        branches:
-            - main
-            - dev
-            - kaparski-patch-2
-    pull_request:
-        branches:
-            - dev
-        types: [review_requested, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Deployment to the QA'
+        required: false
+        type: boolean
 
 jobs:
     test:
