@@ -95,7 +95,7 @@ public class DepartmentService: IDepartmentService
                 .OrderBy(dep => dep.Name)
                 .ToListAsync(cancellationToken);
 
-            exportDepartmentsWithDivision.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+            exportDepartmentsWithDivision.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDateTime(t.CreatedDateTimeUtc));
 
             result = _listToFileConverters[fileType].Convert(exportDepartmentsWithDivision);
         }
@@ -113,12 +113,12 @@ public class DepartmentService: IDepartmentService
                 .OrderBy(dep => dep.Name)
                 .ToListAsync(cancellationToken);
 
-            exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+            exportDepartments.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDateTime(t.CreatedDateTimeUtc));
 
             result = _listToFileConverters[fileType].Convert(exportDepartments);
         }
 
-        _logger.LogInformation("{dateTime} - Departments export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Departments export was executed by {userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
@@ -281,7 +281,7 @@ public class DepartmentService: IDepartmentService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Department ({departmentId}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Department ({departmentId}) was updated by {userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);

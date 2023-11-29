@@ -63,7 +63,8 @@ public class DivisionsService: IDivisionsService
                     Description = d.Description,
                     CreatedDateTimeUtc = d.CreatedDateTimeUtc,
                     NumberOfUsers = d.Users.Count(u => u.TenantUsers.Any(x => x.TenantId == _currentUserService.TenantId)),
-                    DepartmentIds = departments.Select(r => r.Id)
+                    DepartmentIds = departments.Select(r => r.Id),
+                    NumberOfDepartments = departments.Count(),
                 })
             ;
 
@@ -91,9 +92,9 @@ public class DivisionsService: IDivisionsService
             .ProjectToType<DivisionExportModel>()
             .ToListAsync(cancellationToken);
 
-        exportTenants.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+        exportTenants.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDateTime(t.CreatedDateTimeUtc));
 
-        _logger.LogInformation("{dateTime} - Tenants export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Tenants export was executed by {userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
@@ -216,7 +217,7 @@ public class DivisionsService: IDivisionsService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Division ({divisionId}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Division ({divisionId}) was updated by {userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);

@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using FluentValidation.Results;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -120,12 +121,18 @@ public class JobTitlesController: BaseController
     /// Update job title details
     /// </summary>
     /// <response code="200">Returns updated job title details</response>
+    /// <response code="400">Validation failed</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Job title is not found</response>
     /// <returns>Updated job title details</returns>
     [HasPermissions(Common.Permissions.JobTitles.ReadWrite)]
     [HttpPatch("{id:guid}", Name = "UpdateJobTitle")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(JobTitleDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<ValidationFailure>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateJobTitleAsync([FromRoute] Guid id, [FromBody] UpdateJobTitleRequest request,
         CancellationToken cancellationToken)

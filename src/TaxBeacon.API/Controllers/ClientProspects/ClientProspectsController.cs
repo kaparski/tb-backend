@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using TaxBeacon.Accounts.Accounts;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.API.Controllers.Accounts.Responses;
 using TaxBeacon.API.Controllers.ClientProspects.Requests;
+using TaxBeacon.API.Controllers.ClientProspects.Responses;
 using TaxBeacon.Common.Converters;
 
 namespace TaxBeacon.API.Controllers.ClientProspects;

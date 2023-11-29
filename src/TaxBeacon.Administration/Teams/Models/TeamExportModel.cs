@@ -6,15 +6,19 @@ namespace TaxBeacon.Administration.Teams.Models;
 
 public class TeamExportModel: IRegister
 {
-    [Column("Team name")] public string Name { get; set; } = string.Empty;
+    [Column("Team Name")]
+    public string Name { get; set; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
-    [Ignore] public DateTime CreatedDateTimeUtc { get; set; }
+    [Ignore]
+    public DateTime CreatedDateTimeUtc { get; set; }
 
-    [Column("Creation Date")] public string CreatedDateView { get; set; } = string.Empty;
+    [Column("Creation Date")]
+    public string CreatedDateView { get; set; } = string.Empty;
 
-    [Column("Number of Users")] public int NumberOfUsers { get; set; }
+    [Column("Number Of Users")]
+    public int NumberOfUsers { get; set; }
 
     public void Register(TypeAdapterConfig config) =>
         config.NewConfig<Team, TeamExportModel>()

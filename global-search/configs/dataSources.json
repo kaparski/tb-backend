@@ -1,13 +1,15 @@
 [
   {
     "name": "tenants-ds",
-    "description": "a data source for tenants",
+    "description": "a data source for tenants updated new",
     "type": "azuresql",
+    "subtype": null,
     "credentials": {
       "connectionString": ""
     },
     "container": {
-      "name": "[dbo].[TenantsSearchView]"
+      "name": "[dbo].[TenantsSearchView]",
+      "query": null
     },
     "dataChangeDetectionPolicy": {
       "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
@@ -21,13 +23,59 @@
   },
   {
     "name": "users-ds",
-    "description": "a data source for users",
+    "description": "a data source for users updated new",
     "type": "azuresql",
+    "subtype": null,
     "credentials": {
       "connectionString": ""
     },
     "container": {
-      "name": "[dbo].[UsersSearchView]"
+      "name": "[dbo].[UsersSearchView]",
+      "query": null
+    },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "teams-ds",
+    "description": "testing updated new",
+    "type": "azuresql",
+    "subtype": null,
+    "credentials": {
+      "connectionString": ""
+    },
+    "container": {
+      "name": "[dbo].[TeamsSearchView]",
+      "query": null
+    },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "serviceareas-ds",
+    "description": "a data source for service areas updated new",
+    "type": "azuresql",
+    "subtype": null,
+    "credentials": {
+      "connectionString": ""
+    },
+    "container": {
+      "name": "[dbo].[ServiceAreasSearchView]",
+      "query": null
     },
     "dataChangeDetectionPolicy": {
       "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
@@ -41,13 +89,15 @@
   },
   {
     "name": "roles-ds",
-    "description": "a data source for roles",
+    "description": "a data source for roles updated new",
     "type": "azuresql",
+    "subtype": null,
     "credentials": {
       "connectionString": ""
     },
     "container": {
-      "name": "[dbo].[RolesSearchView]"
+      "name": "[dbo].[RolesSearchView]",
+      "query": null
     },
     "dataChangeDetectionPolicy": {
       "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
@@ -61,48 +111,16 @@
   },
   {
     "name": "programs-ds",
-    "description": "a data source for programs",
+    "description": "a data source for programs updated new",
     "type": "azuresql",
+    "subtype": null,
     "credentials": {
       "connectionString": ""
     },
-    "container": { "name": "[dbo].[ProgramsSearchView]" },
-    "dataChangeDetectionPolicy": {
-      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
-      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    "container": {
+      "name": "[dbo].[ProgramsSearchView]",
+      "query": null
     },
-    "dataDeletionDetectionPolicy": {
-      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
-      "softDeleteColumnName": "IsDeleted",
-      "softDeleteMarkerValue": "1"
-    }
-  },
-  {
-    "name": "divisions-ds",
-    "description": "a data source for divisions",
-    "type": "azuresql",
-    "credentials": {
-      "connectionString": ""
-    },
-    "container": { "name": "[dbo].[DivisionsSearchView]" },
-    "dataChangeDetectionPolicy": {
-      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
-      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
-    },
-    "dataDeletionDetectionPolicy": {
-      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
-      "softDeleteColumnName": "IsDeleted",
-      "softDeleteMarkerValue": "1"
-    }
-  },
-  {
-    "name": "departments-ds",
-    "description": "a data source for departments",
-    "type": "azuresql",
-    "credentials": {
-      "connectionString": ""
-    },
-    "container": { "name": "[dbo].[DepartmentsSearchView]" },
     "dataChangeDetectionPolicy": {
       "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
       "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
@@ -115,12 +133,16 @@
   },
   {
     "name": "jobtitles-ds",
-    "description": "a data source for job titles",
+    "description": "a data source for job titles updated new",
     "type": "azuresql",
+    "subtype": null,
     "credentials": {
       "connectionString": ""
     },
-    "container": { "name": "[dbo].[JobTitlesSearchView]" },
+    "container": {
+      "name": "[dbo].[JobTitlesSearchView]",
+      "query": null
+    },
     "dataChangeDetectionPolicy": {
       "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
       "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
@@ -132,13 +154,17 @@
     }
   },
   {
-    "name": "serviceareas-ds",
-    "description": "a data source for service areas",
+    "name": "entities-ds",
+    "description": "a data source for entities updated new",
     "type": "azuresql",
+    "subtype": null,
     "credentials": {
       "connectionString": ""
     },
-    "container": { "name": "[dbo].[ServiceAreasSearchView]" },
+    "container": {
+      "name": "[dbo].[EntitiesSearchView]",
+      "query": null
+    },
     "dataChangeDetectionPolicy": {
       "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
       "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
@@ -150,13 +176,105 @@
     }
   },
   {
-    "name": "teams-ds",
-    "description": "a data source for teams",
+    "name": "divisions-ds",
+    "description": "a data source for divisions updated new",
     "type": "azuresql",
+    "subtype": null,
     "credentials": {
       "connectionString": ""
     },
-    "container": { "name": "[dbo].[TeamsSearchView]" },
+    "container": {
+      "name": "[dbo].[DivisionsSearchView]",
+      "query": null
+    },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "departments-ds",
+    "description": "a data source for departments updated new",
+    "type": "azuresql",
+    "subtype": null,
+    "credentials": {
+      "connectionString": ""
+    },
+    "container": {
+      "name": "[dbo].[DepartmentsSearchView]",
+      "query": null
+    },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "clients-ds",
+    "description": "a data source for client accounts updated new",
+    "type": "azuresql",
+    "subtype": null,
+    "credentials": {
+      "connectionString": ""
+    },
+    "container": {
+      "name": "[dbo].[ClientsSearchView]",
+      "query": null
+    },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "locations-ds",
+    "description": "a data source for locations",
+    "type": "azuresql",
+    "subtype": null,
+    "credentials": {
+      "connectionString": ""
+    },
+    "container": {
+      "name": "[dbo].[LocationsSearchView]",
+      "query": null
+    },
+    "dataChangeDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+      "highWaterMarkColumnName": "LastModifiedDateTimeUtc"
+    },
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
+      "softDeleteColumnName": "IsDeleted",
+      "softDeleteMarkerValue": "1"
+    }
+  },
+  {
+    "name": "contacts-ds",
+    "description": "a data source for contacts",
+    "type": "azuresql",
+    "subtype": null,
+    "credentials": {
+      "connectionString": ""
+    },
+    "container": {
+      "name": "[dbo].[ContactsSearchView]",
+      "query": null
+    },
     "dataChangeDetectionPolicy": {
       "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
       "highWaterMarkColumnName": "LastModifiedDateTimeUtc"

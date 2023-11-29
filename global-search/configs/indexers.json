@@ -1,13 +1,13 @@
 [
   {
     "name": "tenants-indexer",
-    "description": "Indexer of tenants-ds",
+    "description": "Indexer of tenants-ds testing gha latest",
     "dataSourceName": "tenants-ds",
     "targetIndexName": "global-search",
     "fieldMappings": [
       {
         "sourceFieldName": "Permissions",
-        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
       },
       {
         "sourceFieldName": "Name",
@@ -18,17 +18,20 @@
         "targetFieldName": "Name"
       }
     ],
-    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
   },
   {
     "name": "users-indexer",
-    "description": "Indexer of users-ds",
+    "description": "Indexer of users-ds testing gha",
     "dataSourceName": "users-ds",
     "targetIndexName": "global-search",
     "fieldMappings": [
       {
         "sourceFieldName": "Permissions",
-        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
       },
       {
         "sourceFieldName": "FullName",
@@ -39,17 +42,20 @@
         "targetFieldName": "FullName"
       }
     ],
-    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
   },
   {
     "name": "roles-indexer",
-    "description": "Indexer of roles-ds",
+    "description": "Indexer of roles-ds testing gha",
     "dataSourceName": "roles-ds",
     "targetIndexName": "global-search",
     "fieldMappings": [
       {
         "sourceFieldName": "Permissions",
-        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
       },
       {
         "sourceFieldName": "Name",
@@ -60,17 +66,20 @@
         "targetFieldName": "Name"
       }
     ],
-    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
   },
   {
     "name": "programs-indexer",
-    "description": "Indexer of programs-ds datasource",
+    "description": "Indexer of programs-ds datasource testing gha",
     "dataSourceName": "programs-ds",
     "targetIndexName": "global-search",
     "fieldMappings": [
       {
         "sourceFieldName": "Permissions",
-        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
       },
       {
         "sourceFieldName": "Name",
@@ -81,17 +90,20 @@
         "targetFieldName": "Name"
       }
     ],
-    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
   },
   {
     "name": "divisions-indexer",
-    "description": "Indexer of divisions-ds",
+    "description": "Indexer of divisions-ds testing gha",
     "dataSourceName": "divisions-ds",
     "targetIndexName": "global-search",
     "fieldMappings": [
       {
         "sourceFieldName": "Permissions",
-        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
       },
       {
         "sourceFieldName": "Name",
@@ -102,17 +114,20 @@
         "targetFieldName": "Name"
       }
     ],
-    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
   },
   {
     "name": "departments-indexer",
-    "description": "Indexer of departments-ds",
+    "description": "Indexer of departments-ds testing gha",
     "dataSourceName": "departments-ds",
     "targetIndexName": "global-search",
     "fieldMappings": [
       {
         "sourceFieldName": "Permissions",
-        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
       },
       {
         "sourceFieldName": "Name",
@@ -123,17 +138,20 @@
         "targetFieldName": "Name"
       }
     ],
-    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
   },
   {
     "name": "jobtitles-indexer",
-    "description": "Indexer of jobtitles-ds",
+    "description": "Indexer of jobtitles-ds testing gha",
     "dataSourceName": "jobtitles-ds",
     "targetIndexName": "global-search",
     "fieldMappings": [
       {
         "sourceFieldName": "Permissions",
-        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
       },
       {
         "sourceFieldName": "Name",
@@ -144,17 +162,20 @@
         "targetFieldName": "Name"
       }
     ],
-    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
   },
   {
     "name": "serviceareas-indexer",
-    "description": "Indexer of serviceareas-ds",
+    "description": "Indexer of serviceareas-ds testing gha",
     "dataSourceName": "serviceareas-ds",
     "targetIndexName": "global-search",
     "fieldMappings": [
       {
         "sourceFieldName": "Permissions",
-        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
       },
       {
         "sourceFieldName": "Name",
@@ -165,17 +186,20 @@
         "targetFieldName": "Name"
       }
     ],
-    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
   },
   {
     "name": "teams-indexer",
-    "description": "Indexer of teams-ds",
+    "description": "Indexer of teams-ds testing gha",
     "dataSourceName": "teams-ds",
     "targetIndexName": "global-search",
     "fieldMappings": [
       {
         "sourceFieldName": "Permissions",
-        "mappingFunction" : { "name" : "jsonArrayToStringCollection" }
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
       },
       {
         "sourceFieldName": "Name",
@@ -186,7 +210,111 @@
         "targetFieldName": "Name"
       }
     ],
-    "schedule": { "interval": "PT5M", "startTime": "2021-01-01T00:00:00Z" }
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
+  },
+  {
+    "name": "clients-indexer",
+    "description": "Indexer of clients-ds testing gha",
+    "dataSourceName": "clients-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
+  },
+  {
+    "name": "entities-indexer",
+    "description": "Indexer of entities-ds testing gha",
+    "dataSourceName": "entities-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
+  },
+  {
+    "name": "locations-indexer",
+    "description": "Indexer of locations-ds",
+    "dataSourceName": "locations-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "mappingFunction": { "name": "jsonArrayToStringCollection" }
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "DisplayName"
+      },
+      {
+        "sourceFieldName": "Name",
+        "targetFieldName": "Name"
+      }
+    ],
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
+  },
+  {
+    "name": "contacts-indexer",
+    "description": "Indexer of contacts-ds",
+    "dataSourceName": "contacts-ds",
+    "targetIndexName": "global-search",
+    "fieldMappings": [
+      {
+        "sourceFieldName": "Permissions",
+        "targetFieldName": "Permissions",
+        "mappingFunction": {
+          "name": "jsonArrayToStringCollection",
+          "parameters": null
+        }
+      },
+      {
+        "sourceFieldName": "FullName",
+        "targetFieldName": "DisplayName",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "FullName",
+        "targetFieldName": "FullName",
+        "mappingFunction": null
+      }
+    ],
+    "schedule": {
+      "interval": "PT5M",
+      "startTime": "2021-01-01T00:00:00Z"
+    }
   }
 ]
-

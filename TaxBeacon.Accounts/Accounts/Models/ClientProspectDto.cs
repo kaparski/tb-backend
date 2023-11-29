@@ -2,17 +2,45 @@
 
 namespace TaxBeacon.Accounts.Accounts.Models;
 
-public class ClientProspectDto
+public record ClientProspectDto
 {
-    public Guid AccountId { get; set; }
+    public Guid AccountId { get; init; }
 
-    public string Name { get; set; } = null!;
+    public string AccountIdField { get; init; } = null!;
 
-    public string? City { get; set; }
+    public string Name { get; init; } = null!;
 
-    public int DaysOpen { get; set; }
+    public string? City { get; init; }
 
-    public State? State { get; set; }
+    public int DaysOpen { get; init; }
 
-    public Status Status { get; set; }
+    public State? State { get; init; }
+
+    public Status Status { get; init; }
+
+    public string? Salespersons { get; init; } = null!;
+
+    public IEnumerable<Guid> SalespersonIds { get; internal set; } = Enumerable.Empty<Guid>();
+
+    public DateTime CreatedDateTimeUtc { get; init; }
+
+    public DateTime? DeactivationDateTimeUtc { get; init; }
+
+    public DateTime? ReactivationDateTimeUtc { get; init; }
+
+    public string? NaicsCode { get; init; }
+
+    public string? NaicsCodeIndustry { get; init; }
+
+    public string Country { get; init; } = null!;
+
+    public string? County { get; init; }
+
+    public int? EmployeeCount { get; init; }
+
+    public decimal? AnnualRevenue { get; init; }
+
+    public Guid? PrimaryContactId { get; init; }
+
+    public IEnumerable<Guid> AccountManagerIds { get; init; } = Enumerable.Empty<Guid>();
 }

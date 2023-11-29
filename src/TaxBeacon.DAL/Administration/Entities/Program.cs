@@ -3,7 +3,7 @@ using TaxBeacon.Common.Enums.Administration;
 
 namespace TaxBeacon.DAL.Administration.Entities;
 
-public class Program: BaseEntity
+public class Program: BaseDeletableEntity
 {
     public Guid Id { get; set; }
 

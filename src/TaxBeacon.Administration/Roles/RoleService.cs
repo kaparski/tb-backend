@@ -181,7 +181,7 @@ public class RoleService: IRoleService
         return permissionsWithCategory;
     }
 
-    public async Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
+    public async Task<OneOf<RoleDto, NotFound>> GetRoleByIdAsync(Guid roleId,
         CancellationToken cancellationToken = default)
     {
         var role = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true }
@@ -193,7 +193,7 @@ public class RoleService: IRoleService
                                           && r.TenantRoles.Any(tr => tr.TenantId == _currentUserService.TenantId),
                     cancellationToken);
 
-        return role is not null ? role : new NotFound();
+        return role is not null ? role.Adapt<RoleDto>() : new NotFound();
     }
 
     private IQueryable<RoleDto> GetTenantRolesQuery() =>
@@ -204,7 +204,8 @@ public class RoleService: IRoleService
             {
                 Id = tr.RoleId,
                 Name = tr.Role.Name,
-                AssignedUsersCount = tr.TenantUserRoles.Count
+                AssignedUsersCount = tr.TenantUserRoles.Count,
+                Type = tr.Role.Type
             });
 
     private IQueryable<RoleDto> GetNotTenantRolesQuery() =>
@@ -215,7 +216,8 @@ public class RoleService: IRoleService
             {
                 Id = r.Id,
                 Name = r.Name,
-                AssignedUsersCount = r.UserRoles.Count
+                AssignedUsersCount = r.UserRoles.Count,
+                Type = r.Type
             });
 
     private IQueryable<User> GetTenantRoleAssignedUsersQuery(Guid roleId) =>

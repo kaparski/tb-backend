@@ -8,9 +8,11 @@ public class ServiceAreaDetailsResponse
 
     public string Name { get; set; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
     public DepartmentResponse Department { get; set; } = null!;
 
     public DateTime CreatedDateTimeUtc { get; set; }
+
+    public DateTime? LastModifiedDateTimeUtc { get; set; }
 }

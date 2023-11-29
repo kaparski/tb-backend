@@ -1,19 +1,18 @@
-﻿
-namespace TaxBeacon.Administration.JobTitles.Models;
+﻿namespace TaxBeacon.Administration.JobTitles.Models;
 
-public class JobTitleDto
+public record JobTitleDto
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; init; }
 
-    public Guid? DepartmentId { get; set; }
+    public Guid? DepartmentId { get; init; }
 
-    public string? Department { get; set; }
+    public string? Department { get; init; }
 
-    public DateTime CreatedDateTimeUtc { get; set; }
+    public DateTime CreatedDateTimeUtc { get; init; }
 
-    public int AssignedUsersCount { get; set; }
+    public int AssignedUsersCount { get; init; }
 }

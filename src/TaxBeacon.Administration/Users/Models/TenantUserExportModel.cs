@@ -10,6 +10,7 @@ public sealed class TenantUserExportModel: IRegister
 {
     public string Email { get; set; } = string.Empty;
 
+    [Column("Full Name")]
     public string FullName { get; set; } = string.Empty;
 
     public string Department { get; set; } = string.Empty;
@@ -33,19 +34,19 @@ public sealed class TenantUserExportModel: IRegister
     [Ignore]
     public DateTime CreatedDateTimeUtc { get; set; }
 
-    [Column("Creation date")]
+    [Column("Creation Date")]
     public string CreatedDateView { get; set; } = string.Empty;
 
     [Ignore]
     public DateTime? DeactivationDateTimeUtc { get; set; }
 
-    [Column("Deactivation date")]
+    [Column("Deactivation Date")]
     public string DeactivationDateTimeView { get; set; } = string.Empty;
 
     [Ignore]
     public DateTime? ReactivationDateTimeUtc { get; set; }
 
-    [Column("Reactivation date")]
+    [Column("Reactivation Date")]
     public string ReactivationDateTimeView { get; set; } = string.Empty;
 
     public void Register(TypeAdapterConfig config) =>

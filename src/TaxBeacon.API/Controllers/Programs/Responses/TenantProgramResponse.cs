@@ -3,42 +3,40 @@ using TaxBeacon.Common.Enums.Administration;
 
 namespace TaxBeacon.API.Controllers.Programs.Responses;
 
-public class TenantProgramResponse
+public record TenantProgramResponse
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string? Reference { get; set; }
+    public string? Reference { get; init; }
 
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
-    public Jurisdiction Jurisdiction { get; set; }
+    public Jurisdiction Jurisdiction { get; init; }
 
-    public string? Overview { get; set; }
+    public string? Overview { get; init; }
 
-    public string? LegalAuthority { get; set; }
+    public string? LegalAuthority { get; init; }
 
-    public string Agency { get; set; } = string.Empty;
+    public string Agency { get; init; } = string.Empty;
 
-    public string Department { get; set; } = string.Empty;
+    public string? Department { get; init; }
 
-    public string ServiceArea { get; set; } = string.Empty;
+    public string? ServiceArea { get; init; }
 
-    public string? JurisdictionName { get; set; }
+    public string? JurisdictionName { get; init; }
 
-    public string? IncentivesArea { get; set; }
+    public string? IncentivesArea { get; init; }
 
-    public string? IncentivesType { get; set; }
+    public string? IncentivesType { get; init; }
 
-    public Status Status { get; set; }
+    public Status Status { get; init; }
 
-    public DateTime? StartDateTimeUtc { get; set; }
+    public DateTime? StartDateTimeUtc { get; init; }
 
-    public DateTime? EndDateTimeUtc { get; set; }
+    public DateTime? EndDateTimeUtc { get; init; }
 
-    public DateTime CreatedDateTimeUtc { get; set; }
+    public DateTime? DeactivationDateTimeUtc { get; init; }
 
-    public DateTime? DeactivationDateTimeUtc { get; set; }
-
-    public DateTime? ReactivationDateTimeUtc { get; set; }
+    public DateTime? ReactivationDateTimeUtc { get; init; }
 }
 

@@ -1,9 +1,8 @@
 ﻿using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.DAL.Administration.Entities;
 
-public class Tenant: BaseEntity
+public class Tenant: BaseDeletableEntity
 {
     public Guid Id { get; set; }
 
@@ -68,4 +67,33 @@ public class Tenant: BaseEntity
     public ICollection<Contact> Contacts { get; set; } = new HashSet<Contact>();
 
     public ICollection<AccountActivityLog> AccountActivityLogs { get; set; } = new HashSet<AccountActivityLog>();
+
+    public ICollection<LocationActivityLog> LocationActivityLogs { get; set; } = new HashSet<LocationActivityLog>();
+
+    public ICollection<AccountContact> AccountContacts { get; set; } = new HashSet<AccountContact>();
+
+    public ICollection<AccountPhone> AccountPhones { get; set; } = new HashSet<AccountPhone>();
+
+    public ICollection<ContactPhone> ContactPhones { get; set; } = new HashSet<ContactPhone>();
+
+    public ICollection<EntityPhone> EntitiesPhones { get; set; } = new HashSet<EntityPhone>();
+
+    public ICollection<LocationPhone> LocationPhones { get; set; } = new HashSet<LocationPhone>();
+
+    public ICollection<LinkedContact> LinkedContacts { get; set; } = new HashSet<LinkedContact>();
+
+    public ICollection<StateId> StateIds { get; set; } = new HashSet<StateId>();
+
+    public ICollection<EntityLocation> EntityLocations { get; set; } = new HashSet<EntityLocation>();
+
+    public ICollection<AccountContactActivityLog> AccountContactActivityLogs { get; set; } =
+        new HashSet<AccountContactActivityLog>();
+
+    public ICollection<Document> Documents = new HashSet<Document>();
+
+    public ICollection<AccountDocument> AccountDocuments = new HashSet<AccountDocument>();
+
+    public ICollection<EntityDocument> EntityDocuments = new HashSet<EntityDocument>();
+
+    public ICollection<LocationDocument> LocationDocuments = new HashSet<LocationDocument>();
 }

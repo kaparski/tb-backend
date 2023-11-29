@@ -31,11 +31,11 @@ public record AccountDetailsResponse
 
     public string? Address { get; init; }
 
-    public int EntitiesCount { get; init; }
+    public string AccountId { get; init; } = null!;
 
-    public int LocationsCount { get; init; }
+    public DateTime? LastModifiedDateTimeUtc { get; init; }
 
-    public int ContactsCount { get; init; }
+    public NaicsCodeResponse? NaicsCode { get; init; }
 
     public ClientDetailsResponse? Client { get; set; }
 

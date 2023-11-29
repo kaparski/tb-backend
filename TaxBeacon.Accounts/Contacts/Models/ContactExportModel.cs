@@ -1,46 +1,46 @@
+using Mapster;
 using Npoi.Mapper.Attributes;
-using TaxBeacon.Common.Enums;
+using TaxBeacon.Accounts.Common.Models;
+using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.Accounts.Contacts.Models;
 
-public class ContactExportModel
+public record ContactExportModel: IRegister
 {
-    [Column("Name")]
-    public string FullName { get; set; } = string.Empty;
+    [Column("First Name")]
+    public string FirstName { get; init; } = null!;
+
+    [Column("Last Name")]
+    public string LastName { get; init; } = null!;
 
     [Column("Email")]
-    public string Email { get; set; } = string.Empty;
+    public string Email { get; init; } = null!;
+
+    [Column("Secondary Email")]
+    public string SecondaryEmail { get; init; } = null!;
 
     [Column("Job Title")]
-    public string JobTitle { get; set; } = string.Empty;
+    public string JobTitle { get; init; } = null!;
 
-    [Column("Contact Type")]
-    public string Type { get; set; } = string.Empty;
-
-    [Column("Role")]
-    public string? Role { get; set; }
-
-    [Column("Additional Role")]
-    public string? SubRole { get; set; }
-
-    [Column("Country")]
-    public string? Country { get; set; }
-
-    [Column("Street Address 1")]
-    public string? Address { get; set; }
-
-    [Column("City")]
-    public string? City { get; set; }
-
-    [Column("State")]
-    public State? State { get; set; }
-
-    [Column("Zip")]
-    public string? Zip { get; set; }
+    [Ignore]
+    public IEnumerable<PhoneDto> Phones { get; init; } = Enumerable.Empty<PhoneDto>();
 
     [Column("Phone")]
-    public string Phone { get; set; } = null!;
+    public string? PhonesView { get; set; } = string.Empty;
 
-    [Column("Phone 2")]
-    public string? Phone2 { get; set; }
+    [Ignore]
+    public IEnumerable<string> AccountsNames { get; init; } = Enumerable.Empty<string>();
+
+    [Column("Associated Accounts")]
+    public string AccountsView { get; set; } = null!;
+
+    [Ignore]
+    public IEnumerable<LinkedContactDto> LinkedContacts { get; init; } = Enumerable.Empty<LinkedContactDto>();
+
+    [Column("Linked Contacts")]
+    public string? LinkedContactsView { get; set; } = string.Empty;
+
+    public void Register(TypeAdapterConfig config) =>
+        config.NewConfig<Contact, ContactExportModel>()
+            .Map(dest => dest.AccountsNames, src => src.Accounts.Select(a => a.Account.Name));
 }

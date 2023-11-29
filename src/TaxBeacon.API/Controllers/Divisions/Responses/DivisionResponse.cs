@@ -8,7 +8,7 @@ public class DivisionResponse
 
     public int NumberOfUsers { get; set; }
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
 
@@ -17,4 +17,6 @@ public class DivisionResponse
     public string Department { get; set; } = string.Empty;
 
     public IEnumerable<Guid>? DepartmentIds { get; set; }
+
+    public int NumberOfDepartments { get; set; }
 }

@@ -13,6 +13,7 @@ public record ClientDetailsDto
     public DateTime? DeactivationDateTimeUtc { get; init; }
     public DateTime? ReactivationDateTimeUtc { get; init; }
     public DateTime CreatedDateTimeUtc { get; init; }
+    public DateTime? LastModifiedDateTimeUtc { get; init; }
     public ContactDto? PrimaryContact { get; init; } = null!;
     public ICollection<ClientManagerDto> ClientManagers { get; init; } = new List<ClientManagerDto>();
 }

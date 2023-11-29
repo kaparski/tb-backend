@@ -1,34 +1,31 @@
-﻿using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.Accounts.Common.Models;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.Accounts.Contacts.Models;
 
-public class ContactDto
+public record ContactDto
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string FirstName { get; set; } = null!;
+    public string FirstName { get; init; } = null!;
 
-    public string LastName { get; set; } = null!;
+    public string LastName { get; init; } = null!;
 
-    public string FullName { get; set; } = null!;
+    public string FullName { get; init; } = null!;
 
-    public string Email { get; set; } = null!;
+    public string Email { get; init; } = null!;
 
-    public string? JobTitle { get; set; }
+    public string? SecondaryEmail { get; init; } = null!;
 
-    public string ContactType { get; set; } = null!;
+    public string? JobTitle { get; init; }
 
-    public string? Phone { get; set; }
+    public DateTime CreatedDateTimeUtc { get; init; }
 
-    public Status Status { get; set; }
+    public DateTime? LastModifiedDateTimeUtc { get; init; }
 
-    public string? Country { get; set; }
+    public IEnumerable<ContactAccountDto> Accounts { get; init; } = Enumerable.Empty<ContactAccountDto>();
 
-    public string? City { get; set; }
+    public IEnumerable<LinkedContactDto> LinkedContacts { get; init; } = Enumerable.Empty<LinkedContactDto>();
 
-    public State? State { get; set; }
-
-    public Guid AccountId { get; set; }
-    
-    public string AccountName { get; set; } = null!;
+    public IEnumerable<PhoneDto> Phones { get; init; } = Enumerable.Empty<PhoneDto>();
 }

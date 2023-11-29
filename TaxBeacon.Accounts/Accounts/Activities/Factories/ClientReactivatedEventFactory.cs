@@ -2,10 +2,11 @@
 using TaxBeacon.Accounts.Accounts.Activities.Models;
 using TaxBeacon.Common.Enums.Accounts.Activities;
 using TaxBeacon.Common.Models;
+using TaxBeacon.Common.Services;
 
 namespace TaxBeacon.Accounts.Accounts.Activities.Factories;
 
-public sealed class ClientReactivatedEventFactory: IAccountActivityFactory
+public sealed class ClientReactivatedEventFactory: IActivityFactory<AccountEventType>
 {
     public uint Revision => 1;
 

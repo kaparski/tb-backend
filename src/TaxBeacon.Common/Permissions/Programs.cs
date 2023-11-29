@@ -4,5 +4,8 @@ public enum Programs
 {
     Read,
     ReadExport,
-    ReadWrite
+    ReadWrite,
+    ReadTenantOrgUnits,
+    ReadAssignTenantOrgUnits,
+    ReadActivation
 }

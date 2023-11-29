@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.DAL.Administration.Entities;
 
-public class Division: BaseEntity
+public class Division: BaseDeletableEntity
 {
     public Guid TenantId { get; set; }
 
@@ -8,7 +8,7 @@ public class Division: BaseEntity
 
     public string Name { get; set; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
     public Tenant Tenant { get; set; } = null!;
 
@@ -17,5 +17,4 @@ public class Division: BaseEntity
     public ICollection<Department> Departments { get; set; } = new HashSet<Department>();
 
     public ICollection<DivisionActivityLog> DivisionActivityLogs { get; set; } = new HashSet<DivisionActivityLog>();
-
 }

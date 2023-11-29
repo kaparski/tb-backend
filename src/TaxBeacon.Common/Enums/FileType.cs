@@ -3,5 +3,6 @@
 public enum FileType
 {
     Csv = 1,
-    Xlsx = 2
+    Xlsx = 2,
+    Zip = 3,
 }

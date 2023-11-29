@@ -157,4 +157,71 @@ public class RolesControllerTest
             hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
+
+    [Fact]
+    public async Task GetRoleByIdAsync_RoleExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        _roleServiceMock
+            .Setup(x => x.GetRoleByIdAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(new RoleDto());
+
+        // Act
+        var actualResponse = await _controller.GetRoleByIdAsync(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<RoleResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task GetRoleByIdAsync_RoleDoesNotExist_ShouldReturnNotFoundStatusCode()
+    {
+        // Arrange
+        _roleServiceMock
+            .Setup(x => x.GetRoleByIdAsync(It.IsAny<Guid>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.GetRoleByIdAsync(Guid.NewGuid(), default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+
+        }
+    }
+
+    [Fact]
+    public void GetRoleByIdAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<Guid, CancellationToken, Task<IActionResult>>)_controller.GetRoleByIdAsync).Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Roles.Read,
+            Common.Permissions.Roles.ReadWrite
+        };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should().Be(
+                string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
 }

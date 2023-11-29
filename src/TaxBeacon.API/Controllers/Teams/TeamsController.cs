@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using FluentValidation.Results;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -123,6 +124,7 @@ public class TeamsController: BaseController
     /// Update team details
     /// </summary>
     /// <response code="200">Returns updated team</response>
+    /// <response code="400">Validation failed</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Team is not found</response>
@@ -131,6 +133,7 @@ public class TeamsController: BaseController
     [HttpPatch("{id:guid}", Name = "UpdateTeam")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(TeamResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<ValidationFailure>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

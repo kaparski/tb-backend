@@ -9,20 +9,21 @@ namespace TaxBeacon.API.Authentication;
 public sealed class ClaimsTransformation: IClaimsTransformation
 {
     private readonly IUserService _userService;
+    private readonly ILogger<ClaimsTransformation> _logger;
 
-    public ClaimsTransformation(IUserService userService) => _userService = userService;
+    public ClaimsTransformation(IUserService userService, ILogger<ClaimsTransformation> logger)
+    {
+        _userService = userService;
+        _logger = logger;
+    }
 
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
-        var email = principal.Claims
-                        .SingleOrDefault(claim =>
-                            claim.Type.Equals(Claims.EmailClaimName, StringComparison.OrdinalIgnoreCase))
-                        ?.Value
-                    ??
-                    principal.Claims
-                        .SingleOrDefault(claim =>
-                            claim.Type.Equals(Claims.OtherMails, StringComparison.OrdinalIgnoreCase))
-                        ?.Value;
+        var idpExternalId = principal.Claims
+            .Single(claim => claim.Type.Equals(ClaimTypes.NameIdentifier, StringComparison.OrdinalIgnoreCase))
+            .Value;
+
+        var email = principal.GetEmail();
 
         if (email == null)
         {
@@ -33,6 +34,22 @@ public sealed class ClaimsTransformation: IClaimsTransformation
 
         if (userInfo == null || userInfo.Status == Status.Deactivated)
         {
+            return principal;
+        }
+
+        // setup external id at the first login to app
+        if (userInfo.IdpExternalId is null)
+        {
+            await _userService.SetIdpExternalIdAsync(new MailAddress(email), idpExternalId);
+            userInfo = userInfo with { IdpExternalId = idpExternalId };
+        }
+
+        if (userInfo.IdpExternalId != idpExternalId)
+        {
+            _logger.LogCritical("Attempt to get access with email {email} and external id {ActualExternalId} with different external id {ProvidedExternalId}",
+                email,
+                userInfo.IdpExternalId,
+                idpExternalId);
             return principal;
         }
 

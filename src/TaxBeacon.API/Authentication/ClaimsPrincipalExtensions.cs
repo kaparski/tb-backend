@@ -22,4 +22,17 @@ public static class ClaimsPrincipalExtensions
             .Select(p => p.Value)
             .Intersect(permissions)
             .Any();
+
+    public static string? GetEmail(this ClaimsPrincipal claimsPrincipal) =>
+        claimsPrincipal
+            .Claims
+            .SingleOrDefault(claim =>
+                claim.Type.Equals(Claims.EmailClaimName, StringComparison.OrdinalIgnoreCase))
+            ?.Value
+        ??
+        claimsPrincipal
+            .Claims
+            .SingleOrDefault(claim =>
+                claim.Type.Equals(Claims.OtherMails, StringComparison.OrdinalIgnoreCase))
+            ?.Value;
 }

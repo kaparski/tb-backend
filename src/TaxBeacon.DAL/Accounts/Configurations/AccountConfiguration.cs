@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.DAL.Accounts.Configurations;
+
 public class AccountConfiguration: IEntityTypeConfiguration<Account>
 {
     public void Configure(EntityTypeBuilder<Account> account)
@@ -18,12 +19,7 @@ public class AccountConfiguration: IEntityTypeConfiguration<Account>
             .HasDefaultValueSql("NEWID()");
 
         account
-            .HasKey(a => a.Id)
-            .IsClustered(false);
-
-        account
-            .HasIndex(a => new { a.TenantId, a.Id })
-            .IsClustered();
+            .HasKey(a => new { a.TenantId, a.Id });
 
         account
             .HasOne(a => a.Tenant)
@@ -37,7 +33,7 @@ public class AccountConfiguration: IEntityTypeConfiguration<Account>
         account
             .Property(a => a.Website)
             .HasColumnType("nvarchar")
-            .HasMaxLength(100)
+            .HasMaxLength(4000)
             .IsRequired();
 
         account
@@ -48,7 +44,7 @@ public class AccountConfiguration: IEntityTypeConfiguration<Account>
         account
             .Property(a => a.LinkedInUrl)
             .HasColumnType("nvarchar")
-            .HasMaxLength(100);
+            .HasMaxLength(4000);
 
         account
             .Property(a => a.Country)
@@ -87,6 +83,16 @@ public class AccountConfiguration: IEntityTypeConfiguration<Account>
             .HasMaxLength(10);
 
         account
+            .HasOne(a => a.NaicsCode)
+            .WithMany(nc => nc.Accounts)
+            .HasForeignKey(a => a.PrimaryNaicsCode);
+
+        account
+            .Property(a => a.AccountId)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(100);
+
+        account
             .HasIndex(d => new { d.TenantId, d.Website })
             .IsUnique();
 
@@ -95,5 +101,9 @@ public class AccountConfiguration: IEntityTypeConfiguration<Account>
             .HasColumnType("nvarchar")
             .HasMaxLength(2)
             .HasConversion<string>();
+
+        account
+            .HasIndex(l => new { l.TenantId, l.AccountId })
+            .IsUnique();
     }
 }

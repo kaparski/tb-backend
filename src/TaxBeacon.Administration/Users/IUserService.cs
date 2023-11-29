@@ -1,6 +1,7 @@
 ﻿using OneOf;
 using OneOf.Types;
 using System.Net.Mail;
+using TaxBeacon.Administration.Tenants.Models;
 using TaxBeacon.Administration.Users.Models;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Errors;
@@ -12,7 +13,7 @@ public interface IUserService
 {
     IQueryable<UserDto> QueryUsers();
 
-    Task<OneOf<LoginUserDto, NotFound>> LoginAsync(MailAddress mailAddress,
+    Task<OneOf<LoginUserDto, TenantDto[], NotFound>> LoginAsync(MailAddress mailAddress,
         CancellationToken cancellationToken = default);
 
     Task<OneOf<UserDto, NotFound>> GetUserDetailsByIdAsync(Guid id,
@@ -49,4 +50,10 @@ public interface IUserService
         CancellationToken cancellationToken = default);
 
     Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken = default);
+
+    Task<bool> UserExistsInTenantAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default);
+
+    Task SetIdpExternalIdAsync(MailAddress mailAddress, string idpExternalId);
+
+    Task<OneOf<UserDto, NotFound>> GetUserProfileAsync(CancellationToken cancellationToken = default);
 }

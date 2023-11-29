@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.DAL.Administration.Entities;
 
-public class JobTitle: BaseEntity
+public class JobTitle: BaseDeletableEntity
 {
     public Guid TenantId { get; set; }
 
@@ -8,7 +8,7 @@ public class JobTitle: BaseEntity
 
     public string Name { get; set; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
     public Guid? DepartmentId { get; set; }
 

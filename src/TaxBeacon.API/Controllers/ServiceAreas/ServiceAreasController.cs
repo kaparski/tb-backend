@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using FluentValidation.Results;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -120,12 +121,18 @@ public class ServiceAreasController: BaseController
     /// Update service area details
     /// </summary>
     /// <response code="200">Returns updated service area details</response>
-    /// <response code="404">Service area is not found</response>
+    /// <response code="400">Validation failed</response>
+    /// <response code="401">User is unauthorized</response>
+    /// <response code="403">The user does not have the required permission</response>
+    /// <response code="404">Department is not found</response>
     /// <returns>Updated service area details</returns>
     [HasPermissions(Common.Permissions.ServiceAreas.ReadWrite)]
     [HttpPatch("{id:guid}", Name = "UpdateServiceArea")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(ServiceAreaDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<ValidationFailure>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateServiceAreaAsync([FromRoute] Guid id, [FromBody] UpdateServiceAreaRequest request,
         CancellationToken cancellationToken)

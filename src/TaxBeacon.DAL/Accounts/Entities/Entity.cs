@@ -1,10 +1,8 @@
 ﻿using TaxBeacon.Common.Enums;
-using TaxBeacon.Common.Enums.Accounts;
-using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.DAL.Accounts.Entities;
 
-public class Entity: BaseEntity
+public class Entity: BaseDeletableEntity
 {
     public Guid TenantId { get; set; }
 
@@ -18,39 +16,55 @@ public class Entity: BaseEntity
 
     public string Name { get; set; } = null!;
 
-    public string? Dba { get; set; }
+    public string EntityId { get; set; } = null!;
 
-    public string? EntityId { get; set; }
-
-    public string? City { get; set; }
-
-    public string StreetAddress1 { get; set; } = null!;
-
-    public string? StreetAddress2 { get; set; }
-
-    public string? Address { get; set; }
-
-    public int Fein { get; set; }
-
-    public int Zip { get; set; }
+    public string? DoingBusinessAs { get; set; }
 
     public string Country { get; set; } = null!;
 
+    public string? Address1 { get; set; }
+
+    public string? Address2 { get; set; }
+
+    public string? City { get; set; }
+
     public State? State { get; set; }
+
+    public string? Zip { get; set; }
+
+    public string? County { get; set; }
+
+    public string? Address { get; set; }
 
     public string Type { get; set; } = null!;
 
-    public TaxYearEndType? TaxYearEndType { get; set; }
+    public string? TaxYearEndType { get; set; }
 
-    public string? Fax { get; set; }
+    public DateTime? DateOfIncorporation { get; set; }
 
-    public string? Phone { get; set; }
+    public string? Fein { get; set; }
 
-    public string? Extension { get; set; }
+    public string? Ein { get; set; }
+
+    public string? JurisdictionId { get; set; }
 
     public Status Status { get; set; }
+
+    public DateTime? DeactivationDateTimeUtc { get; set; }
+
+    public DateTime? ReactivationDateTimeUtc { get; set; }
+
+    public int? PrimaryNaicsCode { get; set; }
+
+    public NaicsCode? NaicsCode { get; set; }
 
     public ICollection<StateId> StateIds { get; } = new HashSet<StateId>();
 
     public ICollection<EntityActivityLog> EntityActivityLogs { get; set; } = new HashSet<EntityActivityLog>();
+
+    public ICollection<EntityPhone> Phones { get; set; } = new HashSet<EntityPhone>();
+
+    public ICollection<EntityLocation> EntityLocations { get; set; } = new HashSet<EntityLocation>();
+
+    public ICollection<EntityDocument> EntityDocuments { get; set; } = new HashSet<EntityDocument>();
 }

@@ -8,5 +8,6 @@ public record UserInfo(
     string FullName,
     Status Status,
     bool DivisionEnabled,
+    string? IdpExternalId,
     IReadOnlyCollection<string> Roles,
     IReadOnlyCollection<string> TenantRoles);

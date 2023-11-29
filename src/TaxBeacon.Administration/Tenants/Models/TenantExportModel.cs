@@ -15,6 +15,6 @@ public sealed class TenantExportModel
     [Ignore]
     public DateTime CreatedDateTimeUtc { get; set; }
 
-    [Column("Creation date")]
+    [Column("Creation Date")]
     public string CreatedDateView { get; set; } = string.Empty;
 }

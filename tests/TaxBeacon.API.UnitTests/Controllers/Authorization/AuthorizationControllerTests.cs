@@ -7,10 +7,11 @@ using Moq;
 using OneOf.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
+using System.Security.Claims;
 using TaxBeacon.Administration.Users;
 using TaxBeacon.Administration.Users.Models;
+using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Authorization;
-using TaxBeacon.API.Controllers.Authorization.Requests;
 using TaxBeacon.API.Controllers.Authorization.Responses;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Authorization;
@@ -32,16 +33,24 @@ public class AuthorizationControllerTests
     {
         //Arrange
         var loginUserDto = TestData.LoginUserDtoFaker.Generate();
-        var loginRequest = new LoginRequest(new Faker().Internet.Email());
+        var email = new MailAddress("test@test.com");
 
         _userServiceMock
             .Setup(service => service.LoginAsync(
-                It.Is<MailAddress>(mailAddress => mailAddress.Address == loginRequest.Email),
+                email,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(loginUserDto);
 
+        _controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new[] { new ClaimsIdentity(new[] { new Claim(Claims.EmailClaimName, email.Address) }) })
+            }
+        };
+
         //Act
-        var actualResponse = await _controller.LoginAsync(loginRequest, default);
+        var actualResponse = await _controller.LoginAsync(default);
 
         //Assert
         using (new AssertionScope())
@@ -62,15 +71,22 @@ public class AuthorizationControllerTests
     public async Task UpdateUserAsync_InvalidUserId_ReturnsNotFoundResponse()
     {
         // Arrange
-        var loginRequest = new LoginRequest(new Faker().Internet.Email());
         _userServiceMock
             .Setup(service => service.LoginAsync(
-                It.Is<MailAddress>(mailAddress => mailAddress.Address == loginRequest.Email),
+                It.IsAny<MailAddress>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new NotFound());
 
+        _controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new[] { new ClaimsIdentity(new[] { new Claim(Claims.EmailClaimName, "test@test.com") }) })
+            }
+        };
+
         // Act
-        var actualResponse = await _controller.LoginAsync(loginRequest, default);
+        var actualResponse = await _controller.LoginAsync(default);
 
         // Arrange
         using (new AssertionScope())
@@ -92,7 +108,9 @@ public class AuthorizationControllerTests
                     f.Name.FullName(),
                     f.Random.WordsArray(4).AsReadOnly(),
                     f.Random.Bool(),
-                    f.Random.Bool()));
+                    f.Random.Bool(),
+                    Guid.NewGuid(),
+                    f.Company.CompanyName()));
     }
 }
 

@@ -1,28 +1,34 @@
-﻿using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.API.Shared.Responses;
+using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Accounts;
-using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.API.Controllers.Entities.Responses;
 
-public record EntityDetailsResponse
-(
+public record EntityDetailsResponse(
     Guid Id,
+    Guid AccountId,
     string Name,
-    string? Dba,
-    string? EntityId,
-    string? City,
-    string StreetAddress1,
-    string? StreetAddress2,
-    string? Address,
-    int Fein,
-    int? Zip,
+    string EntityId,
+    string? DoingBusinessAs,
     string Country,
-    string? Fax,
-    string? Phone,
-    string? Extension,
+    string? Address1,
+    string? Address2,
+    string? City,
     State? State,
+    string? Zip,
+    string? County,
+    string? Address,
+    string? Fein,
+    string? Ein,
+    string? JurisdictionId,
     string Type,
-    TaxYearEndType TaxYearEndType,
+    NaicsCodeResponse? NaicsCode,
+    DateTime? LastModifiedDateTimeUtc,
+    DateTime? DeactivationDateTimeUtc,
+    DateTime? ReactivationDateTimeUtc,
+    DateTime CreatedDateTimeUtc,
+    string TaxYearEndType,
+    DateTime? DateOfIncorporation,
     Status Status,
-    IEnumerable<StateId> StateIds
-);
+    IEnumerable<PhoneResponse> Phones
+    );

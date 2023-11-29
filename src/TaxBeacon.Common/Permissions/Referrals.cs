@@ -1,4 +1,5 @@
 ﻿namespace TaxBeacon.Common.Permissions;
+
 public enum Referrals
 {
     Read,

@@ -1,20 +1,22 @@
 ﻿namespace TaxBeacon.Administration.Divisions.Models;
 
-public class DivisionDto
+public record DivisionDto
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; init; }
 
-    public DateTime CreatedDateTimeUtc { get; set; }
+    public DateTime CreatedDateTimeUtc { get; init; }
 
-    public int NumberOfUsers { get; set; }
+    public int NumberOfUsers { get; init; }
 
-    public string Departments { get; set; } = string.Empty;
+    public string Departments { get; init; } = string.Empty;
 
-    public string Department { get; set; } = string.Empty;
+    public string Department { get; init; } = string.Empty;
 
     public IEnumerable<Guid>? DepartmentIds { get; set; }
+
+    public int NumberOfDepartments { get; set; }
 }

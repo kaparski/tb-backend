@@ -50,12 +50,6 @@ public class TenantProgramExportModel: IRegister
     [Column("Program End Date")]
     public string EndDateView { get; set; } = string.Empty;
 
-    [Ignore]
-    public DateTime CreatedDateTimeUtc { get; set; }
-
-    [Column("Creation Date")]
-    public string CreatedDateView { get; set; } = string.Empty;
-
     [Column("Program Status")]
     public Status Status { get; set; }
 
@@ -72,6 +66,5 @@ public class TenantProgramExportModel: IRegister
             .Map(dest => dest.IncentivesType, src => src.Program.IncentivesType)
             .Map(dest => dest.StartDateTimeUtc, src => src.Program.StartDateTimeUtc)
             .Map(dest => dest.EndDateTimeUtc, src => src.Program.EndDateTimeUtc)
-            .Map(dest => dest.CreatedDateTimeUtc, src => src.Program.CreatedDateTimeUtc)
             .Map(dest => dest.Status, src => src.Status);
 }

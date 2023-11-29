@@ -1,14 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using TaxBeacon.DAL.Accounts;
-using TaxBeacon.DAL.Accounts.Entities;
 using TaxBeacon.DAL.Administration;
-using TaxBeacon.DAL.Administration.Entities;
+using TaxBeacon.DAL.Documents;
 using TaxBeacon.DAL.Interceptors;
 
 namespace TaxBeacon.DAL;
 
-public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbContext
+public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbContext, IDocumentsDbContext
 {
     private readonly EntitySaveChangesInterceptor _saveChangesInterceptor;
 
@@ -93,9 +91,15 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<AccountView> AccountsView => Set<AccountView>();
 
+    public DbSet<ClientView> ClientsView => Set<ClientView>();
+
+    public DbSet<ReferralView> ReferralsView => Set<ReferralView>();
+
     public DbSet<StateId> StateIds => Set<StateId>();
 
     public DbSet<ClientManager> ClientManagers => Set<ClientManager>();
+
+    public DbSet<ReferralManager> ReferralManagers => Set<ReferralManager>();
 
     public DbSet<EntityActivityLog> EntityActivityLogs => Set<EntityActivityLog>();
 
@@ -105,7 +109,33 @@ public class TaxBeaconDbContext: DbContext, ITaxBeaconDbContext, IAccountDbConte
 
     public DbSet<AccountSalesperson> Salespersons => Set<AccountSalesperson>();
 
-    public DbSet<Phone> Phones => Set<Phone>();
+    public DbSet<NaicsCode> NaicsCodes => Set<NaicsCode>();
+
+    public DbSet<LocationPhone> LocationPhones => Set<LocationPhone>();
+
+    public DbSet<EntityLocation> EntityLocations => Set<EntityLocation>();
+
+    public DbSet<LocationActivityLog> LocationActivityLogs => Set<LocationActivityLog>();
+
+    public DbSet<AccountPhone> AccountPhones => Set<AccountPhone>();
+
+    public DbSet<EntityPhone> EntityPhones => Set<EntityPhone>();
+
+    public DbSet<AccountContact> AccountContacts => Set<AccountContact>();
+
+    public DbSet<ContactPhone> ContactPhones => Set<ContactPhone>();
+
+    public DbSet<LinkedContact> LinkedContacts => Set<LinkedContact>();
+
+    public DbSet<AccountContactActivityLog> AccountContactActivityLogs => Set<AccountContactActivityLog>();
+
+    public DbSet<Document> Documents => Set<Document>();
+
+    public DbSet<AccountDocument> AccountDocuments => Set<AccountDocument>();
+
+    public DbSet<EntityDocument> EntityDocuments => Set<EntityDocument>();
+
+    public DbSet<LocationDocument> LocationDocuments => Set<LocationDocument>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

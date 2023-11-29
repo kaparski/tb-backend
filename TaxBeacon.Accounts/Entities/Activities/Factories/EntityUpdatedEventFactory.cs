@@ -9,7 +9,7 @@ public class EntityUpdatedEventFactory: IEntityActivityFactory
 {
     public uint Revision => 1;
 
-    public EntityEventType EventType => EntityEventType.EntityUpdatedEvent;
+    public EntityEventType EventType => EntityEventType.EntityUpdated;
 
     public ActivityItemDto Create(string teamEvent)
     {

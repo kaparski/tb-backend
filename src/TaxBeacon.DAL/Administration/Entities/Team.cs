@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.DAL.Administration.Entities;
 
-public class Team: BaseEntity
+public class Team: BaseDeletableEntity
 {
     public Guid TenantId { get; set; }
 

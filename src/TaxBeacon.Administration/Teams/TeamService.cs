@@ -77,9 +77,9 @@ public class TeamService: ITeamService
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        exportTeams.ForEach(x => x.CreatedDateView = _dateTimeFormatter.FormatDate(x.CreatedDateTimeUtc));
+        exportTeams.ForEach(x => x.CreatedDateView = _dateTimeFormatter.FormatDateTime(x.CreatedDateTimeUtc));
 
-        _logger.LogInformation("{dateTime} - Teams export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Teams export was executed by {userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
@@ -166,7 +166,7 @@ CancellationToken cancellationToken = default)
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Team ({teamId}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Team ({teamId}) was updated by {userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);

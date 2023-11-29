@@ -1,23 +1,24 @@
-﻿
-using TaxBeacon.API.Controllers.Divisions.Responses;
+﻿using TaxBeacon.API.Controllers.Divisions.Responses;
 using TaxBeacon.API.Controllers.JobTitles.Responses;
 using TaxBeacon.API.Controllers.ServiceAreas.Responses;
 
 namespace TaxBeacon.API.Controllers.Departments.Responses;
 
-public class DepartmentDetailsResponse
+public record DepartmentDetailsResponse
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; init; } = null!;
 
-    public string Description { get; set; } = null!;
+    public string? Description { get; init; }
 
-    public DivisionResponse Division { get; set; } = null!;
+    public DivisionResponse? Division { get; init; }
 
-    public IList<ServiceAreaResponse> ServiceAreas { get; set; } = null!;
+    public IList<ServiceAreaResponse> ServiceAreas { get; init; } = null!;
 
-    public IList<JobTitleResponse> JobTitles { get; set; } = null!;
+    public IList<JobTitleResponse> JobTitles { get; init; } = null!;
 
-    public DateTime CreatedDateTimeUtc { get; set; }
+    public DateTime CreatedDateTimeUtc { get; init; }
+
+    public DateTime? LastModifiedDateTimeUtc { get; init; }
 }

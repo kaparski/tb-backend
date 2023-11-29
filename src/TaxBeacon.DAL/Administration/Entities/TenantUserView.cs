@@ -5,7 +5,7 @@ namespace TaxBeacon.DAL.Administration.Entities;
 /// <summary>
 /// Represents a record in TenantUsersView view. Must be separate from User entity, otherwise EF gets confused and produces wrong queries.
 /// </summary>
-public class TenantUserView: BaseEntity
+public class TenantUserView: BaseDeletableEntity
 {
     public Guid Id { get; set; }
 

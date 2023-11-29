@@ -39,7 +39,7 @@ public class ProgramConfiguration: IEntityTypeConfiguration<Program>
 
         program
             .Property(p => p.Overview)
-            .HasMaxLength(200);
+            .HasMaxLength(1000);
 
         program
             .Property(p => p.Reference)

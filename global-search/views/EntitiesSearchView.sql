@@ -1,0 +1,30 @@
+CREATE OR ALTER VIEW EntitiesSearchView AS
+    SELECT
+        CONCAT_WS('_', E.Id, E.TenantId) AS DocumentId,
+        Id AS OriginalId,
+        TenantId as TenantId,
+        AccountId as AdditionalId,
+        Name,
+        EntityId,
+        DoingBusinessAs,
+        Fein,
+        Ein,
+        Country,
+        State,
+        County,
+        City,
+        Address1,
+        Address2,
+        Zip,
+        Address,
+        PrimaryNaicsCode as NaicsCode,
+        CreatedDateTimeUtc,
+        LastModifiedDateTimeUtc,
+        IsDeleted,
+        JSON_ARRAY(
+                'Entities.Read',
+                'Entities.ReadWrite',
+                'Entities.ReadExport',
+                'Entities.ReadActivation') as Permissions,
+        'entity' as EntityType
+    FROM Entities E

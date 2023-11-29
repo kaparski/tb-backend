@@ -23,6 +23,10 @@ public class UpdateClientRequestValidator: AbstractValidator<UpdateClientRequest
             .GreaterThan(0)
             .WithMessage("Should be positive number");
 
+        RuleFor(x => x.EmployeeCount)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("Should be positive number");
+
         RuleFor(x => x.ClientManagersIds)
             .NotEmpty()
             .WithMessage("Required field");

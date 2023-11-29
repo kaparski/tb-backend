@@ -12,6 +12,7 @@ public record ClientDetailsResponse(
     int? EmployeeCount,
     DateTime? DeactivationDateTimeUtc,
     DateTime? ReactivationDateTimeUtc,
+    DateTime? LastModifiedDateTimeUtc,
     DateTime CreatedDateTimeUtc,
     ContactDto? PrimaryContact,
     ICollection<ClientManagerDto> ClientManagers);

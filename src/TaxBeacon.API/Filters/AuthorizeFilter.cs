@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using TaxBeacon.API.Authentication;
-using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Filters;
 
@@ -14,6 +14,17 @@ public class AuthorizeFilter: IAsyncAuthorizationFilter
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        var isRequiredAuthorization = context.ActionDescriptor.EndpointMetadata
+            .Any(em => em.GetType() == typeof(AuthorizeAttribute));
+
+        var allowAnonymous = context.ActionDescriptor.EndpointMetadata
+            .Any(em => em.GetType() == typeof(AllowAnonymousAttribute));
+
+        if (allowAnonymous || !isRequiredAuthorization)
+        {
+            return Task.CompletedTask;
+        }
 
         var idClaimValue = context.HttpContext.User
             .FindFirst(claim => claim.Type.Equals(Claims.UserId, StringComparison.OrdinalIgnoreCase))

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.DAL.Accounts.Configurations;
+
 public class ContactActivityLogConfiguration: IEntityTypeConfiguration<ContactActivityLog>
 {
     public void Configure(EntityTypeBuilder<ContactActivityLog> builder)
@@ -10,13 +11,13 @@ public class ContactActivityLogConfiguration: IEntityTypeConfiguration<ContactAc
         builder
             .HasOne(x => x.Contact)
             .WithMany(x => x.ContactActivityLogs)
-            .HasForeignKey(x => x.ContactId);
+            .HasForeignKey(x => new { x.TenantId, x.ContactId });
 
         builder
             .HasOne(x => x.Tenant)
             .WithMany(x => x.ContactActivityLogs)
             .HasForeignKey(x => x.TenantId)
-            .OnDelete(DeleteBehavior.ClientNoAction);
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder
             .HasKey(l => new { l.TenantId, l.ContactId, l.Date });

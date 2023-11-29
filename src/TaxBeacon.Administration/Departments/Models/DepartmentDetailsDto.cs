@@ -4,19 +4,21 @@ using TaxBeacon.Administration.ServiceAreas.Models;
 
 namespace TaxBeacon.Administration.Departments.Models;
 
-public class DepartmentDetailsDto
+public record DepartmentDetailsDto
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; init; }
 
-    public DateTime CreatedDateTimeUtc { get; set; }
+    public DateTime CreatedDateTimeUtc { get; init; }
 
-    public IList<ServiceAreaDto> ServiceAreas { get; set; } = null!;
+    public DateTime? LastModifiedDateTimeUtc { get; init; }
 
-    public IList<JobTitleDto> JobTitles { get; set; } = null!;
+    public IList<ServiceAreaDto> ServiceAreas { get; init; } = null!;
 
-    public DivisionDto Division { get; set; } = null!;
+    public IList<JobTitleDto> JobTitles { get; init; } = null!;
+
+    public DivisionDto Division { get; init; } = null!;
 }

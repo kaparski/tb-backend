@@ -32,5 +32,11 @@ public enum EntityType
 
     ClientProspects = 15,
 
-    Client = 16
+    Client = 16,
+
+    ReferralProspects = 17,
+
+    ReferralPartner = 18,
+
+    Documents = 19,
 }

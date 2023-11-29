@@ -1,12 +1,14 @@
 ﻿namespace TaxBeacon.Administration.Teams.Models;
 
-public class TeamDetailsDto
+public record TeamDetailsDto
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; init; }
 
-    public DateTime CreatedDateTimeUtc { get; set; }
+    public DateTime CreatedDateTimeUtc { get; init; }
+
+    public DateTime? LastModifiedDateTimeUtc { get; init; }
 }

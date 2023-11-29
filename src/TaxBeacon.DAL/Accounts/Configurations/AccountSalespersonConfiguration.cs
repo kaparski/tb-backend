@@ -18,7 +18,7 @@ public class AccountSalespersonConfiguration: IEntityTypeConfiguration<AccountSa
         tenantUserAccount
             .HasOne<Account>(tua => tua.Account)
             .WithMany(a => a.Salespersons)
-            .HasForeignKey(tua => tua.AccountId);
+            .HasForeignKey(tua => new { tua.TenantId, tua.AccountId });
 
         tenantUserAccount.HasKey(tua => new { tua.TenantId, tua.AccountId, tua.UserId });
     }

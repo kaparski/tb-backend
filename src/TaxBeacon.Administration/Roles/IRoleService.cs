@@ -22,6 +22,6 @@ public interface IRoleService
     Task<OneOf<IReadOnlyCollection<PermissionDto>, NotFound>> GetRolePermissionsByIdAsync(Guid roleId,
         CancellationToken cancellationToken = default);
 
-    Task<OneOf<Role, NotFound>> GetRoleByIdAsync(Guid roleId,
+    Task<OneOf<RoleDto, NotFound>> GetRoleByIdAsync(Guid roleId,
         CancellationToken cancellationToken = default);
 }

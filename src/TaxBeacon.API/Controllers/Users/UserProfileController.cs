@@ -31,8 +31,7 @@ public class UserProfileController: BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
     {
-        var currentUserId = _currentUserService.UserId;
-        var getUserDetailsResult = await _userService.GetUserDetailsByIdAsync(currentUserId, cancellationToken);
+        var getUserDetailsResult = await _userService.GetUserProfileAsync(cancellationToken);
 
         return getUserDetailsResult.Match<IActionResult>(
             userDto => Ok(userDto.Adapt<UserResponse>()),
