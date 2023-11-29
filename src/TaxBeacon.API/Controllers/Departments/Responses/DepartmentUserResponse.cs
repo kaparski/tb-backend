@@ -1,16 +1,16 @@
 ﻿namespace TaxBeacon.API.Controllers.Departments.Responses;
 
-public class DepartmentUserResponse
+public record DepartmentUserResponse
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Email { get; set; } = string.Empty;
+    public string Email { get; init; } = null!;
 
-    public string FullName { get; set; } = string.Empty;
+    public string FullName { get; init; } = null!;
 
-    public string ServiceArea { get; set; } = string.Empty;
+    public string? ServiceArea { get; init; }
 
-    public string Team { get; set; } = string.Empty;
+    public string? Team { get; init; }
 
-    public string JobTitle { get; set; } = string.Empty;
+    public string? JobTitle { get; init; }
 }

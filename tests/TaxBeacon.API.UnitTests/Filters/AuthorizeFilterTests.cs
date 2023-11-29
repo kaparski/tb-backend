@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -7,22 +8,19 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Claims;
-using System.Security.Principal;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Filters;
-using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.UnitTests.Filters;
 
 public class AuthorizeFilterTests
 {
-    private readonly Mock<ILogger<AuthorizeFilter>> _loggerMock;
     private readonly AuthorizeFilter _authorizeFilter;
 
     public AuthorizeFilterTests()
     {
-        _loggerMock = new();
-        _authorizeFilter = new AuthorizeFilter(_loggerMock.Object);
+        Mock<ILogger<AuthorizeFilter>> loggerMock = new();
+        _authorizeFilter = new AuthorizeFilter(loggerMock.Object);
     }
 
     [Fact]
@@ -34,8 +32,13 @@ public class AuthorizeFilterTests
             new Claim(Claims.UserId, Guid.NewGuid().ToString())
         }));
 
+        var actionDescriptor = new ActionDescriptor
+        {
+            EndpointMetadata = new List<object> { new AuthorizeAttribute() }
+        };
+
         var httpContext = new DefaultHttpContext { User = contextUser };
-        var actionContext = new ActionContext(httpContext, Mock.Of<RouteData>(), Mock.Of<ActionDescriptor>());
+        var actionContext = new ActionContext(httpContext, Mock.Of<RouteData>(), actionDescriptor);
         var authorizationFilterContext = new AuthorizationFilterContext(
             actionContext, new List<IFilterMetadata>());
 
@@ -51,8 +54,13 @@ public class AuthorizeFilterTests
     {
         // Arrange
         var contextUser = new ClaimsPrincipal(new ClaimsIdentity());
+        var actionDescriptor = new ActionDescriptor
+        {
+            EndpointMetadata = new List<object> { new AuthorizeAttribute() }
+        };
+
         var httpContext = new DefaultHttpContext { User = contextUser };
-        var actionContext = new ActionContext(httpContext, Mock.Of<RouteData>(), Mock.Of<ActionDescriptor>());
+        var actionContext = new ActionContext(httpContext, Mock.Of<RouteData>(), actionDescriptor);
         var authorizationFilterContext = new AuthorizationFilterContext(
             actionContext, new List<IFilterMetadata>());
 
@@ -61,5 +69,46 @@ public class AuthorizeFilterTests
 
         // Assert
         authorizationFilterContext.Result.Should().BeOfType<UnauthorizedResult>();
+    }
+
+    [Fact]
+    public async Task OnAuthorizationAsync_EndpointWithoutAuthorizeAttribute_ReturnsResultWithoutErrors()
+    {
+        // Arrange
+        var contextUser = new ClaimsPrincipal(new ClaimsIdentity());
+        var actionDescriptor = new ActionDescriptor { EndpointMetadata = Enumerable.Empty<object>().ToList() };
+
+        var httpContext = new DefaultHttpContext { User = contextUser };
+        var actionContext = new ActionContext(httpContext, Mock.Of<RouteData>(), actionDescriptor);
+        var authorizationFilterContext = new AuthorizationFilterContext(
+            actionContext, new List<IFilterMetadata>());
+
+        // Act
+        await _authorizeFilter.OnAuthorizationAsync(authorizationFilterContext);
+
+        // Assert
+        authorizationFilterContext.Result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task OnAuthorizationAsync_EndpointWithAllowAnonymousAttribute_ReturnsResultWithoutErrors()
+    {
+        // Arrange
+        var contextUser = new ClaimsPrincipal(new ClaimsIdentity());
+        var actionDescriptor = new ActionDescriptor
+        {
+            EndpointMetadata = new List<object> { new AuthorizeAttribute(), new AllowAnonymousAttribute() }
+        };
+
+        var httpContext = new DefaultHttpContext { User = contextUser };
+        var actionContext = new ActionContext(httpContext, Mock.Of<RouteData>(), actionDescriptor);
+        var authorizationFilterContext = new AuthorizationFilterContext(
+            actionContext, new List<IFilterMetadata>());
+
+        // Act
+        await _authorizeFilter.OnAuthorizationAsync(authorizationFilterContext);
+
+        // Assert
+        authorizationFilterContext.Result.Should().BeNull();
     }
 }

@@ -1,3 +1,7 @@
 ﻿namespace TaxBeacon.Accounts.Accounts.Models;
 
-public record SalespersonDto(Guid Id, string FullName);
+public record SalespersonDto
+{
+    public Guid Id { get; init; }
+    public string FullName { get; init; } = null!;
+}

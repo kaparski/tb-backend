@@ -59,7 +59,7 @@ public class TableFilterService: ITableFiltersService
         await _context.TableFilters.AddAsync(newTableFilter, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Filter ({filterId}) with name {filterName} was created by {@userId}",
+        _logger.LogInformation("{dateTime} - Filter ({filterId}) with name {filterName} was created by {userId}",
             _dateTimeService.UtcNow,
             newTableFilter.Id,
             newTableFilter.Name,
@@ -81,7 +81,7 @@ public class TableFilterService: ITableFiltersService
         _context.TableFilters.Remove(tableFilter);
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Filter ({filterId}) was deleted by {@userId}",
+        _logger.LogInformation("{dateTime} - Filter ({filterId}) was deleted by {userId}",
             _dateTimeService.UtcNow,
             tableFilter.Id,
             _currentUserService.UserId);

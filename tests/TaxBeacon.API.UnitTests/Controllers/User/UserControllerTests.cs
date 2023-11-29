@@ -13,6 +13,7 @@ using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Users;
 using TaxBeacon.API.Controllers.Users.Requests;
 using TaxBeacon.API.Controllers.Users.Responses;
+using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Errors;
 
@@ -152,8 +153,7 @@ public class UserControllerTests
             actualResponse.Should().NotBeNull();
             actualResult.Should().NotBeNull();
             actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-            actualResult?.Value.Should().BeOfType<string>();
-            actualResult?.Value.Should().Be("Error");
+            actualResult?.Value.Should().BeOfType<InvalidOperationResponse>();
         }
     }
 

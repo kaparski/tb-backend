@@ -14,6 +14,8 @@ public class UserDto
 
     public DateTime CreatedDateTimeUtc { get; set; }
 
+    public DateTime? LastModifiedDateTimeUtc { get; set; }
+
     public string Email { get; set; } = null!;
 
     public Status Status { get; set; }
@@ -29,6 +31,8 @@ public class UserDto
     public string? Roles { get; set; }
 
     public IEnumerable<Guid>? RoleIds { get; set; }
+
+    public IEnumerable<string>? RoleNames { get; set; }
 
     public Guid? DepartmentId { get; set; }
 

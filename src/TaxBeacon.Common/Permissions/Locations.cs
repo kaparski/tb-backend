@@ -2,5 +2,8 @@ namespace TaxBeacon.Common.Permissions;
 
 public enum Locations
 {
-    Read
+    Read,
+    ReadWrite,
+    ReadActivation,
+    ReadExport,
 }

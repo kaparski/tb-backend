@@ -5,39 +5,41 @@ using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.Administration.Programs.Models;
 
-public class TenantProgramDto: IRegister
+public record TenantProgramDto: IRegister
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; init; } = null!;
 
-    public string? Reference { get; set; }
+    public string? Reference { get; init; }
 
-    public string? Overview { get; set; }
+    public string? Overview { get; init; }
 
-    public string? LegalAuthority { get; set; }
+    public string? LegalAuthority { get; init; }
 
-    public string? Agency { get; set; }
+    public string? Agency { get; init; }
 
-    public Jurisdiction Jurisdiction { get; set; }
+    public Jurisdiction Jurisdiction { get; init; }
 
-    public string? JurisdictionName { get; set; }
+    public string? JurisdictionName { get; init; }
 
-    public string? IncentivesArea { get; set; }
+    public string? IncentivesArea { get; init; }
 
-    public string? IncentivesType { get; set; }
+    public string? IncentivesType { get; init; }
 
-    public Status Status { get; set; }
+    public Status Status { get; init; }
 
-    public DateTime? StartDateTimeUtc { get; set; }
+    public DateTime? StartDateTimeUtc { get; init; }
 
-    public DateTime? EndDateTimeUtc { get; set; }
+    public DateTime? EndDateTimeUtc { get; init; }
 
-    public DateTime CreatedDateTimeUtc { get; set; }
+    public DateTime? DeactivationDateTimeUtc { get; init; }
 
-    public DateTime? DeactivationDateTimeUtc { get; set; }
+    public DateTime? ReactivationDateTimeUtc { get; init; }
 
-    public DateTime? ReactivationDateTimeUtc { get; set; }
+    public string? Department { get; init; }
+
+    public string? ServiceArea { get; init; }
 
     public void Register(TypeAdapterConfig config) =>
         config.NewConfig<TenantProgram, TenantProgramDto>()
@@ -53,8 +55,11 @@ public class TenantProgramDto: IRegister
             .Map(dest => dest.IncentivesType, src => src.Program.IncentivesType)
             .Map(dest => dest.StartDateTimeUtc, src => src.Program.StartDateTimeUtc)
             .Map(dest => dest.EndDateTimeUtc, src => src.Program.EndDateTimeUtc)
-            .Map(dest => dest.CreatedDateTimeUtc, src => src.Program.CreatedDateTimeUtc)
-            .Map(dest => dest.DeactivationDateTimeUtc, src => src.DeactivationDateTimeUtc)
-            .Map(dest => dest.ReactivationDateTimeUtc, src => src.ReactivationDateTimeUtc)
-            .Map(dest => dest.Status, src => src.Status);
+            .Map(dest => dest.Status, src => src.Status)
+            .Map(dest => dest.Department,
+                src => src.DepartmentTenantPrograms.Where(d => d.IsDeleted != true).Select(d => d.Department.Name)
+                    .SingleOrDefault())
+            .Map(dest => dest.ServiceArea,
+                src => src.ServiceAreaTenantPrograms.Where(d => d.IsDeleted != true).Select(d => d.ServiceArea.Name)
+                    .SingleOrDefault());
 }

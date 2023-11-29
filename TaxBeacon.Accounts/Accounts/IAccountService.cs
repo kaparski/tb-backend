@@ -1,8 +1,10 @@
 ﻿using OneOf;
 using OneOf.Types;
 using TaxBeacon.Accounts.Accounts.Models;
+using TaxBeacon.Accounts.Naics.Models;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Accounts;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 
 namespace TaxBeacon.Accounts.Accounts;
@@ -12,6 +14,10 @@ public interface IAccountService
     IQueryable<AccountDto> QueryAccounts();
 
     Task<OneOf<AccountDetailsDto, NotFound>> GetAccountDetailsByIdAsync(Guid id,
+        AccountInfoType accountInfoType,
+        CancellationToken cancellationToken = default);
+
+    Task<OneOf<AccountDetailsDto, InvalidOperation>> CreateAccountAsync(CreateAccountDto createAccountDto,
         AccountInfoType accountInfoType,
         CancellationToken cancellationToken = default);
 
@@ -38,5 +44,20 @@ public interface IAccountService
     Task<byte[]> ExportClientsAsync(FileType fileType, CancellationToken cancellationToken);
 
     Task<OneOf<AccountDetailsDto, NotFound>> UpdateClientDetailsAsync(Guid accountId,
-        UpdateClientDto updatedClient, CancellationToken cancellationToken);
+        UpdateClientDto updatedClient, CancellationToken cancellationToken = default);
+
+    Task<OneOf<AccountDetailsDto, NotFound, InvalidOperation>> UpdateAccountProfileAsync(Guid id,
+        UpdateAccountProfileDto updateAccountProfileDto,
+        CancellationToken cancellationToken = default);
+
+        Task<OneOf<string, InvalidOperation>> GenerateUniqueAccountIdAsync(CancellationToken cancellationToken);
+
+    IQueryable<ReferralPartnerDto> QueryReferralPartners();
+
+    Task<byte[]> ExportReferralPartnersAsync(FileType fileType, CancellationToken cancellationToken);
+
+    IQueryable<ReferralProspectDto> QueryReferralsProspects();
+
+    Task<byte[]> ExportReferralProspectsAsync(FileType fileType, CancellationToken cancellationToken);
+
 }

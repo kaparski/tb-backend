@@ -17,6 +17,7 @@ public sealed class ListToCsvConverter: IListToFileConverter
 
         sw.Flush();
         stream.Seek(0, SeekOrigin.Begin);
+
         return stream.ToArray();
     }
 

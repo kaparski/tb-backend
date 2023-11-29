@@ -1,4 +1,4 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -31,6 +31,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migration-scripts", "{E149189A-4D39-48F3-9B5A-DBDA8D351B70}"
 	ProjectSection(SolutionItems) = preProject
 		migration-scripts\AccountsView.sql = migration-scripts\AccountsView.sql
+		migration-scripts\ClientsView.sql = migration-scripts\ClientsView.sql
 		migration-scripts\InsertAccountManagerRoleWithPermissions.sql = migration-scripts\InsertAccountManagerRoleWithPermissions.sql
 		migration-scripts\InsertAdminRoleWithPermissions.sql = migration-scripts\InsertAdminRoleWithPermissions.sql
 		migration-scripts\InsertProjectManagerRoleWithPermissions.sql = migration-scripts\InsertProjectManagerRoleWithPermissions.sql
@@ -38,7 +39,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migration-scripts", "migrat
 		migration-scripts\InsertSalesRoleWithPermissions.sql = migration-scripts\InsertSalesRoleWithPermissions.sql
 		migration-scripts\InsertSubjectMatterExpertRoleWithPermissions.sql = migration-scripts\InsertSubjectMatterExpertRoleWithPermissions.sql
 		migration-scripts\InsertSuperAdminRoleWithPermissions.sql = migration-scripts\InsertSuperAdminRoleWithPermissions.sql
+		migration-scripts\PopulateNaicsCodes.sql = migration-scripts\PopulateNaicsCodes.sql
 		migration-scripts\TenantUsersView.sql = migration-scripts\TenantUsersView.sql
+		migration-scripts\ReferralsView.sql = migration-scripts\ReferralsView.sql
 		migration-scripts\UsersView.sql = migration-scripts\UsersView.sql
 	EndProjectSection
 EndProject
@@ -49,23 +52,37 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Accounts", "TaxBe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Accounts.UnitTests", "tests\TaxBeacon.Accounts.UnitTests\TaxBeacon.Accounts.UnitTests.csproj", "{7737CC30-B5DD-4EC4-9325-A16089464D93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.Email", "TaxBeacon.Email\TaxBeacon.Email.csproj", "{157028CA-D228-4A56-9D5E-7FEB2FB05978}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxBeacon.Email", "TaxBeacon.Email\TaxBeacon.Email.csproj", "{157028CA-D228-4A56-9D5E-7FEB2FB05978}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "global-search", "global-search", "{544BE82C-921A-4121-AA2A-749C4A0E4A3E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "views", "views", "{A9C78954-3276-4DEF-BD61-1B140EF0ABE9}"
 	ProjectSection(SolutionItems) = preProject
-		global-search\views\AccountsSearchView.sql = global-search\views\AccountsSearchView.sql
+		global-search\views\ClientsSearchView.sql = global-search\views\ClientsSearchView.sql
+		global-search\views\ContactsSearchView.sql = global-search\views\ContactsSearchView.sql
+		global-search\views\DepartmentsSearchView.sql = global-search\views\DepartmentsSearchView.sql
 		global-search\views\DivisionsSearchView.sql = global-search\views\DivisionsSearchView.sql
+		global-search\views\EntitiesSearchView.sql = global-search\views\EntitiesSearchView.sql
+		global-search\views\JobTitlesSearchView.sql = global-search\views\JobTitlesSearchView.sql
+		global-search\views\LocationsSearchView.sql = global-search\views\LocationsSearchView.sql
 		global-search\views\ProgramsSearchView.sql = global-search\views\ProgramsSearchView.sql
 		global-search\views\RolesSearchView.sql = global-search\views\RolesSearchView.sql
-		global-search\views\TenantsSearchView.sql = global-search\views\TenantsSearchView.sql
-		global-search\views\DepartmentsSearchView.sql = global-search\views\DepartmentsSearchView.sql
 		global-search\views\ServiceAreasSearchView.sql = global-search\views\ServiceAreasSearchView.sql
-		global-search\views\JobTitlesSearchView.sql = global-search\views\JobTitlesSearchView.sql
-		global-search\views\UsersSearchView.sql = global-search\views\UsersSearchView.sql
 		global-search\views\TeamsSearchView.sql = global-search\views\TeamsSearchView.sql
+		global-search\views\TenantsSearchView.sql = global-search\views\TenantsSearchView.sql
+		global-search\views\UsersSearchView.sql = global-search\views\UsersSearchView.sql
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{85331F9B-D8D3-4E99-9995-839B91436C59}"
+	ProjectSection(SolutionItems) = preProject
+		global-search\configs\dataSources.json = global-search\configs\dataSources.json
+		global-search\configs\indexers.json = global-search\configs\indexers.json
+		global-search\configs\indexSchema.json = global-search\configs\indexSchema.json
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.DocumentManagement", "src\TaxBeacon.DocumentManagement\TaxBeacon.DocumentManagement.csproj", "{D21AC435-97B9-482C-B54D-B4948082B3C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxBeacon.DocumentManagement.UnitTests", "tests\TaxBeacon.DocumentManagement.UnitTests\TaxBeacon.DocumentManagement.UnitTests.csproj", "{44F0A017-BBA0-4B56-947C-A34C0D81BA49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -109,6 +126,14 @@ Global
 		{157028CA-D228-4A56-9D5E-7FEB2FB05978}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{157028CA-D228-4A56-9D5E-7FEB2FB05978}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{157028CA-D228-4A56-9D5E-7FEB2FB05978}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D21AC435-97B9-482C-B54D-B4948082B3C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D21AC435-97B9-482C-B54D-B4948082B3C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D21AC435-97B9-482C-B54D-B4948082B3C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D21AC435-97B9-482C-B54D-B4948082B3C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44F0A017-BBA0-4B56-947C-A34C0D81BA49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44F0A017-BBA0-4B56-947C-A34C0D81BA49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44F0A017-BBA0-4B56-947C-A34C0D81BA49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44F0A017-BBA0-4B56-947C-A34C0D81BA49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -124,6 +149,9 @@ Global
 		{7737CC30-B5DD-4EC4-9325-A16089464D93} = {78103266-2E2B-4710-9139-0AB800F12A71}
 		{157028CA-D228-4A56-9D5E-7FEB2FB05978} = {1D7F782A-6727-4216-A75A-986158A288A6}
 		{A9C78954-3276-4DEF-BD61-1B140EF0ABE9} = {544BE82C-921A-4121-AA2A-749C4A0E4A3E}
+		{85331F9B-D8D3-4E99-9995-839B91436C59} = {544BE82C-921A-4121-AA2A-749C4A0E4A3E}
+		{D21AC435-97B9-482C-B54D-B4948082B3C8} = {1D7F782A-6727-4216-A75A-986158A288A6}
+		{44F0A017-BBA0-4B56-947C-A34C0D81BA49} = {78103266-2E2B-4710-9139-0AB800F12A71}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F4F2EB9-1E83-4F40-B890-0589652A15CA}

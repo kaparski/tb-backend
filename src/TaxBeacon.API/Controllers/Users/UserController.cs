@@ -81,7 +81,7 @@ public class UserController: BaseController
         return updatedUserResult.Match<IActionResult>(
             user => Ok(user.Adapt<UserResponse>()),
             _ => NotFound(),
-            error => BadRequest(error.Message));
+            error => BadRequest(error.Adapt<InvalidOperationResponse>()));
     }
 
     /// <summary>

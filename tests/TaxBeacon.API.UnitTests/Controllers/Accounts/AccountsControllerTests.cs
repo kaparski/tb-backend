@@ -5,21 +5,21 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OneOf.Types;
-using Org.BouncyCastle.Ocsp;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Claims;
 using TaxBeacon.Accounts.Accounts;
 using TaxBeacon.Accounts.Accounts.Models;
-using TaxBeacon.Administration.Divisions.Models;
 using TaxBeacon.API.Authentication;
 using TaxBeacon.API.Controllers.Accounts;
 using TaxBeacon.API.Controllers.Accounts.Requests;
 using TaxBeacon.API.Controllers.Accounts.Responses;
-using TaxBeacon.API.Controllers.Divisions.Requests;
-using TaxBeacon.API.Controllers.Divisions.Responses;
+using TaxBeacon.API.Controllers.Programs.Requests;
+using TaxBeacon.API.Controllers.Programs.Responses;
+using TaxBeacon.API.Exceptions;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Accounts;
+using TaxBeacon.Common.Errors;
 using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.API.UnitTests.Controllers.Accounts;
@@ -205,7 +205,9 @@ public sealed class AccountsControllerTests
     public void UpdateClientAsync_MarkedWithCorrectHasPermissionsAttribute()
     {
         // Arrange
-        var methodInfo = ((Func<Guid, UpdateClientRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateClientAsync).Method;
+        var methodInfo =
+            ((Func<Guid, UpdateClientRequest, CancellationToken, Task<IActionResult>>)_controller.UpdateClientAsync)
+            .Method;
         var permissions = new object[] { Common.Permissions.Clients.ReadWrite, Common.Permissions.Accounts.ReadWrite };
 
         // Act
@@ -215,7 +217,8 @@ public sealed class AccountsControllerTests
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
         }
     }
 
@@ -229,16 +232,175 @@ public sealed class AccountsControllerTests
 
         var permissions = new object[]
         {
-            Common.Permissions.Accounts.Read,
-            Common.Permissions.Accounts.ReadWrite,
-            Common.Permissions.Accounts.ReadExport,
-            Common.Permissions.Clients.Read,
-            Common.Permissions.Clients.ReadWrite,
-            Common.Permissions.Clients.ReadExport,
-            Common.Permissions.Referrals.Read,
-            Common.Permissions.Referrals.ReadWrite,
+            Common.Permissions.Accounts.Read, Common.Permissions.Accounts.ReadWrite,
+            Common.Permissions.Accounts.ReadExport, Common.Permissions.Clients.Read,
+            Common.Permissions.Clients.ReadWrite, Common.Permissions.Clients.ReadExport,
+            Common.Permissions.Referrals.Read, Common.Permissions.Referrals.ReadWrite,
             Common.Permissions.Referrals.ReadExport,
         };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public async Task UpdateAccountProfileAsync_AccountDoesNotExist_ReturnsNotFoundStatusCode()
+    {
+        // Arrange
+        _accountServiceMock
+            .Setup(x => x.UpdateAccountProfileAsync(It.IsAny<Guid>(), It.IsAny<UpdateAccountProfileDto>(), default))
+            .ReturnsAsync(new NotFound());
+
+        // Act
+        var actualResponse = await _controller.UpdateAccountProfileAsync(Guid.NewGuid(),
+            TestData.UpdateAccountProfileRequestFaker.Generate(),
+            default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as NotFoundResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateAccountProfileAsync_AccountExist_ReturnsSuccessfulStatusCode()
+    {
+        // Arrange
+        _accountServiceMock
+            .Setup(x => x.UpdateAccountProfileAsync(It.IsAny<Guid>(), It.IsAny<UpdateAccountProfileDto>(), default))
+            .ReturnsAsync(new AccountDetailsDto());
+
+        // Act
+        var actualResponse = await _controller.UpdateAccountProfileAsync(Guid.NewGuid(),
+            TestData.UpdateAccountProfileRequestFaker.Generate(),
+            default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<AccountDetailsResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task UpdateAccountProfileAsync_InvalidOperation_ReturnsBadRequest()
+    {
+        // Arrange
+        _accountServiceMock
+            .Setup(x => x.UpdateAccountProfileAsync(It.IsAny<Guid>(), It.IsAny<UpdateAccountProfileDto>(), default))
+            .ReturnsAsync(new InvalidOperation("error"));
+
+        // Act
+        var actualResponse = await _controller.UpdateAccountProfileAsync(Guid.NewGuid(),
+            TestData.UpdateAccountProfileRequestFaker.Generate(),
+            default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as BadRequestObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            actualResult?.Value.Should().BeOfType<InvalidOperationResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task CreateAccountAsync_AccountDoesNotExists_ShouldReturnSuccessfulStatusCode()
+    {
+        // Arrange
+        var request = TestData.CreateAccountRequestFaker.Generate();
+        var account = TestData.AccountsDetailsDtoFaker.Generate();
+        _accountServiceMock
+            .Setup(x => x.CreateAccountAsync(It.IsAny<CreateAccountDto>(), AccountInfoType.Full, default))
+            .ReturnsAsync(account);
+
+        // Act
+        var actualResponse = await _controller.CreateAccountAsync(request, default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as OkObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status200OK);
+            actualResult?.Value.Should().BeOfType<AccountDetailsResponse>();
+        }
+    }
+
+    [Fact]
+    public async Task CreateAccountAsync_InvalidOperation_ReturnsBadRequest()
+    {
+        // Arrange
+        _accountServiceMock
+            .Setup(x => x.CreateAccountAsync(It.IsAny<CreateAccountDto>(), AccountInfoType.Full, default))
+            .ReturnsAsync(new InvalidOperation("error"));
+
+        // Act
+        var actualResponse = await _controller.CreateAccountAsync(TestData.CreateAccountRequestFaker.Generate(),
+            default);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var actualResult = actualResponse as BadRequestObjectResult;
+            actualResponse.Should().NotBeNull();
+            actualResult.Should().NotBeNull();
+            actualResult?.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            actualResult?.Value.Should().BeOfType<InvalidOperationResponse>();
+        }
+    }
+
+    [Fact]
+    public void CreateAccountAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo =
+            ((Func<CreateAccountRequest, CancellationToken, Task<IActionResult>>)_controller.CreateAccountAsync)
+            .Method;
+        var permissions = new object[]
+        {
+            Common.Permissions.Clients.ReadWrite, Common.Permissions.Accounts.ReadWrite,
+            Common.Permissions.Referrals.ReadWrite
+        };
+
+        // Act
+        var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hasPermissionsAttribute.Should().NotBeNull();
+            hasPermissionsAttribute?.Policy.Should()
+                .Be(string.Join(";", permissions.Select(x => $"{x.GetType().Name}.{x}")));
+        }
+    }
+
+    [Fact]
+    public void GenerateAccountIdAsync_MarkedWithCorrectHasPermissionsAttribute()
+    {
+        // Arrange
+        var methodInfo = ((Func<CancellationToken, Task<IActionResult>>)
+            _controller.GenerateUniqueAccountId).Method;
+        var permissions = new object[] { Common.Permissions.Accounts.ReadWrite };
 
         // Act
         var hasPermissionsAttribute = methodInfo.GetCustomAttribute<HasPermissions>();
@@ -255,24 +417,48 @@ public sealed class AccountsControllerTests
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static class TestData
     {
-        public static readonly Faker<Client> ClientsFaker =
-            new Faker<Client>()
-                .RuleFor(a => a.CreatedDateTimeUtc, _ => DateTime.UtcNow)
-                .RuleFor(a => a.ReactivationDateTimeUtc, _ => DateTime.UtcNow)
-                .RuleFor(a => a.DeactivationDateTimeUtc, _ => DateTime.UtcNow)
-                .RuleFor(a => a.AnnualRevenue, f => f.Finance.Amount())
-                .RuleFor(a => a.FoundationYear, f => f.Random.Number(1900, 2023))
-                .RuleFor(a => a.State, f => f.PickRandom("Client", "Client prospect"))
-                .RuleFor(a => a.EmployeeCount, f => f.Random.Number(0, 1000))
-                .RuleFor(a => a.Status, f => f.PickRandom<Status>())
-                .RuleFor(a => a.DaysOpen, f => f.Random.Number(0, 1000));
-
         public static readonly Faker<UpdateClientRequest> UpdateClientFaker =
             new Faker<UpdateClientRequest>()
-            .RuleFor(a => a.AnnualRevenue, f => f.Finance.Amount())
-            .RuleFor(a => a.EmployeeCount, f => f.Random.Number(0, 1000))
-            .RuleFor(a => a.FoundationYear, f => f.Random.Number(1900, 2023))
-            .RuleFor(dto => dto.ClientManagersIds, f => f.Make(3, Guid.NewGuid));
+                .RuleFor(a => a.AnnualRevenue, f => f.Finance.Amount())
+                .RuleFor(a => a.EmployeeCount, f => f.Random.Number(0, 1000))
+                .RuleFor(a => a.FoundationYear, f => f.Random.Number(1900, 2023))
+                .RuleFor(dto => dto.ClientManagersIds, f => f.Make(3, Guid.NewGuid));
 
+        public static readonly Faker<AccountDetailsDto> AccountsDetailsDtoFaker =
+            new Faker<AccountDetailsDto>()
+                .RuleFor(a => a.Id, _ => Guid.NewGuid())
+                .RuleFor(a => a.Name, f => f.Company.CompanyName())
+                .RuleFor(a => a.Website, f => f.Internet.Url())
+                .RuleFor(a => a.Country, f => f.Address.Country())
+                .RuleFor(a => a.State, f => f.PickRandom<State>())
+                .RuleFor(a => a.City, f => f.Address.City())
+                .RuleFor(a => a.Address1, f => f.Address.StreetAddress())
+                .RuleFor(a => a.Address2, f => f.Address.StreetAddress())
+                .RuleFor(a => a.Zip, f => f.Random.Number(10000, 9999999).ToString())
+                .RuleFor(a => a.County, f => f.Address.County());
+
+        public static readonly Faker<CreateAccountRequest> CreateAccountRequestFaker =
+            new Faker<CreateAccountRequest>()
+                .RuleFor(a => a.Name, f => f.Company.CompanyName())
+                .RuleFor(a => a.Website, f => f.Internet.Url())
+                .RuleFor(a => a.Country, _ => Country.UnitedStates)
+                .RuleFor(a => a.State, f => f.PickRandom<State>())
+                .RuleFor(a => a.City, f => f.Address.City())
+                .RuleFor(a => a.Address1, f => f.Address.StreetAddress())
+                .RuleFor(a => a.Address2, f => f.Address.StreetAddress())
+                .RuleFor(a => a.Zip, f => f.Random.Number(10000, 9999999).ToString())
+                .RuleFor(a => a.County, f => f.Address.County());
+
+        public static readonly Faker<UpdateAccountProfileRequest> UpdateAccountProfileRequestFaker =
+            new Faker<UpdateAccountProfileRequest>()
+                .RuleFor(a => a.Name, f => f.Company.CompanyName())
+                .RuleFor(a => a.Website, f => f.Internet.Url())
+                .RuleFor(a => a.Country, _ => Country.UnitedStates)
+                .RuleFor(a => a.State, f => f.PickRandom<State>())
+                .RuleFor(a => a.City, f => f.Address.City())
+                .RuleFor(a => a.Address1, f => f.Address.StreetAddress())
+                .RuleFor(a => a.Address2, f => f.Address.StreetAddress())
+                .RuleFor(a => a.Zip, f => f.Random.Number(10000, 9999999).ToString())
+                .RuleFor(a => a.County, f => f.Address.County());
     }
 }

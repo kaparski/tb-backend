@@ -8,6 +8,7 @@ public static class FileTypeToMimeTypeConverter
     {
         FileType.Csv => "text/csv",
         FileType.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        FileType.Zip => "application/zip",
         _ => throw new InvalidOperationException(),
     };
 }

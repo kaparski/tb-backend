@@ -17,25 +17,23 @@ public class CurrentUserService: ICurrentUserService
             : Guid.Empty;
 
     public bool IsSuperAdmin => UserClaims
-                                    ?.Where(c => c.Type == Claims.Roles)
-                                    ?.Select(c => c.Value)
-                                    ?.ToHashSet()
-                                    ?.Contains(RolesConstants.SuperAdmin)
-                                == true;
+        ?.Where(c => c.Type == Claims.Roles)
+        ?.Select(c => c.Value)
+        ?.ToHashSet()
+        ?.Contains(RolesConstants.SuperAdmin)
+        == true;
 
     public bool IsUserInTenant => TenantId != default;
 
-    public Guid TenantId =>
-        IsSuperAdmin
-        && _httpContextAccessor?.HttpContext?.Request?.Headers?
-            .TryGetValue(Headers.SuperAdminTenantId, out var superAdminTenantIdString)
-        == true
-        && Guid.TryParse(superAdminTenantIdString, out var superAdminTenantId)
-            ? superAdminTenantId
-            : Guid.TryParse(UserClaims?.SingleOrDefault(c => c.Type == Claims.TenantId)?.Value,
-                out var tenantId)
-                ? tenantId
-                : Guid.Empty;
+    public Guid? TenantIdFromHeaders => _httpContextAccessor?
+        .HttpContext?
+        .Request?
+        .Headers?
+        .TryGetValue(Headers.SuperAdminTenantId, out var headerValue) == true
+        && Guid.TryParse(headerValue, out var id) ?
+        id : null;
+
+    public Guid TenantId => IsSuperAdmin && TenantIdFromHeaders.HasValue ? TenantIdFromHeaders.Value : TenantIdFromClaims;
 
     public (string FullName, string Roles) UserInfo
     {
@@ -66,4 +64,8 @@ public class CurrentUserService: ICurrentUserService
         && divisionEnabled;
 
     private IEnumerable<Claim>? UserClaims => _httpContextAccessor?.HttpContext?.User?.Claims;
+
+    private Guid TenantIdFromClaims =>
+        Guid.TryParse(UserClaims?.SingleOrDefault(c => c.Type == Claims.TenantId)?.Value, out var id)
+        ? id : Guid.Empty;
 }

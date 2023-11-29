@@ -34,4 +34,6 @@ public class ProgramDetailsResponse
     public DateTime? EndDateTimeUtc { get; set; }
 
     public DateTime CreatedDateTimeUtc { get; set; }
+
+    public DateTime? LastModifiedDateTimeUtc { get; set; }
 }

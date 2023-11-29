@@ -171,7 +171,7 @@ public class UsersControllerTest
         using (new AssertionScope())
         {
             hasPermissionsAttribute.Should().NotBeNull();
-            hasPermissionsAttribute?.Policy.Should().Be("Users.Read;Users.ReadWrite;Users.ReadExport");
+            hasPermissionsAttribute?.Policy.Should().Be("Users.Read;Users.ReadWrite;Users.ReadExport;Accounts.ReadWrite");
         }
     }
 }

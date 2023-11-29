@@ -1,81 +1,90 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using TaxBeacon.Accounts.Naics;
+using TaxBeacon.API.Shared.Requests;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Accounts;
-using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.API.Controllers.Entities.Requests;
 
-public record UpdateEntityRequest
-(
-    string Name,
-    string? Dba,
-    string? EntityId,
-    string? City,
-    string StreetAddress1,
-    string? StreetAddress2,
-    string? Address,
-    int Fein,
-    int? Zip,
-    string Country,
-    string? Fax,
-    string? Phone,
-    string? Extension,
-    State State,
-    AccountEntityType Type,
-    TaxYearEndType TaxYearEndType,
-    Status Status,
-    IEnumerable<StateId> StateIds
-    );
+public record UpdateEntityRequest: IAddressRequest, INaicsCodeRequest
+{
+    public string Name { get; init; } = null!;
+
+    public string EntityId { get; init; } = null!;
+
+    public string? DoingBusinessAs { get; init; }
+
+    public Country Country { get; init; } = null!;
+
+    public string? Address1 { get; init; }
+
+    public string? Address2 { get; init; }
+
+    public string? City { get; init; }
+
+    public State? State { get; init; }
+
+    public string? Zip { get; init; }
+
+    public string? County { get; init; }
+
+    public string? Address { get; init; }
+
+    public string? Fein { get; init; }
+
+    public string? Ein { get; init; }
+
+    public string? JurisdictionId { get; init; }
+
+    public AccountEntityType Type { get; init; } = null!;
+
+    public TaxYearEndType? TaxYearEndType { get; init; }
+
+    public DateTime? DateOfIncorporation { get; init; }
+
+    public int? PrimaryNaicsCode { get; init; }
+
+    public IEnumerable<CreateUpdatePhoneRequest> Phones { get; init; } = Enumerable.Empty<CreateUpdatePhoneRequest>();
+}
 
 public class UpdateEntityRequestValidator: AbstractValidator<UpdateEntityRequest>
 {
-    public UpdateEntityRequestValidator()
+    public UpdateEntityRequestValidator(INaicsService naicsService)
     {
         RuleFor(x => x.Name)
             .NotEmpty()
             .MaximumLength(100)
             .WithMessage("The entity name must contain no more than 100 characters");
 
-        RuleFor(x => x.Dba)
+        RuleFor(x => x.EntityId)
+            .NotEmpty()
+            .MaximumLength(100)
+            .WithMessage("The entity id must contain no more than {MaxLength} characters");
+
+        RuleFor(x => x.DoingBusinessAs)
             .MaximumLength(100)
             .WithMessage("The DBA must contain no more than 100 characters");
 
-        RuleFor(x => x.EntityId)
-            .MaximumLength(100)
-            .WithMessage("The EntityId must contain no more than 100 characters");
+        RuleFor(x => x.Fein)
+            .MaximumLength(9)
+            .WithMessage("The fein must contain no more than 9 characters");
 
-        RuleFor(x => x.Country)
-            .NotEmpty()
-            .MaximumLength(100)
-            .WithMessage("The country name must contain no more than 100 characters");
-
-        RuleFor(x => x.City)
-            .MaximumLength(100)
-            .WithMessage("The country name must contain no more than 100 characters");
-
-        RuleFor(x => x.StreetAddress1)
-            .NotEmpty()
-            .MaximumLength(100)
-            .WithMessage("The address must contain no more than 100 characters");
-
-        RuleFor(x => x.StreetAddress2)
-            .MaximumLength(100)
-            .WithMessage("The address must contain no more than 100 characters");
-
-        RuleFor(x => x.Address)
-            .MaximumLength(100)
-            .WithMessage("The address must contain no more than 100 characters");
-
-        RuleFor(x => x.Fax)
+        RuleFor(x => x.Ein)
             .MaximumLength(20)
-            .WithMessage("The fax must contain no more than 20 characters");
+            .WithMessage("The ein must contain no more than 20 characters");
 
-        RuleFor(x => x.Phone)
+        RuleFor(x => x.JurisdictionId)
             .MaximumLength(20)
-            .WithMessage("The phone number must contain no more than 20 characters");
+            .WithMessage("The jurisdiction Id must contain no more than 20 characters");
 
-        RuleFor(x => x.Extension)
-            .MaximumLength(20)
-            .WithMessage("The extension must contain no more than 20 characters");
+        RuleFor(x => x.DateOfIncorporation)
+            .LessThanOrEqualTo(DateTime.UtcNow)
+            .When(x => x.DateOfIncorporation.HasValue);
+
+        Include(new NaicsCodeRequestValidation(naicsService));
+
+        Include(new AddressRequestValidation());
     }
 }

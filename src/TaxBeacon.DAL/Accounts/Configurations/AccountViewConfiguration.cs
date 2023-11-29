@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TaxBeacon.Common.Permissions;
 using TaxBeacon.DAL.Accounts.Entities;
 
 namespace TaxBeacon.DAL.Accounts.Configurations;
@@ -35,6 +36,11 @@ public class AccountViewConfiguration: IEntityTypeConfiguration<AccountView>
             .Property(a => a.ReferralState)
             .HasColumnType("nvarchar")
             .HasMaxLength(50);
+
+        accountView
+            .Property(c => c.AnnualRevenue)
+            .HasColumnType("decimal")
+            .HasPrecision(15, 2);
 
         accountView.ToTable("AccountsView", t => t.ExcludeFromMigrations());
     }

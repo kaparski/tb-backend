@@ -12,7 +12,7 @@ public class AccountActivityLogConfiguration: IEntityTypeConfiguration<AccountAc
         accountActivityLog
             .HasOne<Account>(acl => acl.Account)
             .WithMany(a => a.AccountActivityLogs)
-            .HasForeignKey(acl => acl.AccountId);
+            .HasForeignKey(acl => new { acl.TenantId, acl.AccountId });
 
         accountActivityLog
             .HasOne<Tenant>(acl => acl.Tenant)

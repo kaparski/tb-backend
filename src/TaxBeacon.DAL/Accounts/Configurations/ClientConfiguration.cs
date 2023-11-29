@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaxBeacon.DAL.Accounts.Entities;
+﻿namespace TaxBeacon.DAL.Accounts.Configurations;
 
-namespace TaxBeacon.DAL.Accounts.Configurations;
 public class ClientConfiguration: IEntityTypeConfiguration<Client>
 {
     public void Configure(EntityTypeBuilder<Client> client)
@@ -19,12 +16,12 @@ public class ClientConfiguration: IEntityTypeConfiguration<Client>
         client
             .HasOne(c => c.Account)
             .WithOne(a => a.Client)
-            .HasForeignKey<Client>(c => c.AccountId);
+            .HasForeignKey<Client>(c => new { c.TenantId, c.AccountId });
 
         client
             .HasOne(c => c.PrimaryContact)
             .WithMany(m => m.Clients)
-            .HasForeignKey(c => c.PrimaryContactId);
+            .HasForeignKey(c => new { c.TenantId, c.PrimaryContactId });
 
         client
             .Property(c => c.Status)
@@ -45,6 +42,7 @@ public class ClientConfiguration: IEntityTypeConfiguration<Client>
 
         client
             .Property(u => u.DaysOpen)
-            .HasComputedColumnSql("DATEDIFF(second, COALESCE(ActivationDateTimeUtc, CreatedDateTimeUtc), COALESCE(DeactivationDateTimeUtc, GETUTCDATE())) / 86400");
+            .HasComputedColumnSql(
+                "DATEDIFF(second, COALESCE(ActivationDateTimeUtc, CreatedDateTimeUtc), COALESCE(DeactivationDateTimeUtc, GETUTCDATE())) / 86400");
     }
 }

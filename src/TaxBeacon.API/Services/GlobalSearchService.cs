@@ -1,8 +1,8 @@
 using Azure;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
-using System.Text.RegularExpressions;
 using TaxBeacon.Administration.Users;
+using TaxBeacon.Common.Extensions;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Services;
 
@@ -45,7 +45,7 @@ public class GlobalSearchService: IGlobalSearchService
             options.HighlightFields.Add(field);
         }
 
-        var searchWords = term.Split(' ').Select(word => $"/.*{Regex.Escape(word)}.*/").ToList();
+        var searchWords = term.Split(' ').Select(word => @$"/.*{word.EscapeSpecialCharacters()}.*/").ToList();
         try
         {
             var response =
@@ -65,13 +65,14 @@ public class GlobalSearchService: IGlobalSearchService
                 .ToArray();
 
             var totalCount = response.Value.TotalCount;
+            var pagesCount = (totalCount + pageSize - 1) / pageSize;
 
-            return new SearchResultsDto { Count = totalCount!.Value, Items = items };
+            return new SearchResultsDto { Count = totalCount!.Value, PagesCount = pagesCount!.Value, Items = items };
         }
         catch (RequestFailedException exception)
         {
             _logger.LogError(exception, "Azure Cognitive Search exception");
-            return new SearchResultsDto { Count = 0, Items = { } };
+            return new SearchResultsDto();
         }
     }
 

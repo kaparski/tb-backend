@@ -1,0 +1,35 @@
+CREATE OR ALTER VIEW ClientsSearchView AS
+    SELECT
+        CONCAT_WS('_', A.Id, A.TenantId, 'Client') AS DocumentId,
+        A.Id AS OriginalId,
+        A.TenantId as TenantId,
+        A.Name,
+        A.DoingBusinessAs,
+        A.LinkedInUrl,
+        A.Website,
+        A.Country,
+        A.State,
+        A.County,
+        A.City,
+        A.Address1,
+        A.Address2,
+        A.Zip,
+        A.Address,
+        A.AccountId,
+        A.PrimaryNaicsCode as [NaicsCode],
+        C.EmployeeCount,
+        C.AnnualRevenue,
+        C.FoundationYear,
+        A.CreatedDateTimeUtc,
+        A.LastModifiedDateTimeUtc,
+        A.IsDeleted,
+        JSON_ARRAY(
+                'Accounts.Read',
+                'Accounts.ReadWrite',
+                'Accounts.ReadExport',
+                'Clients.Read',
+                'Clients.ReadWrite',
+                'Clients.ReadExport') as Permissions,
+        LOWER(C.State) as EntityType
+    FROM Accounts A
+             INNER JOIN Clients c on A.Id = C.AccountId

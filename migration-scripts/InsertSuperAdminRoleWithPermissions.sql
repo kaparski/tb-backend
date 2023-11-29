@@ -1,6 +1,6 @@
 ﻿DECLARE @rolePermissions TABLE
                          (
-                             NAME NVARCHAR(250)
+                           NAME NVARCHAR(250)
                          );
 DECLARE @roleType AS INT = 1;
 DECLARE @roleId AS UNIQUEIDENTIFIER = NEWID();
@@ -9,16 +9,16 @@ DECLARE @roleName AS NVARCHAR(100) = N'Super admin';
 IF NOT EXISTS(SELECT 1
               FROM Roles
               WHERE Name = @roleName)
-    BEGIN
-        INSERT INTO Roles(Id, Name, Type) VALUES (@roleId, @roleName, @roleType);
-    END;
+  BEGIN
+    INSERT INTO Roles(Id, Name, Type) VALUES (@roleId, @roleName, @roleType);
+  END;
 ELSE
-    BEGIN
-        SELECT @roleId = Id FROM Roles WHERE Name = @roleName;
-    END;
+  BEGIN
+    SELECT @roleId = Id FROM Roles WHERE Name = @roleName;
+  END;
 
 INSERT INTO @rolePermissions
-    (Name)
+  (Name)
 VALUES ('Departments.Read'),
        ('Departments.ReadWrite'),
        ('Departments.ReadExport'),
@@ -32,6 +32,9 @@ VALUES ('Departments.Read'),
        ('Programs.Read'),
        ('Programs.ReadWrite'),
        ('Programs.ReadExport'),
+       ('Programs.ReadTenantOrgUnits'),
+       ('Programs.ReadAssignTenantOrgUnits'),
+       ('Programs.ReadActivation'),
        ('Roles.Read'),
        ('Roles.ReadWrite'),
        ('ServiceAreas.Read'),
@@ -60,11 +63,11 @@ VALUES ('Departments.Read'),
        ('Locations.Read'),
        ('Locations.ReadWrite'),
        ('Locations.ReadExport'),
-       ('Locations.Activation'),
+       ('Locations.ReadActivation'),
        ('Entities.Read'),
        ('Entities.ReadWrite'),
        ('Entities.ReadExport'),
-       ('Entities.Activation'),
+       ('Entities.ReadActivation'),
        ('Clients.Read'),
        ('Clients.ReadWrite'),
        ('Clients.ReadExport'),
@@ -72,7 +75,18 @@ VALUES ('Departments.Read'),
        ('Referrals.Read'),
        ('Referrals.ReadWrite'),
        ('Referrals.ReadExport'),
-       ('Referrals.Activation');
+       ('Referrals.Activation'),
+       ('Accounts.AssignContact'),
+       ('Contacts.AssignContact'),
+       ('Documents.Read'),
+       ('Documents.ReadExport'),
+       ('Templates.Read');
+
+IF DB_NAME() IN ('qa-taxbeacon', 'dev-taxbeacon')
+  BEGIN
+    INSERT INTO @rolePermissions (Name) VALUES ('QualityAssurance.Full');
+  END
+
 
 INSERT INTO Permissions (Id, Name, CreatedDateTimeUtc)
 SELECT NEWID(),
@@ -80,9 +94,9 @@ SELECT NEWID(),
        GETUTCDATE()
 FROM @rolePermissions srp
 WHERE NOT EXISTS
-    (SELECT 1
-     FROM Permissions
-     WHERE Name = srp.Name)
+        (SELECT 1
+         FROM Permissions
+         WHERE Name = srp.Name)
 
 INSERT INTO RolePermissions(RoleId, PermissionId)
 SELECT @roleId, Id

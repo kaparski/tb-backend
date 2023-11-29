@@ -1,3 +1,4 @@
+using TaxBeacon.API.Controllers.Entities.Responses;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.Common.Enums.Accounts;
 
@@ -7,7 +8,9 @@ public record LocationResponse
 {
     public Guid Id { get; init; }
 
-    public string? LocationId { get; init; }
+    public Guid AccountId { get; init; }
+
+    public string LocationId { get; init; } = null!;
 
     public string Name { get; init; } = null!;
 
@@ -21,5 +24,21 @@ public record LocationResponse
 
     public Status Status { get; init; }
 
-    public string? Country { get; init; }
+    public string Country { get; init; } = null!;
+
+    public IEnumerable<EntityLocationResponse> EntityLocations { get; init; } = Enumerable.Empty<EntityLocationResponse>();
+
+    public DateTime? StartDateTimeUtc { get; init; }
+
+    public DateTime? EndDateTimeUtc { get; init; }
+
+    public DateTime CreatedDateTimeUtc { get; init; }
+
+    public DateTime? ReactivationDateTimeUtc { get; init; }
+
+    public DateTime? DeactivationDateTimeUtc { get; init; }
+
+    public string? NaicsCode { get; init; }
+
+    public string? NaicsCodeIndustry { get; init; }
 }

@@ -34,11 +34,17 @@ public static class ConfigureServices
     {
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
+        serviceCollection.AddSingleton(provider =>
+        {
+            /// ClientSecretCredential is thread safe and manages caching itself
+            /// https://learn.microsoft.com/en-us/dotnet/api/overview/azure/identity-readme?view=azure-dotnet#credential-classes
+            var azureAdOptions = provider.GetRequiredService<IOptions<AzureAd>>();
+            return new ClientSecretCredential(azureAdOptions.Value.TenantId, azureAdOptions.Value.ClientId, azureAdOptions.Value.Secret);
+        });
         serviceCollection.AddScoped(provider =>
         {
-            var azureAdOptions = provider.GetRequiredService<IOptions<AzureAd>>();
-            var creds = new ClientSecretCredential(azureAdOptions.Value.TenantId, azureAdOptions.Value.ClientId, azureAdOptions.Value.Secret);
-            return new GraphServiceClient(creds);
+            var azureCreds = provider.GetRequiredService<ClientSecretCredential>();
+            return new GraphServiceClient(azureCreds);
         });
         serviceCollection.AddScoped<IUserService, UserService>();
         serviceCollection.AddScoped<ITenantService, TenantService>();
@@ -53,6 +59,7 @@ public static class ConfigureServices
         serviceCollection.AddScoped<IUserActivityFactory, UserReactivatedEventFactory>();
         serviceCollection.AddScoped<IUserActivityFactory, UserUpdatedEventFactory>();
         serviceCollection.AddScoped<IUserActivityFactory, UnassignRolesEventFactory>();
+        serviceCollection.AddScoped<IUserActivityFactory, CredentialsSentEventFactory>();
 
         serviceCollection.AddScoped<ITeamService, TeamService>();
         serviceCollection.AddScoped<IDepartmentService, DepartmentService>();

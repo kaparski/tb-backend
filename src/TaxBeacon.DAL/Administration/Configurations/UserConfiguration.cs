@@ -59,12 +59,12 @@ public class UserConfiguration: IEntityTypeConfiguration<User>
             .HasDefaultValueSql("GETUTCDATE()");
 
         user
-            .Property(u => u.AadB2CObjectId)
+            .Property(u => u.IdpExternalId)
             .HasColumnType("nvarchar")
             .HasMaxLength(256);
 
         user
-            .HasIndex(u => u.AadB2CObjectId)
+            .HasIndex(u => u.IdpExternalId)
             .IsClustered(false);
 
         user

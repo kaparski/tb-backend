@@ -1,5 +1,5 @@
 ﻿using Mapster;
-using TaxBeacon.Accounts.Models;
+using TaxBeacon.Accounts.Common.Models;
 using TaxBeacon.Common.Enums;
 using TaxBeacon.DAL.Accounts.Entities;
 
@@ -33,15 +33,15 @@ public record AccountDetailsDto: IRegister
 
     public string? Address { get; init; }
 
-    public int EntitiesCount { get; init; }
+    public string AccountId { get; init; } = null!;
 
-    public int LocationsCount { get; init; }
-
-    public int ContactsCount { get; init; }
+    public NaicsCodeDto? NaicsCode { get; init; }
 
     public ClientDetailsDto? Client { get; set; }
 
     public ReferralDetailsDto? Referral { get; set; }
+
+    public DateTime? LastModifiedDateTimeUtc { get; init; }
 
     public IEnumerable<SalespersonDto> Salespersons { get; init; } = Enumerable.Empty<SalespersonDto>();
 
@@ -49,10 +49,7 @@ public record AccountDetailsDto: IRegister
 
     public void Register(TypeAdapterConfig config) =>
         config.NewConfig<Account, AccountDetailsDto>()
-            .Map(dest => dest.EntitiesCount, src => src.Entities.Count)
-            .Map(dest => dest.LocationsCount, src => src.Locations.Count)
-            .Map(dest => dest.ContactsCount, src => src.Contacts.Count)
-            .Map(dest => dest.Salespersons, 
-                src => src.Salespersons.Select(sp => 
-                    new { Id = sp.UserId, sp.TenantUser.User.FullName}));
+            .Map(dest => dest.Salespersons,
+                src => src.Salespersons.Select(sp =>
+                    new { Id = sp.UserId, sp.TenantUser.User.FullName }));
 }

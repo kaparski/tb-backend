@@ -18,6 +18,8 @@ public class UserResponse
 
     public DateTime? LastLoginDateTimeUtc { get; set; }
 
+    public DateTime? LastModifiedDateTimeUtc { get; set; }
+
     public string Email { get; set; } = null!;
 
     public string? Roles { get; set; }
@@ -49,6 +51,8 @@ public class UserResponse
     public string? Team { get; set; }
 
     public IEnumerable<Guid>? RoleIds { get; set; }
+
+    public IEnumerable<string>? RoleNames { get; set; }
 
     public UserType UserType { get; set; }
 }

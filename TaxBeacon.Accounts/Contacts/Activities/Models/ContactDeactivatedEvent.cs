@@ -6,8 +6,11 @@ public sealed class ContactDeactivatedEvent: EventBase
 {
     public DateTime DeactivatedDate { get; }
 
-    public ContactDeactivatedEvent(Guid executorId, DateTime deactivatedDate, string executorFullName, string executorRoles)
-        : base(executorId, executorFullName, executorRoles) => DeactivatedDate = deactivatedDate;
+    public ContactDeactivatedEvent(Guid executorId,
+        string executorRoles,
+        string executorFullName,
+        DateTime deactivatedDate)
+        : base(executorId, executorRoles, executorFullName) => DeactivatedDate = deactivatedDate;
 
-    public override string ToString() => $"Contact deactivated";
+    public override string ToString() => "Contact deactivated";
 }

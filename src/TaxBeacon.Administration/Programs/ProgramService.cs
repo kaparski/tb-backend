@@ -84,7 +84,7 @@ public class ProgramService: IProgramService
             }, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Program ({programId} was created by {@userId}",
+        _logger.LogInformation("{dateTime} - Program ({programId} was created by {userId}",
             eventDateTime,
             newProgram.Id,
             _currentUserService.UserId);
@@ -103,10 +103,10 @@ public class ProgramService: IProgramService
         {
             p.StartDateView = _dateTimeFormatter.FormatDate(p.StartDateTimeUtc);
             p.EndDateView = _dateTimeFormatter.FormatDate(p.EndDateTimeUtc);
-            p.CreatedDateView = _dateTimeFormatter.FormatDate(p.CreatedDateTimeUtc);
+            p.CreatedDateView = _dateTimeFormatter.FormatDateTime(p.CreatedDateTimeUtc);
         });
 
-        _logger.LogInformation("{dateTime} - Programs export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Programs export was executed by {userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
@@ -192,7 +192,7 @@ public class ProgramService: IProgramService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Program ({program}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Program ({program}) was updated by {userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);
@@ -271,7 +271,7 @@ public class ProgramService: IProgramService
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
-            "{dateTime} - Program ({createdProgramId}) status was changed to {newProgramStatus } by {@userId}",
+            "{dateTime} - Program ({createdProgramId}) status was changed to {newProgramStatus } by {userId}",
             _dateTimeService.UtcNow,
             tenantProgram.ProgramId,
             status,
@@ -294,7 +294,7 @@ public class ProgramService: IProgramService
     {
         var exportPrograms = await _context
             .TenantsPrograms
-            .Where(x => x.TenantId == _currentUserService.TenantId)
+            .Where(x => x.TenantId == _currentUserService.TenantId && x.IsDeleted != true)
             .ProjectToType<TenantProgramExportModel>()
             .ToListAsync(cancellationToken);
 
@@ -302,10 +302,9 @@ public class ProgramService: IProgramService
         {
             p.StartDateView = _dateTimeFormatter.FormatDate(p.StartDateTimeUtc);
             p.EndDateView = _dateTimeFormatter.FormatDate(p.EndDateTimeUtc);
-            p.CreatedDateView = _dateTimeFormatter.FormatDate(p.CreatedDateTimeUtc);
         });
 
-        _logger.LogInformation("{dateTime} - Tenant programs export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Tenant programs export was executed by {userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 

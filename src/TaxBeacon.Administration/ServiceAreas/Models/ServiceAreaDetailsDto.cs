@@ -2,15 +2,17 @@ using TaxBeacon.Administration.Departments.Models;
 
 namespace TaxBeacon.Administration.ServiceAreas.Models;
 
-public class ServiceAreaDetailsDto
+public record ServiceAreaDetailsDto
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; init; }
 
-    public DepartmentDto? Department { get; set; }
+    public DepartmentDto? Department { get; init; }
 
-    public DateTime CreatedDateTimeUtc { get; set; }
+    public DateTime CreatedDateTimeUtc { get; init; }
+
+    public DateTime? LastModifiedDateTimeUtc { get; init; }
 }

@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using FluentValidation.Results;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -127,6 +128,7 @@ public class DivisionsController: BaseController
     /// Update division details
     /// </summary>
     /// <response code="200">Returns updated division</response>
+    /// <response code="400">Validation failed</response>
     /// <response code="401">User is unauthorized</response>
     /// <response code="403">The user does not have the required permission</response>
     /// <response code="404">Division is not found</response>
@@ -135,6 +137,7 @@ public class DivisionsController: BaseController
     [HttpPatch("{id:guid}", Name = "UpdateDivision")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]
     [ProducesResponseType(typeof(DivisionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<ValidationFailure>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

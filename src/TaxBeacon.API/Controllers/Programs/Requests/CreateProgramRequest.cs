@@ -33,8 +33,8 @@ public class CreateProgramRequestValidator: AbstractValidator<CreateProgramReque
             .WithMessage("The program reference must contain no more than 200 characters");
 
         RuleFor(x => x.Overview)
-            .MaximumLength(200)
-            .WithMessage("The program overview must contain no more than 200 characters");
+            .MaximumLength(1000)
+            .WithMessage("The program overview must contain no more than 1000 characters");
 
         RuleFor(x => x.LegalAuthority)
             .MaximumLength(200)

@@ -7,7 +7,7 @@ public class JobTitleExportModel
     [Column("Job Title Name")]
     public string Name { get; set; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
     public string Department { get; set; } = string.Empty;
 
@@ -17,6 +17,6 @@ public class JobTitleExportModel
     [Column("Creation Date")]
     public string CreatedDateView { get; set; } = string.Empty;
 
-    [Column("Number of Users")]
+    [Column("Number Of Users")]
     public int AssignedUsersCount { get; set; }
 }

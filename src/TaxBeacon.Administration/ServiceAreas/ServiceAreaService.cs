@@ -85,9 +85,9 @@ public class ServiceAreaService: IServiceAreaService
             .OrderBy(sa => sa.Name)
             .ToListAsync(cancellationToken);
 
-        exportServiceAreas.ForEach(sa => sa.CreatedDateView = _dateTimeFormatter.FormatDate(sa.CreatedDateTimeUtc));
+        exportServiceAreas.ForEach(sa => sa.CreatedDateView = _dateTimeFormatter.FormatDateTime(sa.CreatedDateTimeUtc));
 
-        _logger.LogInformation("{dateTime} - Service Areas export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Service Areas export was executed by {userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
@@ -151,7 +151,7 @@ public class ServiceAreaService: IServiceAreaService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Service Area ({serviceArea}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Service Area ({serviceArea}) was updated by {userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);

@@ -61,9 +61,9 @@ public class TenantService: ITenantService
             .ProjectToType<TenantExportModel>()
             .ToListAsync(cancellationToken);
 
-        exportTenants.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDate(t.CreatedDateTimeUtc));
+        exportTenants.ForEach(t => t.CreatedDateView = _dateTimeFormatter.FormatDateTime(t.CreatedDateTimeUtc));
 
-        _logger.LogInformation("{dateTime} - Tenants export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Tenants export was executed by {userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
@@ -137,7 +137,7 @@ public class TenantService: ITenantService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Tenant ({tenantId}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Tenant ({tenantId}) was updated by {userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);

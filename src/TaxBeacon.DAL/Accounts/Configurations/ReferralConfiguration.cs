@@ -1,8 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaxBeacon.DAL.Accounts.Entities;
-
-namespace TaxBeacon.DAL.Accounts.Configurations;
+﻿namespace TaxBeacon.DAL.Accounts.Configurations;
 
 public class ReferralConfiguration: IEntityTypeConfiguration<Referral>
 {
@@ -20,12 +16,12 @@ public class ReferralConfiguration: IEntityTypeConfiguration<Referral>
         referral
             .HasOne(r => r.Account)
             .WithOne(a => a.Referral)
-            .HasForeignKey<Referral>(r => r.AccountId);
+            .HasForeignKey<Referral>(r => new { r.TenantId, r.AccountId });
 
         referral
-            .HasOne(r => r.Manager)
+            .HasOne(c => c.PrimaryContact)
             .WithMany(m => m.Referrals)
-            .HasForeignKey(r => new { r.TenantId, r.ManagerId });
+            .HasForeignKey(c => new { c.TenantId, c.PrimaryContactId });
 
         referral
             .Property(r => r.Status)
@@ -38,5 +34,23 @@ public class ReferralConfiguration: IEntityTypeConfiguration<Referral>
             .HasColumnType("nvarchar")
             .HasMaxLength(50)
             .IsRequired();
+
+        referral
+            .Property(c => c.OrganizationType)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(50)
+            .IsRequired();
+
+        referral
+            .Property(c => c.Type)
+            .HasColumnType("nvarchar")
+            .HasMaxLength(50)
+            .IsRequired();
+
+        referral
+            .Property(u => u.DaysOpen)
+            .HasComputedColumnSql(
+                "DATEDIFF(second, COALESCE(ActivationDateTimeUtc, CreatedDateTimeUtc), COALESCE(DeactivationDateTimeUtc, GETUTCDATE())) / 86400");
+
     }
 }

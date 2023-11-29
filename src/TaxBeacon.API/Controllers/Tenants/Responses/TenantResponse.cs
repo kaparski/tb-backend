@@ -12,5 +12,7 @@ public record TenantResponse
 
     public DateTime CreatedDateTimeUtc { get; set; }
 
+    public DateTime? LastModifiedDateTimeUtc { get; set; }
+
     public bool? DivisionEnabled { get; set; }
 }

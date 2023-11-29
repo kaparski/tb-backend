@@ -1,6 +1,4 @@
-﻿using TaxBeacon.DAL.Accounts.Entities;
-
-namespace TaxBeacon.DAL.Administration.Entities;
+﻿namespace TaxBeacon.DAL.Administration.Entities;
 
 public class TenantUser
 {
@@ -18,5 +16,7 @@ public class TenantUser
 
     public ICollection<ClientManager> ClientManagers { get; set; } = new HashSet<ClientManager>();
 
-    public ICollection<Referral> Referrals { get; set; } = new HashSet<Referral>();
+    public ICollection<ReferralManager> ReferralManagers { get; set; } = new HashSet<ReferralManager>();
+
+    public ICollection<Document> Documents { get; set; } = new HashSet<Document>();
 }

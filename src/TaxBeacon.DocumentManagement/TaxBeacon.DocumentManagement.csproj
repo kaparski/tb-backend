@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="[12.19.1]" />
+    <PackageReference Include="OneOf" Version="[3.0.243]" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TaxBeacon.Common\TaxBeacon.Common.csproj" />
+  </ItemGroup>
+
+</Project>

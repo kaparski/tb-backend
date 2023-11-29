@@ -1,4 +1,5 @@
 using Azure.Search.Documents.Indexes;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.Common.Models;
 
@@ -12,6 +13,9 @@ public class SearchIndex
 
     [SimpleField(IsFilterable = true)]
     public string TenantId { get; set; } = null!;
+
+    [SimpleField(IsFilterable = true)]
+    public string AdditionalId { get; set; } = null!;
 
     [SimpleField]
     public string DisplayName { get; set; } = null!;
@@ -32,6 +36,12 @@ public class SearchIndex
     public string? Email { get; set; }
 
     [SearchableField]
+    public string? SecondaryEmail { get; set; }
+
+    [SearchableField]
+    public string? JobTitle { get; set; }
+
+    [SearchableField]
     public string? Reference { get; set; }
 
     [SearchableField]
@@ -47,6 +57,9 @@ public class SearchIndex
     public string? JurisdictionName { get; set; }
 
     [SearchableField]
+    public string? Country { get; set; }
+
+    [SearchableField]
     public string? State { get; set; }
 
     [SearchableField]
@@ -56,10 +69,58 @@ public class SearchIndex
     public string? City { get; set; }
 
     [SearchableField]
+    public string? Address1 { get; set; }
+
+    [SearchableField]
+    public string? Address2 { get; set; }
+
+    [SearchableField]
+    public string? Zip { get; set; }
+
+    [SearchableField]
+    public string? Address { get; set; }
+
+    [SearchableField]
     public string? IncentivesArea { get; set; }
 
     [SearchableField]
     public string? IncentivesType { get; set; }
+
+    [SearchableField]
+    public string? DoingBusinessAs { get; set; }
+
+    [SearchableField]
+    public string? LinkedInUrl { get; set; }
+
+    [SearchableField]
+    public string? Website { get; set; }
+
+    [SearchableField]
+    public string? NaicsCode { get; set; }
+
+    [SearchableField]
+    public string? EmployeeCount { get; set; }
+
+    [SearchableField]
+    public string? AnnualRevenue { get; set; }
+
+    [SearchableField]
+    public string? FoundationYear { get; set; }
+
+    [SearchableField]
+    public string? Fein { get; set; }
+
+    [SearchableField]
+    public string? Ein { get; set; }
+
+    [SearchableField]
+    public string? AccountId { get; set; }
+
+    [SearchableField]
+    public string? LocationId { get; set; }
+
+    [SearchableField]
+    public string? EntityId { get; set; }
 
     [SimpleField(IsFilterable = true, IsSortable = true)]
     public DateTime CreatedDateTimeUtc { get; set; }
@@ -68,7 +129,7 @@ public class SearchIndex
     public DateTime? LastModifiedDateTimeUtc { get; set; }
 
     [SimpleField(IsFilterable = true)]
-    public string EntityType { get; set; } = null!;
+    public SearchEntityType EntityType { get; set; } = null!;
 
     [SimpleField(IsFilterable = true, IsHidden = true)]
     public string[] Permissions { get; set; } = { };

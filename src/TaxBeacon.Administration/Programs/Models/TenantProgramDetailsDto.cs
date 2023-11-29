@@ -35,8 +35,6 @@ public class TenantProgramDetailsDto: IRegister
 
     public DateTime? EndDateTimeUtc { get; set; }
 
-    public DateTime CreatedDateTimeUtc { get; set; }
-
     public DateTime? DeactivationDateTimeUtc { get; set; }
 
     public DateTime? ReactivationDateTimeUtc { get; set; }
@@ -58,7 +56,6 @@ public class TenantProgramDetailsDto: IRegister
             .Map(dest => dest.IncentivesType, src => src.Program.IncentivesType)
             .Map(dest => dest.StartDateTimeUtc, src => src.Program.StartDateTimeUtc)
             .Map(dest => dest.EndDateTimeUtc, src => src.Program.EndDateTimeUtc)
-            .Map(dest => dest.CreatedDateTimeUtc, src => src.Program.CreatedDateTimeUtc)
             .Map(dest => dest.DeactivationDateTimeUtc, src => src.DeactivationDateTimeUtc)
             .Map(dest => dest.ReactivationDateTimeUtc, src => src.ReactivationDateTimeUtc)
             .Map(dest => dest.Status, src => src.Status);

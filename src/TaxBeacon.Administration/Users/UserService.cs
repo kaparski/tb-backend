@@ -7,21 +7,21 @@ using OneOf.Types;
 using System.Collections.Immutable;
 using System.Net.Mail;
 using System.Text.Json;
+using TaxBeacon.Administration.Tenants.Models;
 using TaxBeacon.Administration.Users.Activities.Factories;
 using TaxBeacon.Administration.Users.Activities.Models;
 using TaxBeacon.Administration.Users.Models;
 using TaxBeacon.Common.Converters;
 using TaxBeacon.Common.Enums;
+using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.Common.Errors;
 using TaxBeacon.Common.Models;
 using TaxBeacon.Common.Options;
 using TaxBeacon.Common.Services;
-using TaxBeacon.Email;
-using TaxBeacon.Email.Messages;
-using TaxBeacon.Administration.Users.Extensions;
-using TaxBeacon.Common.Enums.Administration.Activities;
 using TaxBeacon.DAL.Administration;
 using TaxBeacon.DAL.Administration.Entities;
+using TaxBeacon.Email;
+using TaxBeacon.Email.Messages;
 using RolesConstants = TaxBeacon.Common.Constants.Roles;
 
 namespace TaxBeacon.Administration.Users;
@@ -66,16 +66,40 @@ public class UserService: IUserService
         _emailSender = emailSender;
     }
 
-    public async Task<OneOf<LoginUserDto, NotFound>> LoginAsync(MailAddress mailAddress,
+    public async Task<OneOf<LoginUserDto, TenantDto[], NotFound>> LoginAsync(MailAddress mailAddress,
         CancellationToken cancellationToken = default)
     {
-        var user = await _context
-            .Users
-            .SingleOrDefaultAsync(u => mailAddress.Address == u.Email, cancellationToken);
+        var userTenants = await _context.TenantUsers
+            .Where(tu => tu.User.Email == mailAddress.Address)
+            .Select(tu => tu.Tenant)
+            .ToArrayAsync(cancellationToken);
 
-        var tenant = await _context
-            .Tenants
-            .FirstOrDefaultAsync(t => t.Id == _currentUserService.TenantId, cancellationToken);
+        Tenant? tenant;
+
+        if (userTenants.Length > 1)
+        {
+            // Trying to use the hint from user, in which tenant they want to login to
+            tenant = userTenants.SingleOrDefault(t => t.Id == _currentUserService.TenantIdFromHeaders);
+
+            if (tenant == null)
+            {
+                // Returning the list of user's tenants, so they can choose which one to login into
+                return userTenants.Adapt<TenantDto[]>();
+            }
+        }
+        else
+        {
+            tenant = userTenants.SingleOrDefault();
+        }
+
+        var user = tenant == null
+            ? await _context.Users
+                .Where(u => u.Email == mailAddress.Address)
+                .SingleOrDefaultAsync(cancellationToken)
+            : await _context.TenantUsers
+                .Where(tu => tu.TenantId == tenant.Id && tu.User.Email == mailAddress.Address)
+                .Select(tu => tu.User)
+                .SingleOrDefaultAsync(cancellationToken);
 
         if (user is null)
         {
@@ -94,20 +118,11 @@ public class UserService: IUserService
         return new LoginUserDto(
             user.Id,
             user.FullName,
-            await GetUserPermissionsAsync(user.Id, _currentUserService.TenantId, cancellationToken),
+            await GetUserPermissionsAsync(user.Id, tenant?.Id ?? Guid.Empty, cancellationToken),
             await HasNoTenantRoleAsync(user.Id, RolesConstants.SuperAdmin, cancellationToken),
-            tenant?.DivisionEnabled);
-    }
-
-    class UserRoleContainer
-    {
-        /// <summary>
-        /// Concatenation of UserId and TenantId. If user is tenant-free, then it is just UserId.
-        /// Needed for optimization purposes.
-        /// </summary>
-        public string UserIdPlusTenantId { get; set; } = null!;
-        public Guid RoleId { get; set; }
-        public string RoleName { get; set; } = null!;
+            tenant?.DivisionEnabled,
+            tenant?.Id,
+            tenant?.Name);
     }
 
     public IQueryable<UserDto> QueryUsers()
@@ -115,97 +130,9 @@ public class UserService: IUserService
         // Need to use views here. Main reason is because EF fails to construct a query when
         // an array-like field (Roles in this case) must be both sortable and filterable.
         // Also a view allows to optimize fetching relative fields like Department, JobTitle etc.
-
         var nonTenantUsers = _currentUserService is { IsUserInTenant: false, IsSuperAdmin: true };
 
-        if (nonTenantUsers)
-        {
-            var userRoles = _context.UserRoles
-                .Select(ur => new
-                {
-                    UserId = ur.UserId,
-                    RoleId = ur.RoleId,
-                    RoleName = ur.Role.Name
-                });
-
-            var userDtos = _context.UsersView.GroupJoin(userRoles,
-                u => u.Id,
-                ur => ur.UserId,
-                (u, roles) => new UserDto
-                {
-                    Id = u.Id,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    Email = u.Email,
-                    Status = u.Status,
-                    CreatedDateTimeUtc = u.CreatedDateTimeUtc,
-                    LastLoginDateTimeUtc = u.LastLoginDateTimeUtc,
-                    DeactivationDateTimeUtc = u.DeactivationDateTimeUtc,
-                    ReactivationDateTimeUtc = u.ReactivationDateTimeUtc,
-                    FullName = u.FullName,
-                    LegalName = u.LegalName,
-                    DivisionId = u.DivisionId,
-                    Division = u.Division,
-                    DepartmentId = u.DepartmentId,
-                    Department = u.Department,
-                    JobTitleId = u.JobTitleId,
-                    JobTitle = u.JobTitle,
-                    ServiceAreaId = u.ServiceAreaId,
-                    ServiceArea = u.ServiceArea,
-                    TeamId = u.TeamId,
-                    Team = u.Team,
-                    Roles = u.Roles,
-                    RoleIds = roles.Select(r => r.RoleId)
-                });
-
-            return userDtos;
-        }
-        else
-        {
-            var tenantId = _currentUserService.TenantId;
-
-            var users = _context.TenantUsersView.Where(u => u.TenantId == tenantId);
-
-            var userRoles = _context.TenantUserRoles
-                .Select(tur => new
-                {
-                    UserIdPlusTenantId = tur.UserId.ToString() + tur.TenantId.ToString(),
-                    RoleId = tur.RoleId,
-                    RoleName = tur.TenantRole.Role.Name
-                });
-
-            var userDtos = users.GroupJoin(userRoles,
-                u => u.UserIdPlusTenantId,
-                tur => tur.UserIdPlusTenantId,
-                (u, roles) => new UserDto
-                {
-                    Id = u.Id,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    Email = u.Email,
-                    Status = u.Status,
-                    CreatedDateTimeUtc = u.CreatedDateTimeUtc,
-                    LastLoginDateTimeUtc = u.LastLoginDateTimeUtc,
-                    DeactivationDateTimeUtc = u.DeactivationDateTimeUtc,
-                    ReactivationDateTimeUtc = u.ReactivationDateTimeUtc,
-                    FullName = u.FullName,
-                    LegalName = u.LegalName,
-                    DivisionId = u.DivisionId,
-                    Division = u.Division,
-                    DepartmentId = u.DepartmentId,
-                    Department = u.Department,
-                    JobTitleId = u.JobTitleId,
-                    JobTitle = u.JobTitle,
-                    ServiceAreaId = u.ServiceAreaId,
-                    ServiceArea = u.ServiceArea,
-                    TeamId = u.TeamId,
-                    Team = u.Team,
-                    Roles = u.Roles,
-                    RoleIds = roles.Select(r => r.RoleId)
-                });
-
-            return userDtos;
-        }
+        return nonTenantUsers ? QueryNotTenantUsers() : QueryTenantUsers();
     }
 
     public async Task<OneOf<UserDto, NotFound>> GetUserDetailsByIdAsync(Guid id,
@@ -213,17 +140,19 @@ public class UserService: IUserService
     {
         var user = await QueryUsers().SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (user is null)
-        {
-            return new NotFound();
-        }
+        return user is null ? new NotFound() : user;
+    }
 
-        if (id == _currentUserService.UserId)
-        {
-            user.Roles = string.Join(", ", _currentUserService.Roles.Concat(_currentUserService.TenantRoles).Order());
-        }
+    public async Task<OneOf<UserDto, NotFound>> GetUserProfileAsync(CancellationToken cancellationToken = default)
+    {
+        var userQuery =
+            _currentUserService is { IsUserInTenant: true, IsSuperAdmin: true } || !_currentUserService.IsUserInTenant
+                ? QueryNotTenantUsers()
+                : QueryTenantUsers();
 
-        return user;
+        var user = await userQuery.SingleOrDefaultAsync(x => x.Id == _currentUserService.UserId, cancellationToken);
+
+        return user is null ? new NotFound() : user;
     }
 
     public async Task<OneOf<UserDto, NotFound>> GetUserByEmailAsync(MailAddress mailAddress,
@@ -303,7 +232,7 @@ public class UserService: IUserService
         await _context.UserActivityLogs.AddAsync(userActivityLog, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - User ({createdUserId}) status was changed to {newUserStatus} by {@userId}",
+        _logger.LogInformation("{dateTime} - User ({createdUserId}) status was changed to {newUserStatus} by {userId}",
             _dateTimeService.UtcNow,
             user.Id,
             status,
@@ -348,7 +277,8 @@ public class UserService: IUserService
 
         if (string.IsNullOrEmpty(externalAadIssuerUrl) && !string.IsNullOrEmpty(newUserData.ExternalAadUserObjectId))
         {
-            return new InvalidOperation("This email address is not associated with any external AAD tenant. Can only create a local B2C user for it, but in that case user's external ObjectId should not be specified.");
+            return new InvalidOperation(
+                "This email address is not associated with any external AAD tenant. Can only create a local B2C user for it, but in that case user's external ObjectId should not be specified.");
         }
 
         var (aadB2CObjectId, userType, password) = await _userExternalStore.CreateUserAsync(userEmail,
@@ -360,10 +290,13 @@ public class UserService: IUserService
 
         // Storing this B2C user's ObjectId in a separate field in our Users table.
         // This value will then be used as part of the login process.
-        user.AadB2CObjectId = aadB2CObjectId;
+        user.IdpExternalId = aadB2CObjectId;
 
         // Also storing user type, just for the reference and (potentially) future use.
         user.UserType = userType;
+
+        var now = _dateTimeService.UtcNow;
+        var currentUserInfo = _currentUserService.UserInfo;
 
         if (userType == UserType.LocalB2C)
         {
@@ -371,6 +304,21 @@ public class UserService: IUserService
             await _emailSender.SendAsync(EmailType.UserCreated,
                 _createUserOptions.Recipients,
                 new UserCreatedMessage(userEmail.Address, password));
+
+            await _context.UserActivityLogs.AddAsync(new UserActivityLog
+            {
+                TenantId = _currentUserService.TenantId,
+                UserId = user.Id,
+                Date = now,
+                Revision = 1,
+                Event = JsonSerializer.Serialize(
+                    new CredentialsSentEvent(_currentUserService.UserId,
+                        userEmail.Address,
+                        now,
+                        currentUserInfo.FullName,
+                        currentUserInfo.Roles)),
+                EventType = UserEventType.CredentialSent
+            }, cancellationToken);
         }
 
         if (_currentUserService.TenantId != default)
@@ -380,8 +328,7 @@ public class UserService: IUserService
 
         await _context.Users.AddAsync(user, cancellationToken);
 
-        var now = _dateTimeService.UtcNow;
-        var currentUserInfo = _currentUserService.UserInfo;
+        now = _dateTimeService.UtcNow;
 
         await _context.UserActivityLogs.AddAsync(new UserActivityLog
         {
@@ -400,7 +347,7 @@ public class UserService: IUserService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - User ({createdUserId}) was created by {@userId}",
+        _logger.LogInformation("{dateTime} - User ({createdUserId}) was created by {userId}",
             now,
             user.Id,
             _currentUserService.UserId);
@@ -422,10 +369,10 @@ public class UserService: IUserService
 
             exportUsers.ForEach(u =>
             {
-                u.DeactivationDateTimeView = _dateTimeFormatter.FormatDate(u.DeactivationDateTimeUtc);
-                u.ReactivationDateTimeView = _dateTimeFormatter.FormatDate(u.ReactivationDateTimeUtc);
-                u.CreatedDateView = _dateTimeFormatter.FormatDate(u.CreatedDateTimeUtc);
-                u.LastLoginDateView = _dateTimeFormatter.FormatDate(u.LastLoginDateTimeUtc);
+                u.DeactivationDateTimeView = _dateTimeFormatter.FormatDateTime(u.DeactivationDateTimeUtc);
+                u.ReactivationDateTimeView = _dateTimeFormatter.FormatDateTime(u.ReactivationDateTimeUtc);
+                u.CreatedDateView = _dateTimeFormatter.FormatDateTime(u.CreatedDateTimeUtc);
+                u.LastLoginDateView = _dateTimeFormatter.FormatDateTime(u.LastLoginDateTimeUtc);
             });
 
             result = _listToFileConverters[fileType].Convert(exportUsers);
@@ -440,16 +387,16 @@ public class UserService: IUserService
 
             exportUsers.ForEach(u =>
             {
-                u.DeactivationDateTimeView = _dateTimeFormatter.FormatDate(u.DeactivationDateTimeUtc);
-                u.ReactivationDateTimeView = _dateTimeFormatter.FormatDate(u.ReactivationDateTimeUtc);
-                u.CreatedDateView = _dateTimeFormatter.FormatDate(u.CreatedDateTimeUtc);
-                u.LastLoginDateView = _dateTimeFormatter.FormatDate(u.LastLoginDateTimeUtc);
+                u.DeactivationDateTimeView = _dateTimeFormatter.FormatDateTime(u.DeactivationDateTimeUtc);
+                u.ReactivationDateTimeView = _dateTimeFormatter.FormatDateTime(u.ReactivationDateTimeUtc);
+                u.CreatedDateView = _dateTimeFormatter.FormatDateTime(u.CreatedDateTimeUtc);
+                u.LastLoginDateView = _dateTimeFormatter.FormatDateTime(u.LastLoginDateTimeUtc);
             });
 
             result = _listToFileConverters[fileType].Convert(exportUsers);
         }
 
-        _logger.LogInformation("{dateTime} - Users export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Users export was executed by {userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
@@ -473,7 +420,7 @@ public class UserService: IUserService
 
         if (!string.IsNullOrEmpty(addedRolesString))
         {
-            _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roles} roles by {@userId}",
+            _logger.LogInformation("{dateTime} - User ({userId}) was assigned to {roles} roles by {userId}",
                 _dateTimeService.UtcNow,
                 userId,
                 addedRolesString,
@@ -482,7 +429,7 @@ public class UserService: IUserService
 
         if (!string.IsNullOrEmpty(removedRolesString))
         {
-            _logger.LogInformation("{dateTime} - User ({userId}) was unassigned from {roles} roles by {@userId}",
+            _logger.LogInformation("{dateTime} - User ({userId}) was unassigned from {roles} roles by {userId}",
                 _dateTimeService.UtcNow,
                 userId,
                 removedRolesString,
@@ -541,7 +488,7 @@ public class UserService: IUserService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - User ({updatedUserId}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - User ({updatedUserId}) was updated by {userId}",
             now,
             user.Id,
             _currentUserService.UserId);
@@ -588,39 +535,150 @@ public class UserService: IUserService
 
     public async Task<UserInfo?> GetUserInfoAsync(MailAddress mailAddress, CancellationToken cancellationToken)
     {
-        var tenant = await GetTenantAsync(mailAddress, cancellationToken);
-        var tenantId = tenant?.Id ?? Guid.Empty;
-        var userQuery = from u in _context.Users
-                        join ur in _context.UserRoles on u.Id equals ur.UserId into rolesGrouping
-                        from userRole in rolesGrouping.DefaultIfEmpty()
-                        join tur in _context.TenantUserRoles on new { UserId = u.Id, TenantId = tenantId } equals new
-                        {
-                            tur.UserId,
-                            tur.TenantId
-                        } into tenantRolesGrouping
-                        from tenantUserRole in tenantRolesGrouping.DefaultIfEmpty()
-                        where u.Email == mailAddress.Address
-                        select new
-                        {
-                            u.Id,
-                            u.FullName,
-                            u.Status,
-                            Role = userRole.Role.Name,
-                            TenantRole = tenantUserRole.TenantRole.Role.Name
-                        };
+        var userTenants = await _context.TenantUsers
+            .Where(tu => tu.User.Email == mailAddress.Address)
+            .Select(tu => tu.Tenant)
+            .ToArrayAsync(cancellationToken);
 
-        return (await userQuery.ToListAsync(cancellationToken: cancellationToken))
-            .GroupBy(z => new { z.Id, z.FullName, z.Status })
-            .Select(g => new UserInfo
-            (
-                tenantId,
-                g.Key.Id,
-                g.Key.FullName,
-                g.Key.Status,
-                tenant?.DivisionEnabled ?? false,
-                g.Where(r => !string.IsNullOrEmpty(r.Role)).Select(r => r.Role).Distinct().ToList(),
-                g.Where(tr => !string.IsNullOrEmpty(tr.TenantRole)).Select(tr => tr.TenantRole).Distinct().ToList()))
-            .SingleOrDefault();
+        Tenant? tenant;
+
+        if (userTenants.Length > 1)
+        {
+            // Trying to use the hint from user, in which tenant they want to login to
+            tenant = userTenants.SingleOrDefault(t => t.Id == _currentUserService.TenantIdFromHeaders);
+        }
+        else
+        {
+            tenant = userTenants.SingleOrDefault();
+        }
+
+        return tenant == null
+            ? _context.Users
+                .Where(u => u.Email == mailAddress.Address)
+                .Select(u => new UserInfo(
+                    Guid.Empty,
+                    u.Id,
+                    u.FullName,
+                    u.Status,
+                    false,
+                    u.IdpExternalId,
+                    u.UserRoles.Select(ur => ur.Role.Name).ToArray(),
+                    Array.Empty<string>()
+                ))
+                .SingleOrDefault()
+            : _context.TenantUsers
+                .Where(tu => tu.TenantId == tenant.Id && tu.User.Email == mailAddress.Address)
+                .Select(tu => new UserInfo(
+                    tenant.Id,
+                    tu.User.Id,
+                    tu.User.FullName,
+                    tu.User.Status,
+                    tu.Tenant.DivisionEnabled,
+                    tu.User.IdpExternalId,
+                    Array.Empty<string>(),
+                    tu.TenantUserRoles.Select(tur => tur.TenantRole.Role.Name).ToArray()
+                ))
+                .SingleOrDefault();
+    }
+
+    public Task<bool> UserExistsInTenantAsync(Guid userId, Guid tenantId,
+        CancellationToken cancellationToken = default) =>
+        _context.TenantUsers.AnyAsync(tu => tu.TenantId == tenantId && tu.UserId == userId, cancellationToken);
+
+    public async Task SetIdpExternalIdAsync(MailAddress mailAddress, string idpExternalId)
+    {
+        var user = await _context.Users.SingleAsync(u => u.Email == mailAddress.Address);
+        user.IdpExternalId = idpExternalId;
+        await _context.SaveChangesAsync();
+    }
+
+    private IQueryable<UserDto> QueryNotTenantUsers()
+    {
+        var userRoles = _context.UserRoles
+            .Select(ur => new { UserId = ur.UserId, RoleId = ur.RoleId, RoleName = ur.Role.Name });
+
+        var userDtos = _context.UsersView.GroupJoin(userRoles,
+            u => u.Id,
+            ur => ur.UserId,
+            (u, roles) => new UserDto
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email,
+                Status = u.Status,
+                CreatedDateTimeUtc = u.CreatedDateTimeUtc,
+                LastLoginDateTimeUtc = u.LastLoginDateTimeUtc,
+                DeactivationDateTimeUtc = u.DeactivationDateTimeUtc,
+                ReactivationDateTimeUtc = u.ReactivationDateTimeUtc,
+                LastModifiedDateTimeUtc = u.LastModifiedDateTimeUtc,
+                FullName = u.FullName,
+                LegalName = u.LegalName,
+                DivisionId = u.DivisionId,
+                Division = u.Division,
+                DepartmentId = u.DepartmentId,
+                Department = u.Department,
+                JobTitleId = u.JobTitleId,
+                JobTitle = u.JobTitle,
+                ServiceAreaId = u.ServiceAreaId,
+                ServiceArea = u.ServiceArea,
+                TeamId = u.TeamId,
+                Team = u.Team,
+                Roles = u.Roles,
+                RoleIds = roles.Select(r => r.RoleId),
+                RoleNames = roles.Select(r => r.RoleName),
+            });
+
+        return userDtos;
+    }
+
+    private IQueryable<UserDto> QueryTenantUsers()
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        var users = _context.TenantUsersView.Where(u => u.TenantId == tenantId);
+
+        var userRoles = _context.TenantUserRoles
+            .Select(tur => new
+            {
+                UserIdPlusTenantId = tur.UserId.ToString() + tur.TenantId.ToString(),
+                RoleId = tur.RoleId,
+                RoleName = tur.TenantRole.Role.Name
+            });
+
+        var userDtos = users.GroupJoin(userRoles,
+            u => u.UserIdPlusTenantId,
+            tur => tur.UserIdPlusTenantId,
+            (u, roles) => new UserDto
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email,
+                Status = u.Status,
+                CreatedDateTimeUtc = u.CreatedDateTimeUtc,
+                LastLoginDateTimeUtc = u.LastLoginDateTimeUtc,
+                DeactivationDateTimeUtc = u.DeactivationDateTimeUtc,
+                ReactivationDateTimeUtc = u.ReactivationDateTimeUtc,
+                LastModifiedDateTimeUtc = u.LastModifiedDateTimeUtc,
+                FullName = u.FullName,
+                LegalName = u.LegalName,
+                DivisionId = u.DivisionId,
+                Division = u.Division,
+                DepartmentId = u.DepartmentId,
+                Department = u.Department,
+                JobTitleId = u.JobTitleId,
+                JobTitle = u.JobTitle,
+                ServiceAreaId = u.ServiceAreaId,
+                ServiceArea = u.ServiceArea,
+                TeamId = u.TeamId,
+                Team = u.Team,
+                Roles = u.Roles,
+                RoleIds = roles.Select(r => r.RoleId),
+                RoleNames = roles.Select(r => r.RoleName),
+            });
+
+        return userDtos;
     }
 
     private async Task<IReadOnlyCollection<string>> GetTenantUserPermissionsAsync(Guid tenantId,
@@ -648,7 +706,8 @@ public class UserService: IUserService
             .Join(_context.Permissions, id => id, p => p.Id, (id, p) => p.Name)
             .ToListAsync(cancellationToken);
 
-    private async Task<bool> EmailExistsAsync(string email, Guid tenantId, CancellationToken cancellationToken = default)
+    private async Task<bool> EmailExistsAsync(string email, Guid tenantId,
+        CancellationToken cancellationToken = default)
     {
         if (tenantId == default)
         {
@@ -658,7 +717,8 @@ public class UserService: IUserService
         else
         {
             // Checking among users belonging to this particular tenant
-            return await _context.TenantUsers.AnyAsync(tu => tu.TenantId == tenantId && tu.User.Email == email, cancellationToken);
+            return await _context.TenantUsers.AnyAsync(tu => tu.TenantId == tenantId && tu.User.Email == email,
+                cancellationToken);
         }
     }
 
@@ -668,12 +728,6 @@ public class UserService: IUserService
         await _context
             .UserRoles
             .AnyAsync(ur => ur.UserId == id && ur.Role.Name == roleName, cancellationToken);
-
-    private Task<Tenant?> GetTenantAsync(MailAddress mail, CancellationToken cancellationToken) =>
-        _context.TenantUsers
-            .Where(tu => tu.User.Email == mail.Address)
-            .Select(tu => tu.Tenant)
-            .SingleOrDefaultAsync(cancellationToken);
 
     private async Task<OneOf<User, NotFound>> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -828,6 +882,15 @@ public class UserService: IUserService
                 return new InvalidOperation($"Division with the ID {divisionId} does not exist.");
         }
 
+        if (divisionId is not null && departmentId is not null && _currentUserService.DivisionEnabled)
+        {
+            var department = await _context.Departments
+                .SingleOrDefaultAsync(d => d.Id == departmentId && d.TenantId == tenantId);
+            if (department is not null && department.DivisionId != divisionId)
+                return new InvalidOperation($"Division {divisionId} and Department {departmentId} do not match.",
+                    "divisionAndDepartment");
+        }
+
         if (departmentId is not null && (divisionId is not null || !_currentUserService.DivisionEnabled))
         {
             var departmentExists = _currentUserService.DivisionEnabled
@@ -843,7 +906,7 @@ public class UserService: IUserService
         if (serviceAreaId is not null && departmentId is not null)
         {
             var serviceAreaExists = await _context.ServiceAreas
-                        .AnyAsync(d => d.Id == serviceAreaId && d.DepartmentId == departmentId);
+                .AnyAsync(d => d.Id == serviceAreaId && d.DepartmentId == departmentId);
             if (!serviceAreaExists)
                 return new InvalidOperation($"Service area with the ID {serviceAreaId} does not exist.");
         }
@@ -851,7 +914,7 @@ public class UserService: IUserService
         if (jobTitleId is not null && departmentId is not null)
         {
             var jobTitleExists = await _context.JobTitles
-                        .AnyAsync(d => d.Id == jobTitleId && d.DepartmentId == departmentId);
+                .AnyAsync(d => d.Id == jobTitleId && d.DepartmentId == departmentId);
             if (!jobTitleExists)
                 return new InvalidOperation($"Job title with the ID {jobTitleId} does not exist.");
         }

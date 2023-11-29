@@ -24,10 +24,18 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Account", b =>
                 {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
 
                     b.Property<string>("Address")
                         .HasMaxLength(200)
@@ -71,7 +79,7 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LinkedInUrl")
-                        .HasMaxLength(100)
+                        .HasMaxLength(4000)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Name")
@@ -79,29 +87,28 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
+                    b.Property<int?>("PrimaryNaicsCode")
+                        .HasColumnType("int");
+
                     b.Property<string>("State")
                         .HasMaxLength(2)
                         .HasColumnType("nvarchar");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Website")
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(4000)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Zip")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar");
 
-                    b.HasKey("Id");
+                    b.HasKey("TenantId", "Id");
 
-                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
+                    b.HasIndex("PrimaryNaicsCode");
 
-                    b.HasIndex("TenantId", "Id");
-
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "Id"));
+                    b.HasIndex("TenantId", "AccountId")
+                        .IsUnique();
 
                     b.HasIndex("TenantId", "Name")
                         .IsUnique();
@@ -138,9 +145,110 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("TenantId", "AccountId", "Date");
 
-                    b.HasIndex("AccountId");
-
                     b.ToTable("AccountActivityLogs");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountContact", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ReactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar");
+
+                    b.HasKey("TenantId", "AccountId", "ContactId");
+
+                    b.HasIndex("TenantId", "ContactId");
+
+                    b.ToTable("AccountContacts");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountContactActivityLog", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Event")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<long>("Revision")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("TenantId", "AccountId", "ContactId", "Date");
+
+                    b.ToTable("AccountContactActivityLogs");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountPhone", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<Guid?>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Extension")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar");
+
+                    b.HasKey("TenantId", "Id");
+
+                    b.HasIndex("TenantId", "AccountId");
+
+                    b.ToTable("AccountPhones");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountSalesperson", b =>
@@ -156,8 +264,6 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("TenantId", "AccountId", "UserId");
 
-                    b.HasIndex("AccountId");
-
                     b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("Salespersons");
@@ -169,12 +275,38 @@ namespace TaxBeacon.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("AccountType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Address1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Address2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("AnnualRevenue")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal");
+
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientAccountManagers")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientPrimaryContact")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ClientPrimaryContactId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ClientState")
                         .HasMaxLength(50)
@@ -184,11 +316,27 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("County")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedDateTimeUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedDateTimeUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DoingBusinessAs")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("EmployeeCount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FoundationYear")
+                        .HasColumnType("int");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
@@ -196,9 +344,30 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("LastModifiedDateTimeUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("LinkedInUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NaicsCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NaicsCodeIndustry")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrganizationType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReferralAccountManagers")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReferralPrimaryContact")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ReferralPrimaryContactId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ReferralState")
                         .HasMaxLength(50)
@@ -207,6 +376,12 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<string>("ReferralStatus")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
+
+                    b.Property<string>("ReferralType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Salespersons")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("State")
                         .HasMaxLength(2)
@@ -217,6 +392,9 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.Property<string>("Website")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Zip")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -268,9 +446,6 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("LastModifiedDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("NaicsCode")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid?>("PrimaryContactId")
                         .HasColumnType("uniqueidentifier");
 
@@ -289,10 +464,7 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("TenantId", "AccountId");
 
-                    b.HasIndex("AccountId")
-                        .IsUnique();
-
-                    b.HasIndex("PrimaryContactId");
+                    b.HasIndex("TenantId", "PrimaryContactId");
 
                     b.ToTable("Clients");
                 });
@@ -315,30 +487,40 @@ namespace TaxBeacon.DAL.Migrations
                     b.ToTable("ClientManagers");
                 });
 
-            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Contact", b =>
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.ClientView", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWID()");
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar");
+                    b.Property<string>("AccountManagers")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("AnnualRevenue")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal");
 
                     b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientState")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Country")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("County")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDateTimeUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("DaysOpen")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DeactivationDateTimeUtc")
                         .HasColumnType("datetime2");
@@ -346,9 +528,75 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("DeletedDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Email")
+                    b.Property<int?>("EmployeeCount")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NaicsCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NaicsCodeIndustry")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("PrimaryContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PrimaryContactName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Salespersons")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("State")
+                        .HasMaxLength(2)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
+                    b.HasKey("TenantId", "AccountId");
+
+                    b.ToTable("ClientsView", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Contact", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("CreatedDateTimeUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(64)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("FirstName")
@@ -378,59 +626,14 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(100)
+                    b.Property<string>("SecondaryEmail")
+                        .HasMaxLength(64)
                         .HasColumnType("nvarchar");
 
-                    b.Property<string>("Phone2")
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar");
-
-                    b.Property<DateTime?>("ReactivationDateTimeUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Role")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
-
-                    b.Property<string>("State")
-                        .HasMaxLength(2)
-                        .HasColumnType("nvarchar");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar");
-
-                    b.Property<string>("SubRole")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar");
-
-                    b.Property<string>("Zip")
-                        .HasMaxLength(9)
-                        .HasColumnType("nvarchar");
-
-                    b.HasKey("Id");
-
-                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
-
-                    b.HasIndex("AccountId");
+                    b.HasKey("TenantId", "Id");
 
                     b.HasIndex("TenantId", "Email")
                         .IsUnique();
-
-                    b.HasIndex("TenantId", "AccountId", "Id");
-
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "AccountId", "Id"));
 
                     b.ToTable("Contacts");
                 });
@@ -458,13 +661,54 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("TenantId", "ContactId", "Date");
 
-                    b.HasIndex("ContactId");
-
                     b.ToTable("ContactActivityLogs");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.ContactPhone", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<Guid>("ContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Extension")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar");
+
+                    b.HasKey("TenantId", "Id");
+
+                    b.HasIndex("TenantId", "ContactId");
+
+                    b.ToTable("ContactPhones");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Entity", b =>
                 {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
@@ -477,6 +721,14 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar");
 
+                    b.Property<string>("Address1")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Address2")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
                     b.Property<string>("City")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
@@ -486,32 +738,45 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
+                    b.Property<string>("County")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar");
+
                     b.Property<DateTime>("CreatedDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Dba")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar");
+                    b.Property<DateTime?>("DateOfIncorporation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedDateTimeUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DoingBusinessAs")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Ein")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar");
+
                     b.Property<string>("EntityId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Extension")
-                        .HasMaxLength(20)
+                        .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
-                    b.Property<string>("Fax")
-                        .HasMaxLength(20)
+                    b.Property<string>("Fein")
+                        .HasMaxLength(9)
                         .HasColumnType("nvarchar");
-
-                    b.Property<int>("Fein")
-                        .HasColumnType("int");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("JurisdictionId")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar");
 
                     b.Property<DateTime?>("LastModifiedDateTimeUtc")
                         .HasColumnType("datetime2");
@@ -521,9 +786,11 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
-                    b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar");
+                    b.Property<int?>("PrimaryNaicsCode")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("State")
                         .HasMaxLength(2)
@@ -534,21 +801,9 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar");
 
-                    b.Property<string>("StreetAddress1")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar");
-
-                    b.Property<string>("StreetAddress2")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar");
-
                     b.Property<string>("TaxYearEndType")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -556,18 +811,23 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Zip")
-                        .IsRequired()
-                        .HasMaxLength(15)
+                        .HasMaxLength(10)
                         .HasColumnType("nvarchar");
 
-                    b.HasKey("Id");
+                    b.HasKey("TenantId", "Id");
 
-                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
+                    b.HasIndex("PrimaryNaicsCode");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("TenantId", "Ein")
+                        .IsUnique()
+                        .HasFilter("[Ein] IS NOT NULL");
+
+                    b.HasIndex("TenantId", "EntityId")
+                        .IsUnique();
 
                     b.HasIndex("TenantId", "Fein")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[Fein] IS NOT NULL");
 
                     b.HasIndex("TenantId", "Name")
                         .IsUnique();
@@ -602,13 +862,97 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("TenantId", "EntityId", "Date");
 
-                    b.HasIndex("EntityId");
-
                     b.ToTable("EntityActivityLogs");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.EntityLocation", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TenantId", "EntityId", "LocationId");
+
+                    b.HasIndex("TenantId", "LocationId");
+
+                    b.ToTable("EntityLocations");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.EntityPhone", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("CreatedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Extension")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar");
+
+                    b.HasKey("TenantId", "Id");
+
+                    b.HasIndex("TenantId", "EntityId");
+
+                    b.ToTable("EntityPhones");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.LinkedContact", b =>
+                {
+                    b.Property<Guid>("SourceContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RelatedContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("SourceContactId", "RelatedContactId");
+
+                    b.HasIndex("TenantId", "RelatedContactId");
+
+                    b.HasIndex("TenantId", "SourceContactId");
+
+                    b.ToTable("LinkedContacts");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Location", b =>
                 {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
@@ -617,22 +961,41 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Address1")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Address2")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
                     b.Property<string>("City")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Country")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("County")
-                        .HasMaxLength(100)
+                        .HasMaxLength(150)
                         .HasColumnType("nvarchar");
 
                     b.Property<DateTime>("CreatedDateTimeUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("DeletedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EndDateTimeUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsDeleted")
@@ -651,6 +1014,15 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
+                    b.Property<int?>("PrimaryNaicsCode")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("StartDateTimeUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("State")
                         .HasMaxLength(2)
                         .HasColumnType("nvarchar");
@@ -660,19 +1032,25 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Zip")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar");
 
-                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
+                    b.HasKey("TenantId", "Id");
 
-                    b.HasIndex("AccountId", "LocationId", "Name")
+                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("TenantId", "Id"), false);
+
+                    b.HasIndex("PrimaryNaicsCode");
+
+                    b.HasIndex("AccountId", "Name")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "LocationId")
                         .IsUnique();
 
                     b.HasIndex("TenantId", "AccountId", "Id");
@@ -682,19 +1060,54 @@ namespace TaxBeacon.DAL.Migrations
                     b.ToTable("Locations");
                 });
 
-            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Phone", b =>
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.LocationActivityLog", b =>
                 {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Event")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<long>("Revision")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("TenantId", "LocationId", "Date");
+
+                    b.ToTable("LocationActivityLogs");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.LocationPhone", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<Guid?>("AccountId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTime>("CreatedDateTimeUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Extension")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar");
+
+                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Number")
                         .IsRequired()
@@ -706,11 +1119,46 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar");
 
-                    b.HasKey("Id");
+                    b.HasKey("TenantId", "Id");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("TenantId", "LocationId");
 
-                    b.ToTable("Phones");
+                    b.ToTable("LocationPhones");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.NaicsCode", b =>
+                {
+                    b.Property<int>("Code")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ParentCode")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar");
+
+                    b.HasKey("Code");
+
+                    b.HasIndex("ParentCode");
+
+                    b.ToTable("NaicsCodes");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Referral", b =>
@@ -721,7 +1169,18 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("ActivationDateTimeUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DaysOpen")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("int")
+                        .HasComputedColumnSql("DATEDIFF(second, COALESCE(ActivationDateTimeUtc, CreatedDateTimeUtc), COALESCE(DeactivationDateTimeUtc, GETUTCDATE())) / 86400");
+
+                    b.Property<DateTime?>("DeactivationDateTimeUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedDateTimeUtc")
@@ -733,11 +1192,16 @@ namespace TaxBeacon.DAL.Migrations
                     b.Property<DateTime?>("LastModifiedDateTimeUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("ManagerId")
+                    b.Property<string>("OrganizationType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<Guid?>("PrimaryContactId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("NaicsCode")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("ReactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("State")
                         .IsRequired()
@@ -749,34 +1213,179 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar");
+
                     b.HasKey("TenantId", "AccountId");
 
-                    b.HasIndex("AccountId")
-                        .IsUnique();
-
-                    b.HasIndex("TenantId", "ManagerId");
+                    b.HasIndex("TenantId", "PrimaryContactId");
 
                     b.ToTable("Referrals");
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.ReferralManager", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TenantId", "AccountId", "UserId");
+
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("ReferralManagers");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.ReferralView", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccountManagers")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("County")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DaysOpen")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NaicsCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NaicsCodeIndustry")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrganizationType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<Guid?>("PrimaryContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PrimaryContactName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReactivationDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReferralState")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Salespersons")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("State")
+                        .HasMaxLength(2)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar");
+
+                    b.HasKey("TenantId", "AccountId");
+
+                    b.ToTable("ReferralsView", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.StateId", b =>
                 {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
+                    b.Property<DateTime>("CreatedDateTimeUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
                     b.Property<Guid>("EntityId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Value")
-                        .IsRequired()
+                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LocalJurisdiction")
                         .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(2)
                         .HasColumnType("nvarchar");
 
-                    b.HasKey("Id");
+                    b.Property<string>("StateIdCode")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
-                    b.HasIndex("EntityId");
+                    b.Property<string>("StateIdType")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar");
+
+                    b.HasKey("TenantId", "Id");
+
+                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("TenantId", "Id"), false);
+
+                    b.HasIndex("EntityId", "State")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "StateIdCode")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "EntityId", "Id");
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TenantId", "EntityId", "Id"));
 
                     b.ToTable("StateIds");
                 });
@@ -1133,8 +1742,8 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Overview")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Reference")
                         .HasMaxLength(200)
@@ -1744,10 +2353,6 @@ namespace TaxBeacon.DAL.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<string>("AadB2CObjectId")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar");
-
                     b.Property<DateTime>("CreatedDateTimeUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -1781,6 +2386,10 @@ namespace TaxBeacon.DAL.Migrations
                         .HasMaxLength(202)
                         .HasColumnType("nvarchar")
                         .HasComputedColumnSql("TRIM(CONCAT([FirstName], ' ', [LastName]))", true);
+
+                    b.Property<string>("IdpExternalId")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
@@ -1825,15 +2434,15 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AadB2CObjectId");
-
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("AadB2CObjectId"), false);
-
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("DivisionId");
 
                     b.HasIndex("Email");
+
+                    b.HasIndex("IdpExternalId");
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("IdpExternalId"), false);
 
                     b.HasIndex("JobTitleId");
 
@@ -1979,30 +2588,200 @@ namespace TaxBeacon.DAL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Documents.Entities.AccountDocument", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TenantId", "AccountId", "DocumentId");
+
+                    b.HasIndex("TenantId", "DocumentId");
+
+                    b.ToTable("AccountDocuments");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Documents.Entities.Document", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<long>("ContentLength")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDateTimeUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTime?>("DeletedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedDateTimeUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TenantId", "Id");
+
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("Documents");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Documents.Entities.EntityDocument", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TenantId", "EntityId", "DocumentId");
+
+                    b.HasIndex("TenantId", "DocumentId");
+
+                    b.ToTable("EntityDocuments");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Documents.Entities.LocationDocument", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TenantId", "LocationId", "DocumentId");
+
+                    b.HasIndex("TenantId", "DocumentId");
+
+                    b.ToTable("LocationDocuments");
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Account", b =>
                 {
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.NaicsCode", "NaicsCode")
+                        .WithMany("Accounts")
+                        .HasForeignKey("PrimaryNaicsCode");
+
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("Accounts")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("NaicsCode");
+
                     b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountActivityLog", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
-                        .WithMany("AccountActivityLogs")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("AccountActivityLogs")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.ClientNoAction)
                         .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                        .WithMany("AccountActivityLogs")
+                        .HasForeignKey("TenantId", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountContact", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("AccountContacts")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                        .WithMany("Contacts")
+                        .HasForeignKey("TenantId", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Contact", "Contact")
+                        .WithMany("Accounts")
+                        .HasForeignKey("TenantId", "ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountContactActivityLog", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("AccountContactActivityLogs")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.AccountContact", "AccountContact")
+                        .WithMany("AccountContactActivityLogs")
+                        .HasForeignKey("TenantId", "AccountId", "ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccountContact");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountPhone", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("AccountPhones")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                        .WithMany("Phones")
+                        .HasForeignKey("TenantId", "AccountId");
 
                     b.Navigation("Account");
 
@@ -2013,7 +2792,7 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
                         .WithMany("Salespersons")
-                        .HasForeignKey("AccountId")
+                        .HasForeignKey("TenantId", "AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2030,21 +2809,21 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Client", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
-                        .WithOne("Client")
-                        .HasForeignKey("TaxBeacon.DAL.Accounts.Entities.Client", "AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Contact", "PrimaryContact")
-                        .WithMany("Clients")
-                        .HasForeignKey("PrimaryContactId");
-
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("Clients")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                        .WithOne("Client")
+                        .HasForeignKey("TaxBeacon.DAL.Accounts.Entities.Client", "TenantId", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Contact", "PrimaryContact")
+                        .WithMany("Clients")
+                        .HasForeignKey("TenantId", "PrimaryContactId");
 
                     b.Navigation("Account");
 
@@ -2074,35 +2853,46 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Contact", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
-                        .WithMany("Contacts")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("Contacts")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Account");
-
                     b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.ContactActivityLog", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Contact", "Contact")
-                        .WithMany("ContactActivityLogs")
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("ContactActivityLogs")
                         .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.ClientNoAction)
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Contact", "Contact")
+                        .WithMany("ContactActivityLogs")
+                        .HasForeignKey("TenantId", "ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.ContactPhone", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("ContactPhones")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Contact", "Contact")
+                        .WithMany("Phones")
+                        .HasForeignKey("TenantId", "ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Contact");
@@ -2112,11 +2902,9 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Entity", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.NaicsCode", "NaicsCode")
                         .WithMany("Entities")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PrimaryNaicsCode");
 
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("Entities")
@@ -2124,37 +2912,114 @@ namespace TaxBeacon.DAL.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                        .WithMany("Entities")
+                        .HasForeignKey("TenantId", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Account");
+
+                    b.Navigation("NaicsCode");
 
                     b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.EntityActivityLog", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Entity", "Entity")
-                        .WithMany("EntityActivityLogs")
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("EntityActivityLogs")
                         .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.ClientNoAction)
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Entity", "Entity")
+                        .WithMany("EntityActivityLogs")
+                        .HasForeignKey("TenantId", "EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Entity");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.EntityLocation", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("EntityLocations")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Entity", "Entity")
+                        .WithMany("EntityLocations")
+                        .HasForeignKey("TenantId", "EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Location", "Location")
+                        .WithMany("EntityLocations")
+                        .HasForeignKey("TenantId", "LocationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.EntityPhone", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("EntitiesPhones")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Entity", "Entity")
+                        .WithMany("Phones")
+                        .HasForeignKey("TenantId", "EntityId");
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.LinkedContact", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("LinkedContacts")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Contact", "RelatedContact")
+                        .WithMany()
+                        .HasForeignKey("TenantId", "RelatedContactId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Contact", "SourceContact")
+                        .WithMany("LinkedContacts")
+                        .HasForeignKey("TenantId", "SourceContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RelatedContact");
+
+                    b.Navigation("SourceContact");
 
                     b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Location", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.NaicsCode", "NaicsCode")
                         .WithMany("Locations")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PrimaryNaicsCode");
 
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("Locations")
@@ -2162,52 +3027,127 @@ namespace TaxBeacon.DAL.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                        .WithMany("Locations")
+                        .HasForeignKey("TenantId", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Account");
+
+                    b.Navigation("NaicsCode");
 
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Phone", b =>
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.LocationActivityLog", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
-                        .WithMany("Phones")
-                        .HasForeignKey("AccountId");
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("LocationActivityLogs")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.Navigation("Account");
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Location", "Location")
+                        .WithMany("LocationActivityLogs")
+                        .HasForeignKey("TenantId", "LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.LocationPhone", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("LocationPhones")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Location", "Location")
+                        .WithMany("Phones")
+                        .HasForeignKey("TenantId", "LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.NaicsCode", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.NaicsCode", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentCode");
+
+                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Referral", b =>
                 {
-                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
-                        .WithOne("Referral")
-                        .HasForeignKey("TaxBeacon.DAL.Accounts.Entities.Referral", "AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
                         .WithMany("Referrals")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("TaxBeacon.DAL.Administration.Entities.TenantUser", "Manager")
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                        .WithOne("Referral")
+                        .HasForeignKey("TaxBeacon.DAL.Accounts.Entities.Referral", "TenantId", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Contact", "PrimaryContact")
                         .WithMany("Referrals")
-                        .HasForeignKey("TenantId", "ManagerId");
+                        .HasForeignKey("TenantId", "PrimaryContactId");
 
                     b.Navigation("Account");
 
-                    b.Navigation("Manager");
+                    b.Navigation("PrimaryContact");
 
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.ReferralManager", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Referral", "Referral")
+                        .WithMany("ReferralManagers")
+                        .HasForeignKey("TenantId", "AccountId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.TenantUser", "TenantUser")
+                        .WithMany("ReferralManagers")
+                        .HasForeignKey("TenantId", "UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Referral");
+
+                    b.Navigation("TenantUser");
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.StateId", b =>
                 {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("StateIds")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("TaxBeacon.DAL.Accounts.Entities.Entity", "Entity")
                         .WithMany("StateIds")
-                        .HasForeignKey("EntityId");
+                        .HasForeignKey("TenantId", "EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Entity");
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Administration.Entities.Department", b =>
@@ -2658,9 +3598,111 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Documents.Entities.AccountDocument", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("AccountDocuments")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Account", "Account")
+                        .WithMany("AccountDocuments")
+                        .HasForeignKey("TenantId", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Documents.Entities.Document", "Document")
+                        .WithMany("AccountDocuments")
+                        .HasForeignKey("TenantId", "DocumentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Documents.Entities.Document", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("Documents")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.TenantUser", "TenantUser")
+                        .WithMany("Documents")
+                        .HasForeignKey("TenantId", "UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("TenantUser");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Documents.Entities.EntityDocument", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("EntityDocuments")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Documents.Entities.Document", "Document")
+                        .WithMany("EntityDocuments")
+                        .HasForeignKey("TenantId", "DocumentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Entity", "Entity")
+                        .WithMany("EntityDocuments")
+                        .HasForeignKey("TenantId", "EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Documents.Entities.LocationDocument", b =>
+                {
+                    b.HasOne("TaxBeacon.DAL.Administration.Entities.Tenant", "Tenant")
+                        .WithMany("LocationDocuments")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Documents.Entities.Document", "Document")
+                        .WithMany("LocationDocuments")
+                        .HasForeignKey("TenantId", "DocumentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TaxBeacon.DAL.Accounts.Entities.Location", "Location")
+                        .WithMany("LocationDocuments")
+                        .HasForeignKey("TenantId", "LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Account", b =>
                 {
                     b.Navigation("AccountActivityLogs");
+
+                    b.Navigation("AccountDocuments");
 
                     b.Navigation("Client");
 
@@ -2677,6 +3719,11 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("Salespersons");
                 });
 
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.AccountContact", b =>
+                {
+                    b.Navigation("AccountContactActivityLogs");
+                });
+
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Client", b =>
                 {
                     b.Navigation("ClientManagers");
@@ -2684,16 +3731,57 @@ namespace TaxBeacon.DAL.Migrations
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Contact", b =>
                 {
+                    b.Navigation("Accounts");
+
                     b.Navigation("Clients");
 
                     b.Navigation("ContactActivityLogs");
+
+                    b.Navigation("LinkedContacts");
+
+                    b.Navigation("Phones");
+
+                    b.Navigation("Referrals");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Entity", b =>
                 {
                     b.Navigation("EntityActivityLogs");
 
+                    b.Navigation("EntityDocuments");
+
+                    b.Navigation("EntityLocations");
+
+                    b.Navigation("Phones");
+
                     b.Navigation("StateIds");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Location", b =>
+                {
+                    b.Navigation("EntityLocations");
+
+                    b.Navigation("LocationActivityLogs");
+
+                    b.Navigation("LocationDocuments");
+
+                    b.Navigation("Phones");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.NaicsCode", b =>
+                {
+                    b.Navigation("Accounts");
+
+                    b.Navigation("Children");
+
+                    b.Navigation("Entities");
+
+                    b.Navigation("Locations");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Accounts.Entities.Referral", b =>
+                {
+                    b.Navigation("ReferralManagers");
                 });
 
             modelBuilder.Entity("TaxBeacon.DAL.Administration.Entities.Department", b =>
@@ -2768,11 +3856,21 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.Navigation("AccountActivityLogs");
 
+                    b.Navigation("AccountContactActivityLogs");
+
+                    b.Navigation("AccountContacts");
+
+                    b.Navigation("AccountDocuments");
+
+                    b.Navigation("AccountPhones");
+
                     b.Navigation("Accounts");
 
                     b.Navigation("Clients");
 
                     b.Navigation("ContactActivityLogs");
+
+                    b.Navigation("ContactPhones");
 
                     b.Navigation("Contacts");
 
@@ -2784,13 +3882,29 @@ namespace TaxBeacon.DAL.Migrations
 
                     b.Navigation("Divisions");
 
+                    b.Navigation("Documents");
+
                     b.Navigation("Entities");
 
+                    b.Navigation("EntitiesPhones");
+
                     b.Navigation("EntityActivityLogs");
+
+                    b.Navigation("EntityDocuments");
+
+                    b.Navigation("EntityLocations");
 
                     b.Navigation("JobTitleActivityLogs");
 
                     b.Navigation("JobTitles");
+
+                    b.Navigation("LinkedContacts");
+
+                    b.Navigation("LocationActivityLogs");
+
+                    b.Navigation("LocationDocuments");
+
+                    b.Navigation("LocationPhones");
 
                     b.Navigation("Locations");
 
@@ -2801,6 +3915,8 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("ServiceAreaActivityLogs");
 
                     b.Navigation("ServiceAreas");
+
+                    b.Navigation("StateIds");
 
                     b.Navigation("TableFilters");
 
@@ -2842,7 +3958,9 @@ namespace TaxBeacon.DAL.Migrations
                 {
                     b.Navigation("ClientManagers");
 
-                    b.Navigation("Referrals");
+                    b.Navigation("Documents");
+
+                    b.Navigation("ReferralManagers");
 
                     b.Navigation("TenantUserAccounts");
 
@@ -2858,6 +3976,15 @@ namespace TaxBeacon.DAL.Migrations
                     b.Navigation("UserActivityLogs");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("TaxBeacon.DAL.Documents.Entities.Document", b =>
+                {
+                    b.Navigation("AccountDocuments");
+
+                    b.Navigation("EntityDocuments");
+
+                    b.Navigation("LocationDocuments");
                 });
 #pragma warning restore 612, 618
         }

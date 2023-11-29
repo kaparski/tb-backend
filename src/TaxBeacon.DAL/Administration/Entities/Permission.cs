@@ -1,6 +1,6 @@
 ﻿namespace TaxBeacon.DAL.Administration.Entities;
 
-public class Permission: BaseEntity
+public class Permission: BaseDeletableEntity
 {
     public Guid Id { get; init; }
 

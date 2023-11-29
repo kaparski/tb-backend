@@ -1,9 +1,8 @@
 ﻿using TaxBeacon.Common.Enums;
-using TaxBeacon.DAL.Administration.Entities;
 
 namespace TaxBeacon.DAL.Accounts.Entities;
 
-public class Account: BaseEntity
+public class Account: BaseDeletableEntity
 {
     public Guid TenantId { get; set; }
 
@@ -33,9 +32,15 @@ public class Account: BaseEntity
 
     public string? Address { get; set; }
 
+    public int? PrimaryNaicsCode { get; set; }
+
+    public string AccountId { get; set; } = null!;
+
     public Tenant Tenant { get; set; } = null!;
 
     public Client? Client { get; set; }
+
+    public NaicsCode? NaicsCode { get; set; }
 
     public Referral? Referral { get; set; }
 
@@ -43,11 +48,13 @@ public class Account: BaseEntity
 
     public ICollection<Location> Locations { get; set; } = new HashSet<Location>();
 
-    public ICollection<Contact> Contacts { get; set; } = new HashSet<Contact>();
+    public ICollection<AccountContact> Contacts { get; set; } = new HashSet<AccountContact>();
 
     public ICollection<AccountSalesperson> Salespersons { get; set; } = new HashSet<AccountSalesperson>();
 
     public ICollection<AccountActivityLog> AccountActivityLogs { get; set; } = new HashSet<AccountActivityLog>();
 
-    public ICollection<Phone> Phones { get; set; } = new HashSet<Phone>();
+    public ICollection<AccountPhone> Phones { get; set; } = new HashSet<AccountPhone>();
+
+    public ICollection<AccountDocument> AccountDocuments { get; set; } = new HashSet<AccountDocument>();
 }

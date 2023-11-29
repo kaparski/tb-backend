@@ -9,4 +9,5 @@ public enum UserEventType
     UserRolesAssign = 4,
     UserUpdated = 5,
     UserRolesUnassign = 6,
+    CredentialSent = 7
 }

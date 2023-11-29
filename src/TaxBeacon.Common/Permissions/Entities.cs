@@ -2,5 +2,8 @@
 public enum Entities
 {
     Read,
-    ReadWrite
+    ReadWrite,
+    ReadActivation,
+    ReadExport,
+    Import,
 }

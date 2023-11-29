@@ -85,9 +85,9 @@ public class JobTitleService: IJobTitleService
             .OrderBy(sa => sa.Name)
             .ToListAsync(cancellationToken);
 
-        exportJobTitles.ForEach(sa => sa.CreatedDateView = _dateTimeFormatter.FormatDate(sa.CreatedDateTimeUtc));
+        exportJobTitles.ForEach(sa => sa.CreatedDateView = _dateTimeFormatter.FormatDateTime(sa.CreatedDateTimeUtc));
 
-        _logger.LogInformation("{dateTime} - Job Titles export was executed by {@userId}",
+        _logger.LogInformation("{dateTime} - Job Titles export was executed by {userId}",
             _dateTimeService.UtcNow,
             _currentUserService.UserId);
 
@@ -149,7 +149,7 @@ public class JobTitleService: IJobTitleService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("{dateTime} - Job Title ({jobTitle}) was updated by {@userId}",
+        _logger.LogInformation("{dateTime} - Job Title ({jobTitle}) was updated by {userId}",
             eventDateTime,
             id,
             _currentUserService.UserId);

@@ -2,11 +2,11 @@
 
 namespace TaxBeacon.DAL.Administration.Entities;
 
-public class User: BaseEntity
+public class User: BaseDeletableEntity
 {
     public Guid Id { get; set; }
 
-    public string? AadB2CObjectId { get; set; }
+    public string? IdpExternalId { get; set; }
 
     public UserType UserType { get; set; }
 

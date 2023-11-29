@@ -10,6 +10,8 @@ public record TenantDto
 
     public DateTime CreatedDateTimeUtc { get; set; }
 
+    public DateTime? LastModifiedDateTimeUtc { get; set; }
+
     public Status Status { get; set; }
 
     public bool? DivisionEnabled { get; set; }

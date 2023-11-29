@@ -30,7 +30,8 @@ public class UsersController: BaseController
     [HasPermissions(
         Common.Permissions.Users.Read,
         Common.Permissions.Users.ReadWrite,
-        Common.Permissions.Users.ReadExport)]
+        Common.Permissions.Users.ReadExport,
+        Common.Permissions.Accounts.ReadWrite)]
     [EnableQuery]
     [HttpGet("api/odata/users")]
     [ProducesDefaultResponseType(typeof(CustomProblemDetails))]

@@ -1,8 +1,9 @@
-﻿using TaxBeacon.Common.Enums;
+﻿using TaxBeacon.API.Shared.Responses;
+using TaxBeacon.Common.Enums;
 
 namespace TaxBeacon.API.Controllers.Contacts.Responses;
 
-public class ContactResponse
+public record ContactResponse
 {
     public Guid Id { get; set; }
 
@@ -14,21 +15,17 @@ public class ContactResponse
 
     public string Email { get; set; } = null!;
 
+    public string? SecondaryEmail { get; init; } = null!;
+
     public string? JobTitle { get; set; }
 
-    public string ContactType { get; set; } = null!;
+    public DateTime CreatedDateTimeUtc { get; init; }
 
-    public string Phone { get; set; } = null!;
+    public DateTime? LastModifiedDateTimeUtc { get; init; }
 
-    public Status Status { get; set; }
+    public IEnumerable<ContactAccountResponse> Accounts { get; init; } = Enumerable.Empty<ContactAccountResponse>();
 
-    public string? Country { get; set; }
+    public IEnumerable<LinkedContactResponse> LinkedContacts { get; init; } = Enumerable.Empty<LinkedContactResponse>();
 
-    public string? City { get; set; }
-
-    public State? State { get; set; }
-
-    public Guid AccountId { get; set; }
-
-    public string AccountName { get; set; } = null!;
+    public IEnumerable<PhoneResponse> Phones { get; init; } = Enumerable.Empty<PhoneResponse>();
 }

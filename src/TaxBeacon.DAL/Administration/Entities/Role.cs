@@ -2,7 +2,7 @@
 
 namespace TaxBeacon.DAL.Administration.Entities;
 
-public class Role: BaseEntity
+public class Role: BaseDeletableEntity
 {
     public Guid Id { get; set; }
 
